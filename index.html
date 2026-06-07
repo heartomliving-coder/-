@@ -519,6 +519,13 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 /* 月別担当集計インライン行 */
 .ob-agg-inline-row td{background:#FAF8F5;padding:5px 16px;border-bottom:1px solid #EDE9E3}
 .ob-agg-inline-lbl{font-size:.65rem;font-weight:700;color:#888;letter-spacing:.1em;margin-right:10px;text-transform:uppercase}
+.ob-vis-agg-wrap{margin:0 0 16px;border:1px solid #E8E4DE;border-radius:4px;overflow:hidden;background:#fff}
+.ob-vis-agg-title{padding:10px 16px;background:#2B2B2B;color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.12em;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none}
+.ob-vis-agg-toggle{font-size:.8rem;transition:transform .2s}
+.ob-vis-agg-wrap.open .ob-vis-agg-toggle{transform:rotate(180deg)}
+.ob-vis-agg-body{display:none;overflow-x:auto}
+.ob-vis-agg-wrap.open .ob-vis-agg-body{display:block}
+.ob-vis-agg-tbl{margin:0}
 
 /* 次回予定 */
 .ob-next-plan{font-size:.75rem;color:#4A6FA5;font-weight:600}
@@ -805,7 +812,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     <div class="ob-det-top">
       <button class="ob-det-back" onclick="obCloseDetail()">‹ 一覧へ戻る</button>
       <div style="flex:1">
-        <div id="ob-det-name" class="ob-det-name">—</div>
+        <div id="ob-det-name" class="ob-det-name" title="クリックして名前を編集" onclick="obEditDetName()" style="cursor:pointer">—</div>
         <div id="ob-det-sub" class="ob-det-sub"></div>
       </div>
       <span id="ob-det-badge" class="ob-badge" style="font-size:.78rem;padding:5px 14px;cursor:default"></span>
@@ -2255,8 +2262,56 @@ function obRenderVisitors(){
     return b>a?1:b<a?-1:0;
   });
 
+  // ── 月別集計サマリーテーブル（スプレッドシート形式）──
+  var AGG_TYPES=[
+    {key:'来場',label:'来場計'},
+    {key:'完成見学会',label:'完成見学'},
+    {key:'オンライン見学会',label:'オンライン'},
+    {key:'無料相談会',label:'無料相談'},
+    {key:'勉強会',label:'勉強会'},
+    {key:'その他',label:'その他'},
+    {key:'_P',label:'P申込'}
+  ];
+  var aggData={};
+  mOrder.forEach(function(ym){
+    var d={来場:0,完成見学会:0,'オンライン見学会':0,'無料相談会':0,'勉強会':0,'その他':0,_P:0};
+    groups[ym].forEach(function(r){
+      d['来場']++;
+      var t=r['来場種別']||'その他';
+      if(d.hasOwnProperty(t)) d[t]++; else d['その他']++;
+      if(r['P申込目標日']) d._P++;
+    });
+    aggData[ym]=d;
+  });
+  var ymLabels=mOrder.filter(function(ym){return ym!=='未設定';});
+  var aggHtml='<div class="ob-vis-agg-wrap"><div class="ob-vis-agg-title" onclick="this.parentNode.classList.toggle(\'open\')">📊 月別集計 <span class="ob-vis-agg-toggle">▾</span></div>'+
+    '<div class="ob-vis-agg-body"><table class="ob-agg-table ob-vis-agg-tbl"><thead><tr><th>月</th>'+
+    AGG_TYPES.map(function(a){return '<th>'+a.label+'</th>';}).join('')+'</tr></thead><tbody>';
+  ymLabels.forEach(function(ym){
+    var d=aggData[ym];
+    var lbl=ym.split('-'); lbl=parseInt(lbl[0])+'年'+parseInt(lbl[1])+'月';
+    var pRate=d['来場']?Math.round(d._P/d['来場']*100)+'%':'—';
+    aggHtml+='<tr><td style="white-space:nowrap">'+lbl+'</td>'+
+      AGG_TYPES.map(function(a){
+        var v=d[a.key]||0;
+        if(a.key==='_P') return '<td class="hi">'+v+'<small style="opacity:.6"> ('+pRate+')</small></td>';
+        return '<td>'+(v||'—')+'</td>';
+      }).join('')+'</tr>';
+  });
+  // 合計行
+  var tot={来場:0,完成見学会:0,'オンライン見学会':0,'無料相談会':0,'勉強会':0,'その他':0,_P:0};
+  ymLabels.forEach(function(ym){ Object.keys(tot).forEach(function(k){ tot[k]+=(aggData[ym][k]||0); }); });
+  var totRate=tot['来場']?Math.round(tot._P/tot['来場']*100)+'%':'—';
+  aggHtml+='<tr style="font-weight:700;background:#F5F3EF"><td>合計</td>'+
+    AGG_TYPES.map(function(a){
+      var v=tot[a.key]||0;
+      if(a.key==='_P') return '<td class="hi">'+v+'<small style="opacity:.6"> ('+totRate+')</small></td>';
+      return '<td>'+v+'</td>';
+    }).join('')+'</tr>';
+  aggHtml+='</tbody></table></div></div>';
+
   var COL=11; // colspan
-  var html='<table class="ob-table ob-vis-table"><thead><tr>'+
+  var html=aggHtml+'<table class="ob-table ob-vis-table"><thead><tr>'+
     '<th class="ob-rn">No</th>'+
     '<th>受付日</th><th>種別</th><th>顧客名</th><th>担当</th><th>エリア</th>'+
     '<th>反響元</th><th>来店履歴</th><th>アポ確定日</th><th>次回予定</th><th></th>'+
@@ -2939,6 +2994,26 @@ function obOpenDetail(rowIdx){
 function obCloseDetail(){
   document.getElementById('ob-detail').classList.remove('show');
   obDetailRow=-1;
+}
+
+function obEditDetName(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  var el=document.getElementById('ob-det-name');
+  var old=r['顧客名']||'';
+  var inp=document.createElement('input');
+  inp.value=old; inp.className='ob-det-name-inp';
+  inp.style.cssText='font-family:var(--serif);font-size:1.5rem;font-weight:700;color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);padding:2px 8px;border-radius:3px;outline:none;width:100%;letter-spacing:.06em';
+  el.innerHTML=''; el.appendChild(inp); inp.focus(); inp.select();
+  function save(){
+    var v=inp.value.trim()||old;
+    r['顧客名']=v; obSetCache(obRows);
+    el.textContent=v;
+    obSaveField(obDetailRow,'顧客名',v);
+    obRenderAll();
+    toast('顧客名を更新しました');
+  }
+  inp.addEventListener('blur',save);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();inp.blur();} if(e.key==='Escape'){el.textContent=old;} });
 }
 
 function obDetTab(tab){
