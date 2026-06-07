@@ -1,0 +1,3221 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>HEARTOM LIVING — 管理コンソール</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Shippori+Mincho:wght@500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Shippori+Mincho:wght@500;600;700&display=swap"></noscript>
+<style>
+:root{
+  --charcoal:#2B2B2B;--charcoal-d:#1A1A1A;--bg:#FFFFFF;--sf:#F5F5F5;--sf2:#FAFAFA;--bd:#DDDDDD;--bd2:#BBBBBB;
+  --tx:#2B2B2B;--tx2:#555555;--tx3:#888888;--tx4:#BBBBBB;--accent:#2B2B2B;--accent-d:#1A1A1A;
+  --gold:#9A8C76;
+  --ok:#5E9E5E;--ok-bg:rgba(94,158,94,.10);--idle:#BBBBBB;
+  --serif:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --fs:1;                
+}
+:root[data-fs="s"] {--fs:.92}   
+:root[data-fs="l"] {--fs:1.10}  
+:root[data-fs="xl"]{--fs:1.26}  
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:calc(16px * var(--fs))}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--tx);
+  font-family:"Noto Sans JP",sans-serif;overscroll-behavior:none;
+  -webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,118,.06),transparent 60%)}
+
+/* ─────────── ログイン画面 ─────────── */
+.login{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;background:#0E0E0F;padding:30px;overflow:hidden}
+.login:not(.hide){display:flex}
+.login .lslides{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.login .lslide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;will-change:opacity,transform;animation:lKen 36s linear infinite}
+.login .lslide:nth-child(2){animation-delay:9s}.login .lslide:nth-child(3){animation-delay:18s}.login .lslide:nth-child(4){animation-delay:27s}
+.login .lveil{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(5,5,8,.72) 0%,rgba(5,5,8,.44) 42%,rgba(5,5,8,.78) 100%)}
+.login .lveil::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 75% 55% at 50% 46%,transparent 30%,rgba(0,0,0,.3) 100%)}
+@keyframes lKen{0%{opacity:0;transform:scale(1.06)}8%{opacity:1}25%{opacity:1}33%{opacity:0;transform:scale(1.12)}100%{opacity:0}}
+.login .lwrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%;padding:0 20px}
+.login .logo{height:50px;margin-bottom:24px;opacity:.98;filter:drop-shadow(0 2px 20px rgba(0,0,0,.55))}
+.login .lo{font-family:"Playfair Display",serif;font-size:.74rem;letter-spacing:.48em;color:rgba(255,255,255,.55);margin-bottom:10px;text-transform:uppercase}
+.login .lt{font-family:var(--serif);font-size:1.6rem;font-weight:500;color:#fff;letter-spacing:.2em;margin-bottom:0;text-shadow:0 2px 20px rgba(0,0,0,.5)}
+.login .l-divider{width:48px;height:1px;background:rgba(255,255,255,.25);margin:24px auto 32px}
+.login .f{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.login .err{font-size:.86rem;color:#F0A090;min-height:20px;text-align:center;letter-spacing:.04em}
+
+/* ─────────── 管理画面（デフォルト） ─────────── */
+.app{display:none;flex-direction:column;height:100dvh;overflow:hidden}
+.app.show{display:flex}
+.hd{flex-shrink:0;background:var(--charcoal);color:#fff;padding:max(20px,env(safe-area-inset-top)) 30px 18px;
+  display:flex;align-items:center;gap:22px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.1)}
+.hd .brand{display:flex;align-items:center;gap:14px}
+.hd .brand img{height:30px;width:auto;display:block;filter:brightness(0) invert(1)}
+.hd .brand .divider{width:1px;height:30px;background:rgba(255,255,255,.2)}
+.hd .ti{font-family:var(--serif);font-size:1.18rem;letter-spacing:.14em;font-weight:600;line-height:1.2;color:#fff}
+.hd .ti small{display:block;font-family:"Playfair Display",serif;font-size:.6rem;letter-spacing:.34em;color:rgba(255,255,255,.5);font-weight:500;margin-top:4px}
+.hd .grow{flex:1}
+.hd-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
+.fsctl{display:flex;align-items:center;gap:9px;color:rgba(255,255,255,.6);font-size:.7rem;font-weight:700;letter-spacing:.1em}
+.fsctl .seg{display:flex;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:0;overflow:hidden}
+.fsctl .seg button{background:none;border:none;border-left:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);padding:9px 13px;font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.04em}
+.fsctl .seg button:first-child{border-left:none}
+.fsctl .seg button.on{background:#fff;color:var(--charcoal)}
+
+.hbtn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.22);color:#fff;
+  border-radius:0;padding:12px 17px;font-size:.82rem;font-weight:600;letter-spacing:.06em;cursor:pointer;white-space:nowrap;transition:all .18s}
+.hbtn:hover{border-color:rgba(255,255,255,.55)}
+.hbtn:active{opacity:.8}
+.hbtn.primary{background:#fff;border-color:#fff;color:var(--charcoal)}
+.hbtn.primary:hover{opacity:.9}
+.hbtn.ghost{background:transparent;border-style:dashed;color:rgba(255,255,255,.8)}
+.hbtn .ic{font-size:1rem;line-height:1}
+
+.staffbox{display:flex;align-items:center;gap:9px;font-size:.78rem;color:rgba(255,255,255,.7);font-weight:700;letter-spacing:.06em}
+.staffbox select{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.22);border-radius:0;padding:11px 13px;font-size:.95rem;color:#fff;outline:none;min-width:110px}
+.staffbox select:focus{border-color:rgba(255,255,255,.55)}
+.staffbox select option{color:#2B2B2B}
+.staff-add{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.22);color:#fff;width:34px;padding:11px 0;font-size:1rem;font-weight:700;cursor:pointer;line-height:1;flex-shrink:0}
+.staff-add:hover{border-color:rgba(255,255,255,.55)}
+.staff-add:active{opacity:.8}
+
+.ws{flex:1;display:grid;grid-template-columns:minmax(340px,30%) 1fr;min-height:0;overflow:hidden}
+.ws-left{background:var(--charcoal);overflow:auto;border-right:1px solid rgba(0,0,0,.06);display:flex;flex-direction:column}
+.ws-right{display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+
+.seats-wrap{background:transparent;padding:22px 22px 8px}
+.seats-h{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.78);font-size:.72rem;letter-spacing:.18em;font-weight:700;margin-bottom:14px}
+.seats-h .live{display:inline-flex;align-items:center;gap:7px;margin-left:auto;font-size:.64rem;font-weight:600;letter-spacing:.06em;color:rgba(255,255,255,.5)}
+.seats-h .live .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(94,158,94,.25)}
+.seats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.seat{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:15px 16px;min-height:120px;display:flex;flex-direction:column;gap:4px}
+.seat.occ{background:#fff;border-color:#fff}
+.seat-h{font-size:.72rem;font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.55); display:flex; justify-content:space-between; align-items:center;}
+.seat.occ .seat-h{color:var(--gold)}
+.seat-idle{margin-top:auto;font-size:.9rem;color:rgba(255,255,255,.38);font-weight:600;letter-spacing:.08em}
+.seat-who{margin-top:5px;font-family:var(--serif);font-size:1.16rem;font-weight:700;color:var(--charcoal);line-height:1.3;word-break:break-all}
+.seat-st{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;font-size:.7rem;font-weight:700;letter-spacing:.06em;padding:4px 9px;border-radius:2px;margin-top:3px}
+.seat-st.on{background:var(--ok-bg);color:var(--ok)}
+.seat-st.on::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.seat-st.sent{background:#F0EBE3;color:var(--tx2)}
+.seat-meta{font-size:.75rem;font-weight:700;color:var(--ok);margin-top:8px;letter-spacing:.04em}
+.seat-cmds{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.seat-cmd{background:var(--sf);border:1px solid var(--bd2);color:var(--tx2);border-radius:2px;padding:8px 10px;font-size:.7rem;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:all .15s;flex:1;text-align:center}
+.seat-cmd:hover{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
+.seat-cmd.danger{background:none;border-color:var(--bd2);color:var(--tx2)}
+.seat-cmd.danger:hover{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
+
+.dash{background:transparent;border-bottom:none;padding:14px 22px 26px}
+.dash-row{display:flex;gap:14px;flex-wrap:wrap;align-items:stretch}
+.dash-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:16px 20px;display:flex;flex-direction:column;justify-content:center;flex:1}
+.dc-n{font-family:"Playfair Display",serif;font-size:2.8rem;font-weight:600;color:#fff;line-height:1}
+.dc-l{font-size:.66rem;letter-spacing:.18em;color:rgba(255,255,255,.55);font-weight:700}
+.dash-card .dc-l{margin-top:8px}
+.dash-block{margin-top:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:3px;padding:16px 18px}
+.dash-block .dc-l{margin-bottom:11px}
+.dc-staff{display:flex;flex-direction:column;gap:9px}
+.ds-item{display:flex;align-items:center;gap:10px;font-size:.85rem;color:rgba(255,255,255,.8)}
+.ds-item .ds-bar{flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}
+.ds-item .ds-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#7E7160);border-radius:99px}
+.ds-item .ds-nm{min-width:56px;font-weight:700;color:#fff}
+.ds-item .ds-ct{min-width:40px;text-align:right;color:rgba(255,255,255,.65);font-weight:600}
+.ds-empty{font-size:.85rem;color:rgba(255,255,255,.4)}
+.dash-recent{margin-top:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:3px;padding:16px 18px}
+.dr-h{font-size:.66rem;letter-spacing:.18em;color:rgba(255,255,255,.55);font-weight:700;margin-bottom:10px}
+.dr-i{display:flex;gap:12px;align-items:baseline;font-size:.86rem;padding:7px 0;color:rgba(255,255,255,.75);border-bottom:1px solid rgba(255,255,255,.08)}
+.dr-i:last-child{border-bottom:none}
+.dr-t{color:rgba(255,255,255,.45);font-size:.76rem;min-width:88px}
+.dr-n{flex:1;color:#fff;font-weight:600}
+.dr-s{color:var(--gold);font-weight:700;font-size:.76rem}
+.dr-empty{font-size:.85rem;color:rgba(255,255,255,.4)}
+
+.bar{padding:18px 26px;background:var(--sf);border-bottom:1px solid var(--bd);display:flex;gap:12px;flex-wrap:wrap;align-items:center;flex-shrink:0}
+.bar .newbtn{background:var(--charcoal);color:#fff;border:none;border-radius:2px;padding:15px 24px;font-size:1rem;font-weight:700;letter-spacing:.06em;cursor:pointer;flex-shrink:0;transition:background .18s}
+.bar .newbtn:hover{background:#000}
+.bar .newbtn:active{opacity:.85}
+.bar input{flex:1;min-width:200px;padding:14px 16px;border:1px solid var(--bd2);border-radius:2px;font-size:1rem;background:#fff;color:var(--tx);outline:none}
+.bar input:focus{border-color:var(--charcoal)}
+.bar .rl{background:#fff;border:1px solid var(--bd2);border-radius:2px;padding:13px 18px;font-size:.85rem;font-weight:600;cursor:pointer;color:var(--tx2);flex-shrink:0}
+.bar .rl:hover{border-color:var(--charcoal)}
+.bar .rl:active{background:var(--sf)}
+.bar .target{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--tx2);font-weight:700;flex-shrink:0;letter-spacing:.04em}
+.bar .target select{padding:13px 11px;border:1px solid var(--bd2);border-radius:2px;font-size:1rem;background:#fff;color:var(--tx);outline:none;font-weight:600}
+.bar .listcount{margin-left:auto;font-size:.8rem;color:var(--tx3);font-weight:700;letter-spacing:.04em;flex-shrink:0}
+
+.list{flex:1;width:100%;margin:0;padding:16px 26px 40px;overflow:auto;min-height:0}
+.state{padding:48px 20px;text-align:center;color:var(--tx3);font-size:.95rem}
+.ci{display:flex;align-items:center;gap:18px;padding:20px 22px;border:1px solid var(--bd);background:#fff;border-radius:2px;margin-top:10px;transition:border-color .18s}
+.ci:hover{border-color:var(--bd2)}
+.ci .info{flex:1;min-width:0}
+.ci .nm{font-family:var(--serif);font-size:1.32rem;font-weight:700;letter-spacing:.03em;line-height:1.25}
+.ci .src{display:inline-block;font-size:.62rem;padding:2px 8px;background:var(--charcoal);color:#fff;border-radius:2px;letter-spacing:.1em;margin-right:9px;vertical-align:middle;font-weight:600}
+.ci .fr{font-size:.92rem;color:var(--tx3);margin-top:5px}
+.ci .mt{font-size:1.02rem;color:var(--tx2);margin-top:8px;line-height:1.5;word-break:break-all}
+.ci .mt .lb{display:inline-block;font-size:.7rem;color:#fff;background:var(--tx4);font-weight:700;letter-spacing:.08em;padding:2px 7px;border-radius:2px;margin-right:6px}
+.ci .send{flex-shrink:0;background:var(--charcoal);color:#fff;border:none;border-radius:2px;padding:18px 24px;font-size:.96rem;font-weight:700;letter-spacing:.06em;cursor:pointer;line-height:1.3;text-align:center;min-width:132px;transition:background .18s}
+.ci .send:hover{background:#000}
+.ci .send:active{opacity:.85;transform:scale(.98)}
+.ci .send small{display:block;font-size:.66rem;font-weight:400;opacity:.8;margin-top:3px;letter-spacing:.04em}
+
+.modal{position:fixed;inset:0;z-index:70;background:rgba(15,13,10,.55);display:none;align-items:center;justify-content:center;padding:24px}
+.modal.show{display:flex}
+.modal-box{background:var(--bg);border-radius:3px;width:100%;max-width:520px;max-height:88vh;overflow:auto;box-shadow:0 24px 70px rgba(0,0,0,.4)}
+.modal-hd{background:var(--charcoal);color:#fff;padding:22px 26px;display:flex;align-items:center;gap:12px}
+.modal-hd .mt{font-family:var(--serif);font-size:1.18rem;letter-spacing:.14em;font-weight:600}
+.modal-hd .x{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.7);font-size:1.5rem;cursor:pointer;line-height:1;padding:0 4px}
+.modal-bd{padding:26px}
+.fld{margin-bottom:22px}
+.fld label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.14em;color:var(--tx2);margin-bottom:9px}
+.fld .hint{font-size:.76rem;color:var(--tx3);margin-top:8px;line-height:1.6}
+.fld input{width:100%;padding:14px 15px;border:1px solid var(--bd2);border-radius:2px;font-size:1rem;background:#fff;color:var(--tx);outline:none}
+.fld input:focus{border-color:var(--charcoal)}
+.modal-bd .save{width:100%;padding:16px;border:none;border-radius:2px;background:var(--charcoal);color:#fff;font-size:1rem;font-weight:700;letter-spacing:.1em;cursor:pointer}
+.modal-bd .save:hover{background:#000}
+.modal-bd .save:active{opacity:.85}
+
+#toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);background:var(--charcoal);color:#fff;padding:15px 26px;border-radius:2px;font-size:.95rem;font-weight:600;letter-spacing:.04em;opacity:0;pointer-events:none;transition:all .3s;z-index:80;box-shadow:0 8px 30px rgba(0,0,0,.25);text-align:center;max-width:88vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:840px){
+  .seats{grid-template-columns:repeat(2,1fr)}
+  .hd{padding-left:20px;padding-right:20px;gap:14px}
+  .seats-wrap,.dash,.bar{padding-left:20px;padding-right:20px}
+  .ci .send{min-width:116px;padding:16px 16px}
+}
+@media (max-width:560px){
+  .seats{grid-template-columns:repeat(2,1fr)}
+  .ci{flex-direction:column;align-items:stretch;gap:12px}
+  .ci .send{width:100%}
+}
+
+/* ─────────── モニター画面専用 (Board Mode) ─────────── */
+.board-mode {
+  --bg:#141210; --panel:#1E1B17; --panel2:#252119; --line:#332E26;
+  --tx:#F4F1EC; --tx2:#B9B1A4; --tx3:#7E776B; --gold:#C7B299;
+  --ok:#6FB070; --ok-bg:rgba(111,176,112,.16);
+  background-image: radial-gradient(ellipse 90% 70% at 50% 0%,rgba(199,178,153,.05),transparent 60%);
+}
+.board { display:none; flex-direction:column; min-height:100dvh; overflow:hidden; }
+.board-mode .board { display:flex; }
+.board-mode .app { display:none !important; }
+
+.bhd{display:flex;align-items:center;gap:20px;padding:max(22px,env(safe-area-inset-top)) 36px 18px;border-bottom:1px solid var(--line)}
+.bhd img{height:30px;width:auto;opacity:.95}
+.bhd .divider{width:1px;height:30px;background:var(--line)}
+.bhd .ti{font-family:var(--serif);font-size:1.2rem;letter-spacing:.2em;font-weight:600}
+.bhd .ti small{display:block;font-family:"Playfair Display",serif;font-size:.58rem;letter-spacing:.36em;color:var(--tx3);font-weight:500;margin-top:4px}
+.bhd .clock{margin-left:auto;text-align:right}
+.bhd .clock .t{font-family:"Playfair Display",serif;font-size:2rem;font-weight:600;line-height:1;letter-spacing:.02em}
+.bhd .clock .d{font-size:.8rem;color:var(--tx2);letter-spacing:.1em;margin-top:5px}
+.bhd .live{display:inline-flex;align-items:center;gap:8px;font-size:.66rem;letter-spacing:.1em;color:var(--tx3);margin-left:22px}
+.bhd .live .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(111,176,112,.18)}
+.bhd .back-btn{background:none; border:1px solid var(--line); color:var(--tx2); padding:6px 12px; border-radius:3px; font-size:0.8rem; cursor:pointer; margin-left:15px; text-decoration:none;}
+.bhd .back-btn:hover{background:var(--panel2); color:var(--tx);}
+
+.b-wrap{flex:1;display:grid;grid-template-columns:1.55fr 1fr;gap:22px;padding:24px 36px 30px;min-height:0}
+.b-col{display:flex;flex-direction:column;min-height:0}
+.b-lbl{font-size:.72rem;letter-spacing:.24em;color:var(--tx3);font-weight:700;margin-bottom:14px}
+
+.b-seats{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;flex:1;min-height:0;}
+.b-seat{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:24px 26px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.b-seat.b-occ{background:linear-gradient(180deg,var(--panel2),var(--panel));border-color:#4A4234}
+.b-seat .sh{display:flex;align-items:center;gap:12px; justify-content:space-between;}
+.b-seat .sn{font-family:"Playfair Display",serif;font-size:1.5rem;font-weight:600;color:var(--gold)}
+.b-seat .badge{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:.74rem;font-weight:700;letter-spacing:.06em;padding:6px 13px;border-radius:3px}
+.b-seat .badge.on{background:var(--ok-bg);color:var(--ok)}
+.b-seat .badge.on::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 1.6s ease infinite}
+.b-seat .badge.sent{background:rgba(199,178,153,.14);color:var(--gold)}
+.b-seat .who{margin-top:auto;font-family:var(--serif);font-size:2rem;font-weight:700;line-height:1.25;word-break:break-all}
+.b-seat .who.idle{font-family:"Noto Sans JP";font-size:1.4rem;font-weight:500;color:var(--tx3);letter-spacing:.08em}
+.b-seat .meta{margin-top:10px;font-size:.82rem;color:var(--tx2);letter-spacing:.04em;min-height:1.2em}
+
+.b-seat-cmds { display:flex; gap:12px; margin-top:20px; flex-wrap:wrap; }
+.b-seat-cmd { background:var(--panel2); border:1px solid var(--line); color:var(--tx2); border-radius:4px; padding:14px 18px; font-size:1rem; font-weight:700; cursor:pointer; letter-spacing:0.04em; transition:all 0.15s; flex:1; text-align:center; }
+.b-seat-cmd:hover { background:var(--gold); color:#141210; border-color:var(--gold); }
+.b-seat-cmd.danger { background:transparent; border-color:var(--line); color:var(--tx3); }
+.b-seat-cmd.danger:hover { background:#8A3A3A; color:#fff; border-color:#8A3A3A; }
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+.b-kpi{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:22px 26px;display:flex;align-items:center;gap:22px;margin-bottom:18px}
+.b-kpi .num{font-family:"Playfair Display",serif;font-size:4rem;font-weight:600;line-height:.9;color:var(--gold)}
+.b-kpi .cap{font-size:.78rem;letter-spacing:.16em;color:var(--tx3);font-weight:700}
+.b-kpi .cap b{display:block;color:var(--tx);font-size:.98rem;letter-spacing:.04em;margin-bottom:4px}
+
+.b-panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:20px 24px;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.b-panel + .b-panel{margin-top:18px}
+.b-staff-list{display:flex;flex-direction:column;gap:11px;overflow:auto}
+.b-staff-row{display:flex;align-items:center;gap:14px;font-size:1rem}
+.b-staff-row .nm{font-family:var(--serif);font-weight:700;min-width:74px}
+.b-staff-row .barbg{flex:1;height:9px;background:var(--panel2);border-radius:99px;overflow:hidden}
+.b-staff-row .barfill{height:100%;background:linear-gradient(90deg,var(--gold),#9A8C76);border-radius:99px}
+.b-staff-row .ct{font-size:.92rem;color:var(--tx2);min-width:42px;text-align:right;font-weight:600}
+.b-empty{color:var(--tx3);font-size:.9rem;letter-spacing:.06em}
+
+.b-recent{display:flex;flex-direction:column;gap:0;overflow:auto}
+.b-rec{display:flex;gap:16px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--line)}
+.b-rec:last-child{border-bottom:none}
+.b-rec .rt{font-family:"Playfair Display",serif;color:var(--tx3);font-size:.86rem;min-width:78px;letter-spacing:.02em}
+.b-rec .rn{flex:1;font-family:var(--serif);font-weight:700;font-size:1.04rem}
+.b-rec .rs{color:var(--gold);font-weight:700;font-size:.84rem;letter-spacing:.04em}
+
+@media (max-width:1100px){
+  .b-wrap{grid-template-columns:1fr;gap:18px;overflow:auto}
+  .b-seats{grid-template-rows:none;min-height:380px}
+  .bhd{padding-left:22px;padding-right:22px}
+  .b-wrap{padding-left:22px;padding-right:22px}
+}
+
+/* ─────────── 全画面モニター (PDFレイアウト完全再現＋遠隔操作) ─────────── */
+.fs-monitor { position:fixed; inset:0; z-index:900; background:#1E1E1E; color:#424242; display:flex; flex-direction:column; overflow:hidden; }
+.fs-monitor.hide { display:none; }
+
+.fsm-head { display:flex; align-items:center; padding:15px 30px; background:#1A1A1A; border-bottom:1px solid #111111; gap:20px; flex-shrink:0; }
+.fsm-ti { font-size:1.5rem; font-weight:700; font-family:var(--serif); color:var(--gold); }
+.fsm-stat { font-size:1rem; color:var(--ok); font-weight:600; margin-right:auto; }
+
+.fsm-btn { background:#141210; border:1px solid #332E26; color:#B9B1A4; border-radius:4px; padding:10px 18px; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.fsm-btn:hover { background:var(--gold); color:#141210; border-color:var(--gold); }
+.fsm-close { background:transparent; border:1px solid #7E776B; color:#B9B1A4; padding:10px 20px; border-radius:4px; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.fsm-close:hover { background:#1A1A1A; color:#fff; }
+
+.pdf-wrap { flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
+/* ════════════ 視認性改善パッチ（管理画面） ════════════ */
+:root{--danger:#B4524A;--danger-d:#9A3F38}
+/* 文字サイズ段階：標準を等倍に底上げ（従来 標準=0.92 で小さすぎた） */
+:root[data-fs="s"]{--fs:1}
+:root[data-fs="l"]{--fs:1.14}
+:root[data-fs="xl"]{--fs:1.30}
+
+/* 字間を詰めて日本語の可読性を確保（ブランド見出しは対象外） */
+.seats-h,.seat-h,.seat-st,.dc-l,.dr-h,.seat-meta{letter-spacing:.04em}
+
+/* 左サイド（ダーク背景）の薄すぎる文字をコントラスト確保した濃さに */
+.seats-h{color:rgba(255,255,255,.92);font-size:.74rem}
+.seats-h .live{color:rgba(255,255,255,.72)}
+.seat-h{color:rgba(255,255,255,.78)}
+.seat-idle{color:rgba(255,255,255,.6);font-size:1rem}
+.dc-l{color:rgba(255,255,255,.78)}
+.dr-h{color:rgba(255,255,255,.78)}
+.dr-t{color:rgba(255,255,255,.62)}
+.dr-i{color:rgba(255,255,255,.85)}
+.ds-item{color:rgba(255,255,255,.9)}
+.ds-empty,.dr-empty{color:rgba(255,255,255,.55)}
+
+/* 受付席の操作ボタン：1列に並べて折返し・文字切れを防止（特大でも崩れない） */
+.seat-cmds{flex-direction:column;gap:7px}
+.seat-cmd{flex:none;white-space:nowrap;padding:10px 8px;font-size:.78rem}
+
+/* 危険操作（待機に戻す）を赤系で明示し、誤操作を防ぐ */
+.seat-cmd.danger{color:var(--danger);border-color:var(--danger)}
+.seat-cmd.danger:hover{background:var(--danger);border-color:var(--danger);color:#fff}
+.b-seat-cmd.danger{color:#E0917F;border-color:#6e4a44}
+.b-seat-cmd.danger:hover{background:var(--danger);border-color:var(--danger);color:#fff}
+
+/* iPad運用向けのタップ反応とキーボード操作のフォーカス可視化 */
+.seat-cmd:active,.hbtn:active,.bar .newbtn:active,.ci .send:active{transform:scale(.98)}
+.bar input:focus,.fld input:focus{outline:2px solid var(--gold);outline-offset:1px}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* 顧客リスト：フリガナを読める濃さに */
+.ci .fr{color:var(--tx2)}
+.staff-add{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.22);color:#fff;width:40px;padding:11px 0;font-size:1.05rem;font-weight:700;cursor:pointer;line-height:1;flex-shrink:0}
+.staff-add:hover{border-color:rgba(255,255,255,.55)}
+.staff-add:active{opacity:.8}
+/* board（モニター）操作ボタンの折返し防止 */
+.b-seat-cmd{white-space:nowrap}
+
+/* 全画面モニター：シート＋操作パネルの2カラム */
+.fsm-body{flex:1;display:flex;min-height:0;overflow:hidden}
+.fsm-body .pdf-wrap{flex:1;min-width:0;justify-content:flex-start;padding-left:0;display:block;position:relative;background:#fff}
+.fsm-panel{width:310px;flex-shrink:0;background:#1A1A1A;border-left:1px solid #333333;padding:22px 18px;overflow:auto;display:flex;flex-direction:column;gap:9px}
+.fp-sec{font-size:.7rem;letter-spacing:.16em;color:#7E776B;font-weight:700;margin:8px 2px 2px}
+.fp-btn{background:#2A2A2A;border:1px solid #3A3A3A;color:#E8E3DA;border-radius:6px;padding:12px 14px;font-size:.9rem;font-weight:600;cursor:pointer;text-align:left;letter-spacing:.02em;transition:all .15s}
+.fp-btn:hover{background:#C7B299;color:#1A1A1A;border-color:#C7B299}
+.fp-btn:active{transform:scale(.98)}
+.cmd-feedback{background:#1A2F1A;border:1px solid #2D5A2D;color:#7ADB7A;border-radius:6px;padding:8px 12px;font-size:.82rem;font-weight:600;text-align:center;margin-bottom:8px;transition:all .3s}
+.cmd-feedback.done{background:#1A2A1A;color:#5CC85C}
+.fp-grow{flex:1;min-height:8px}
+.fp-hint{font-size:.72rem;color:#9A9286;line-height:1.6;background:rgba(255,255,255,.05);border:1px solid #333333;border-radius:6px;padding:10px 12px}
+.fp-danger{border-color:#6e4a44;color:#E0917F}
+.fp-danger:hover{background:#B4524A;border-color:#B4524A;color:#fff}
+/* お客様入力プレビュー（iframe） */
+.preview-frame{width:100%;height:100%;border:0;background:#fff;display:block}
+.preview-frame.hide{display:none}
+.preview-idle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#7E776B;font-size:1.1rem;font-weight:600;pointer-events:none;background:#1E1E1E}
+.preview-idle.hide{display:none}
+
+/* ─────────── 統合設定パネル（タブ） ─────────── */
+.st-wrap{display:flex;min-height:340px;max-height:70vh}
+.st-nav{width:96px;flex-shrink:0;background:var(--sf2);border-right:1px solid var(--bd);display:flex;flex-direction:column;padding:6px 0}
+.st-tab{background:none;border:none;border-left:3px solid transparent;text-align:left;padding:13px 12px;font-size:.75rem;font-weight:700;color:var(--tx3);cursor:pointer;transition:all .15s;letter-spacing:.04em;white-space:nowrap;line-height:1.4}
+.st-tab:hover{background:var(--sf);color:var(--tx)}
+.st-tab.on{background:#fff;color:var(--charcoal);border-left-color:var(--charcoal)}
+.st-body{flex:1;padding:22px 24px;overflow:auto;min-width:0}
+.st-pane{display:none}
+.st-pane.show{display:block}
+.st-sec{font-size:.66rem;font-weight:700;letter-spacing:.2em;color:var(--tx3);text-transform:uppercase;margin:20px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--bd)}
+.st-sec:first-child{margin-top:0}
+.st-row{margin-bottom:18px}
+.st-row label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.12em;color:var(--tx2);margin-bottom:7px}
+.st-row input{width:100%;padding:12px 14px;border:1px solid var(--bd2);border-radius:2px;font-size:.95rem;background:#fff;color:var(--tx);outline:none;font-family:monospace}
+.st-row input.nm-input{font-family:"Noto Sans JP",sans-serif}
+.st-row input:focus{border-color:var(--charcoal);outline:2px solid var(--gold);outline-offset:1px}
+.st-row .hint{font-size:.73rem;color:var(--tx3);margin-top:7px;line-height:1.65}
+.st-save{width:100%;padding:13px;border:none;border-radius:2px;background:var(--charcoal);color:#fff;font-size:.9rem;font-weight:700;letter-spacing:.08em;cursor:pointer;margin-top:6px;transition:background .18s}
+.st-save:hover{background:#000}
+.st-fsbtns{display:flex;gap:8px;margin-top:6px}
+.st-fsbtn{flex:1;padding:12px 0;border:1px solid var(--bd2);border-radius:2px;background:#fff;color:var(--tx2);font-size:.85rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.st-fsbtn.on{background:var(--charcoal);border-color:var(--charcoal);color:#fff}
+.st-logout{width:100%;padding:13px;border:1px solid #B4524A;border-radius:2px;background:#fff;color:#B4524A;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:10px;transition:all .18s}
+.st-logout:hover{background:#B4524A;color:#fff}
+.st-account-info{font-size:.88rem;color:var(--tx2);line-height:1.9;background:var(--sf);border:1px solid var(--bd);border-radius:2px;padding:12px 15px;margin-bottom:14px}
+
+/* ─────────── スタッフ管理モーダル ─────────── */
+.staff-list-item{display:flex;align-items:center;padding:11px 14px;border:1px solid var(--bd);border-radius:2px;margin-bottom:8px;background:var(--sf);gap:12px}
+.staff-list-item .snm{flex:1;font-size:1rem;font-weight:600;color:var(--tx)}
+.staff-del{background:none;border:1px solid var(--bd2);color:var(--tx3);border-radius:2px;padding:6px 12px;font-size:.78rem;cursor:pointer;font-weight:700;flex-shrink:0;transition:all .15s;white-space:nowrap}
+.staff-del:hover{background:#B4524A;border-color:#B4524A;color:#fff}
+.staff-add-row{display:flex;gap:10px;margin-top:14px}
+.staff-add-row input{flex:1;padding:13px 15px;border:1px solid var(--bd2);border-radius:2px;font-size:1rem;background:#fff;color:var(--tx);outline:none}
+.staff-add-row input:focus{border-color:var(--charcoal)}
+.staff-add-row button{background:var(--charcoal);color:#fff;border:none;border-radius:2px;padding:13px 20px;font-size:.9rem;font-weight:700;cursor:pointer;flex-shrink:0}
+.staff-add-row button:hover{background:#000}
+
+/* ─────────── オンライン商談URL発行 ─────────── */
+.ci .url-btn{flex-shrink:0;background:#fff;border:1.5px solid var(--charcoal);color:var(--charcoal);border-radius:2px;padding:14px 14px;font-size:.82rem;font-weight:700;letter-spacing:.04em;cursor:pointer;line-height:1.3;text-align:center;min-width:100px;transition:all .18s;margin-right:8px}
+.ci .url-btn:hover{background:var(--charcoal);color:#fff}
+.ci .url-btn:active{opacity:.85;transform:scale(.98)}
+.url-display{background:var(--sf);border:1px solid var(--bd2);border-radius:3px;padding:14px 16px;font-size:.82rem;word-break:break-all;color:var(--tx2);margin-bottom:14px;line-height:1.6;font-family:monospace}
+.url-copy-btn{width:100%;padding:14px;border:none;border-radius:2px;background:var(--charcoal);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:.06em;margin-bottom:12px}
+.url-copy-btn:hover{background:#000}
+.url-note{font-size:.78rem;color:var(--tx3);line-height:1.7;margin:8px 0 16px;text-align:center}
+
+/* ─────────── オンライン商談セッション（左サイド） ─────────── */
+.online-wrap{padding:12px 22px 18px;border-top:1px solid rgba(255,255,255,.1);margin-top:4px}
+.online-h{font-size:.72rem;letter-spacing:.14em;font-weight:700;color:rgba(255,255,255,.72);margin-bottom:10px}
+.online-list{display:flex;flex-direction:column;gap:9px}
+.online-item{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:3px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.online-item .oi-name{font-family:var(--serif);font-size:1rem;font-weight:700;color:#fff}
+.online-item .oi-meta{font-size:.7rem;color:rgba(255,255,255,.55);margin-top:1px}
+.online-item .oi-cmds{display:flex;gap:6px;margin-top:8px}
+.online-item .oi-cmd{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:2px;padding:7px 10px;font-size:.7rem;font-weight:700;cursor:pointer;flex:1;text-align:center;transition:all .15s;white-space:nowrap}
+.online-item .oi-cmd:hover{background:rgba(255,255,255,.18)}
+.online-empty{font-size:.8rem;color:rgba(255,255,255,.35);letter-spacing:.04em}
+
+/* ─────────── モード選択ハブ ─────────── */
+.hub{position:fixed;inset:0;z-index:45;display:none;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.hub.show{display:flex}
+.hub .lslides{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.hub .lslide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;will-change:opacity,transform;animation:lKen 36s linear infinite}
+.hub .lslide:nth-child(2){animation-delay:9s}.hub .lslide:nth-child(3){animation-delay:18s}.hub .lslide:nth-child(4){animation-delay:27s}
+.hub .lveil{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(5,5,8,.60) 0%,rgba(5,5,8,.38) 48%,rgba(5,5,8,.64) 100%)}
+.hub .lveil::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 46%,rgba(154,140,118,.08),transparent 65%)}
+.hub-wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:30px;width:100%;max-width:800px}
+.hub-logo{height:38px;margin-bottom:12px;filter:brightness(0) invert(1) opacity(.9)}
+.hub-eyebrow{font-family:"Playfair Display",serif;font-size:.68rem;letter-spacing:.52em;color:rgba(255,255,255,.48);margin-bottom:44px}
+.hub-cards{display:flex;gap:24px;flex-wrap:wrap;justify-content:center}
+.hub-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:46px 56px;cursor:pointer;text-align:center;transition:all .28s;min-width:220px;position:relative;overflow:hidden;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.hub-card::after{content:'';position:absolute;inset:0;border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12);pointer-events:none}
+.hub-card:hover{background:rgba(255,255,255,.14);border-color:rgba(199,178,153,.55);transform:translateY(-6px);box-shadow:0 28px 64px rgba(0,0,0,.45)}
+.hub-card:active{transform:translateY(-2px) scale(.98)}
+.hub-icon{font-size:2.8rem;margin-bottom:18px;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
+.hub-title{font-family:var(--serif);font-size:1.32rem;font-weight:700;color:#fff;letter-spacing:.12em;margin-bottom:10px}
+.hub-desc{font-size:.72rem;color:rgba(255,255,255,.48);letter-spacing:.06em;line-height:1.8}
+
+/* ─────────── オープンボード ─────────── */
+.ob{display:none;flex-direction:column;height:100dvh;overflow:hidden;background:#F7F6F3}
+.ob.show{display:flex}
+.ob-hd{flex-shrink:0;background:var(--charcoal);color:#fff;padding:max(16px,env(safe-area-inset-top)) 24px 0;display:flex;align-items:flex-start;gap:0;flex-wrap:wrap}
+.ob-brand{display:flex;align-items:center;gap:12px;padding:0 20px 16px 0;border-right:1px solid rgba(255,255,255,.12);margin-right:16px;flex-shrink:0}
+.ob-brand img{height:24px;filter:brightness(0) invert(1) opacity(.85)}
+.ob-hd-ti{font-family:var(--serif);font-size:1rem;letter-spacing:.16em;font-weight:600;color:#fff}
+.ob-hd-ti small{display:block;font-family:"Playfair Display",serif;font-size:.55rem;letter-spacing:.36em;color:rgba(255,255,255,.36);font-weight:400;margin-top:2px}
+.ob-tabs{display:flex;align-self:flex-end;gap:0;padding:0 2px}
+.ob-tab{background:none;border:none;border-bottom:3px solid transparent;color:rgba(255,255,255,.48);padding:13px 16px;font-size:.78rem;font-weight:700;letter-spacing:.09em;cursor:pointer;white-space:nowrap;transition:all .18s}
+.ob-tab:hover{color:rgba(255,255,255,.85)}
+.ob-tab.on{color:#fff;border-bottom-color:var(--gold)}
+.ob-hd-tools{display:flex;align-items:center;gap:8px;padding:0 0 14px;margin-left:auto;flex-wrap:wrap}
+.ob-pane{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0}
+.ob-pane.show{display:flex}
+
+/* フィルターバー */
+.ob-filter{flex-shrink:0;padding:9px 18px;background:#fff;border-bottom:1px solid #E8E4DE;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.ob-filter label{font-size:.74rem;font-weight:700;color:#777;letter-spacing:.08em}
+.ob-filter select,.ob-filter input[type=text]{padding:6px 10px;border:1px solid #DDD;border-radius:3px;font-size:.88rem;background:#FAFAFA;color:var(--tx);outline:none;font-family:inherit;transition:border .15s}
+.ob-filter select:focus,.ob-filter input[type=text]:focus{border-color:var(--charcoal);background:#fff}
+.ob-filter-count{margin-left:auto;font-size:.72rem;color:#AAA;font-weight:700;letter-spacing:.06em}
+.ob-filter-chk{display:flex;align-items:center;gap:6px;font-size:.76rem;color:#666;font-weight:600;cursor:pointer;user-select:none}
+.ob-filter-chk input{accent-color:var(--charcoal);width:14px;height:14px}
+
+/* テーブル共通 */
+.ob-scroll{flex:1;overflow:auto}
+.ob-table{width:100%;border-collapse:collapse;font-size:.86rem;white-space:nowrap}
+.ob-table thead th{background:#2B2B2B;color:rgba(255,255,255,.85);font-size:.68rem;font-weight:700;letter-spacing:.08em;padding:8px 10px;text-align:left;position:sticky;top:0;z-index:3;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08)}
+.ob-table thead th.cb-th{text-align:center;padding:6px 5px;font-size:.62rem;letter-spacing:.03em;line-height:1.4}
+.ob-table td{padding:7px 10px;border-bottom:1px solid #E8E4DC;color:#222;vertical-align:middle;background:#fff;border-right:1px solid #EDE9E2;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+.ob-table tr:hover td{background:#FDFCF8}
+.ob-table tr.ob-sel td{background:#FFF8EE !important}
+
+/* 顧客名リンク */
+.ob-name-link{font-family:var(--serif);font-weight:700;color:var(--charcoal);cursor:pointer;border-bottom:1px solid transparent;transition:all .15s;font-size:.96rem}
+.ob-name-link:hover{color:var(--gold-d,#9A7B4B);border-bottom-color:var(--gold)}
+
+/* 月グループヘッダー */
+.ob-month-hd td{background:#EFEBE3;font-weight:700;font-size:.78rem;letter-spacing:.08em;padding:8px 16px;border-top:2px solid #D8CFC2;border-bottom:1px solid #D8CFC2;border-right:none !important}
+.ob-month-label{font-family:var(--serif);font-size:1.05rem;color:#2B2B2B;font-weight:700;margin-right:14px;letter-spacing:.09em}
+.ob-sum-chips{display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ob-sc{display:inline-flex;align-items:baseline;gap:2px;background:rgba(255,255,255,.55);border:1px solid rgba(0,0,0,.07);border-radius:20px;padding:1px 8px}
+.ob-sc .sl{font-size:.6rem;color:#888;letter-spacing:.04em}
+.ob-sc .sv{font-size:.84rem;font-weight:800;color:#2B2B2B}
+.ob-sc .sp{font-size:.62rem;color:#AAA}
+
+/* ステータスバッジ */
+.ob-badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:.76rem;font-weight:700;letter-spacing:.04em;white-space:nowrap;cursor:pointer;transition:opacity .15s}
+.ob-badge:hover{opacity:.8}
+.ob-s0{background:#FEF9EC;color:#92600E;border:1px solid #F5DFA0}
+.ob-s1{background:#F0EEFF;color:#5B21B6;border:1px solid #D4C8F8}
+.ob-s2{background:#EDFAF3;color:#065F46;border:1px solid #A7DFBE}
+.ob-s3{background:#EBF4FF;color:#1E40AF;border:1px solid #BFDBFE}
+.ob-s4{background:#FFF0F0;color:#991B1B;border:1px solid #FEC9C9}
+.ob-s5{background:#FEF0F8;color:#9D174D;border:1px solid #F9C2DC}
+.ob-s6{background:#FFF4EB;color:#9A3412;border:1px solid #FDC9A0}
+.ob-s7{background:#ECFDF5;color:#065F46;border:1px solid #6EE7B7}
+.ob-s8{background:#F4F5F7;color:#6B7280;border:1px solid #D1D5DB}
+.ob-s9{background:#FEF3F2;color:#B91C1C;border:1px solid #FECACA}
+.ob-sP{background:#ECFDF5;color:#166534;border:1px solid #86EFAC}
+.ob-sF{background:#F8F9FB;color:#9CA3AF;border:1px solid #E5E7EB}
+
+/* インライン編集 */
+.ob-editable{display:inline-block;min-width:18px;cursor:text;border-radius:3px;padding:2px 3px;transition:background .12s;line-height:1.4}
+.ob-editable:hover{background:rgba(154,140,118,.14)}
+.ob-editable.empty{color:#CCC;font-style:italic}
+.ob-cell-input{border:none;border-bottom:2px solid var(--gold);background:rgba(255,248,230,.6);font-size:.82rem;font-family:inherit;color:var(--tx);padding:2px 4px;outline:none;min-width:60px;max-width:200px;border-radius:2px}
+.ob-cell-select{border:1px solid var(--gold);background:#fff;font-size:.82rem;font-family:inherit;color:var(--tx);outline:none;cursor:pointer;padding:2px 4px;border-radius:2px}
+
+/* チェックボックス */
+.ob-cb{width:16px;height:16px;cursor:pointer;accent-color:var(--charcoal);display:block;margin:0 auto}
+
+/* 行番号・削除 */
+.ob-rn{color:#AAA;font-size:.72rem;text-align:right;padding-right:6px !important;min-width:28px;font-weight:600}
+.ob-del{background:none;border:1px solid #DDD;color:#CCC;border-radius:3px;padding:3px 7px;font-size:.66rem;cursor:pointer;transition:all .15s}
+.ob-del:hover{background:#C0392B;border-color:#C0392B;color:#fff}
+
+/* 空状態 */
+.ob-empty-state{padding:80px 20px;text-align:center;color:#BBB;font-size:.9rem;line-height:2.2}
+
+/* 履歴チップ（一覧表示 — 全件） */
+.ob-hist-chips{display:flex;gap:4px;flex-wrap:wrap;max-width:260px}
+.ob-hist-chip{font-size:.68rem;padding:3px 8px;border-radius:20px;white-space:nowrap;font-weight:600;flex-shrink:0;background:#F0EDE8;color:#666;border:1px solid #E0DAD0}
+.ob-hist-chip.new{background:#2B2B2B;color:#fff;border-color:#2B2B2B}
+
+/* 月ヘッダー ＋追加ボタン */
+.ob-month-add{margin-left:auto;float:right;background:none;border:1px solid rgba(0,0,0,.18);color:#555;border-radius:3px;padding:2px 10px;font-size:.68rem;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:all .15s}
+.ob-month-add:hover{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
+
+/* 月別担当集計インライン行 */
+.ob-agg-inline-row td{background:#FAF8F5;padding:5px 16px;border-bottom:1px solid #EDE9E3}
+.ob-agg-inline-lbl{font-size:.65rem;font-weight:700;color:#888;letter-spacing:.1em;margin-right:10px;text-transform:uppercase}
+
+/* 次回予定 */
+.ob-next-plan{font-size:.75rem;color:#4A6FA5;font-weight:600}
+
+/* 小ボタン */
+.ob-btn-sm{background:#fff;border:1px solid #D0C8BC;color:#555;border-radius:3px;padding:3px 10px;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .12s}
+.ob-btn-sm:hover{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
+
+/* 月間カレンダー */
+.ob-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:.7rem;margin-bottom:10px}
+.ob-cal-dh{background:#2B2B2B;color:#fff;text-align:center;padding:4px;font-weight:700;font-size:.6rem;letter-spacing:.06em}
+.ob-cal-day{background:#FAF8F5;border:1px solid #E8E4DE;border-radius:2px;padding:4px 5px;min-height:52px;position:relative;vertical-align:top}
+.ob-cal-day.today{border-color:var(--gold);background:#FFFBEF}
+.ob-cal-day.other-month{background:#F2F0ED;color:#CCC}
+.ob-cal-dn{font-size:.65rem;font-weight:700;color:#888;margin-bottom:2px}
+.ob-cal-ev{display:block;background:var(--charcoal);color:#fff;border-radius:2px;padding:1px 4px;margin-bottom:1px;font-size:.58rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.ob-cal-ev:hover{background:var(--gold);color:#2B2B2B}
+
+/* 誕生日カレンダー */
+.ob-bday-upcoming{padding:16px 20px;background:#fff;border-bottom:1px solid #E8E4DE;flex-shrink:0}
+.ob-bday-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.ob-bday-item{display:flex;align-items:center;gap:12px;padding:9px 14px;border:1px solid #E8E4DE;border-radius:6px;cursor:pointer;transition:background .12s;background:#FAFAFA}
+.ob-bday-item:hover{background:#FFF8EE;border-color:#E0CFA8}
+.ob-bday-item.soon{border-color:#F5C842;background:#FFFDF0}
+.ob-bday-item.today-bd{border-color:var(--gold);background:#FFFBEF;box-shadow:0 0 0 2px rgba(154,140,118,.18)}
+.ob-bday-date{font-size:.84rem;font-weight:700;color:#555;min-width:52px}
+.ob-bday-name{flex:1;font-size:.86rem;font-weight:600;color:#2B2B2B}
+.ob-bday-age{font-size:.72rem;color:#AAA;min-width:40px;text-align:right;font-weight:700}
+.ob-bday-soon{font-size:.72rem;font-weight:700;color:#E6920A;min-width:60px;text-align:right}
+.ob-bday-cal{padding:16px 20px}
+.ob-bday-cal-nav{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ob-bday-cal-nav span{font-weight:700;font-size:.92rem;min-width:100px;text-align:center}
+.ob-bday-ev{background:#FEF0D0 !important;color:#9A6B0A !important;border:1px solid #F5DFA0 !important}
+.ob-bday-empty{color:#BBB;font-size:.88rem;padding:20px 0;text-align:center}
+
+/* ステータス別行の左ボーダー（視認性向上）*/
+.ob-table tr[data-sc] td:first-child{border-left:3px solid transparent}
+.ob-table tr[data-sc="ob-s0"] td:first-child{border-left-color:#F5DFA0}
+.ob-table tr[data-sc="ob-s1"] td:first-child{border-left-color:#D4C8F8}
+.ob-table tr[data-sc="ob-s2"] td:first-child{border-left-color:#A7DFBE}
+.ob-table tr[data-sc="ob-s3"] td:first-child{border-left-color:#BFDBFE}
+.ob-table tr[data-sc="ob-s4"] td:first-child{border-left-color:#FEC9C9}
+.ob-table tr[data-sc="ob-s5"] td:first-child{border-left-color:#F9C2DC}
+.ob-table tr[data-sc="ob-s6"] td:first-child{border-left-color:#FDC9A0}
+.ob-table tr[data-sc="ob-s7"] td:first-child{border-left-color:#6EE7B7}
+.ob-table tr[data-sc="ob-s8"] td:first-child{border-left-color:#D1D5DB}
+.ob-table tr[data-sc="ob-s9"] td:first-child{border-left-color:#FECACA}
+.ob-table tr[data-sc="ob-sP"] td:first-child{border-left-color:#86EFAC}
+.ob-table tr[data-sc="ob-sF"] td:first-child{border-left-color:#E5E7EB}
+/* 行の高さを少し増して可読性UP */
+.ob-table td{padding:7px 9px}
+/* パイプラインフロー */
+.ob-pipeline{flex-shrink:0;display:flex;padding:6px 16px;background:#FAFAF8;border-bottom:1px solid #E8E4DE;overflow-x:auto;gap:0;align-items:center}
+.ob-pipe-s{display:flex;align-items:center;gap:0;font-size:.64rem;font-weight:700;color:#CCC;white-space:nowrap;cursor:pointer;transition:color .15s}
+.ob-pipe-s:hover .ob-pipe-lbl{background:rgba(43,43,43,.08)}
+.ob-pipe-lbl{padding:3px 9px;border-radius:20px;transition:background .15s}
+.ob-pipe-s.on .ob-pipe-lbl{background:var(--charcoal);color:#fff}
+.ob-pipe-arr{color:#DDD;padding:0 3px;font-size:.6rem;flex-shrink:0}
+
+/* 集計タブ */
+.ob-agg-body{flex:1;overflow:auto;padding:20px 24px;display:flex;flex-direction:column;gap:28px}
+.ob-agg-sec{background:#fff;border-radius:6px;border:1px solid #E8E4DE;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.ob-agg-sec-hd{background:#2B2B2B;color:#fff;padding:10px 18px;font-size:.72rem;font-weight:700;letter-spacing:.14em;display:flex;align-items:center;gap:12px}
+.ob-agg-sec-hd select{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:3px;font-size:.72rem;font-family:inherit;outline:none}
+.ob-agg-table{width:100%;border-collapse:collapse;font-size:.8rem;white-space:nowrap}
+.ob-agg-table th{background:#F7F5F0;color:#888;font-size:.65rem;font-weight:700;letter-spacing:.1em;padding:8px 14px;text-align:right;border-bottom:1px solid #E8E4DE;border-right:1px solid #F0EDE8}
+.ob-agg-table th:first-child{text-align:left}
+.ob-agg-table td{padding:8px 14px;border-bottom:1px solid #F0EDE8;border-right:1px solid #F5F2EE;text-align:right;color:#444}
+.ob-agg-table td:first-child{text-align:left;font-weight:600;color:#2B2B2B}
+.ob-agg-table tr:last-child td{background:#EFEBE3;font-weight:700;color:#2B2B2B;border-bottom:none}
+.ob-agg-table .hi{color:#166534;font-weight:700}
+
+/* ─── 顧客詳細画面 ─── */
+.ob-detail{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;background:#F7F6F3}
+.ob-detail.show{display:flex}
+.ob-det-hd{flex-shrink:0;background:#2B2B2B;color:#fff;padding:max(16px,env(safe-area-inset-top)) 24px 0;display:flex;flex-direction:column}
+.ob-det-top{display:flex;align-items:center;gap:14px;padding-bottom:14px}
+.ob-det-back{background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);padding:7px 14px;border-radius:3px;font-size:.75rem;font-weight:700;cursor:pointer;letter-spacing:.08em;transition:all .15s;flex-shrink:0}
+.ob-det-back:hover{background:rgba(255,255,255,.1);color:#fff}
+.ob-det-name{font-family:var(--serif);font-size:1.5rem;font-weight:700;color:#fff;flex:1;letter-spacing:.06em}
+.ob-det-sub{font-size:.72rem;color:rgba(255,255,255,.45);margin-top:2px;letter-spacing:.06em}
+.ob-det-tabs{display:flex;gap:0;align-self:flex-start}
+.ob-det-tab{background:none;border:none;border-bottom:3px solid transparent;color:rgba(255,255,255,.45);padding:11px 18px;font-size:.76rem;font-weight:700;letter-spacing:.1em;cursor:pointer;transition:all .18s;white-space:nowrap}
+.ob-det-tab:hover{color:rgba(255,255,255,.85)}
+.ob-det-tab.on{color:#fff;border-bottom-color:var(--gold)}
+.ob-det-body{flex:1;overflow:auto}
+.ob-det-pane{display:none;padding:24px}
+.ob-det-pane.show{display:block}
+
+/* 基本情報 */
+.ob-info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:24px}
+.ob-info-card{background:#fff;border:1px solid #E8E4DE;border-radius:6px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.ob-info-label{font-size:.65rem;font-weight:700;letter-spacing:.14em;color:#AAA;margin-bottom:6px;text-transform:uppercase}
+.ob-info-val{font-size:.9rem;color:#2B2B2B;font-weight:600;min-height:22px}
+.ob-info-val .ob-editable{font-size:.9rem;font-weight:600;min-width:80px;display:block}
+.ob-info-full{grid-column:1/-1}
+.ob-info-actions{display:flex;gap:10px;margin-top:4px}
+
+/* ハードルカード */
+.ob-hurdle-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.ob-framing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ob-hurdle-card{background:#fff;border:1px solid #E8E4DE;border-radius:6px;padding:14px;text-align:center;transition:all .18s;cursor:pointer}
+.ob-hurdle-card.done{background:#2B2B2B;border-color:#2B2B2B}
+.ob-hurdle-card.done .ob-hurdle-label{color:#fff}
+.ob-hurdle-card.done .ob-hurdle-icon{opacity:1}
+.ob-hurdle-label{font-size:.72rem;font-weight:700;color:#888;letter-spacing:.08em;display:block;margin-top:6px}
+.ob-hurdle-icon{font-size:1.4rem;opacity:.25;transition:opacity .18s}
+
+/* 履歴タイムライン */
+.ob-tl-add{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.ob-tl-add input,.ob-tl-add select{padding:8px 10px;border:1px solid #DDD;border-radius:3px;font-size:.82rem;font-family:inherit;background:#fff;outline:none}
+.ob-tl-add input:focus,.ob-tl-add select:focus{border-color:var(--charcoal)}
+.ob-tl-add .tl-content{flex:1;min-width:180px}
+.ob-timeline{display:flex;flex-direction:column;gap:0;position:relative;padding-left:24px}
+.ob-timeline::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:2px;background:#E8E4DE}
+.ob-tl-item{display:flex;align-items:flex-start;gap:14px;padding:12px 0;position:relative}
+.ob-tl-dot{position:absolute;left:-24px;top:14px;width:10px;height:10px;border-radius:50%;background:var(--gold);border:2px solid #F7F6F3;flex-shrink:0;z-index:1}
+.ob-tl-date{font-size:.72rem;color:#AAA;white-space:nowrap;min-width:64px;padding-top:2px}
+.ob-tl-badge{font-size:.64rem;font-weight:700;background:#F0EDE8;color:#666;padding:2px 8px;border-radius:20px;white-space:nowrap;align-self:flex-start;margin-top:2px}
+.ob-tl-content{font-size:.84rem;color:#444;flex:1;line-height:1.5}
+.ob-tl-staff{font-size:.68rem;color:#BBB;white-space:nowrap}
+.ob-tl-del{background:none;border:none;color:#DDD;cursor:pointer;font-size:.8rem;padding:0 4px;line-height:1;transition:color .12s}
+.ob-tl-del:hover{color:#C0392B}
+
+/* カルテ */
+.ob-karte-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.ob-karte-fld label{display:block;font-size:.67rem;font-weight:700;letter-spacing:.12em;color:#AAA;margin-bottom:5px;text-transform:uppercase}
+.ob-karte-fld input,.ob-karte-fld select,.ob-karte-fld textarea{width:100%;padding:9px 12px;border:1px solid #DDD;border-radius:3px;font-size:.86rem;background:#fff;color:var(--tx);outline:none;font-family:inherit;transition:border .15s}
+.ob-karte-fld input:focus,.ob-karte-fld select:focus,.ob-karte-fld textarea:focus{border-color:var(--charcoal)}
+.ob-karte-fld textarea{resize:vertical;min-height:70px}
+.ob-karte-fld.full{grid-column:1/-1}
+
+/* ドライブ埋め込み */
+.ob-drive-input{display:flex;gap:8px;margin-bottom:16px}
+.ob-drive-input input{flex:1;padding:10px 14px;border:1px solid #DDD;border-radius:3px;font-size:.86rem;font-family:inherit;outline:none}
+.ob-drive-input input:focus{border-color:var(--charcoal)}
+.ob-drive-frame{width:100%;height:calc(100vh - 280px);border:1px solid #E8E4DE;border-radius:6px;background:#fff}
+.ob-drive-placeholder{padding:60px 20px;text-align:center;color:#BBB;font-size:.9rem;border:2px dashed #E8E4DE;border-radius:6px}
+
+/* 新規追加モーダル */
+.ob-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:480px){.ob-modal-grid{grid-template-columns:1fr}}
+.ob-fld label{display:block;font-size:.68rem;font-weight:700;letter-spacing:.12em;color:#888;margin-bottom:5px}
+.ob-fld input,.ob-fld select{width:100%;padding:10px 12px;border:1px solid #DDD;border-radius:3px;font-size:.88rem;background:#fff;color:var(--tx);outline:none;font-family:inherit;transition:border .15s}
+.ob-fld input:focus,.ob-fld select:focus{border-color:var(--charcoal);box-shadow:0 0 0 3px rgba(199,178,153,.2)}
+.ob-fld.full{grid-column:1/-1}
+.ob-sec-title{font-size:.7rem;font-weight:700;letter-spacing:.14em;color:#AAA;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #EEE;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div id="login" class="login">
+  <div class="lslides">
+    <div class="lslide" style="background-image:url('https://www.heartom.co.jp/wp-content/themes/heartom2023/images/home/img_fv00.jpg')"></div>
+    <div class="lslide" style="background-image:url('https://www.heartom.co.jp/wp-content/themes/heartom2023/images/home/img_fv03.jpg')"></div>
+    <div class="lslide" style="background-image:url('https://www.heartom.co.jp/wp-content/themes/heartom2023/images/home/img_fv01.jpg')"></div>
+    <div class="lslide" style="background-image:url('https://www.heartom.co.jp/wp-content/themes/heartom2023/images/home/img_fv04.jpg')"></div>
+  </div>
+  <div class="lveil"></div>
+  <div class="lwrap">
+    <img class="logo" src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none'">
+    <div class="lo">HEARTOM LIVING</div>
+    <div class="lt">管理コンソール</div>
+    <div class="l-divider"></div>
+    <div class="f">
+      <div id="g_id_onload"
+           data-client_id="40655412309-av7oitabtv9eb2g3fafc3sb9oulvatcb.apps.googleusercontent.com"
+           data-callback="handleCredentialResponse"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="center"></div>
+      <div class="err" id="lerr"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── モード選択ハブ ─── -->
+<div id="hub" class="hub">
+  <div class="lslides">
+    <div class="lslide" style="background-image:url('/int1.jpg')"></div>
+    <div class="lslide" style="background-image:url('/int3.jpg')"></div>
+    <div class="lslide" style="background-image:url('/ext1.jpg')"></div>
+    <div class="lslide" style="background-image:url('/int5.jpg')"></div>
+  </div>
+  <div class="lveil"></div>
+  <div class="hub-wrap">
+    <img class="hub-logo" src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none'">
+    <div class="hub-eyebrow">HEARTOM LIVING — MANAGEMENT CONSOLE</div>
+    <div class="hub-cards">
+      <div class="hub-card" onclick="enterReception()">
+        <div class="hub-icon">🏠</div>
+        <div class="hub-title">受付管理</div>
+        <div class="hub-desc">お客様受付・セッション管理<br>モニター・遠隔操作</div>
+      </div>
+      <div class="hub-card" onclick="enterOpenBoard()">
+        <div class="hub-icon">📊</div>
+        <div class="hub-title">オープンボード</div>
+        <div class="hub-desc">顧客追客・商談進捗管理<br>月次集計・ハードル管理</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── オープンボード（一覧） ─── -->
+<div id="openboard" class="ob">
+  <div class="ob-hd">
+    <div class="ob-brand">
+      <img src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM" onerror="this.style.display='none'">
+      <div class="ob-hd-ti">オープンボード<small>OPEN BOARD</small></div>
+    </div>
+    <div class="ob-tabs">
+      <button class="ob-tab on" data-tab="visitors" onclick="obSwitchTab('visitors')">📅 来客状況</button>
+      <button class="ob-tab" data-tab="active" onclick="obSwitchTab('active')">🔥 直近案件</button>
+      <button class="ob-tab" data-tab="birthday" onclick="obSwitchTab('birthday')">🎂 誕生日</button>
+      <button class="ob-tab" data-tab="agg" onclick="obSwitchTab('agg')">📊 集計</button>
+    </div>
+    <div class="ob-hd-tools">
+      <button class="hbtn primary" onclick="obAddCustomer()">＋ 新規追加</button>
+      <button class="hbtn ghost" onclick="obImportFromNotion()">🔄 Notion同期</button>
+      <button class="hbtn ghost" onclick="obCleanData()" title="データ修正（FALSE除去・ステータス正規化）">🧹 修正</button>
+      <button class="hbtn" onclick="showHub()">‹ 戻る</button>
+    </div>
+  </div>
+
+  <!-- 来客状況 -->
+  <div class="ob-pane show" data-tab="visitors">
+    <!-- パイプラインフロー -->
+    <div class="ob-pipeline" id="ob-pipeline-bar"></div>
+    <div class="ob-filter">
+      <label>年:</label>
+      <select id="ob-filter-year" onchange="obRenderVisitors()" style="width:80px"></select>
+      <label>月:</label>
+      <select id="ob-filter-month" onchange="obRenderVisitors()" style="width:80px"></select>
+      <label>担当:</label>
+      <select id="ob-vis-staff" onchange="obRenderVisitors()" style="width:100px"></select>
+      <input type="text" id="ob-vis-q" placeholder="顧客名で検索..." style="min-width:140px" oninput="obRenderVisitors()">
+      <span class="ob-filter-count" id="ob-vis-count"></span>
+    </div>
+    <div class="ob-scroll">
+      <div id="ob-visitors-content"><div class="ob-empty-state">読み込み中...</div></div>
+    </div>
+  </div>
+
+  <!-- 誕生日カレンダー -->
+  <div class="ob-pane" data-tab="birthday">
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+      <div id="ob-birthday-upcoming" class="ob-bday-upcoming"></div>
+      <div class="ob-scroll"><div id="ob-birthday-content"></div></div>
+    </div>
+  </div>
+
+  <!-- 直近案件 -->
+  <div class="ob-pane" data-tab="active">
+    <div class="ob-filter">
+      <label class="ob-filter-chk"><input type="checkbox" id="ob-hide-inactive" checked onchange="obRenderActive()"> 失注・中長期を非表示</label>
+      <label>担当:</label>
+      <select id="ob-filter-staff" onchange="obRenderActive()" style="width:100px"></select>
+      <span class="ob-filter-count" id="ob-active-count"></span>
+      <button class="ob-btn-sm" onclick="obToggleCalendar()" style="margin-left:auto">📅 カレンダー</button>
+    </div>
+    <div id="ob-cal-wrap" style="display:none;padding:12px 18px 0;flex-shrink:0">
+      <div id="ob-cal-nav" style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <button class="ob-btn-sm" onclick="obCalMove(-1)">◀</button>
+        <span id="ob-cal-title" style="font-weight:700;font-size:.9rem;min-width:90px;text-align:center"></span>
+        <button class="ob-btn-sm" onclick="obCalMove(1)">▶</button>
+        <button class="ob-btn-sm" onclick="obCalToday()">今月</button>
+      </div>
+      <div id="ob-cal-grid" class="ob-cal-grid"></div>
+    </div>
+    <div class="ob-scroll">
+      <div id="ob-active-content"><div class="ob-empty-state">読み込み中...</div></div>
+    </div>
+  </div>
+
+  <!-- 集計 -->
+  <div class="ob-pane" data-tab="agg">
+    <div class="ob-agg-body" id="ob-agg-content"><div class="ob-empty-state">読み込み中...</div></div>
+  </div>
+</div>
+
+<!-- ─── 顧客詳細画面 ─── -->
+<div id="ob-detail" class="ob-detail">
+  <div class="ob-det-hd">
+    <div class="ob-det-top">
+      <button class="ob-det-back" onclick="obCloseDetail()">‹ 一覧へ戻る</button>
+      <div style="flex:1">
+        <div id="ob-det-name" class="ob-det-name">—</div>
+        <div id="ob-det-sub" class="ob-det-sub"></div>
+      </div>
+      <span id="ob-det-badge" class="ob-badge" style="font-size:.78rem;padding:5px 14px;cursor:default"></span>
+    </div>
+    <div class="ob-det-tabs">
+      <button class="ob-det-tab on" data-dtab="info" onclick="obDetTab('info')">基本情報</button>
+      <button class="ob-det-tab" data-dtab="history" onclick="obDetTab('history')">📋 履歴</button>
+      <button class="ob-det-tab" data-dtab="karte" onclick="obDetTab('karte')">🗂 カルテ</button>
+      <button class="ob-det-tab" data-dtab="birthday" onclick="obDetTab('birthday')">🎂 誕生日</button>
+      <button class="ob-det-tab" data-dtab="drive" onclick="obDetTab('drive')">📁 ドライブ</button>
+    </div>
+  </div>
+  <div class="ob-det-body">
+    <!-- 基本情報 -->
+    <div class="ob-det-pane show" data-dtab="info" id="ob-det-pane-info">
+      <div class="ob-info-grid" id="ob-det-info-grid"></div>
+      <div style="margin-top:4px">
+        <div class="ob-sec-title">5大ハードル</div>
+        <div class="ob-hurdle-grid" id="ob-det-hurdles"></div>
+      </div>
+      <div style="margin-top:20px">
+        <div class="ob-sec-title">フレーミング</div>
+        <div class="ob-framing-grid" id="ob-det-framing"></div>
+      </div>
+    </div>
+    <!-- 履歴 -->
+    <div class="ob-det-pane" data-dtab="history" id="ob-det-pane-history">
+      <div class="ob-tl-add">
+        <input type="date" id="tl-date" style="width:140px">
+        <select id="tl-type" style="width:120px">
+          <option>来場</option><option>電話</option><option>オンライン</option>
+          <option>打ち合わせ</option><option>現地見学</option><option>プレゼン</option><option>その他</option>
+        </select>
+        <input type="text" id="tl-content" class="tl-content" placeholder="内容を入力...">
+        <select id="tl-staff" style="width:100px"></select>
+        <button class="hbtn primary" onclick="obAddHistoryItem()">追加</button>
+      </div>
+      <div class="ob-timeline" id="ob-det-timeline"></div>
+    </div>
+    <!-- カルテ -->
+    <div class="ob-det-pane" data-dtab="karte" id="ob-det-pane-karte">
+      <div class="ob-karte-grid" id="ob-det-karte-grid"></div>
+      <button class="save" style="margin-top:20px;padding:12px 28px" onclick="obSaveKarteForm()">カルテを保存</button>
+    </div>
+    <!-- 誕生日（個人） -->
+    <div class="ob-det-pane" data-dtab="birthday" id="ob-det-pane-birthday">
+      <div id="ob-det-bday-content" style="padding:4px 0"></div>
+    </div>
+    <!-- ドライブ -->
+    <div class="ob-det-pane" data-dtab="drive" id="ob-det-pane-drive">
+      <div class="ob-sec-title">Google Drive フォルダURL</div>
+      <div class="ob-drive-input">
+        <input type="url" id="ob-drive-url" placeholder="https://drive.google.com/drive/folders/...">
+        <button class="hbtn primary" onclick="obSaveDriveUrl()">保存・表示</button>
+      </div>
+      <div id="ob-drive-frame-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 新規顧客追加モーダル ─── -->
+<div class="modal" id="obNewModal">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-hd">
+      <div class="mt">新規顧客を追加</div>
+      <button class="x" onclick="obCloseNewModal()">&times;</button>
+    </div>
+    <div class="modal-bd">
+      <div class="ob-modal-grid">
+        <div class="ob-fld full">
+          <label>顧客名 *</label>
+          <input id="obNewName" placeholder="例）田中 太郎 様" style="font-size:1rem;padding:12px">
+        </div>
+        <div class="ob-fld"><label>受付日</label><input type="date" id="obNewDate"></div>
+        <div class="ob-fld"><label>エリア（自由入力）</label><input id="obNewArea" placeholder="例）千葉市緑区"></div>
+        <div class="ob-fld">
+          <label>来場種別</label>
+          <select id="obNewType">
+            <option value="">—</option>
+            <option>完成見学会</option><option>オンライン見学会</option><option>無料相談会</option>
+            <option>デザインセミナー</option><option>casa資料請求</option><option>trip資料請求</option>
+            <option>カナマルハウス</option><option>電話</option><option>飛び込み</option>
+          </select>
+        </div>
+        <div class="ob-fld">
+          <label>反響元</label>
+          <select id="obNewSource">
+            <option value="">—</option>
+            <option>HP</option><option>電話</option><option>家づくり学校</option>
+            <option>FC</option><option>友人紹介</option><option>Instagram</option>
+            <option>ポータルサイト</option><option>その他</option>
+          </select>
+        </div>
+        <div class="ob-fld"><label>担当者</label><select id="obNewStaff"><option value="">—</option></select></div>
+        <div class="ob-fld"><label>サブ担当</label><select id="obNewSubStaff"><option value="">—</option></select></div>
+        <div class="ob-fld">
+          <label>商談ステータス</label>
+          <select id="obNewStatus">
+            <option>問い合わせ</option><option>見学会前</option><option>無料相談前</option>
+            <option>勉強会前</option><option>FP前</option><option>LPS前</option>
+            <option>ヒアリング前</option><option>プレゼン前</option>
+          </select>
+        </div>
+        <div class="ob-fld full"><label>次回予定</label><input type="date" id="obNewNextDate"></div>
+        <div class="ob-fld full"><label>次回内容</label><input id="obNewNextContent" placeholder="例）FP相談、現地見学..."></div>
+      </div>
+      <button class="save" style="width:100%;margin-top:18px;padding:14px;font-size:.96rem" onclick="obSaveNew()">追加する</button>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="app">
+  <div class="hd">
+    <div class="brand">
+      <img src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none'">
+      <div class="divider"></div>
+      <div class="ti">受付管理<small>RECEPTION ADMIN</small></div>
+    </div>
+    <div class="grow"></div>
+    <div class="hd-tools">
+      <button class="hbtn ghost"   onclick="showHub()">‹ ハブへ</button>
+      <button class="hbtn primary" onclick="openCustomer()"><span class="ic">&#128241;</span>お客様画面</button>
+      <button class="hbtn ghost"   onclick="openDemo()"><span class="ic">&#9655;</span>デモ</button>
+      <button class="hbtn"         onclick="openBoard()"><span class="ic">&#128250;</span>モニター</button>
+      <button class="hbtn"         onclick="openSettings()"><span class="ic">&#9881;</span>設定</button>
+      <div class="staffbox">担当者
+        <select id="staff" onchange="saveStaff()"><option value="">選択</option></select>
+      </div>
+      <div class="staffbox">サブ
+        <select id="subStaff" onchange="saveSubStaff()"><option value="">選択なし</option></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="ws">
+    <aside class="ws-left">
+      <div class="seats-wrap">
+        <div class="seats-h">お客様画面の状況
+          <span class="live"><span class="dot"></span><span id="liveTime">接続中…</span></span>
+        </div>
+        <div class="seats" id="seats"></div>
+      </div>
+
+      <div class="dash" id="dash">
+        <div class="dash-row">
+          <div class="dash-card"><div class="dc-n" id="dToday">–</div><div class="dc-l">本日の受付</div></div>
+        </div>
+        <div class="dash-block">
+          <div class="dc-l">担当者別（本日）</div>
+          <div class="dc-staff" id="dStaff"><span class="ds-empty">読み込み中…</span></div>
+        </div>
+        <div class="dash-recent" id="dRecent"></div>
+      </div>
+    </aside>
+
+    <section class="ws-right">
+      <div class="bar">
+        <button class="newbtn" onclick="sendNew()">＋ 新規のお客様を送信</button>
+        <span class="target">送信先
+          <select id="target" onchange="saveTarget()"></select>
+        </span>
+        <input id="q" placeholder="名前・電話・メールで絞り込み" oninput="renderList()">
+        <button class="rl" onclick="loadList()">再読込</button>
+        <span class="listcount" id="listCount"></span>
+      </div>
+      <div class="list" id="list"><div class="state">読み込み中...</div></div>
+    </section>
+  </div>
+</div>
+
+<div id="board" class="board">
+  <div class="bhd">
+    <img src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none'">
+    <div class="divider"></div>
+    <div class="ti">受付モニター<small>RECEPTION MONITOR</small></div>
+    <a href="?" class="back-btn">‹ 管理画面へ戻る</a>
+    <div class="clock">
+      <div class="t" id="b_clock">--:--</div>
+      <div class="d" id="b_cdate"></div>
+    </div>
+    <span class="live"><span class="dot"></span><span id="b_live">接続中…</span></span>
+  </div>
+
+  <div class="b-wrap">
+    <div class="b-col">
+      <div class="b-lbl">受付席の状況</div>
+      <div class="b-seats" id="b_seats"></div>
+    </div>
+    <div class="b-col">
+      <div class="b-kpi">
+        <div class="num" id="b_today">–</div>
+        <div class="cap"><b>本日の受付</b>TODAY'S RECEPTION</div>
+      </div>
+      <div class="b-panel">
+        <div class="b-lbl">担当者別（本日）</div>
+        <div class="b-staff-list" id="b_staff"><span class="b-empty">読み込み中…</span></div>
+      </div>
+      <div class="b-panel">
+        <div class="b-lbl">直近の受付</div>
+        <div class="b-recent" id="b_recent"><span class="b-empty">読み込み中…</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="fsMonitor" class="fs-monitor hide">
+  <div class="fsm-head">
+    <div class="fsm-ti" id="fsmTi">受付モニター</div>
+    <div class="fsm-stat" id="fsmStat">待機中</div>
+    <button class="fsm-close" onclick="closeFsMonitor()">✕ 閉じる</button>
+  </div>
+  <div class="fsm-body">
+    <div class="pdf-wrap" id="pdfWrap">
+      <iframe id="previewFrame" class="preview-frame" title="お客様入力プレビュー"></iframe>
+      <div class="preview-idle" id="previewIdle">お客様の入力を待っています…</div>
+    </div>
+    <aside class="fsm-panel">
+      <div class="fp-sec">ページ移動</div>
+      <button class="fp-btn" onclick="sendCommand(__fsScreenId,'navigate',0)">▶ 基本情報へ</button>
+      <button class="fp-btn" onclick="sendCommand(__fsScreenId,'navigate',2)">▶ アンケートへ</button>
+      <button class="fp-btn" onclick="sendCommand(__fsScreenId,'navigate',4)">▶ 外観写真へ</button>
+      <button class="fp-btn" onclick="sendCommand(__fsScreenId,'navigate',5)">▶ 内観写真へ</button>
+      <div class="fp-sec">お客様へ通知</div>
+      <button class="fp-btn" onclick="sendCommand(__fsScreenId,'toast','スタッフがまもなく伺います')">🔔 まもなく伺います</button>
+      <button class="fp-btn" onclick="sendCommand(__fsScreenId,'toast','資料をお持ちします')">🔔 資料をお持ちします</button>
+      <button class="fp-btn" onclick="sendCommand(__fsScreenId,'toast','お飲み物はいかがですか？')">🔔 お飲み物はいかがですか</button>
+      
+      <div id="cmdFeedback" class="cmd-feedback" style="display:none"></div>
+
+      <div class="fp-hint">お客様の入力状況をリアルタイムで表示しています。プレビュー画面の項目を直接入力・選択すると、遠隔でお客様の端末に反映されます。</div>
+
+      <div class="fp-grow"></div>
+      <button class="fp-btn fp-danger" onclick="clearScreen(__fsScreenId)">受付を待機に戻す</button>
+    </aside>
+  </div>
+</div>
+
+
+<!-- ─── 統合設定パネル ─── -->
+<div class="modal" id="settingsModal">
+  <div class="modal-box" style="max-width:620px">
+    <div class="modal-hd">
+      <div class="mt">システム設定</div>
+      <button class="x" onclick="closeSettings()">&times;</button>
+    </div>
+    <div class="st-wrap">
+      <nav class="st-nav">
+        <button class="st-tab on"  id="stab-connection" onclick="showSettingsTab('connection')">🔗<br>接続</button>
+        <button class="st-tab"     id="stab-event"      onclick="showSettingsTab('event')">📅<br>イベント</button>
+        <button class="st-tab"     id="stab-staff"      onclick="showSettingsTab('staff')">👤<br>担当者</button>
+        <button class="st-tab"     id="stab-terminal"   onclick="showSettingsTab('terminal')">🪑<br>端末</button>
+        <button class="st-tab"     id="stab-display"    onclick="showSettingsTab('display')">🖥<br>表示</button>
+        <button class="st-tab"     id="stab-account"    onclick="showSettingsTab('account')">🔓<br>アカウント</button>
+      </nav>
+      <div class="st-body">
+
+        <!-- 接続設定 -->
+        <div class="st-pane show" id="tab-connection">
+          <div class="st-sec">接続設定</div>
+          <div class="st-row">
+            <label>GAS Web アプリ URL</label>
+            <input id="setGasUrl" placeholder="https://script.google.com/macros/s/...">
+            <div class="hint">Google Apps Script のデプロイ URL。更新した場合は保存してください。</div>
+          </div>
+          <div class="st-row">
+            <label>お客様画面 URL</label>
+            <input id="setCustomerUrl" class="nm-input" placeholder="https://heartom-customer.vercel.app/">
+            <div class="hint">iPad に表示するお客様入力画面の URL。</div>
+          </div>
+          <button class="st-save" onclick="saveConnectionSettings()">保存する</button>
+        </div>
+
+        <!-- イベント設定 -->
+        <div class="st-pane" id="tab-event">
+          <div class="st-sec">イベント設定</div>
+          <div class="st-row">
+            <label>見学会・イベント名</label>
+            <input id="setEvent" class="nm-input" placeholder="例）〇〇邸 完成見学会">
+            <div class="hint">送信時にお客様画面へ渡されます。空欄でも問題ありません。</div>
+          </div>
+          <button class="st-save" onclick="saveEventSettings()">保存する</button>
+        </div>
+
+        <!-- 担当者管理 -->
+        <div class="st-pane" id="tab-staff">
+          <div class="st-sec">担当者管理</div>
+          <div id="settingsStaffList"></div>
+          <div class="staff-add-row" style="margin-top:14px">
+            <input id="settingsStaffInput" class="nm-input" placeholder="担当者名を入力" maxlength="30" onkeydown="if(event.key==='Enter')addStaffFromSettings()">
+            <button onclick="addStaffFromSettings()">追加</button>
+          </div>
+        </div>
+
+        <!-- 端末設定 -->
+        <div class="st-pane" id="tab-terminal">
+          <div class="st-sec">受付端末（席）</div>
+          <div id="terminalSeatList" style="margin-bottom:10px"></div>
+          <button class="save" style="padding:7px 16px;font-size:.85rem" onclick="addSeatFromSettings()">＋ 席を追加</button>
+          <div id="terminalSeatMsg" style="margin-top:6px;font-size:.8rem;min-height:1em;color:#2a7a2a"></div>
+
+          <div class="st-sec" style="margin-top:18px">ボードモニター</div>
+          <div style="font-size:.82rem;color:var(--tx2);margin-bottom:6px">ロビーや待合室のディスプレイで開くと受付状況がリアルタイム表示されます。</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input id="boardMonitorUrlDisplay" readonly
+              style="flex:1;border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.8rem;font-family:monospace;background:var(--sf2);color:var(--charcoal);outline:none">
+            <button class="save" style="padding:7px 14px;font-size:.85rem;white-space:nowrap" onclick="copyBoardUrl()">コピー</button>
+            <button class="hbtn" style="padding:7px 14px;font-size:.85rem;white-space:nowrap" onclick="openBoard()">開く</button>
+          </div>
+        </div>
+
+        <!-- オープンボード設定 -->
+        <div class="st-pane" id="tab-display">
+          <div class="st-sec">オープンボード設定</div>
+          <div class="st-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+            <label style="font-weight:700;font-size:.82rem;color:#555">集計から除外するスタッフ</label>
+            <div id="ob-excl-staff-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px"></div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <select id="ob-excl-staff-sel" style="border:1px solid var(--bd);border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit;min-width:120px">
+                <option value="">スタッフを選択</option>
+              </select>
+              <button class="save" style="padding:6px 12px;font-size:.82rem;white-space:nowrap" onclick="obAddExclStaff()">除外に追加</button>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:4px">
+              <button class="hbtn" style="padding:6px 12px;font-size:.8rem" onclick="obLinkDriveFoldersAction()">📁 Driveフォルダを一括紐付け</button>
+              <button class="hbtn" style="padding:6px 12px;font-size:.8rem" onclick="obImportSSAction()">📊 スプレッドシートから取込</button>
+            </div>
+          </div>
+
+          <div class="st-sec" style="margin-top:18px">表示設定</div>
+          <div class="st-row">
+            <label>文字の大きさ</label>
+            <div class="st-fsbtns">
+              <button class="st-fsbtn" data-fs="s"  onclick="setFs('s')">標準</button>
+              <button class="st-fsbtn" data-fs="l"  onclick="setFs('l')">大</button>
+              <button class="st-fsbtn" data-fs="xl" onclick="setFs('xl')">特大</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- アカウント -->
+        <div class="st-pane" id="tab-account">
+          <div class="st-sec">ログイン情報</div>
+          <div class="st-account-info" id="stAccountInfo">読み込み中...</div>
+          <button class="st-logout" onclick="logout()">ログアウト</button>
+
+          <div class="st-sec" style="margin-top:16px">管理アカウント</div>
+          <div id="adminEmailList" style="margin-bottom:10px;font-size:.85rem;color:var(--charcoal)">読み込み中…</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="email" id="newAdminEmailInput" placeholder="追加するGmailアドレス"
+              style="flex:1;border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.85rem;font-family:inherit;outline:none"
+              onkeydown="if(event.key==='Enter') addAdminEmailFromUI()">
+            <button class="save" style="padding:7px 14px;font-size:.85rem;white-space:nowrap" onclick="addAdminEmailFromUI()">追加</button>
+          </div>
+          <div id="adminEmailMsg" style="margin-top:6px;font-size:.8rem;min-height:1em"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── オンライン商談 URL モーダル ─── -->
+<div class="modal" id="onlineModal">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <div class="mt">🔗 オンライン商談URL</div>
+      <button class="x" onclick="closeOnlineModal()">&times;</button>
+    </div>
+    <div class="modal-bd">
+      <div class="fld">
+        <label>お客様専用URL</label>
+        <div class="url-display" id="onlineUrlDisplay">—</div>
+        <button class="url-copy-btn" onclick="copyOnlineUrl()">📋 URLをコピー</button>
+        <p class="url-note">このURLをお客様にLINEやメールで送ってください。<br>お客様がフォームに入力すると、管理画面でリアルタイムに確認できます。</p>
+      </div>
+      <button class="save" onclick="openOnlineFsMonitor()">📺 今すぐモニターを開く</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var SEND_URL_DEFAULT="https://script.google.com/macros/s/AKfycbxx7Fy7f1qSRWXs4fgN6lperuRwGqwHtP1nFHvXKBkJsl7Elx83Dh1FDvVSmUkP5Xis3A/exec";
+var DEFAULT_CUSTOMER_URL="https://heartom-customer.vercel.app/";
+
+function sendUrl(){ return (localStorage.getItem('admin_gas_url')||SEND_URL_DEFAULT).trim(); }
+function customerUrl(){ return (localStorage.getItem('admin_customer_url')||DEFAULT_CUSTOMER_URL).trim(); }
+function adminKey(){ return localStorage.getItem('admin_session_token') || ''; }
+var __all=[];
+
+function esc(s){return(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show')},2600)}
+
+var isBoardView = new URLSearchParams(window.location.search).get('view') === 'board';
+if(isBoardView) document.body.classList.add('board-mode');
+
+function setFs(level){
+  document.documentElement.setAttribute('data-fs',level);
+  localStorage.setItem('admin_fs',level);
+  document.querySelectorAll('.st-fsbtn').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-fs')===level); });
+}
+function initFs(){ setFs(localStorage.getItem('admin_fs')||'s'); }
+
+function handleCredentialResponse(response) {
+  document.getElementById('lerr').textContent = '認証中...';
+  var name = '__a' + Date.now();
+  window[name] = function(d) {
+    if (d && d.token) {
+      localStorage.setItem('admin_session_token', d.token);
+      document.getElementById('lerr').textContent = '';
+      showApp();
+    } else {
+      document.getElementById('lerr').textContent = d ? d.error : 'ログインに失敗しました';
+    }
+  };
+  var s = document.createElement('script');
+  s.src = SEND_URL + '?action=googleLogin&credential=' + response.credential + '&callback=' + name;
+  document.body.appendChild(s);
+}
+
+function logout(){ if(confirm('ログアウトしますか？')){ localStorage.removeItem('admin_session_token'); location.reload(); } }
+
+function onAuthFail(){
+  localStorage.removeItem('admin_session_token');
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('board').style.display='none';
+  document.getElementById('login').classList.remove('hide');
+  document.getElementById('lerr').textContent='セッションが切れました。再度ログインしてください';
+}
+
+function showApp(){
+  document.getElementById('login').classList.add('hide');
+  if (isBoardView) {
+    document.getElementById('board').style.display = 'flex';
+    initBoard();
+  } else {
+    document.getElementById('hub').classList.add('show');
+  }
+}
+
+var __receptionStarted = false;
+function enterReception(){
+  document.getElementById('hub').classList.remove('show');
+  document.getElementById('app').classList.add('show');
+  if(!__receptionStarted){
+    __receptionStarted = true;
+    renderStaffOptions();
+    renderTargetOptions();
+    var s=localStorage.getItem('admin_staff'); if(s)document.getElementById('staff').value=s;
+    var sSub=localStorage.getItem('admin_sub_staff'); if(sSub&&document.getElementById('subStaff')) document.getElementById('subStaff').value=sSub;
+    var tg=localStorage.getItem('admin_target'); if(tg)document.getElementById('target').value=tg;
+    renderSeatsWithMonitor([],{});
+    loadList(); loadDash(); pollStatus(); setInterval(pollStatus,2000); setInterval(loadDash,20000);
+  }
+}
+
+function enterOpenBoard(){
+  document.getElementById('hub').classList.remove('show');
+  document.getElementById('openboard').classList.add('show');
+  obLoadExclStaff();
+  obLoad();
+  if(!window.__obPollTimer) window.__obPollTimer=setInterval(function(){ obLoad(true); },60000);
+}
+
+function showHub(){
+  document.getElementById('openboard').classList.remove('show');
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('hub').classList.add('show');
+}
+
+// ★ サブ担当の保存機能追加
+function saveStaff(){localStorage.setItem('admin_staff',document.getElementById('staff').value.trim())}
+function saveSubStaff(){localStorage.setItem('admin_sub_staff',document.getElementById('subStaff').value.trim())}
+
+var DEFAULT_STAFF=['渡邊','畑田','中山','稲葉','和田','沖'];
+function getStaffList(){ try{ var s=JSON.parse(localStorage.getItem('admin_staff_list')||'null'); if(s&&s.length) return s; }catch(e){} return DEFAULT_STAFF.slice(); }
+
+function renderStaffOptions(){
+  var sel=document.getElementById('staff'); if(!sel) return;
+  var cur=sel.value || localStorage.getItem('admin_staff') || '';
+  var list=getStaffList();
+  var html='<option value="">選択</option>';
+  list.forEach(function(n){ html+='<option'+(n===cur?' selected':'')+'>'+esc(n)+'</option>'; });
+  html+='<option'+(cur==='その他'?' selected':'')+'>その他</option>';
+  sel.innerHTML=html;
+
+  var subSel=document.getElementById('subStaff'); if(subSel) {
+    var subCur=subSel.value || localStorage.getItem('admin_sub_staff') || '';
+    var subHtml='<option value="">選択なし</option>';
+    list.forEach(function(n){ subHtml+='<option'+(n===subCur?' selected':'')+'>'+esc(n)+'</option>'; });
+    subHtml+='<option'+(subCur==='その他'?' selected':'')+'>その他</option>';
+    subSel.innerHTML=subHtml;
+  }
+}
+
+function addStaff(){
+  var name=prompt('追加する担当者名を入力してください'); if(name===null) return;
+  name=name.trim(); if(!name) return;
+  var list=getStaffList();
+  if(list.indexOf(name)>=0){ toast('「'+name+'」は既に登録されています'); return; }
+  list.push(name); localStorage.setItem('admin_staff_list', JSON.stringify(list));
+  renderStaffOptions();
+  var sel=document.getElementById('staff'); if(sel){ sel.value=name; saveStaff(); }
+  toast('担当者「'+name+'」を追加しました');
+}
+
+function renderTargetOptions() {
+  var sel = document.getElementById('target');
+  if (!sel) return;
+  var cur = sel.value || localStorage.getItem('admin_target') || '';
+  var seats = getSeatConfig();
+  sel.innerHTML = seats.map(function(s){
+    return '<option value="'+esc(s.id)+'"'+(s.id===cur?' selected':'')+'>'+esc(s.name)+'</option>';
+  }).join('');
+  // 保存済みのIDが引き続き有効か確認
+  if (cur && !seats.some(function(s){ return s.id===cur; })) sel.value = seats[0] ? seats[0].id : '';
+}
+
+// ─── 統合設定パネル ───
+function openSettings(tab){
+  // 接続設定
+  document.getElementById('setGasUrl').value=localStorage.getItem('admin_gas_url')||SEND_URL_DEFAULT;
+  document.getElementById('setCustomerUrl').value=localStorage.getItem('admin_customer_url')||DEFAULT_CUSTOMER_URL;
+  // イベント設定
+  document.getElementById('setEvent').value=localStorage.getItem('reception_event')||'';
+  // 担当者管理
+  renderSettingsStaffList();
+  // 表示設定
+  syncSettingsFsButtons();
+  // アカウント情報
+  var tok=adminKey();
+  var info=tok?'ログイン中':'未ログイン';
+  try{ var s=tok?JSON.parse(atob(tok.split('.')[1])||'{}'):{}; if(s.email) info='メール: '+s.email; }catch(e){}
+  document.getElementById('stAccountInfo').textContent=info;
+  // 端末設定
+  renderTerminalSeatList();
+  var boardUrl = (location.origin + location.pathname).replace(/\/+$/, '') + '?view=board';
+  var bel = document.getElementById('boardMonitorUrlDisplay');
+  if (bel) bel.value = boardUrl;
+  // 管理アカウント一覧読み込み
+  loadAdminEmailList();
+  // OB除外スタッフUI
+  obRenderExclStaffUI();
+  // 指定タブを開く
+  showSettingsTab(tab||'connection');
+  document.getElementById('settingsModal').classList.add('show');
+}
+function closeSettings(){ document.getElementById('settingsModal').classList.remove('show'); }
+
+// ─── 受付端末（席）設定 ───
+var DEFAULT_SEATS = [
+  {id:'1', name:'受付①'},
+  {id:'2', name:'受付②'},
+  {id:'3', name:'受付③'},
+  {id:'4', name:'受付④'}
+];
+
+function getSeatConfig() {
+  try {
+    var s = localStorage.getItem('admin_seat_config');
+    var parsed = s ? JSON.parse(s) : null;
+    if (parsed && Array.isArray(parsed) && parsed.length > 0) return parsed;
+  } catch(e) {}
+  return DEFAULT_SEATS.slice();
+}
+
+function saveSeatConfig(seats) {
+  localStorage.setItem('admin_seat_config', JSON.stringify(seats));
+}
+
+function renderTerminalSeatList() {
+  var el = document.getElementById('terminalSeatList');
+  if (!el) return;
+  var seats = getSeatConfig();
+  if (seats.length === 0) { el.innerHTML = '<div style="color:#999;font-size:.85rem">席が登録されていません</div>'; return; }
+  el.innerHTML = seats.map(function(seat, idx) {
+    return '<div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--bd)">' +
+      '<span style="font-size:.75rem;color:#999;min-width:36px;flex-shrink:0">ID: ' + esc(seat.id) + '</span>' +
+      '<input type="text" value="' + esc(seat.name) + '" maxlength="20" placeholder="席の名前"' +
+        ' style="flex:1;border:1px solid var(--bd);border-radius:5px;padding:5px 8px;font-size:.85rem;font-family:inherit;outline:none"' +
+        ' onchange="updateSeatName(' + idx + ', this.value)">' +
+      '<button onclick="moveSeat(' + idx + ',-1)" title="上へ" ' + (idx===0?'disabled':'') +
+        ' style="background:none;border:1px solid #ddd;border-radius:4px;padding:3px 7px;cursor:pointer;font-size:.8rem">↑</button>' +
+      '<button onclick="moveSeat(' + idx + ',1)" title="下へ" ' + (idx===seats.length-1?'disabled':'') +
+        ' style="background:none;border:1px solid #ddd;border-radius:4px;padding:3px 7px;cursor:pointer;font-size:.8rem">↓</button>' +
+      '<button onclick="deleteSeat(' + idx + ')" title="削除"' +
+        ' style="background:none;border:1px solid #faa;border-radius:4px;padding:3px 8px;font-size:.75rem;cursor:pointer;color:#c00">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function updateSeatName(idx, name) {
+  var seats = getSeatConfig();
+  if (!seats[idx]) return;
+  seats[idx].name = name.trim() || seats[idx].name;
+  saveSeatConfig(seats);
+  // screenLabel のキャッシュ更新も不要（都度呼ぶ）
+  showTerminalMsg('✓ 保存しました');
+}
+
+function moveSeat(idx, dir) {
+  var seats = getSeatConfig();
+  var to = idx + dir;
+  if (to < 0 || to >= seats.length) return;
+  var tmp = seats[idx]; seats[idx] = seats[to]; seats[to] = tmp;
+  saveSeatConfig(seats);
+  renderTerminalSeatList();
+  showTerminalMsg('✓ 順番を変更しました');
+}
+
+function deleteSeat(idx) {
+  var seats = getSeatConfig();
+  if (seats.length <= 1) { showTerminalMsg('⚠ 最低1席は必要です', true); return; }
+  var name = seats[idx].name || seats[idx].id;
+  if (!confirm('「' + name + '」を削除しますか？')) return;
+  seats.splice(idx, 1);
+  saveSeatConfig(seats);
+  renderTerminalSeatList();
+  renderTargetOptions();
+  showTerminalMsg('✓ 削除しました');
+}
+
+function addSeatFromSettings() {
+  var seats = getSeatConfig();
+  // 既存IDと重複しない新IDを生成
+  var existing = seats.map(function(s){ return s.id; });
+  var newId = String(seats.length + 1);
+  var n = seats.length + 1;
+  while (existing.indexOf(newId) >= 0) { n++; newId = String(n); }
+  var circled = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
+  var newName = '受付' + (circled[seats.length] || newId);
+  seats.push({ id: newId, name: newName });
+  saveSeatConfig(seats);
+  renderTerminalSeatList();
+  renderTargetOptions();
+  showTerminalMsg('✓ 席「' + newName + '」を追加しました（ID: ' + newId + '）');
+}
+
+function showTerminalMsg(msg, isErr) {
+  var el = document.getElementById('terminalSeatMsg');
+  if (!el) return;
+  el.style.color = isErr ? '#c00' : '#2a7a2a';
+  el.textContent = msg;
+  setTimeout(function(){ el.textContent = ''; }, 3000);
+}
+
+function copyBoardUrl() {
+  var el = document.getElementById('boardMonitorUrlDisplay');
+  if (!el) return;
+  try {
+    navigator.clipboard.writeText(el.value).then(function(){ toast('モニターURLをコピーしました'); });
+  } catch(e) {
+    el.select(); document.execCommand('copy'); toast('コピーしました');
+  }
+}
+
+// ─── 管理アカウント管理 ───
+function loadAdminEmailList() {
+  var el = document.getElementById('adminEmailList');
+  if (!el) return;
+  el.textContent = '読み込み中…';
+  gasGet('getAdminEmails', function(d) {
+    if (!d || !d.all) { el.textContent = '取得できませんでした'; return; }
+    if (d.all.length === 0) { el.innerHTML = '<span style="color:#999">登録なし</span>'; return; }
+    el.innerHTML = d.all.map(function(email) {
+      var isFixed = d.fixed && d.fixed.indexOf(email) >= 0;
+      return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--bd)">' +
+        '<span style="flex:1;font-size:.85rem">' + email + '</span>' +
+        (isFixed
+          ? '<span style="font-size:.72rem;color:#999;white-space:nowrap">固定</span>'
+          : '<button onclick="removeAdminEmailFromUI(\'' + email.replace(/'/g,"\\'") + '\')" style="background:none;border:1px solid #ccc;border-radius:4px;padding:2px 8px;font-size:.75rem;cursor:pointer;color:#c00">削除</button>'
+        ) +
+        '</div>';
+    }).join('');
+  });
+}
+
+function addAdminEmailFromUI() {
+  var input = document.getElementById('newAdminEmailInput');
+  var msg = document.getElementById('adminEmailMsg');
+  var email = (input ? input.value : '').trim();
+  if (!email) { if(msg) msg.textContent = ''; return; }
+  if (msg) { msg.style.color = '#888'; msg.textContent = '追加中…'; }
+  // JSONP経由（GETパラメーターにemailを付与）
+  gasGet('addAdminEmail&email=' + encodeURIComponent(email), function(d) {
+    if (!d) d = {};
+    if (d.error) {
+      if (msg) { msg.style.color = '#c00'; msg.textContent = d.error; }
+    } else {
+      if (input) input.value = '';
+      if (msg) { msg.style.color = '#2a7a2a'; msg.textContent = '✓ 追加しました'; setTimeout(function(){ msg.textContent=''; }, 3000); }
+      loadAdminEmailList();
+    }
+  });
+}
+
+function removeAdminEmailFromUI(email) {
+  if (!confirm(email + ' を削除してもよいですか？')) return;
+  var msg = document.getElementById('adminEmailMsg');
+  gasGet('removeAdminEmail&email=' + encodeURIComponent(email), function(d) {
+    if (!d) d = {};
+    if (d.error) {
+      if (msg) { msg.style.color = '#c00'; msg.textContent = d.error; }
+    } else {
+      if (msg) { msg.style.color = '#2a7a2a'; msg.textContent = '✓ 削除しました'; setTimeout(function(){ msg.textContent=''; }, 3000); }
+      loadAdminEmailList();
+    }
+  });
+}
+
+function showSettingsTab(name){
+  ['connection','event','staff','terminal','display','account'].forEach(function(t){
+    document.getElementById('tab-'+t).classList.toggle('show', t===name);
+    var btn=document.getElementById('stab-'+t);
+    if(btn) btn.classList.toggle('on', t===name);
+  });
+}
+function saveConnectionSettings(){
+  var gasUrl=document.getElementById('setGasUrl').value.trim();
+  var cusUrl=document.getElementById('setCustomerUrl').value.trim();
+  if(gasUrl) localStorage.setItem('admin_gas_url',gasUrl); else localStorage.removeItem('admin_gas_url');
+  if(cusUrl) localStorage.setItem('admin_customer_url',cusUrl); else localStorage.removeItem('admin_customer_url');
+  toast('接続設定を保存しました');
+}
+function saveEventSettings(){
+  localStorage.setItem('reception_event',document.getElementById('setEvent').value.trim());
+  toast('イベント設定を保存しました');
+}
+function syncSettingsFsButtons(){
+  var cur=document.documentElement.getAttribute('data-fs')||'s';
+  document.querySelectorAll('.st-fsbtn').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-fs')===cur); });
+}
+
+function openCustomer(){
+  var url=customerUrl(); var sep=(url.indexOf('?')>=0)?'&':'?';
+  window.open(url+sep+'screen='+encodeURIComponent(getTarget()),'_blank','noopener');
+}
+function openDemo(){
+  var url=customerUrl(); var sep=(url.indexOf('?')>=0)?'&':'?';
+  window.location.href = url+sep+'demo=1&screen=demo';
+}
+function openBoard(){
+  window.location.href = '?view=board';
+}
+
+function gasGet(action,cb){
+  var name='__a'+Date.now()+Math.random().toString(36).slice(2);
+  var s=document.createElement('script'),done=false;
+  var t=setTimeout(function(){if(done)return;done=true;delete window[name];cb(null)},20000);
+  window[name]=function(d){
+    if(done)return;done=true;clearTimeout(t);delete window[name];if(s.parentNode)s.parentNode.removeChild(s);
+    if(d&&d.error==='auth'){ onAuthFail(); cb(null); return; }
+    cb(d);
+  };
+  s.src=sendUrl()+'?action='+action+'&key='+encodeURIComponent(adminKey())+'&callback='+name+'&_='+Date.now();
+  s.onerror=function(){if(done)return;done=true;clearTimeout(t);delete window[name];cb(null)};
+  document.body.appendChild(s);
+}
+
+function loadList(){
+  document.getElementById('list').innerHTML='<div class="state">読み込み中...</div>';
+  gasGet('listInfoCustomers',function(d){
+    __all=(d&&d.list)?d.list:[];
+    if(!__all.length){document.getElementById('list').innerHTML='<div class="state">顧客データがありません<br><button class="rl" style="margin-top:14px" onclick="loadList()">再読込</button></div>';return}
+    renderList();
+  });
+}
+function renderList(){
+  var q=(document.getElementById('q').value||'').toLowerCase().trim();
+  var list=__all.filter(function(c){return !q||((c.name||'')+(c.furigana||'')+(c.tel||'')+(c.email||'')+(c.address||'')).toLowerCase().indexOf(q)>=0});
+  var el=document.getElementById('list');
+  var lc=document.getElementById('listCount');
+  if(lc)lc.textContent=q?(list.length+' / '+__all.length+' 件'):(__all.length+' 件');
+  if(!list.length){el.innerHTML='<div class="state">該当するお客様がいません</div>';return}
+  el.innerHTML=list.map(function(c,i){
+    var idx=__all.indexOf(c);
+    var src=c.source?'<span class="src">'+esc(c.source)+'</span>':'';
+    return '<div class="ci"><div class="info">'+
+      '<div class="nm">'+src+esc(c.name||'(名前未抽出)')+(c.name?' 様':'')+'</div>'+
+      (c.furigana?'<div class="fr">'+esc(c.furigana)+'</div>':'')+
+      '<div class="mt">'+(c.tel?'<span class="lb">TEL</span>'+esc(c.tel)+' ':'')+(c.email?'<span class="lb">MAIL</span>'+esc(c.email):'')+'</div>'+
+      (c.address?'<div class="mt"><span class="lb">住所</span>'+esc((c.postalCode?'〒'+c.postalCode+' ':'')+c.address)+'</div>':'')+
+      '</div>'+
+      '<button class="url-btn" onclick="issueOnlineUrl('+idx+')" title="オンライン商談用URLを発行">🔗 URL発行<small style="display:block;font-size:.6rem;font-weight:400;margin-top:2px;opacity:.8">オンライン</small></button>'+
+      '<button class="send" onclick="sendCustomer('+idx+')">このお客様で送信<small>お客様画面へ</small></button></div>';
+  }).join('');
+}
+
+function post(payload){
+  payload=payload||{}; payload.key=adminKey();
+  return fetch(sendUrl(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+}
+
+// ★ 送信時に担当者＋サブ担当者を文字列結合する関数
+function getCombinedStaff() {
+  var s = document.getElementById('staff').value.trim();
+  var sub = document.getElementById('subStaff') ? document.getElementById('subStaff').value.trim() : '';
+  return s + (sub ? '（サブ: ' + sub + '）' : '');
+}
+
+function sendCustomer(idx){
+  var c=__all[idx]; if(!c)return;
+  var masterId=(c.dbSource==='master')?(c.id||''):'';
+  var tg=getTarget();
+  
+  // ★ すぐにプレビュー画面（モニター）を開く（真っ暗な待機時間を無くす）
+  openFsMonitor(tg);
+
+  var payload={action:'pushSession',isNew:false,screen:tg,staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',
+    customer:{name:c.name||'',furigana:c.furigana||'',tel:c.tel||'',email:c.email||'',postalCode:c.postalCode||'',address:c.address||'',masterId:masterId,threadId:(c.threadId&&c.threadId.indexOf('notion_')!==0)?c.threadId:''}};
+  post(payload);
+  toast((c.name||'お客様')+' 様 を 受付'+screenLabel(tg)+' に送信しました');
+  setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
+}
+
+function sendNew(){
+  var tg=getTarget();
+  
+  // ★ すぐにプレビュー画面（モニター）を開く（真っ暗な待機時間を無くす）
+  openFsMonitor(tg);
+
+  post({action:'pushSession',isNew:true,screen:tg,staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',customer:{}});
+  toast('新規のお客様の入力画面を 受付'+screenLabel(tg)+' に送信しました');
+  setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
+}
+
+function clearScreen(screen){
+  var tg=String(screen||getTarget());
+  // 誤タップ対策：接客中セッションの即時消去を確認してから実行
+  var sess=null; (__lastSessions||[]).forEach(function(s){ if(String(s.screen)===tg) sess=s; });
+  var who='';
+  if(sess){
+    var m=__lastMonitors&&__lastMonitors[tg];
+    var nm=(m&&m.customerName&&m.customerName!=='未入力')?m.customerName:((sess.customer&&sess.customer.name)?sess.customer.name:'');
+    who=nm?(' の '+nm+' 様'):(sess.isNew?' の 新規入力':'');
+  }
+  if(!confirm('受付'+screenLabel(tg)+who+' を待機に戻します。\nお客様の入力画面は消去されます。よろしいですか？')) return;
+  post({action:'clearSession',screen:tg});
+  toast('受付'+screenLabel(tg)+' を待機に戻しました');
+  if(__fsScreenId === String(tg)) closeFsMonitor();
+  setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
+}
+
+function sendCommand(screen, type, payload) {
+  var cmd = { type: type };
+  if(type==='navigate') cmd.step = payload;
+  if(type==='toast') cmd.message = payload;
+  if(type==='setValue') { cmd.field = payload.field; cmd.value = payload.value; }
+  if(type==='setChip') { cmd.field = payload.field; cmd.value = payload.value; }
+  if(type==='setImg') { cmd.field = payload.field; cmd.value = payload.value; }
+
+  post({ action: 'pushCommand', screen: screen, command: cmd });
+
+  // 送信インジケーター（軽いもの以外は常に表示）
+  if(type !== 'setValue' && type !== 'setChip' && type !== 'setImg') {
+    showCmdFeedback('受付' + screenLabel(screen) + ' に指示を送信中…', 'sending');
+    // 1.8秒後に完了表示（次のポーリングで届く想定）
+    setTimeout(function(){ showCmdFeedback('✓ 送信完了', 'done'); }, 1800);
+    setTimeout(function(){ hideCmdFeedback(); }, 3200);
+  } else {
+    // setValue系は小さく1秒だけ
+    showCmdFeedback('↑ 送信', 'sending');
+    setTimeout(function(){ hideCmdFeedback(); }, 1000);
+  }
+}
+
+function showCmdFeedback(msg, state) {
+  var el = document.getElementById('cmdFeedback');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'cmd-feedback ' + (state || '');
+  el.style.display = 'block';
+}
+function hideCmdFeedback() {
+  var el = document.getElementById('cmdFeedback');
+  if (el) el.style.display = 'none';
+}
+
+function getTarget(){ var t=document.getElementById('target'); return t?t.value:'1'; }
+function saveTarget(){ localStorage.setItem('admin_target',getTarget()); }
+function screenLabel(n){
+  if(String(n).indexOf('online_')===0) return '（オンライン）';
+  var seats = getSeatConfig();
+  for(var i=0;i<seats.length;i++){ if(String(seats[i].id)===String(n)) return seats[i].name; }
+  // フォールバック（設定外IDは数字をそのまま返す）
+  return String(n);
+}
+
+// ── 全画面モニター表示と詳細な遠隔操作 ──
+var __fsScreenId = null;
+var __lastSessions = [];
+var __lastMonitors = {};
+function openFsMonitor(n) {
+  __fsScreenId = String(n);
+  var u=customerUrl(); var fr=document.getElementById('previewFrame');
+  if(fr){ fr.src = u + (u.indexOf('?')>=0?'&':'?') + 'preview=1&screen=' + encodeURIComponent(n); }
+  document.getElementById('fsMonitor').classList.remove('hide');
+  updateFsMonitor(__lastSessions, __lastMonitors);
+}
+
+function closeFsMonitor() {
+  __fsScreenId = null;
+  var fr=document.getElementById('previewFrame'); if(fr) fr.src='about:blank';
+  document.getElementById('fsMonitor').classList.add('hide');
+}
+
+// ★ お客様画面（iframe）からの直接遠隔入力コマンドを受信（プロンプトなし）
+window.addEventListener('message', function(e) {
+  var d = e.data;
+  if (d && d.type === 'heartomAssist') {
+    var cmdType = 'setValue';
+    if(d.kind === 'chip') cmdType = 'setChip';
+    if(d.kind === 'img') cmdType = 'setImg';
+    // そのまま即座にコマンドを裏で飛ばす
+    sendCommand(__fsScreenId, cmdType, {field: d.field, value: d.value || ''});
+  }
+});
+
+function updateFsMonitor(sessions, monitors) {
+  __lastSessions = sessions;
+  __lastMonitors = monitors;
+  if (!__fsScreenId) return;
+  var el = document.getElementById('fsMonitor');
+  if (el.classList.contains('hide')) return;
+
+  var s = null;
+  (sessions||[]).forEach(function(sess){ if(String(sess.screen) === String(__fsScreenId)) s = sess; });
+  var m = monitors[__fsScreenId];
+  
+  var ti = document.getElementById('fsmTi');
+  var stat = document.getElementById('fsmStat');
+
+  var isOnline = String(__fsScreenId).indexOf('online_') === 0;
+  ti.textContent = isOnline ? 'オンライン商談 全画面モニター (遠隔入力対応)' : '受付' + screenLabel(__fsScreenId) + ' 全画面モニター (遠隔入力対応)';
+
+  var fr=document.getElementById('previewFrame');
+  var idle=document.getElementById('previewIdle');
+
+  if (!s) {
+    stat.textContent = '待機中'; stat.style.color = 'var(--tx3)';
+    if(fr) fr.classList.add('hide');
+    if(idle){ idle.classList.remove('hide'); idle.textContent='お客様の入力を待っています…'; }
+    return;
+  }
+
+  var on = (s.status === 'received');
+  
+  // 送信した直後（まだお客様がiPadで操作していない段階）でもプレビュー画面を強制表示
+  if(fr) {
+    fr.classList.remove('hide');
+    try { 
+      if(fr.contentWindow) {
+        // お客様がまだ操作していない場合は、セッションから基礎データを渡して描画
+        var detail = m ? m.detail : {
+          husbandName: s.customer ? s.customer.name : '',
+          husbandFurigana: s.customer ? s.customer.furigana : '',
+          husbandPhone: s.customer ? s.customer.tel : '',
+          husbandEmail: s.customer ? s.customer.email : '',
+          postalCode: s.customer ? s.customer.postalCode : '',
+          address: s.customer ? s.customer.address : ''
+        };
+        fr.contentWindow.postMessage({type:'heartomPreview', detail: detail}, '*'); 
+      }
+    } catch(e){} 
+  }
+  if(idle) idle.classList.add('hide');
+
+  if (m) {
+    stat.textContent = '進行中: ' + esc(m.stepName) + ' (' + m.filledCount + '項目入力済)';
+    stat.style.color = 'var(--ok)';
+  } else {
+    stat.textContent = on ? 'お客様の入力を待機中' : '送信済み (iPadでの受信を待機中)';
+    stat.style.color = 'var(--gold)';
+  }
+}
+
+function renderSeatsWithMonitor(sessions, monitors){
+  var byScreen={}; (sessions||[]).forEach(function(s){ byScreen[String(s.screen||'1')]=s; });
+  var html=getSeatConfig().map(function(seat){ var n=seat.id;
+    var s=byScreen[n], m=monitors[n], occ=!!s, inner;
+    if(occ){
+      var who = s.isNew ? '新規入力' : ((s.customer&&s.customer.name)?esc(s.customer.name)+' 様':'お客様');
+      if (m && m.customerName && m.customerName !== '未入力') {
+          who = esc(m.customerName) + ' 様' + (s.isNew ? ' <span style="font-size:0.6rem; background:var(--charcoal); color:#fff; padding:2px 4px; border-radius:2px; vertical-align:middle; margin-left:4px;">新規</span>' : '');
+      }
+
+      var on=(s.status==='received');
+      var liveState = m ? '<div class="seat-meta">進行中: '+esc(m.stepName)+' ('+m.filledCount+'項目済)</div>' : '<div class="seat-meta" style="color:var(--tx3)">通信待機中...</div>';
+      
+      inner='<div class="seat-who">'+who+'</div>'+
+            '<div class="seat-st '+(on?'on':'sent')+'">'+(on?'表示中':'送信済み')+'</div>'+
+            liveState+
+            '<div class="seat-cmds">'+
+              '<button class="seat-cmd" onclick="sendCommand(\''+n+'\',\'navigate\',2)">アンケートへ</button>'+
+              '<button class="seat-cmd" onclick="sendCommand(\''+n+'\',\'navigate\',4)">外観写真へ</button>'+
+              '<button class="seat-cmd" onclick="sendCommand(\''+n+'\',\'toast\',\'スタッフが向かいます\')">通知</button>'+
+            '</div>';
+    }else{
+      inner='<div class="seat-idle">待機中</div>';
+    }
+    return '<div class="seat'+(occ?' occ':'')+'"><div class="seat-h" style="display:flex; justify-content:space-between; align-items:center;"><span>受付'+screenLabel(n)+'</span>' +
+           (occ ? '<button onclick="openFsMonitor(\''+n+'\')" style="background:none; border:1px solid rgba(0,0,0,0.2); color:var(--charcoal); padding:4px 8px; border-radius:3px; font-size:0.7rem; font-weight:600; cursor:pointer;">⛶ 全画面</button>' : '') +
+           '</div>'+inner+'</div>';
+  }).join('');
+  // オンライン商談セッション
+  var onlineSessions=(sessions||[]).filter(function(s){ return String(s.screen||'').indexOf('online_')===0; });
+  if(onlineSessions.length){
+    html+='<div class="online-wrap" style="grid-column:1/-1"><div class="online-h">🌐 オンライン商談</div><div class="online-list">'+
+      onlineSessions.map(function(s){
+        var tok=s.screen;
+        var m=monitors[tok];
+        var name=(m&&m.customerName&&m.customerName!=='未入力')?m.customerName:(s.customer&&s.customer.name?s.customer.name:'—');
+        var metaTxt=m?('進行中: '+esc(m.stepName)+' ('+m.filledCount+'項目済)'):
+                    (s.status==='received'?'お客様が入力中':'接続待ち...');
+        return '<div class="online-item">'+
+          '<div class="oi-name">'+esc(name)+' 様</div>'+
+          '<div class="oi-meta">'+metaTxt+'</div>'+
+          '<div class="oi-cmds">'+
+            '<button class="oi-cmd" onclick="openFsMonitor(\''+tok+'\')">📺 モニター</button>'+
+            '<button class="oi-cmd" onclick="clearScreen(\''+tok+'\')" style="flex:0.6;color:rgba(255,150,150,.8)">✕ 終了</button>'+
+          '</div>'+
+        '</div>';
+      }).join('')+
+    '</div></div>';
+  }
+  document.getElementById('seats').innerHTML=html;
+}
+
+function pollStatus(){
+  gasGet('listSessions',function(dSession){
+    gasGet('listMonitors',function(dMonitor){
+      var arr=(dSession&&dSession.sessions)?dSession.sessions:[];
+      var mons=(dMonitor&&dMonitor.monitors)?dMonitor.monitors:{};
+      renderSeatsWithMonitor(arr, mons);
+      updateFsMonitor(arr, mons); 
+      var now=new Date();
+      document.getElementById('liveTime').textContent='最終更新 '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2)+':'+('0'+now.getSeconds()).slice(-2);
+    });
+  });
+}
+
+function loadDash(){
+  gasGet('listActivityLog',function(d){
+    var list=(d&&d.list)?d.list:[];
+    // 「新規来場」（名前未入力のゴミデータ）を除外
+    var valid=list.filter(function(a){ return (a.customerName||'').trim() !== '新規来場' && (a.customerName||'').trim() !== ''; });
+    var t=new Date(); var ts=t.getFullYear()+'/'+('0'+(t.getMonth()+1)).slice(-2)+'/'+('0'+t.getDate()).slice(-2);
+    var todays=valid.filter(function(a){return (a.at||'').indexOf(ts)===0});
+    document.getElementById('dToday').textContent=todays.length;
+    var by={}; todays.forEach(function(a){var s=(a.staff||'').trim()||'（未設定）'; by[s]=(by[s]||0)+1});
+    var keys=Object.keys(by).sort(function(x,y){return by[y]-by[x]});
+    var max=keys.length?by[keys[0]]:1;
+    document.getElementById('dStaff').innerHTML = keys.length? keys.map(function(k){
+      var w=Math.max(8,Math.round(by[k]/max*100));
+      return '<div class="ds-item"><span class="ds-nm">'+esc(k)+'</span><span class="ds-bar"><i style="width:'+w+'%"></i></span><span class="ds-ct">'+by[k]+'件</span></div>';
+    }).join('') : '<span class="ds-empty">本日の受付はまだありません</span>';
+    var rec=valid.slice(0,8);
+    document.getElementById('dRecent').innerHTML='<div class="dr-h">直近の受付</div>'+(rec.length? rec.map(function(a){
+      return '<div class="dr-i"><span class="dr-t">'+esc((a.at||'').slice(5,16))+'</span><span class="dr-n">'+esc(a.customerName||'(名前なし)')+'</span><span class="dr-s">'+esc(a.staff||'')+'</span></div>';
+    }).join('') : '<div class="dr-empty">まだ受付がありません</div>');
+  });
+}
+
+// ─────────── 統合モニター画面用の処理 ───────────
+function tickBoard(){
+  var n=new Date();
+  var clk = document.getElementById('b_clock');
+  if(clk) {
+      clk.textContent=('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2);
+      var wd=['日','月','火','水','木','金','土'][n.getDay()];
+      document.getElementById('b_cdate').textContent=n.getFullYear()+'.'+('0'+(n.getMonth()+1)).slice(-2)+'.'+('0'+n.getDate()).slice(-2)+' ('+wd+')';
+  }
+}
+
+function renderBoardSeats(sessions, monitors){
+  var by={}; (sessions||[]).forEach(function(s){ by[String(s.screen||'1')]=s; });
+  document.getElementById('b_seats').innerHTML=getSeatConfig().map(function(seat){ var n=seat.id;
+    var s=by[n], m=monitors[n], occ=!!s, badge='', who, meta='';
+    if(occ){
+      who = s.isNew ? '新規入力' : ((s.customer&&s.customer.name)?esc(s.customer.name)+' 様':'お客様');
+      if (m && m.customerName && m.customerName !== '未入力') {
+          who = esc(m.customerName) + ' 様' + (s.isNew ? ' <span style="font-size:0.6rem; background:#332E26; color:#B9B1A4; padding:2px 4px; border-radius:2px; vertical-align:middle; margin-left:4px;">新規</span>' : '');
+      }
+
+      var on=(s.status==='received');
+      badge='<span class="badge '+(on?'on':'sent')+'">'+(on?'対応中':'送信済み')+'</span>';
+      
+      if(m) {
+         meta='<div class="meta" style="color:var(--ok)">進行中: '+esc(m.stepName)+' ('+m.filledCount+'項目済)</div>';
+      } else {
+         if(s.staff)meta='<div class="meta">担当 '+esc(s.staff)+'</div>'; else meta='<div class="meta"></div>';
+      }
+
+      var cmds = '<div class="b-seat-cmds">' +
+                 '<button class="b-seat-cmd" onclick="sendCommand(\''+n+'\',\'navigate\',2)">アンケートへ</button>' +
+                 '<button class="b-seat-cmd" onclick="sendCommand(\''+n+'\',\'navigate\',4)">外観写真へ</button>' +
+                 '<button class="b-seat-cmd" onclick="sendCommand(\''+n+'\',\'toast\',\'スタッフが向かいます\')">通知</button>' +
+                 '</div>';
+      meta += cmds;
+
+    }else{
+      who='<div class="who idle">待機中</div>'; meta='<div class="meta"></div>';
+    }
+    return '<div class="b-seat'+(occ?' b-occ':'')+'"><div class="sh" style="justify-content:space-between;">' +
+           '<div><span class="sn">'+screenLabel(n)+'</span>'+badge+'</div>' +
+           (occ ? '<button onclick="openFsMonitor(\''+n+'\')" style="background:none; border:1px solid var(--line); color:var(--tx3); padding:6px 10px; border-radius:4px; font-size:0.8rem; font-weight:600; cursor:pointer;">⛶ 全画面</button>' : '') +
+           '</div>'+who+meta+'</div>';
+  }).join('');
+}
+
+function pollBoard(){
+  gasGet('listSessions',function(dSession){
+    gasGet('listMonitors',function(dMonitor){
+      var arr=(dSession&&dSession.sessions)?dSession.sessions:[];
+      var mons=(dMonitor&&dMonitor.monitors)?dMonitor.monitors:{};
+      renderBoardSeats(arr, mons);
+      updateFsMonitor(arr, mons); 
+      var n=new Date();
+      var lv = document.getElementById('b_live');
+      if(lv) lv.textContent='更新 '+('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2)+':'+('0'+n.getSeconds()).slice(-2);
+    });
+  });
+}
+
+function loadBoardDash(){
+  gasGet('listActivityLog',function(d){
+    var list=(d&&d.list)?d.list:[];
+    // 「新規来場」（名前未入力のゴミデータ）を除外
+    var valid=list.filter(function(a){ return (a.customerName||'').trim() !== '新規来場' && (a.customerName||'').trim() !== ''; });
+    var t=new Date(); var ts=t.getFullYear()+'/'+('0'+(t.getMonth()+1)).slice(-2)+'/'+('0'+t.getDate()).slice(-2);
+    var todays=valid.filter(function(a){return (a.at||'').indexOf(ts)===0});
+
+    var td = document.getElementById('b_today');
+    if(td) td.textContent=todays.length;
+
+    var by={}; todays.forEach(function(a){var s=(a.staff||'').trim()||'（未設定）'; by[s]=(by[s]||0)+1});
+    var keys=Object.keys(by).sort(function(x,y){return by[y]-by[x]});
+    var max=keys.length?by[keys[0]]:1;
+    var st = document.getElementById('b_staff');
+    if(st) {
+        st.innerHTML = keys.length? keys.map(function(k){
+          var w=Math.max(6,Math.round(by[k]/max*100));
+          return '<div class="b-staff-row"><span class="nm">'+esc(k)+'</span><span class="barbg"><span class="barfill" style="width:'+w+'%"></span></span><span class="ct">'+by[k]+'件</span></div>';
+        }).join('') : '<span class="b-empty">本日の受付はまだありません</span>';
+    }
+
+    var rec=valid.slice(0,8);
+    var rc = document.getElementById('b_recent');
+    if(rc) {
+        rc.innerHTML = rec.length? rec.map(function(a){
+          return '<div class="b-rec"><span class="rt">'+esc((a.at||'').slice(5,16))+'</span><span class="rn">'+esc(a.customerName||'(名前なし)')+'</span><span class="rs">'+esc(a.staff||'')+'</span></div>';
+        }).join('') : '<span class="b-empty">まだ受付がありません</span>';
+    }
+  });
+}
+
+function initBoard() {
+  tickBoard(); setInterval(tickBoard,1000);
+  renderBoardSeats([], {});
+  pollBoard(); loadBoardDash();
+  setInterval(pollBoard,2000); setInterval(loadBoardDash,20000);
+}
+
+// ─────────── スタッフ管理（設定パネル内） ───────────
+function renderSettingsStaffList(){
+  var list=getStaffList();
+  var c=document.getElementById('settingsStaffList'); if(!c) return;
+  if(!list.length){ c.innerHTML='<div style="color:var(--tx3);font-size:.9rem;padding:8px 0 4px">担当者が登録されていません</div>'; return; }
+  c.innerHTML=list.map(function(n){
+    var safe=n.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<div class="staff-list-item"><span class="snm">'+esc(n)+'</span>'+
+           '<button class="staff-del" onclick="deleteStaff(\''+safe+'\')">✕ 削除</button></div>';
+  }).join('');
+}
+
+function deleteStaff(name){
+  if(!confirm('「'+name+'」を削除しますか？')) return;
+  var list=getStaffList(); var idx=list.indexOf(name);
+  if(idx<0){ toast('担当者が見つかりません'); return; }
+  list.splice(idx,1); localStorage.setItem('admin_staff_list',JSON.stringify(list));
+  var sel=document.getElementById('staff'); if(sel&&sel.value===name){ sel.value=''; saveStaff(); }
+  var sub=document.getElementById('subStaff'); if(sub&&sub.value===name){ sub.value=''; saveSubStaff(); }
+  renderStaffOptions(); renderSettingsStaffList();
+  toast('「'+name+'」を削除しました');
+}
+
+function addStaffFromSettings(){
+  var inp=document.getElementById('settingsStaffInput'); if(!inp) return;
+  var name=inp.value.trim(); if(!name){ toast('名前を入力してください'); return; }
+  var list=getStaffList();
+  if(list.indexOf(name)>=0){ toast('「'+name+'」は既に登録されています'); return; }
+  list.push(name); localStorage.setItem('admin_staff_list',JSON.stringify(list));
+  renderStaffOptions(); renderSettingsStaffList();
+  inp.value=''; inp.focus();
+  toast('担当者「'+name+'」を追加しました');
+}
+
+// 旧関数の互換性（念のため残す）
+function addStaffFromModal(){ addStaffFromSettings(); }
+function openStaffModal(){ openSettings('staff'); }
+
+// ─────────── オンライン商談 URL 発行 ───────────
+var __onlineToken = null;
+
+function issueOnlineUrl(idx){
+  var c=__all[idx]; if(!c) return;
+  // UUID風トークン生成
+  var token='online_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+  __onlineToken=token;
+  var base=customerUrl();
+  var sep=(base.indexOf('?')>=0)?'&':'?';
+  var url=base+sep+'screen='+encodeURIComponent(token);
+  document.getElementById('onlineUrlDisplay').textContent=url;
+  document.getElementById('onlineModal').classList.add('show');
+  // セッションをGASへ送信（お客様情報付き）
+  var masterId=(c.dbSource==='master')?(c.id||''):'';
+  post({action:'pushSession',isNew:false,screen:token,isOnline:true,
+    staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',
+    customer:{name:c.name||'',furigana:c.furigana||'',tel:c.tel||'',email:c.email||'',
+              postalCode:c.postalCode||'',address:c.address||'',masterId:masterId,
+              threadId:(c.threadId&&c.threadId.indexOf('notion_')!==0)?c.threadId:''}});
+  toast((c.name||'お客様')+' 様のオンラインURLを発行しました');
+}
+
+function closeOnlineModal(){ document.getElementById('onlineModal').classList.remove('show'); }
+
+function copyOnlineUrl(){
+  var url=document.getElementById('onlineUrlDisplay').textContent;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(function(){ toast('URLをコピーしました'); });
+  } else {
+    var t=document.createElement('textarea'); t.value=url;
+    t.style.position='fixed'; t.style.opacity='0';
+    document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t);
+    toast('URLをコピーしました');
+  }
+}
+
+function openOnlineFsMonitor(){
+  if(!__onlineToken) return;
+  closeOnlineModal();
+  openFsMonitor(__onlineToken);
+}
+
+// ════════════════════════════════════════════════
+//  オープンボード JS  — 全面再設計版
+// ════════════════════════════════════════════════
+var obRows = [];
+var obCurrentTab = 'visitors';
+var obDetailRow  = -1;
+var OB_CACHE_KEY = 'ob_v3';
+
+// ステータス（初回接触→問い合わせ）
+var OB_STATUS_LIST = ['問い合わせ','見学会前','無料相談前','勉強会前','FP前','LPS前',
+  'ヒアリング前','プレゼン前','中長期フォロー','返信なし','パートナー検討中','パートナー契約済','失注'];
+var OB_EVENT_TYPES = ['完成見学会','オンライン見学会','無料相談会','デザインセミナー',
+  'casa資料請求','trip資料請求','カナマルハウス','電話','飛び込み'];
+var OB_SOURCES = ['HP','電話','家づくり学校','FC','友人紹介','Instagram','ポータルサイト','その他'];
+var OB_HIST_TYPES = ['来場','電話','オンライン','打ち合わせ','現地見学','プレゼン','その他'];
+var OB_HURDLES = [
+  {key:'H_予算',icon:'💰',label:'予算'},
+  {key:'H_時期',icon:'⏰',label:'時期'},
+  {key:'H_関与者',icon:'👥',label:'関与者'},
+  {key:'H_競合',icon:'⚔️',label:'競合'},
+  {key:'H_土地',icon:'🏡',label:'土地'}
+];
+var OB_FRAMINGS = [
+  {key:'F_建築家',icon:'✏️',label:'建築家'},
+  {key:'F_性能',icon:'🔬',label:'性能'},
+  {key:'F_コスト',icon:'📊',label:'コスト'}
+];
+var OB_KARTE_FIELDS = [
+  {key:'電話番号',label:'電話番号',placeholder:'090-0000-0000'},
+  {key:'メールアドレス',label:'メールアドレス',placeholder:'example@mail.com'},
+  {key:'フリガナ',label:'フリガナ',placeholder:'タナカ タロウ'},
+  {key:'住所',label:'住所',placeholder:'千葉市中央区...'},
+  {key:'家族構成',label:'家族構成',placeholder:'夫婦+子2人'},
+  {key:'子供年齢',label:'子供年齢',placeholder:'5歳・8歳'},
+  {key:'現在の住まい',label:'現在の住まい',placeholder:'賃貸アパート'},
+  {key:'土地状況',label:'土地状況',placeholder:'未定・希望エリアあり'},
+  {key:'予算感',label:'予算感',placeholder:'3000〜3500万'},
+  {key:'検討時期',label:'検討時期',placeholder:'2025年内'},
+  {key:'備考',label:'備考',placeholder:'特記事項...',full:true,type:'textarea'},
+  // 誕生日情報
+  {key:'BD_本人',label:'🎂 本人誕生日',type:'date',placeholder:'1985-03-15'},
+  {key:'BD_配偶者',label:'🎂 配偶者誕生日',type:'date',placeholder:'1987-07-20'},
+  {key:'BD_子1',label:'🎂 お子様①誕生日',type:'date',placeholder:'2010-01-05'},
+  {key:'BD_子2',label:'🎂 お子様②誕生日',type:'date',placeholder:''},
+  {key:'BD_子3',label:'🎂 お子様③誕生日',type:'date',placeholder:''}
+];
+var OB_STATUS_CLASS = {
+  '問い合わせ':'ob-s0','初回接触':'ob-s0', // 旧データ互換
+  '見学会前':'ob-s1','無料相談前':'ob-s2','勉強会前':'ob-s3',
+  'FP前':'ob-s4','LPS前':'ob-s5','ヒアリング前':'ob-s6','プレゼン前':'ob-s7',
+  '中長期フォロー':'ob-s8','返信なし':'ob-s9',
+  'パートナー検討中':'ob-sP','パートナー契約済':'ob-sP','失注':'ob-sF'
+};
+
+// ステータス表示正規化（初回接触→問い合わせ）
+function obNormStatus(s){
+  if(!s) return '問い合わせ';
+  if(s==='初回接触') return '問い合わせ';
+  return s;
+}
+
+// FALSE/TRUEの文字列を空として扱う
+function obSanitizeVal(v){
+  if(v===undefined||v===null) return '';
+  var s=String(v);
+  if(s==='FALSE'||s==='TRUE'||s==='false'||s==='true') return '';
+  return s;
+}
+
+// 除外スタッフリスト（集計から除く）
+var OB_EXCLUDED_STAFF = [];
+
+// 日付正規化ユーティリティ
+function obNormDate(s){
+  if(!s) return '';
+  s=String(s);
+  var m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return s.substring(0,10);
+  m=s.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+  if(m) return m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);
+  m=s.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+  if(m) return m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);
+  return s;
+}
+function obDateToYM(s){
+  var d=obNormDate(s); if(!d||d.length<7) return '未設定';
+  return d.substring(0,7); // "2026-06"
+}
+
+// ── キャッシュ ──
+function obGetCache(){try{return JSON.parse(localStorage.getItem(OB_CACHE_KEY)||'[]');}catch(e){return[];}}
+function obSetCache(r){try{localStorage.setItem(OB_CACHE_KEY,JSON.stringify(r));}catch(e){}}
+
+// ── ロード ──
+function obLoad(silent){
+  var cached=obGetCache();
+  if(cached.length && !silent){ obRows=cached; obRows.forEach(function(r,i){r._row=i;}); obPopulateFilters(); obRenderAll(); }
+  gasGet('obGetData',function(d){
+    if(!d||d.error){ if(!cached.length) document.getElementById('ob-visitors-content').innerHTML='<div class="ob-empty-state">データ取得エラー<br><button class="hbtn" style="margin-top:12px" onclick="obLoad()">再読み込み</button></div>'; return; }
+    var newRows=d.rows||[];
+    var prevLen=obRows.length;
+    obRows=newRows;
+    obRows.forEach(function(r,i){r._row=i;});
+    obSetCache(obRows);
+    obPopulateFilters();
+    obRenderAll();
+    if(silent && obRows.length>prevLen){ toast('🔔 新規データ '+(obRows.length-prevLen)+'件 を取得しました'); }
+  });
+}
+
+function obRenderAll(){ obRenderPipeline(); obRenderVisitors(); obRenderActive(); obRenderAgg(); }
+
+// パイプラインフロー（ステータスごとの件数バー）
+function obRenderPipeline(){
+  var bar=document.getElementById('ob-pipeline-bar'); if(!bar) return;
+  var cnt={};
+  obRows.forEach(function(r){
+    var s=obNormStatus(r['商談ステータス']||'問い合わせ');
+    cnt[s]=(cnt[s]||0)+1;
+  });
+  var STEPS=['問い合わせ','見学会前','無料相談前','勉強会前','FP前','LPS前','ヒアリング前','プレゼン前','パートナー検討中','パートナー契約済'];
+  bar.innerHTML=STEPS.map(function(s,i){
+    var n=cnt[s]||0;
+    var cls=OB_STATUS_CLASS[s]||'ob-s0';
+    return '<span class="ob-pipe-s'+(n>0?' on':'')+'" onclick="obFilterByStatus(\''+s+'\')">'+
+      '<span class="ob-pipe-lbl"><span style="font-size:.58rem;opacity:.7">'+s+'</span>'+(n>0?' <b>'+n+'</b>':'')+'</span>'+
+      (i<STEPS.length-1?'<span class="ob-pipe-arr">›</span>':'')+
+    '</span>';
+  }).join('');
+}
+
+// パイプラインクリックでステータスフィルター
+function obFilterByStatus(s){
+  // 検索ボックスにステータス名を入れてフィルター（簡易実装：ステータスで絞り込む専用フィルターが望ましいが現在は検索非対応なためスキップ）
+}
+
+// ── フィルター初期化 ──
+function obPopulateFilters(){
+  var years={},months={},staffs={};
+  obRows.forEach(function(r){
+    var d=obNormDate(r['来場日']||'');
+    if(d.length>=7){ years[d.substring(0,4)]=true; }
+    if(r['担当者']) staffs[r['担当者']]=true;
+    if(r['サブ担当']) staffs[r['サブ担当']]=true;
+  });
+  var allStaff=getStaffList(); allStaff.forEach(function(s){staffs[s]=true;});
+
+  var yEl=document.getElementById('ob-filter-year');
+  var curY=yEl?yEl.value:'';
+  if(yEl) yEl.innerHTML='<option value="">全年</option>'+Object.keys(years).sort().reverse().map(function(y){return '<option'+(y===curY?' selected':'')+'>'+y+'</option>';}).join('');
+
+  var mEl=document.getElementById('ob-filter-month');
+  var curM=mEl?mEl.value:'';
+  if(mEl) mEl.innerHTML='<option value="">全月</option>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(m){var s=('0'+m).slice(-2); return '<option value="'+s+'"'+(s===curM?' selected':'')+'>'+m+'月</option>';}).join('');
+
+  ['ob-vis-staff','ob-filter-staff'].forEach(function(id){
+    var el=document.getElementById(id); if(!el) return;
+    var cv=el.value;
+    el.innerHTML='<option value="">全員</option>'+Object.keys(staffs).sort().map(function(s){return '<option value="'+esc(s)+'"'+(s===cv?' selected':'')+'>'+esc(s)+'</option>';}).join('');
+  });
+  ['obNewStaff','obNewSubStaff','tl-staff'].forEach(function(id){
+    var el=document.getElementById(id); if(!el) return;
+    var cv=el.value;
+    var emptyLabel=id==='obNewSubStaff'?'—（なし）':'—';
+    el.innerHTML='<option value="">'+emptyLabel+'</option>'+allStaff.map(function(s){return '<option value="'+esc(s)+'"'+(s===cv?' selected':'')+'>'+esc(s)+'</option>';}).join('');
+  });
+  // 日付フィルタ向けに年データを正規化
+  obRows.forEach(function(r){
+    var dn=obNormDate(r['来場日']||'');
+    if(dn && dn!==r['来場日']) { /* 正規化値でフィルタ用に参照するがデータは変えない */ }
+  });
+}
+
+// ── 来客状況タブ ──
+function obRenderVisitors(){
+  var el=document.getElementById('ob-visitors-content'); if(!el) return;
+  var fYear=((document.getElementById('ob-filter-year')||{}).value||'');
+  var fMonth=((document.getElementById('ob-filter-month')||{}).value||'');
+  var fStaff=((document.getElementById('ob-vis-staff')||{}).value||'');
+  var fQ=((document.getElementById('ob-vis-q')||{}).value||'').toLowerCase().trim();
+
+  var rows=obRows.filter(function(r){
+    var d=obNormDate(r['来場日']||'');
+    if(fYear && d.substring(0,4)!==fYear) return false;
+    if(fMonth && d.substring(5,7)!==fMonth) return false;
+    if(fStaff && r['担当者']!==fStaff && r['サブ担当']!==fStaff) return false;
+    if(fQ && (r['顧客名']||'').toLowerCase().indexOf(fQ)<0) return false;
+    return true;
+  });
+  var cntEl=document.getElementById('ob-vis-count'); if(cntEl) cntEl.textContent=rows.length+'件';
+  if(!rows.length){ el.innerHTML='<div class="ob-empty-state">該当するデータがありません</div>'; return; }
+
+  // 月ごとにグループ化（正規化後のYM使用でNaN月バグ防止）
+  var groups={},mOrder=[];
+  rows.forEach(function(r){
+    var ym=obDateToYM(r['来場日']);
+    if(!groups[ym]){groups[ym]=[];mOrder.push(ym);}
+    groups[ym].push(r);
+  });
+  // 新しい月が上（降順）
+  mOrder.sort(function(a,b){
+    if(a==='未設定') return 1; if(b==='未設定') return -1;
+    return b>a?1:b<a?-1:0;
+  });
+
+  var COL=11; // colspan
+  var html='<table class="ob-table ob-vis-table"><thead><tr>'+
+    '<th class="ob-rn">No</th>'+
+    '<th>受付日</th><th>種別</th><th>顧客名</th><th>担当</th><th>エリア</th>'+
+    '<th>反響元</th><th>来店履歴</th><th>アポ確定日</th><th>次回予定</th><th></th>'+
+    '</tr></thead><tbody>';
+
+  mOrder.forEach(function(ym){
+    var mr=groups[ym];
+    // 月内を受付日昇順にソート
+    mr.sort(function(a,b){
+      var da=obNormDate(a['来場日']||''), db=obNormDate(b['来場日']||'');
+      return da>db?1:da<db?-1:0;
+    });
+    var lbl=ym==='未設定'?'日付未設定':(function(){var p=ym.split('-');return parseInt(p[0])+'年'+parseInt(p[1])+'月';})();
+    var pCnt=0; var evCnt={};
+    var staffCnt={};
+    mr.forEach(function(r){
+      var t=r['来場種別']||'その他'; evCnt[t]=(evCnt[t]||0)+1;
+      if(r['P申込目標日']) pCnt++;
+      var s=r['担当者']||'未設定';
+      if(OB_EXCLUDED_STAFF.indexOf(s)<0){ staffCnt[s]=(staffCnt[s]||0)+1; }
+    });
+    var pRate=mr.length?Math.round(pCnt/mr.length*100)+'%':'0%';
+    var evChips=Object.keys(evCnt).map(function(t){return obSC(t,evCnt[t]);}).join('');
+    var staffChips=Object.keys(staffCnt).sort().map(function(s){return obSC(s,staffCnt[s]);}).join('');
+
+    // ── 月ヘッダー行 ──
+    html+='<tr class="ob-month-hd"><td colspan="'+COL+'">'+
+      '<span class="ob-month-label">'+lbl+'</span>'+
+      '<span class="ob-sum-chips">'+obSC('合計',mr.length)+evChips+obSC('P申込',pCnt,'('+pRate+')')+'</span>'+
+      '<button class="ob-month-add" onclick="obQuickAddVisitor(\''+ym+'\')">＋ 追加</button>'+
+      '</td></tr>';
+
+    if(staffChips){
+      html+='<tr class="ob-agg-inline-row"><td colspan="'+COL+'">'+
+        '<span class="ob-agg-inline-lbl">👤 担当別</span>'+staffChips+'</td></tr>';
+    }
+
+    // 月内連番（毎月1から）
+    var monthN=0;
+    mr.forEach(function(r){ monthN++;
+      var rawStatus=r['商談ステータス']||'問い合わせ';
+      var dispStatus=obNormStatus(rawStatus);
+      var sc=OB_STATUS_CLASS[rawStatus]||OB_STATUS_CLASS[dispStatus]||'ob-s0';
+      var nextDate=r['次回予定']?obFmtDate(obNormDate(r['次回予定'])):'';
+      var nextContent=r['次回内容']||'';
+      var nextLbl=nextDate?(nextDate+(nextContent?' <small>'+nextContent+'</small>':'')):nextContent||'';
+      var appo=r['アポ確定日']?obFmtDate(obNormDate(r['アポ確定日'])):'';
+      var tipo=obSanitizeVal(r['来場種別']);
+      var genki=obSanitizeVal(r['反響元']);
+      var mainStaff=obSanitizeVal(r['担当者']);
+      var subStaff=obSanitizeVal(r['サブ担当']);
+      var staffLbl=mainStaff||(subStaff?'':'—');
+      if(subStaff) staffLbl+=(mainStaff?' / ':'')+subStaff;
+      html+='<tr data-sc="'+sc+'" data-row="'+r._row+'">'+
+        '<td class="ob-rn">'+monthN+'</td>'+
+        '<td style="white-space:nowrap">'+obCell(r,'来場日')+'</td>'+
+        '<td style="font-size:.82rem;color:#444">'+obCell(r,'来場種別')+'</td>'+
+        '<td><span class="ob-name-link" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span></td>'+
+        '<td style="white-space:nowrap;font-size:.84rem">'+esc(staffLbl)+'</td>'+
+        '<td>'+obCell(r,'エリア')+'</td>'+
+        '<td style="font-size:.82rem;color:#444">'+obCell(r,'反響元')+'</td>'+
+        '<td><div class="ob-hist-chips">'+obHistChips(r)+'</div></td>'+
+        '<td style="white-space:nowrap;font-size:.84rem">'+(appo?'<span style="color:#2563EB;font-weight:600">'+esc(appo)+'</span>':'<span style="color:#CCC">—</span>')+'</td>'+
+        '<td style="min-width:80px;font-size:.82rem">'+(nextLbl?nextLbl:'<span style="color:#CCC">—</span>')+'</td>'+
+        '<td><button class="ob-del" onclick="obConfirmDel('+r._row+')">✕</button></td>'+
+      '</tr>';
+    });
+  });
+  html+='</tbody></table>';
+  el.innerHTML=html;
+}
+
+// 月ヘッダーの＋ボタンから簡易追加（電話受付など）
+function obQuickAddVisitor(ym){
+  var name=prompt('顧客名を入力してください（例：田中 太郎）');
+  if(!name||!name.trim()) return;
+  // デフォルト来場日は月の1日
+  var defDate=ym==='未設定'?new Date().toISOString().substring(0,10):(ym+'-01');
+  document.getElementById('obNewName').value=name.trim();
+  document.getElementById('obNewDate').value=defDate;
+  document.getElementById('obNewModal').classList.add('show');
+}
+
+function obHistChips(r){
+  var h=(r.history||[]).slice().sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+  if(!h.length) return '<span class="ob-hist-chip" style="color:#DDD;border-color:#EEE">—</span>';
+  var last=h.length-1;
+  var chips=h.map(function(item,i){
+    var d=item.date?obNormDate(item.date):'';
+    var shortD=d?(function(){var p=d.match(/^(\d{4})-(\d{2})-(\d{2})/);return p?parseInt(p[2])+'月'+parseInt(p[3])+'日':'';}()):'';
+    var lbl=(shortD?shortD+' ':'')+(item.type||'');
+    return '<span class="ob-hist-chip'+(i===last?' new':'')+'">'+esc(lbl)+'</span>';
+  });
+  // 全件表示（切り捨てなし）
+  return chips.join('');
+}
+
+function obSC(l,v,extra){return '<span class="ob-sc"><span class="sl">'+l+'</span><span class="sv">'+v+'</span>'+(extra?'<span class="sp">'+extra+'</span>':'')+'</span>';}
+
+// ── 直近案件タブ ──
+function obRenderActive(){
+  var el=document.getElementById('ob-active-content'); if(!el) return;
+  var hideInactive=(document.getElementById('ob-hide-inactive')||{}).checked!==false;
+  var fStaff=((document.getElementById('ob-filter-staff')||{}).value||'');
+  var INACTIVE=['失注','中長期フォロー','パートナー検討中','パートナー契約済'];
+
+  var rows=obRows.filter(function(r){
+    if(hideInactive && INACTIVE.indexOf(r['商談ステータス'])>=0) return false;
+    if(fStaff && r['担当者']!==fStaff) return false;
+    return true;
+  }).slice().sort(function(a,b){
+    // 受付順（来場日昇順、同一日・未設定は登録順）
+    var da=obNormDate(a['来場日']||'')||'9999-99-99';
+    var db=obNormDate(b['来場日']||'')||'9999-99-99';
+    return da>db?1:da<db?-1:(a._row-b._row);
+  });
+  var cntEl=document.getElementById('ob-active-count'); if(cntEl) cntEl.textContent=rows.length+'件';
+  if(!rows.length){ el.innerHTML='<div class="ob-empty-state">該当する案件がありません</div>'; return; }
+
+  var html='<table class="ob-table"><thead><tr>'+
+    '<th>顧客名</th><th>エリア</th><th>担当</th><th>サブ担当</th><th>ステータス</th>'+
+    '<th>次回予定日</th><th>次回内容</th>'+
+    '<th class="cb-th" style="border-left:2px solid rgba(255,255,255,.15)">予算</th>'+
+    '<th class="cb-th">時期</th><th class="cb-th">関与者</th><th class="cb-th">競合</th><th class="cb-th">土地</th>'+
+    '<th class="cb-th" style="border-left:2px solid rgba(255,255,255,.15)">建築家</th>'+
+    '<th class="cb-th">性能</th><th class="cb-th">コスト</th>'+
+    '<th>P申込目標</th>'+
+    '</tr></thead><tbody>';
+
+  rows.forEach(function(r){
+    var rawStatus=r['商談ステータス']||'問い合わせ';
+    var dispStatus=obNormStatus(rawStatus);
+    var sc=OB_STATUS_CLASS[rawStatus]||OB_STATUS_CLASS[dispStatus]||'ob-s0';
+    html+='<tr data-sc="'+sc+'">'+
+      '<td><span class="ob-name-link" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span></td>'+
+      '<td>'+obCell(r,'エリア')+'</td>'+
+      '<td style="font-size:.84rem">'+obCell(r,'担当者')+'</td>'+
+      '<td style="font-size:.84rem">'+obCell(r,'サブ担当')+'</td>'+
+      '<td><span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')">'+esc(dispStatus)+'</span></td>'+
+      '<td style="font-size:.84rem">'+obCell(r,'次回予定')+'</td>'+
+      '<td style="min-width:90px;font-size:.82rem">'+obCell(r,'次回内容')+'</td>'+
+      OB_HURDLES.map(function(h,i){ return '<td style="text-align:center'+(i===0?';border-left:2px solid #EEE':'')+'">'+ obCbCell(r,h.key)+'</td>'; }).join('')+
+      OB_FRAMINGS.map(function(f,i){ return '<td style="text-align:center'+(i===0?';border-left:2px solid #EEE':'')+'">'+ obCbCell(r,f.key)+'</td>'; }).join('')+
+      '<td>'+obCell(r,'P申込目標日')+'</td>'+
+    '</tr>';
+  });
+  html+='</tbody></table>';
+  el.innerHTML=html;
+  // カレンダーが開いていれば更新
+  var calWrap=document.getElementById('ob-cal-wrap');
+  if(calWrap && calWrap.style.display!=='none') obRenderCal();
+}
+
+// ── 月間カレンダー（直近案件タブ） ──
+var obCalYear=new Date().getFullYear(), obCalMonth=new Date().getMonth();
+function obToggleCalendar(){
+  var w=document.getElementById('ob-cal-wrap');
+  if(!w) return;
+  var show=w.style.display==='none';
+  w.style.display=show?'block':'none';
+  if(show) obRenderCal();
+}
+function obCalMove(d){ obCalMonth+=d; if(obCalMonth>11){obCalMonth=0;obCalYear++;} if(obCalMonth<0){obCalMonth=11;obCalYear--;} obRenderCal(); }
+function obCalToday(){ obCalYear=new Date().getFullYear(); obCalMonth=new Date().getMonth(); obRenderCal(); }
+function obRenderCal(){
+  var el=document.getElementById('ob-cal-grid'); if(!el) return;
+  var titleEl=document.getElementById('ob-cal-title');
+  if(titleEl) titleEl.textContent=obCalYear+'年'+(obCalMonth+1)+'月';
+  var today=new Date(); var todayStr=today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2);
+
+  // アポ確定日 or 次回予定がある案件をマップ
+  var evMap={};
+  obRows.forEach(function(r){
+    var dates=[];
+    if(r['アポ確定日']) dates.push(obNormDate(r['アポ確定日']));
+    if(r['次回予定']) dates.push(obNormDate(r['次回予定']));
+    dates.forEach(function(d){
+      if(!d||d.length<10) return;
+      var ym=d.substring(0,7);
+      var cy=obCalYear+'-'+('0'+(obCalMonth+1)).slice(-2);
+      if(ym!==cy) return;
+      if(!evMap[d]) evMap[d]=[];
+      evMap[d].push(r);
+    });
+  });
+
+  var DOW=['日','月','火','水','木','金','土'];
+  var html=DOW.map(function(d,i){return '<div class="ob-cal-dh'+(i===0?' sun':i===6?' sat':'')+'" style="'+(i===0?'color:#E85858':i===6?'color:#4A90D9':'')+'">' +d+'</div>';}).join('');
+
+  var first=new Date(obCalYear,obCalMonth,1);
+  var last=new Date(obCalYear,obCalMonth+1,0);
+  // 先月の空白
+  for(var i=0;i<first.getDay();i++) html+='<div class="ob-cal-day other-month"></div>';
+  // 日付
+  for(var d=1;d<=last.getDate();d++){
+    var ds=obCalYear+'-'+('0'+(obCalMonth+1)).slice(-2)+'-'+('0'+d).slice(-2);
+    var isToday=ds===todayStr;
+    var evs=evMap[ds]||[];
+    var dow=new Date(obCalYear,obCalMonth,d).getDay();
+    var dotw=dow===0?'color:#C0392B':dow===6?'color:#2980B9':'';
+    html+='<div class="ob-cal-day'+(isToday?' today':'')+(first.getDay()+d>7||true?'':' other-month')+'">'+
+      '<div class="ob-cal-dn" style="'+dotw+'">'+d+'</div>'+
+      evs.map(function(r){ return '<span class="ob-cal-ev" onclick="obOpenDetail('+r._row+')" title="'+esc(r['顧客名']||'')+'">'+esc((r['顧客名']||'').substring(0,6))+'</span>'; }).join('')+
+    '</div>';
+  }
+  // 翌月の空白（6行になるよう）
+  var trailing=(7-((first.getDay()+last.getDate())%7))%7;
+  for(var i=0;i<trailing;i++) html+='<div class="ob-cal-day other-month"></div>';
+  el.innerHTML=html;
+}
+
+// ── 集計タブ ──
+function obRenderAgg(){
+  var el=document.getElementById('ob-agg-content'); if(!el) return;
+  if(!obRows.length){ el.innerHTML='<div class="ob-empty-state">データがありません</div>'; return; }
+
+  // 年リスト（正規化後）
+  var years={};
+  obRows.forEach(function(r){ var y=obNormDate(r['来場日']||'').substring(0,4); if(y&&y.length===4) years[y]=true; });
+  var yearList=Object.keys(years).sort().reverse();
+  var selY=el.querySelector('.ob-agg-year-sel');
+  var curY=(selY&&selY.value)?selY.value:(yearList[0]||'');
+
+  // 月別集計
+  var monthly={};
+  for(var m=1;m<=12;m++) monthly[('0'+m).slice(-2)]={問合:0,完成:0,オンライン:0,無料:0,デザ:0,casa:0,trip:0,他:0,P:0};
+
+  obRows.filter(function(r){ return obNormDate(r['来場日']||'').substring(0,4)===curY; })
+  .forEach(function(r){
+    var nd=obNormDate(r['来場日']||'');
+    var mm=nd.substring(5,7); if(!mm||!monthly[mm]) return;
+    monthly[mm].問合++;
+    var t=r['来場種別']||'';
+    if(t==='完成見学会') monthly[mm].完成++;
+    else if(t==='オンライン見学会') monthly[mm].オンライン++;
+    else if(t==='無料相談会') monthly[mm].無料++;
+    else if(t.indexOf('デザ')>=0||t.indexOf('セミナー')>=0) monthly[mm].デザ++;
+    else if(t.toLowerCase().indexOf('casa')>=0) monthly[mm].casa++;
+    else if(t.toLowerCase().indexOf('trip')>=0) monthly[mm].trip++;
+    else if(t) monthly[mm].他++;
+    if(r['P申込目標日']) monthly[mm].P++;
+  });
+
+  var mKeys=Object.keys(monthly).filter(function(m){return monthly[m].問合>0;}).sort();
+  var totals={問合:0,完成:0,オンライン:0,無料:0,デザ:0,casa:0,trip:0,他:0,P:0};
+  mKeys.forEach(function(m){ Object.keys(totals).forEach(function(k){totals[k]+=monthly[m][k];}); });
+
+  var mRows=mKeys.map(function(m){
+    var d=monthly[m]; var pr=d.問合?Math.round(d.P/d.問合*100)+'%':'—';
+    return '<tr><td>'+parseInt(m)+'月</td>'+
+      '<td>'+d.問合+'</td><td>'+(d.完成||'—')+'</td><td>'+(d.オンライン||'—')+'</td>'+
+      '<td>'+(d.無料||'—')+'</td><td>'+(d.デザ||'—')+'</td>'+
+      '<td>'+(d.casa||'—')+'</td><td>'+(d.trip||'—')+'</td><td>'+(d.他||'—')+'</td>'+
+      '<td class="hi">'+d.P+'</td><td class="hi">'+pr+'</td></tr>';
+  }).join('');
+  var pRate=totals.問合?Math.round(totals.P/totals.問合*100)+'%':'—';
+  var mTotal='<tr><td>合計</td>'+
+    '<td>'+totals.問合+'</td><td>'+totals.完成+'</td><td>'+totals.オンライン+'</td>'+
+    '<td>'+totals.無料+'</td><td>'+totals.デザ+'</td>'+
+    '<td>'+totals.casa+'</td><td>'+totals.trip+'</td><td>'+totals.他+'</td>'+
+    '<td class="hi">'+totals.P+'</td><td class="hi">'+pRate+'</td></tr>';
+
+  // 担当者別集計（除外スタッフを除く）
+  var staffAgg={};
+  obRows.filter(function(r){return obNormDate(r['来場日']||'').substring(0,4)===curY;})
+  .forEach(function(r){
+    var s=r['担当者']||'未設定';
+    if(OB_EXCLUDED_STAFF.indexOf(s)>=0) return;
+    if(!staffAgg[s]) staffAgg[s]={問合:0,P:0};
+    staffAgg[s].問合++;
+    if(r['P申込目標日']) staffAgg[s].P++;
+  });
+  var sRows=Object.keys(staffAgg).sort().map(function(s){
+    var d=staffAgg[s]; var pr=d.問合?Math.round(d.P/d.問合*100)+'%':'—';
+    return '<tr><td>'+esc(s)+'</td><td>'+d.問合+'</td><td class="hi">'+d.P+'</td><td class="hi">'+pr+'</td></tr>';
+  }).join('');
+
+  var yearOpts=yearList.map(function(y){return '<option'+(y===curY?' selected':'')+'>'+y+'</option>';}).join('');
+
+  el.innerHTML=
+    '<div class="ob-agg-sec">'+
+      '<div class="ob-agg-sec-hd">📅 月別集計 — <select class="ob-agg-year-sel" onchange="obRenderAgg(this)">'+yearOpts+'</select></div>'+
+      '<table class="ob-agg-table"><thead><tr>'+
+        '<th>月</th><th>問合</th><th>完成見学会</th><th>オンライン</th><th>無料相談</th>'+
+        '<th>デザセミ</th><th>casa</th><th>trip</th><th>その他</th><th>P申込数</th><th>P申込率</th>'+
+      '</tr></thead><tbody>'+mRows+mTotal+'</tbody></table>'+
+    '</div>'+
+    '<div class="ob-agg-sec">'+
+      '<div class="ob-agg-sec-hd">👤 担当者別集計 — '+curY+'年</div>'+
+      '<table class="ob-agg-table"><thead><tr><th>担当者</th><th>問合数</th><th>P申込数</th><th>P申込率</th></tr></thead>'+
+      '<tbody>'+sRows+'</tbody></table>'+
+    '</div>';
+}
+
+// ── インライン編集 ──
+function obCell(r,field){
+  var raw=r[field]; var val=obSanitizeVal(raw); // FALSEなど無効値を空扱い
+  var isDate=(field==='来場日'||field==='アポ確定日'||field==='P申込目標日'||field==='次回予定');
+  var isSel=(field==='来場種別'||field==='反響元'||field==='商談ステータス');
+  var isStaff=(field==='担当者'||field==='サブ担当');
+  var display='';
+  if(isDate) display=val?obFmtDate(obNormDate(val)):'<span style="color:#CCC;font-size:.72rem">—</span>';
+  else display=val?esc(val):'<span style="color:#CCC;font-size:.72rem;font-style:italic">—</span>';
+  var type=isDate?'date':isSel?'sel':isStaff?'staff':'text';
+  // display:block + min-height でクリック領域を確保（空欄でもタップ可能）
+  return '<span class="ob-editable" style="display:block;min-height:20px;width:100%" data-row="'+r._row+'" data-field="'+field+'" data-type="'+type+'" onclick="obStartEdit(this)">'+display+'</span>';
+}
+
+function obCbCell(r,field){
+  var chk=(r[field]==='1'||r[field]==='TRUE'||r[field]===true||r[field]===1);
+  return '<input type="checkbox" class="ob-cb"'+(chk?' checked':'')+' data-row="'+r._row+'" data-field="'+field+'" onchange="obToggleCb(this)">';
+}
+
+function obFmtDate(s){
+  var p=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(!p) return esc(s);
+  return parseInt(p[1])+'年'+parseInt(p[2])+'月'+parseInt(p[3])+'日';
+}
+
+function obStartEdit(el){
+  if(el.querySelector('input,select')) return;
+  var row=parseInt(el.getAttribute('data-row'));
+  var field=el.getAttribute('data-field');
+  var type=el.getAttribute('data-type');
+  var r=obRows[row];
+  var val=r?r[field]||'':'';
+
+  if(type==='date'){
+    var isoVal=obNormDate(val); // 日本語/スラッシュ形式をISOに正規化
+    var inp=document.createElement('input'); inp.type='date'; inp.value=isoVal; inp.className='ob-cell-input';
+    el.innerHTML=''; el.appendChild(inp); inp.focus();
+    var done=false;
+    function saveDate(){ if(done)return; done=true; var v=inp.value; el.innerHTML=v?obFmtDate(v):'<span style="color:#CCC;font-size:.72rem">—</span>'; obSaveField(row,field,v); }
+    inp.addEventListener('change',saveDate); inp.addEventListener('blur',saveDate);
+    inp.addEventListener('keydown',function(e){if(e.key==='Escape'){el.innerHTML=val?obFmtDate(obNormDate(val)):'<span style="color:#CCC;font-size:.72rem">—</span>';}});
+    return;
+  }
+  var opts=[];
+  if(type==='sel'){
+    if(field==='来場種別') opts=OB_EVENT_TYPES;
+    else if(field==='反響元') opts=OB_SOURCES;
+    else if(field==='商談ステータス') opts=OB_STATUS_LIST;
+  } else if(type==='staff'){
+    opts=getStaffList();
+  }
+  if(opts.length){
+    var sel=document.createElement('select'); sel.className='ob-cell-select';
+    sel.innerHTML='<option value="">—</option>'+opts.map(function(o){return '<option'+(o===val?' selected':'')+'>'+esc(o)+'</option>';}).join('');
+    el.innerHTML=''; el.appendChild(sel); sel.focus();
+    var done2=false;
+    function saveSel(){ if(done2)return; done2=true; var v=sel.value; el.textContent=v||'—'; obSaveField(row,field,v); if(field==='商談ステータス'){var tr=el.closest('tr'); if(tr){var b=tr.querySelector('.ob-badge'); if(b){b.textContent=v;b.className='ob-badge '+(OB_STATUS_CLASS[v]||'ob-s0');}}} }
+    sel.addEventListener('change',saveSel); sel.addEventListener('blur',saveSel);
+    return;
+  }
+  var inp2=document.createElement('input'); inp2.type='text'; inp2.value=val; inp2.className='ob-cell-input';
+  inp2.style.minWidth=Math.max(60,el.offsetWidth)+'px';
+  el.innerHTML=''; el.appendChild(inp2); inp2.focus(); inp2.select();
+  var done3=false;
+  function saveTxt(){ if(done3)return; done3=true; var v=inp2.value; el.textContent=v||''; obSaveField(row,field,v); }
+  inp2.addEventListener('blur',saveTxt);
+  inp2.addEventListener('keydown',function(e){if(e.key==='Enter')inp2.blur(); if(e.key==='Escape'){el.textContent=val||'';}});
+}
+
+function obEditStatusInline(el,rowIdx){
+  var r=obRows[rowIdx]; if(!r) return;
+  var val=r['商談ステータス']||'';
+  var sel=document.createElement('select'); sel.className='ob-cell-select'; sel.style.background='#fff';
+  sel.innerHTML=OB_STATUS_LIST.map(function(o){return '<option'+(o===val?' selected':'')+'>'+esc(o)+'</option>';}).join('');
+  el.style.display='none'; el.parentNode.insertBefore(sel,el.nextSibling); sel.focus();
+  var done=false;
+  function save(){ if(done)return; done=true; var v=sel.value; sel.remove(); el.style.display=''; el.textContent=v; el.className='ob-badge '+(OB_STATUS_CLASS[v]||'ob-s0'); obSaveField(rowIdx,'商談ステータス',v); }
+  sel.addEventListener('change',save); sel.addEventListener('blur',save);
+}
+
+function obToggleCb(cb){
+  var row=parseInt(cb.getAttribute('data-row')); var field=cb.getAttribute('data-field');
+  var v=cb.checked?'1':'0';
+  if(obRows[row]) obRows[row][field]=v;
+  obSetCache(obRows);
+  post({action:'obUpdateField',row:row,field:field,value:v});
+}
+
+function obSaveField(row,field,value){
+  if(obRows[row]) obRows[row][field]=value;
+  obSetCache(obRows);
+  post({action:'obUpdateField',row:row,field:field,value:value});
+}
+
+// ── 除外スタッフ設定 ──
+function obRenderExclStaffUI(){
+  var listEl=document.getElementById('ob-excl-staff-list');
+  var selEl=document.getElementById('ob-excl-staff-sel');
+  if(!listEl||!selEl) return;
+  // チップ表示
+  listEl.innerHTML=OB_EXCLUDED_STAFF.length
+    ?OB_EXCLUDED_STAFF.map(function(s){
+        return '<span style="background:#FEF3F2;border:1px solid #FECACA;color:#991B1B;border-radius:20px;padding:3px 10px;font-size:.75rem;font-weight:700;display:inline-flex;align-items:center;gap:6px">'+
+          esc(s)+' <span onclick="obRemoveExclStaff(\''+esc(s)+'\')" style="cursor:pointer;color:#AAA;font-size:1rem;line-height:1">&times;</span></span>';
+      }).join('')
+    :'<span style="color:#BBB;font-size:.8rem">除外スタッフなし</span>';
+  // セレクト
+  var allStaff=getStaffList(); var obStaff={};
+  obRows.forEach(function(r){ if(r['担当者']) obStaff[r['担当者']]=true; });
+  var merged=Object.keys(obStaff);
+  allStaff.forEach(function(s){ if(merged.indexOf(s)<0) merged.push(s); });
+  selEl.innerHTML='<option value="">スタッフを選択</option>'+merged.sort().map(function(s){
+    return '<option value="'+esc(s)+'"'+(OB_EXCLUDED_STAFF.indexOf(s)>=0?' disabled':'')+'>'+esc(s)+(OB_EXCLUDED_STAFF.indexOf(s)>=0?' (除外中)':'')+'</option>';
+  }).join('');
+}
+function obAddExclStaff(){
+  var sel=document.getElementById('ob-excl-staff-sel'); if(!sel||!sel.value) return;
+  var s=sel.value;
+  if(OB_EXCLUDED_STAFF.indexOf(s)<0){ OB_EXCLUDED_STAFF.push(s); obSaveExclStaff(); obRenderExclStaffUI(); obRenderAgg(); obRenderVisitors(); }
+}
+function obRemoveExclStaff(s){
+  var i=OB_EXCLUDED_STAFF.indexOf(s); if(i<0) return;
+  OB_EXCLUDED_STAFF.splice(i,1); obSaveExclStaff(); obRenderExclStaffUI(); obRenderAgg(); obRenderVisitors();
+}
+function obSaveExclStaff(){
+  post({action:'obSaveSettings',excludedStaff:OB_EXCLUDED_STAFF});
+  localStorage.setItem('ob_excl_staff',JSON.stringify(OB_EXCLUDED_STAFF));
+}
+function obLoadExclStaff(){
+  // まずlocalStorageから読む
+  try{ var saved=JSON.parse(localStorage.getItem('ob_excl_staff')||'[]'); if(Array.isArray(saved)) OB_EXCLUDED_STAFF=saved; }catch(e){}
+  // GASからも取得して上書き（非同期）
+  gasGet('obGetSettings',function(d){ if(d&&d.ok&&Array.isArray(d.excludedStaff)){ OB_EXCLUDED_STAFF=d.excludedStaff; localStorage.setItem('ob_excl_staff',JSON.stringify(OB_EXCLUDED_STAFF)); obRenderAgg(); } });
+}
+function obLinkDriveFoldersAction(){
+  toast('Driveフォルダを紐付け中…');
+  gasGet('obLinkDriveFolders',function(d){ toast(d&&d.ok?'✅ 紐付け完了 ('+(d.linked||0)+'件)':'❌ エラー'); obLoad(); });
+}
+function obImportSSAction(){
+  if(!confirm('スプレッドシートからデータを取込みますか？\n既存データとの重複はスキップされます。')) return;
+  toast('取込中…');
+  gasGet('obImportFromSS',function(d){ toast(d&&d.ok?'✅ 取込完了 ('+(d.added||0)+'件追加)':'❌ エラー: '+(d&&d.error||'不明')); obLoad(); });
+}
+
+// ── タブ切替 ──
+function obSwitchTab(tab){
+  obCurrentTab=tab;
+  document.querySelectorAll('.ob-tab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-tab')===tab);});
+  document.querySelectorAll('#openboard .ob-pane').forEach(function(p){p.classList.toggle('show',p.getAttribute('data-tab')===tab);});
+  if(tab==='agg') obRenderAgg();
+  if(tab==='birthday') obRenderBirthday();
+}
+
+// ── 誕生日カレンダー ──
+var obBdayYear=new Date().getFullYear(), obBdayMonth=new Date().getMonth();
+
+// カルテ入力 + Notion誕生日DB から全誕生日を収集
+function obGetBdays(){
+  var result=[];
+  var BD_KEYS=[
+    {key:'BD_本人',suffix:'本人'},
+    {key:'BD_配偶者',suffix:'配偶者'},
+    {key:'BD_子1',suffix:'お子様①'},
+    {key:'BD_子2',suffix:'お子様②'},
+    {key:'BD_子3',suffix:'お子様③'}
+  ];
+  obRows.forEach(function(r){
+    var k=r.karte||{};
+    var custName=r['顧客名']||'—';
+    // ① カルテ手動入力の誕生日
+    BD_KEYS.forEach(function(bd){
+      var raw=k[bd.key]; if(!raw) return;
+      var norm=obNormDate(raw); if(!norm||norm.length<10) return;
+      var mmdd=norm.substring(5,10);
+      var birthYear=parseInt(norm.substring(0,4));
+      if(isNaN(birthYear)) return;
+      result.push({mmdd:mmdd,birthYear:birthYear,name:custName,suffix:bd.suffix,row:r._row,rawDate:norm,source:'karte'});
+    });
+    // ② Notion バースデーDB から同期した誕生日
+    (r.birthdays||[]).forEach(function(b){
+      if(!b.date) return;
+      var norm=obNormDate(b.date); if(!norm||norm.length<5) return;
+      // MM-DD形式の場合は年を補完
+      if(norm.length===5) norm='1900-'+norm;
+      if(norm.length<10) return;
+      var mmdd=norm.substring(5,10);
+      var birthYear=parseInt(norm.substring(0,4));
+      if(isNaN(birthYear)||birthYear<1900) birthYear=1900; // 年不明の場合
+      var dispName=b.name||custName;
+      var suffix=b.type||'家族';
+      result.push({mmdd:mmdd,birthYear:birthYear,name:custName,suffix:suffix,displayName:dispName,row:r._row,rawDate:norm,source:'notion'});
+    });
+  });
+  return result;
+}
+
+function obBdayMove(d){ obBdayMonth+=d; if(obBdayMonth>11){obBdayMonth=0;obBdayYear++;} if(obBdayMonth<0){obBdayMonth=11;obBdayYear--;} obRenderBirthday(); }
+function obBdayToday(){ obBdayYear=new Date().getFullYear(); obBdayMonth=new Date().getMonth(); obRenderBirthday(); }
+
+function obRenderBirthday(){
+  var upEl=document.getElementById('ob-birthday-upcoming');
+  var mainEl=document.getElementById('ob-birthday-content');
+  if(!upEl||!mainEl) return;
+
+  var bdays=obGetBdays();
+  var today=new Date();
+  var todayStr=today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2);
+
+  // ── 今後60日の誕生日（upcoming） ──
+  var upcoming=[];
+  bdays.forEach(function(b){
+    var thisYear=today.getFullYear();
+    var bdThisYear=new Date(thisYear+'-'+b.mmdd);
+    var bdNextYear=new Date((thisYear+1)+'-'+b.mmdd);
+    var target=bdThisYear>=today?bdThisYear:bdNextYear;
+    var daysUntil=Math.ceil((target-today)/(1000*60*60*24));
+    if(daysUntil<=60){
+      upcoming.push({b:b,daysUntil:daysUntil,targetDate:target.getFullYear()+'-'+b.mmdd});
+    }
+  });
+  upcoming.sort(function(a,x){return a.daysUntil-x.daysUntil;});
+
+  if(upcoming.length){
+    var upHtml='<div style="font-size:.7rem;font-weight:700;letter-spacing:.12em;color:#AAA;margin-bottom:10px">📅 今後60日以内の誕生日</div>';
+    upHtml+='<div class="ob-bday-list">';
+    upcoming.forEach(function(u){
+      var b=u.b; var d=u.daysUntil;
+      var todayMark=d===0?'🎉 今日！':d===1?'⭐ 明日':d+'日後';
+      var age=new Date(u.targetDate).getFullYear()-b.birthYear;
+      var isSoon=d<=7; var isToday=d===0;
+      upHtml+='<div class="ob-bday-item'+(isToday?' today-bd':isSoon?' soon':'')+'" onclick="obOpenDetail('+b.row+')">'+
+        '<span class="ob-bday-date">'+b.mmdd.replace('-','月')+'日</span>'+
+        '<span class="ob-bday-name">'+esc(b.name)+'<span style="font-size:.72rem;color:#AAA;margin-left:6px">('+b.suffix+')</span></span>'+
+        '<span class="ob-bday-age">'+age+'歳</span>'+
+        '<span class="ob-bday-soon">'+todayMark+'</span>'+
+      '</div>';
+    });
+    upHtml+='</div>';
+    upEl.innerHTML=upHtml;
+    upEl.style.display='block';
+  } else {
+    upEl.innerHTML='<div class="ob-bday-empty">今後60日以内の誕生日はありません</div>';
+    upEl.style.display='block';
+  }
+
+  // ── 月間カレンダー ──
+  var monthStr=('0'+(obBdayMonth+1)).slice(-2);
+  var DOW=['日','月','火','水','木','金','土'];
+  var calHtml='<div class="ob-bday-cal">';
+  calHtml+='<div class="ob-bday-cal-nav">'+
+    '<button class="ob-btn-sm" onclick="obBdayMove(-1)">◀</button>'+
+    '<span>'+obBdayYear+'年'+(obBdayMonth+1)+'月</span>'+
+    '<button class="ob-btn-sm" onclick="obBdayMove(1)">▶</button>'+
+    '<button class="ob-btn-sm" onclick="obBdayToday()">今月</button>'+
+  '</div>';
+  calHtml+='<div class="ob-cal-grid">'+
+    DOW.map(function(d,i){return '<div class="ob-cal-dh'+(i===0?' sun':i===6?' sat':'')+'" style="'+(i===0?'color:#E85858':i===6?'color:#4A90D9':'')+'">'+d+'</div>';}).join('');
+
+  var first=new Date(obBdayYear,obBdayMonth,1);
+  var last=new Date(obBdayYear,obBdayMonth+1,0);
+  for(var ii=0;ii<first.getDay();ii++) calHtml+='<div class="ob-cal-day other-month"></div>';
+  for(var dd=1;dd<=last.getDate();dd++){
+    var ds=obBdayYear+'-'+('0'+(obBdayMonth+1)).slice(-2)+'-'+('0'+dd).slice(-2);
+    var dayMMDD=ds.substring(5);
+    var isToday2=ds===todayStr;
+    var dayBdays=bdays.filter(function(b){return b.mmdd===dayMMDD;});
+    var dow=new Date(obBdayYear,obBdayMonth,dd).getDay();
+    var dotw=dow===0?'color:#C0392B':dow===6?'color:#2980B9':'';
+    calHtml+='<div class="ob-cal-day'+(isToday2?' today':'')+'" style="min-height:60px">'+
+      '<div class="ob-cal-dn" style="'+dotw+'">'+dd+'</div>'+
+      dayBdays.map(function(b){
+        var age=obBdayYear-b.birthYear;
+        return '<span class="ob-cal-ev ob-bday-ev" onclick="obOpenDetail('+b.row+')" title="'+esc(b.name+' '+b.suffix+' '+age+'歳')+'">🎂'+esc(b.name.substring(0,3))+'</span>';
+      }).join('')+
+    '</div>';
+  }
+  var trailing=(7-((first.getDay()+last.getDate())%7))%7;
+  for(var ti=0;ti<trailing;ti++) calHtml+='<div class="ob-cal-day other-month"></div>';
+  calHtml+='</div></div>';
+
+  // 月の誕生日一覧
+  var monthBdays=bdays.filter(function(b){return b.mmdd.substring(0,2)===monthStr;})
+    .sort(function(a,b){return a.mmdd>b.mmdd?1:a.mmdd<b.mmdd?-1:0;});
+  if(monthBdays.length){
+    calHtml+='<div style="margin-top:18px"><div style="font-size:.7rem;font-weight:700;letter-spacing:.12em;color:#AAA;margin-bottom:10px">'+(obBdayMonth+1)+'月の誕生日一覧</div>'+
+      '<div class="ob-bday-list">';
+    monthBdays.forEach(function(b){
+      var age=obBdayYear-b.birthYear;
+      calHtml+='<div class="ob-bday-item" onclick="obOpenDetail('+b.row+')">'+
+        '<span class="ob-bday-date">'+parseInt(b.mmdd.substring(3))+'日</span>'+
+        '<span class="ob-bday-name">'+esc(b.name)+'<span style="font-size:.72rem;color:#AAA;margin-left:6px">('+b.suffix+')</span></span>'+
+        '<span class="ob-bday-age">'+age+'歳</span>'+
+      '</div>';
+    });
+    calHtml+='</div></div>';
+  } else {
+    calHtml+='<div class="ob-bday-empty">'+(obBdayMonth+1)+'月の誕生日登録はありません<br><small>各顧客の カルテ タブから誕生日を登録してください</small></div>';
+  }
+
+  mainEl.innerHTML=calHtml;
+}
+
+// ── データクリーニング（FALSE除去・ステータス正規化）──
+function obCleanData(){
+  if(!confirm('データをクリーニングします。\n・ステータス「初回接触」→「問い合わせ」に変換\n・エリア等のFALSE/TRUEを空白に変換\n続けますか？')) return;
+  toast('クリーニング中...');
+  gasGet('obCleanData',function(d){
+    if(!d||d.error){ toast('❌ エラー: '+(d?d.error:'不明')); return; }
+    toast('✅ クリーニング完了: '+d.fixed+'件修正');
+    obLoad();
+  });
+}
+
+// ── 削除 ──
+function obConfirmDel(rowIdx){
+  var r=obRows[rowIdx]; var name=r?r['顧客名']:'';
+  if(!confirm((name||'この顧客')+'を削除しますか？\n元に戻せません。')) return;
+  post({action:'obDeleteCustomer',row:rowIdx});
+  obRows.splice(rowIdx,1);
+  obRows.forEach(function(r,i){r._row=i;});
+  obSetCache(obRows);
+  obRenderVisitors(); obRenderActive();
+  toast('削除しました');
+}
+
+// ── 新規追加 ──
+function obAddCustomer(){
+  obPopulateFilters();
+  var today=new Date();
+  document.getElementById('obNewDate').value=today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2);
+  document.getElementById('obNewName').value='';
+  document.getElementById('obNewArea').value='';
+  var el;
+  if((el=document.getElementById('obNewSubStaff'))) el.value='';
+  if((el=document.getElementById('obNewNextDate'))) el.value='';
+  if((el=document.getElementById('obNewNextContent'))) el.value='';
+  document.getElementById('obNewModal').classList.add('show');
+  setTimeout(function(){document.getElementById('obNewName').focus();},80);
+}
+function obCloseNewModal(){ document.getElementById('obNewModal').classList.remove('show'); }
+
+function obSaveNew(){
+  var name=document.getElementById('obNewName').value.trim();
+  if(!name){ toast('顧客名を入力してください'); return; }
+  var data={
+    来場日:document.getElementById('obNewDate').value||'',
+    顧客名:name, 来場種別:document.getElementById('obNewType').value||'',
+    エリア:document.getElementById('obNewArea').value.trim(),
+    反響元:document.getElementById('obNewSource').value||'',
+    担当者:document.getElementById('obNewStaff').value||'',
+    サブ担当:document.getElementById('obNewSubStaff').value||'',
+    商談ステータス:document.getElementById('obNewStatus').value||'問い合わせ',
+    次回予定:document.getElementById('obNewNextDate').value||'',
+    次回内容:document.getElementById('obNewNextContent').value.trim()||''
+  };
+  obCloseNewModal();
+  toast('追加中…');
+  post(Object.assign({action:'obSaveCustomer'},data));
+  setTimeout(function(){ obLoad(); },1800);
+}
+
+// ── 顧客詳細画面 ──
+function obOpenDetail(rowIdx){
+  var r=obRows[rowIdx]; if(!r) return;
+  obDetailRow=rowIdx;
+  document.getElementById('ob-det-name').textContent=r['顧客名']||'—';
+  var sub=[];
+  if(r['来場日']) sub.push(obFmtDate(obNormDate(r['来場日']))+' 受付');
+  var staffStr=r['担当者']||(r['サブ担当']?'':'');
+  if(r['サブ担当']) staffStr+=(staffStr?' / ':'')+r['サブ担当'];
+  if(staffStr) sub.push('担当: '+staffStr);
+  if(r['エリア']) sub.push(r['エリア']);
+  document.getElementById('ob-det-sub').textContent=sub.join(' ｜ ');
+  var sc=OB_STATUS_CLASS[r['商談ステータス']]||'ob-s0';
+  var badge=document.getElementById('ob-det-badge');
+  badge.textContent=r['商談ステータス']||'—'; badge.className='ob-badge '+sc;
+  obDetTab('info');
+  obRenderDetInfo();
+  obRenderDetHistory();
+  obRenderDetKarte();
+  obRenderDetDrive();
+  document.getElementById('ob-detail').classList.add('show');
+  document.getElementById('ob-detail').scrollTop=0;
+}
+
+function obCloseDetail(){
+  document.getElementById('ob-detail').classList.remove('show');
+  obDetailRow=-1;
+}
+
+function obDetTab(tab){
+  document.querySelectorAll('.ob-det-tab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-dtab')===tab);});
+  document.querySelectorAll('.ob-det-pane').forEach(function(p){p.classList.toggle('show',p.getAttribute('data-dtab')===tab);});
+  if(tab==='birthday') obRenderDetBirthday();
+  if(tab==='drive') obRenderDetDrive();
+}
+
+// 個人詳細の誕生日タブ
+function obRenderDetBirthday(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  var el=document.getElementById('ob-det-bday-content'); if(!el) return;
+  var k=r.karte||{};
+  var BD_DEF=[
+    {key:'BD_本人',label:'本人'},
+    {key:'BD_配偶者',label:'配偶者'},
+    {key:'BD_子1',label:'お子様①'},
+    {key:'BD_子2',label:'お子様②'},
+    {key:'BD_子3',label:'お子様③'}
+  ];
+  var today=new Date();
+  var curYear=today.getFullYear();
+
+  // 誕生日エントリを統合（カルテ + Notion）
+  var entries=[];
+  BD_DEF.forEach(function(bd){
+    var raw=k[bd.key]; if(!raw) return;
+    var norm=obNormDate(raw); if(!norm||norm.length<10) return;
+    entries.push({label:bd.label,norm:norm,source:'カルテ入力'});
+  });
+  (r.birthdays||[]).forEach(function(b){
+    if(!b.date) return;
+    var norm=b.date; if(norm.length>10) norm=norm.substring(0,10);
+    if(norm.length<5) return;
+    // MM-DD のみの場合はダミー年を補完
+    if(norm.length===5) norm='1900-'+norm;
+    if(norm.length<10) return;
+    // カルテ側と重複していないか（MM-DDが同じなら統合済み）
+    var mmdd=norm.substring(5,10);
+    var dup=entries.some(function(e){ return e.norm.substring(5,10)===mmdd; });
+    if(!dup) entries.push({label:b.name||(b.type||'家族'),norm:norm,source:'Notion'});
+  });
+
+  var html='<div class="ob-bday-list">';
+  if(!entries.length){
+    html+='<div class="ob-bday-empty">誕生日が未登録です<br><small>カルテ タブから誕生日を登録してください</small></div>';
+  } else {
+    entries.forEach(function(bd){
+      var norm=bd.norm;
+      var birthYear=parseInt(norm.substring(0,4));
+      var mmdd=norm.substring(5,10);
+      var age=(birthYear>1900)?(curYear-birthYear):null;
+      var bdThisYear=new Date(curYear+'-'+mmdd);
+      var daysUntil=Math.ceil((bdThisYear-today)/(1000*60*60*24));
+      if(daysUntil<0) daysUntil+=365;
+      var isSoon=daysUntil<=30;
+      html+='<div class="ob-bday-item'+(isSoon?' soon':'')+'">'+
+        '<span class="ob-bday-date">'+obFmtDate(norm)+'</span>'+
+        '<span class="ob-bday-name">'+esc(bd.label)+'</span>'+
+        (age!==null?'<span class="ob-bday-age">'+age+'歳</span>':'')+
+        '<span class="ob-bday-soon">'+(daysUntil===0?'🎉 今日！':daysUntil+'日後')+'</span>'+
+        '<span style="font-size:.7rem;color:#AAA;margin-left:4px">'+esc(bd.source)+'</span>'+
+      '</div>';
+    });
+  }
+  html+='</div>';
+  // 編集フォーム
+  html+='<div style="margin-top:24px"><div class="ob-sec-title">誕生日を編集</div>';
+  html+='<div class="ob-karte-grid" style="margin-top:12px">';
+  BD_DEF.forEach(function(bd){
+    var raw=k[bd.key]||'';
+    var isoVal=raw?obNormDate(raw):'';
+    html+='<div class="ob-karte-fld"><label>'+bd.label+'</label>'+
+      '<input id="bdf-'+bd.key+'" type="date" value="'+esc(isoVal)+'"></div>';
+  });
+  html+='</div>';
+  html+='<button class="save" style="margin-top:16px;padding:10px 24px" onclick="obSaveDetBirthday()">誕生日を保存</button></div>';
+  el.innerHTML=html;
+}
+
+function obSaveDetBirthday(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  if(!r.karte) r.karte={};
+  var BD_DEF=[{key:'BD_本人'},{key:'BD_配偶者'},{key:'BD_子1'},{key:'BD_子2'},{key:'BD_子3'}];
+  BD_DEF.forEach(function(bd){
+    var el=document.getElementById('bdf-'+bd.key);
+    if(el) r.karte[bd.key]=el.value||'';
+  });
+  obSetCache(obRows);
+  post({action:'obSaveKarte',row:obDetailRow,karte:r.karte});
+  toast('誕生日を保存しました');
+  obRenderDetBirthday();
+}
+
+// 基本情報
+function obRenderDetInfo(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  var g=document.getElementById('ob-det-info-grid');
+  var fields=[
+    {key:'来場日',label:'受付日',type:'date'},
+    {key:'来場種別',label:'来場種別',type:'sel',opts:OB_EVENT_TYPES},
+    {key:'エリア',label:'エリア',type:'text'},
+    {key:'反響元',label:'反響元',type:'sel',opts:OB_SOURCES},
+    {key:'担当者',label:'担当者',type:'staff'},
+    {key:'サブ担当',label:'サブ担当',type:'staff'},
+    {key:'商談ステータス',label:'商談ステータス',type:'sel',opts:OB_STATUS_LIST},
+    {key:'次回予定',label:'次回予定日',type:'date'},
+    {key:'次回内容',label:'次回内容',type:'text'},
+    {key:'アポ確定日',label:'アポ確定日',type:'date'},
+    {key:'P申込目標日',label:'P申込目標日',type:'date'},
+    {key:'メモ',label:'メモ',type:'text',full:true}
+  ];
+  g.innerHTML=fields.map(function(f){
+    var val=r[f.key]||''; var display='';
+    if(f.type==='date') display=val?obFmtDate(obNormDate(val)):'—';
+    else display=val||'—';
+    return '<div class="ob-info-card'+(f.full?' ob-info-full':'')+'">'+
+      '<div class="ob-info-label">'+f.label+'</div>'+
+      '<div class="ob-info-val">'+
+        '<span class="ob-editable" style="display:block;font-size:.9rem;font-weight:600" data-row="'+obDetailRow+'" data-field="'+f.key+'" data-type="'+(f.type==='staff'?'staff':f.opts?'sel':f.type)+'" onclick="obStartEdit(this)">'+display+'</span>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  var hd=document.getElementById('ob-det-hurdles');
+  hd.innerHTML=OB_HURDLES.map(function(h){
+    var done=(r[h.key]==='1'||r[h.key]===true||r[h.key]===1);
+    return '<div class="ob-hurdle-card'+(done?' done':'')+'" onclick="obToggleDet(this,\''+h.key+'\','+obDetailRow+')">'+
+      '<span class="ob-hurdle-icon">'+h.icon+'</span>'+
+      '<span class="ob-hurdle-label">'+h.label+'</span>'+
+    '</div>';
+  }).join('');
+
+  var fd=document.getElementById('ob-det-framing');
+  fd.innerHTML=OB_FRAMINGS.map(function(f){
+    var done=(r[f.key]==='1'||r[f.key]===true||r[f.key]===1);
+    return '<div class="ob-hurdle-card'+(done?' done':'')+'" onclick="obToggleDet(this,\''+f.key+'\','+obDetailRow+')">'+
+      '<span class="ob-hurdle-icon">'+f.icon+'</span>'+
+      '<span class="ob-hurdle-label">'+f.label+'</span>'+
+    '</div>';
+  }).join('');
+}
+
+function obToggleDet(el,field,rowIdx){
+  var r=obRows[rowIdx]; if(!r) return;
+  var cur=(r[field]==='1'||r[field]===true||r[field]===1);
+  var nv=cur?'0':'1';
+  r[field]=nv; obSetCache(obRows);
+  el.classList.toggle('done',nv==='1');
+  post({action:'obUpdateField',row:rowIdx,field:field,value:nv});
+}
+
+// 履歴タイムライン
+function obRenderDetHistory(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  var tl=document.getElementById('ob-det-timeline'); if(!tl) return;
+  var hist=(r.history||[]).slice().sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+  obPopulateFilters(); // staff select
+  if(!hist.length){ tl.innerHTML='<div style="color:#CCC;font-size:.88rem;padding:8px 0">まだ履歴がありません。上から追加してください。</div>'; return; }
+  tl.innerHTML=hist.map(function(item,i){
+    return '<div class="ob-tl-item">'+
+      '<div class="ob-tl-dot"></div>'+
+      '<div class="ob-tl-date">'+esc(item.date?obFmtDate(obNormDate(item.date)):'—')+'</div>'+
+      '<div class="ob-tl-badge">'+esc(item.type||'')+'</div>'+
+      '<div class="ob-tl-content">'+esc(item.content||'')+'</div>'+
+      '<div class="ob-tl-staff">'+esc(item.staff||'')+'</div>'+
+      '<button class="ob-tl-del" onclick="obDelHistory('+i+')" title="削除">✕</button>'+
+    '</div>';
+  }).join('');
+}
+
+function obAddHistoryItem(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  var date=document.getElementById('tl-date').value;
+  var type=document.getElementById('tl-type').value;
+  var content=document.getElementById('tl-content').value.trim();
+  var staff=document.getElementById('tl-staff').value;
+  if(!content){ toast('内容を入力してください'); return; }
+  if(!date){ var t=new Date(); date=t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2); }
+  if(!r.history) r.history=[];
+  r.history.push({date:date,type:type,content:content,staff:staff});
+  r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+  obSetCache(obRows);
+  obRenderDetHistory();
+  obRenderVisitors();
+  document.getElementById('tl-content').value='';
+  post({action:'obAddHistory',row:obDetailRow,date:date,type:type,content:content,staff:staff});
+  toast('履歴を追加しました');
+}
+
+function obDelHistory(histIdx){
+  var r=obRows[obDetailRow]; if(!r||!r.history) return;
+  if(!confirm('この履歴を削除しますか？')) return;
+  r.history.splice(histIdx,1);
+  obSetCache(obRows);
+  obRenderDetHistory();
+  obRenderVisitors();
+  post({action:'obDeleteHistory',row:obDetailRow,histIndex:histIdx});
+  toast('削除しました');
+}
+
+// カルテ
+function obRenderDetKarte(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  var k=r.karte||{};
+  var g=document.getElementById('ob-det-karte-grid'); if(!g) return;
+  g.innerHTML=OB_KARTE_FIELDS.map(function(f){
+    var val=k[f.key]||'';
+    var isoVal=(f.type==='date'&&val)?obNormDate(val):val;
+    var input;
+    if(f.type==='textarea'){
+      input='<textarea id="kf-'+f.key+'" placeholder="'+esc(f.placeholder||'')+'">'+esc(val)+'</textarea>';
+    } else if(f.type==='date'){
+      input='<input id="kf-'+f.key+'" type="date" value="'+esc(isoVal)+'">';
+    } else {
+      input='<input id="kf-'+f.key+'" type="text" value="'+esc(val)+'" placeholder="'+esc(f.placeholder||'')+'">';
+    }
+    return '<div class="ob-karte-fld'+(f.full?' full':'')+'"><label>'+f.label+'</label>'+input+'</div>';
+  }).join('');
+}
+
+function obSaveKarteForm(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  if(!r.karte) r.karte={};
+  var karte={};
+  OB_KARTE_FIELDS.forEach(function(f){
+    var el=document.getElementById('kf-'+f.key);
+    karte[f.key]=el?el.value:'';
+  });
+  r.karte=karte; obSetCache(obRows);
+  post({action:'obSaveKarte',row:obDetailRow,karte:karte});
+  toast('カルテを保存しました');
+}
+
+// Googleドライブ
+function obRenderDetDrive(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  var url=r['driveUrl']||'';
+  var inp=document.getElementById('ob-drive-url'); if(inp) inp.value=url;
+  obShowDriveFrame(url);
+}
+
+function obSaveDriveUrl(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  var url=document.getElementById('ob-drive-url').value.trim();
+  r['driveUrl']=url; obSetCache(obRows);
+  obSaveField(obDetailRow,'driveUrl',url);
+  obShowDriveFrame(url);
+  toast('URLを保存しました');
+}
+
+function obShowDriveFrame(url){
+  var wrap=document.getElementById('ob-drive-frame-wrap'); if(!wrap) return;
+  if(!url){ wrap.innerHTML='<div class="ob-drive-placeholder">Google DriveのフォルダURLを上に入力すると<br>ここに埋め込まれます</div>'; return; }
+  // Drive共有リンクをiframe用URLに変換
+  var embedUrl=url;
+  var m=url.match(/\/folders\/([^?/]+)/);
+  if(m) embedUrl='https://drive.google.com/embeddedfolderview?id='+m[1]+'#list';
+  wrap.innerHTML='<iframe class="ob-drive-frame" src="'+esc(embedUrl)+'" allowfullscreen></iframe>';
+}
+
+// Notion同期
+function obImportFromNotion(){
+  if(!confirm('Notionの顧客マスタDB・見学会カルテDB・MTG DBから完全同期します。\n新規追加＋既存ステータス更新＋来場履歴を取得します。\n30〜60秒かかります。続けますか？')) return;
+  toast('Notion同期中… しばらくお待ちください');
+  gasGet('obImportFromNotion',function(d){
+    if(!d||d.error){ toast('⚠️ 同期エラー: '+(d?d.error:'不明')); return; }
+    var bdMsg=(d.birthdays&&d.birthdays.ok)?(' / 誕生日'+d.birthdays.synced+'件'):''
+    toast('✅ 同期完了：新規'+d.imported+'件追加、既存'+d.updated+'件更新（計'+d.total+'件）'+bdMsg);
+    obLoad();
+  });
+}
+
+// 起動処理
+initFs();
+if(adminKey()){ showApp(); }
+</script>
+</body>
+</html>
