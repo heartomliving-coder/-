@@ -821,11 +821,12 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
         <div class="hub-card-sep"></div>
         <div class="hub-desc">着工〜竣工・引渡し管理<br>工程スケジュール追跡</div>
       </div>
-      <div class="hub-card soon" style="padding:34px 40px">
+      <div class="hub-card" onclick="enterTochiBoard()" style="padding:34px 40px">
         <div class="hub-icon">🗺</div>
         <div class="hub-title">土地DB</div>
+        <div class="hub-badge" id="hubTcCount">—</div>
         <div class="hub-card-sep"></div>
-        <div class="hub-desc">土地情報・区画管理<br style="display:none"><span style="font-size:.6rem;opacity:.6;letter-spacing:.2em">近日公開</span></div>
+        <div class="hub-desc">確定土地・物件管理<br>工事案内図・見学会案内図</div>
       </div>
     </div>
   </div>
@@ -946,6 +947,36 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   <!-- 工程カレンダー -->
   <div class="kj-pane" data-ktab="timeline">
     <div class="kj-scroll" id="kj-timeline-content"><div class="kj-empty">工程表は現在準備中です</div></div>
+  </div>
+</div>
+
+<!-- ─── 土地DB ─── -->
+<div id="tochiboard" class="kj">
+  <div class="kj-hd">
+    <div class="kj-brand">
+      <img src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM" onerror="this.style.display='none'">
+      <div class="kj-hd-ti">土地DB<small>LAND DATABASE</small></div>
+    </div>
+    <div class="kj-tabs">
+      <button class="kj-tab on" data-ttab="list">📋 物件一覧</button>
+    </div>
+    <div class="kj-actions">
+      <button class="hbtn primary" onclick="tochiGenerateAll()">🗺 地図PDF生成（未処理）</button>
+      <button class="hbtn ghost" onclick="tochiLoad()">🔄 Notion同期</button>
+      <button class="hbtn ghost" onclick="showHub()">‹ 戻る</button>
+    </div>
+  </div>
+  <div class="kj-filter" style="gap:10px;padding:12px 20px">
+    <input id="tochi-q" type="text" placeholder="顧客名・住所で検索..." oninput="tochiRenderList()" style="padding:6px 12px;border:1px solid #DDD;border-radius:4px;font-size:.84rem;width:280px;outline:none">
+    <select id="tochi-filter-koji" onchange="tochiRenderList()" style="padding:6px 10px;border:1px solid #DDD;border-radius:4px;font-size:.82rem">
+      <option value="">工事案内図: すべて</option>
+      <option value="done">生成済み</option>
+      <option value="none">未生成</option>
+    </select>
+    <span id="tochi-count" style="font-size:.8rem;color:#888;margin-left:auto"></span>
+  </div>
+  <div class="kj-scroll">
+    <div id="tochi-list-content"><div class="kj-empty">読み込み中...</div></div>
   </div>
 </div>
 
@@ -1460,6 +1491,7 @@ function enterOpenBoard(){
 function showHub(){
   document.getElementById('openboard').classList.remove('show');
   document.getElementById('kojiboard').classList.remove('show');
+  document.getElementById('tochiboard').classList.remove('show');
   document.getElementById('app').classList.remove('show');
   document.getElementById('hub').classList.add('show');
   hubUpdateBadges();
@@ -1483,6 +1515,8 @@ function hubUpdateBadges(){
   var el=document.getElementById('hubObCount'); if(el) el.textContent=obCnt+'件';
   var kjCnt=kjRows.filter(function(r){return ['引渡済','完了'].indexOf(kjPhaseOf(r))<0;}).length;
   var el2=document.getElementById('hubKjCount'); if(el2) el2.textContent=kjCnt+'件';
+  var tcCnt=tochiRows.length;
+  var el3=document.getElementById('hubTcCount'); if(el3) el3.textContent=tcCnt?tcCnt+'件':'—';
 }
 setInterval(hubTick,1000); hubTick();
 
@@ -3827,6 +3861,87 @@ function kjAutoAddFromOB(obRow){
       toast('✅ 着工管理に追加しました: '+rec['物件名']);
       kjLoad(true);
     }
+  });
+}
+
+// ══════════════════════════════════════════════════
+// 土地DB (TochiBoard)
+// ══════════════════════════════════════════════════
+
+var tochiRows = [];
+
+function tochiGetCache(){ try{var d=localStorage.getItem('tc_v1');return d?JSON.parse(d):[];}catch(e){return[];} }
+function tochiSetCache(rows){ try{localStorage.setItem('tc_v1',JSON.stringify(rows));}catch(e){} }
+
+function enterTochiBoard(){
+  document.getElementById('hub').classList.remove('show');
+  document.getElementById('tochiboard').classList.add('show');
+  var cached=tochiGetCache();
+  if(cached.length){ tochiRows=cached; tochiRenderList(); }
+  tochiLoad();
+}
+
+function tochiLoad(){
+  toast('Notionから読み込み中…');
+  gasGet('tochiGetData',function(d){
+    if(!d||d.error){ toast('⚠️ 取得エラー: '+(d?d.error:'不明')); return; }
+    tochiRows=d.rows||[];
+    tochiSetCache(tochiRows);
+    tochiRenderList();
+    hubUpdateBadges();
+    toast('✅ 土地DB 読み込み完了: '+tochiRows.length+'件');
+  });
+}
+
+function tochiRenderList(){
+  var el=document.getElementById('tochi-list-content'); if(!el) return;
+  var fQ=((document.getElementById('tochi-q')||{}).value||'').toLowerCase().trim();
+  var fKoji=((document.getElementById('tochi-filter-koji')||{}).value||'');
+  var rows=tochiRows.filter(function(r){
+    if(fQ && (r['顧客名']||'').toLowerCase().indexOf(fQ)<0 && (r['所在地']||'').toLowerCase().indexOf(fQ)<0) return false;
+    if(fKoji==='done' && !r['工事案内図']) return false;
+    if(fKoji==='none' && r['工事案内図']) return false;
+    return true;
+  });
+  var cntEl=document.getElementById('tochi-count'); if(cntEl) cntEl.textContent=rows.length+'件';
+  if(!rows.length){ el.innerHTML='<div class="kj-empty">該当する物件がありません</div>'; return; }
+
+  var html='<table class="kj-table"><thead><tr>'+
+    '<th>顧客名</th><th>所在地</th><th>Googleマップ</th>'+
+    '<th>工事案内図</th><th>見学会案内図</th><th>駐車場</th>'+
+    '</tr></thead><tbody>';
+  rows.forEach(function(r){
+    var hasKoji=!!r['工事案内図'];
+    var hasKengaku=TOCHI_STAFF.some(function(s){return !!r[s.prop];});
+    var gmapUrl=r['Googleマップ']||'';
+    html+='<tr>'+
+      '<td><span style="font-weight:700;color:#2B2B2B">'+esc(r['顧客名']||'—')+'</span></td>'+
+      '<td style="font-size:.8rem;color:#555;max-width:200px">'+esc(r['所在地']||'—')+'</td>'+
+      '<td>'+(gmapUrl?'<a href="'+esc(gmapUrl)+'" target="_blank" style="color:#2563EB;font-size:.78rem;text-decoration:none">🗺 開く</a>':'<span style="color:#CCC;font-size:.76rem">—</span>')+'</td>'+
+      '<td>'+(hasKoji?'<span style="color:#166534;font-weight:700;font-size:.78rem">✅ 生成済</span>':
+        '<span style="color:#9A3412;font-size:.76rem">未生成</span>')+'</td>'+
+      '<td>'+(hasKengaku?'<span style="color:#166534;font-size:.78rem">✅ あり</span>':
+        '<span style="color:#9A3412;font-size:.76rem">なし</span>')+'</td>'+
+      '<td style="font-size:.78rem;color:#555">'+esc(r['駐車場場所']||'—')+'</td>'+
+    '</tr>';
+  });
+  html+='</tbody></table>';
+  el.innerHTML=html;
+}
+
+var TOCHI_STAFF=[
+  {prop:'見学会案内図(畑田)'},{prop:'見学会案内図(中山)'},
+  {prop:'見学会案内図(渡邊)'},{prop:'見学会案内図(沖)'},{prop:'見学会案内図(和田)'}
+];
+
+function tochiGenerateAll(){
+  var unprocessed=tochiRows.filter(function(r){return !r['工事案内図'];});
+  if(!unprocessed.length){ toast('未処理の物件はありません'); return; }
+  if(!confirm('工事案内図・見学会案内図が未生成の '+unprocessed.length+'件 のPDFを生成します。\n数分かかります。続けますか？')) return;
+  toast('PDF生成中… GASで処理しています（完了まで数分）');
+  post({action:'tochiGenerateAllMaps'},function(d){
+    if(d&&d.ok){ toast('✅ PDF生成完了: '+d.processed+'件処理'); tochiLoad(); }
+    else toast('⚠️ エラー: '+(d?d.error:'不明'));
   });
 }
 
