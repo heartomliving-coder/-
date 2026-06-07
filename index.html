@@ -422,9 +422,92 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .hub-card::after{content:'';position:absolute;inset:0;border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12);pointer-events:none}
 .hub-card:hover{background:rgba(255,255,255,.14);border-color:rgba(199,178,153,.55);transform:translateY(-6px);box-shadow:0 28px 64px rgba(0,0,0,.45)}
 .hub-card:active{transform:translateY(-2px) scale(.98)}
-.hub-icon{font-size:2.8rem;margin-bottom:18px;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
-.hub-title{font-family:var(--serif);font-size:1.32rem;font-weight:700;color:#fff;letter-spacing:.12em;margin-bottom:10px}
-.hub-desc{font-size:.72rem;color:rgba(255,255,255,.48);letter-spacing:.06em;line-height:1.8}
+.hub-icon{font-size:2.8rem;margin-bottom:16px;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
+.hub-title{font-family:var(--serif);font-size:1.22rem;font-weight:700;color:#fff;letter-spacing:.10em;margin-bottom:8px}
+.hub-desc{font-size:.68rem;color:rgba(255,255,255,.42);letter-spacing:.04em;line-height:1.8}
+.hub-badge{position:absolute;top:14px;right:14px;background:rgba(154,140,118,.35);border:1px solid rgba(154,140,118,.6);color:rgba(255,255,255,.9);font-size:.6rem;font-weight:700;letter-spacing:.06em;padding:3px 8px;border-radius:20px}
+.hub-card-sep{width:28px;height:1px;background:rgba(255,255,255,.12);margin:10px auto}
+.hub-card.soon{opacity:.4;cursor:not-allowed}
+.hub-card.soon:hover{transform:none;box-shadow:none}
+.hub-datetime{font-size:.64rem;color:rgba(255,255,255,.3);letter-spacing:.2em;margin-bottom:8px;text-align:center}
+.hub-appname{font-family:var(--serif);font-size:1.9rem;font-weight:600;color:#fff;letter-spacing:.14em;margin-bottom:4px;text-align:center}
+.hub-subtitle{font-family:"Playfair Display",serif;font-size:.63rem;letter-spacing:.48em;color:rgba(255,255,255,.4);margin-bottom:36px;text-align:center;text-transform:uppercase}
+.hub-divider{width:60px;height:1px;background:rgba(255,255,255,.12);margin:0 auto 36px}
+
+/* ─────────── 着工管理 ─────────── */
+.kj{display:none;flex-direction:column;height:100dvh;overflow:hidden;background:#F3F1EE}
+.kj.show{display:flex}
+.kj-hd{flex-shrink:0;background:#1A1A1A;color:#fff;padding:16px 28px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.08)}
+.kj-brand{display:flex;align-items:center;gap:12px}
+.kj-brand img{height:26px;filter:brightness(0) invert(1)}
+.kj-hd-ti{font-family:var(--serif);font-size:1.05rem;letter-spacing:.14em;font-weight:600;color:#fff}
+.kj-hd-ti small{display:block;font-family:"Playfair Display",serif;font-size:.56rem;letter-spacing:.3em;color:rgba(255,255,255,.4);font-weight:500;margin-top:3px}
+.kj-tabs{display:flex;gap:0;border-left:1px solid rgba(255,255,255,.1)}
+.kj-tab{background:none;border:none;border-bottom:3px solid transparent;color:rgba(255,255,255,.45);padding:12px 20px;font-size:.72rem;font-weight:700;letter-spacing:.1em;cursor:pointer;transition:all .18s;white-space:nowrap}
+.kj-tab:hover{color:rgba(255,255,255,.85)}
+.kj-tab.on{color:#fff;border-bottom-color:#9A8C76}
+.kj-hd-tools{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.kj-pane{display:none;flex:1;flex-direction:column;overflow:hidden}
+.kj-pane.show{display:flex}
+.kj-filter{flex-shrink:0;background:#fff;border-bottom:1px solid #E8E4DE;padding:10px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.kj-filter label{font-size:.7rem;font-weight:700;letter-spacing:.1em;color:#888}
+.kj-filter input,.kj-filter select{padding:7px 12px;border:1px solid #DDD;border-radius:3px;font-size:.82rem;font-family:inherit;outline:none;background:#FAFAFA}
+.kj-filter input:focus,.kj-filter select:focus{border-color:#2B2B2B}
+.kj-scroll{flex:1;overflow:auto}
+.kj-empty{padding:60px 20px;text-align:center;color:#BBB;font-size:.88rem}
+
+/* 着工管理テーブル */
+.kj-table{width:100%;border-collapse:collapse;font-size:.82rem;white-space:nowrap}
+.kj-table thead th{background:#2B2B2B;color:rgba(255,255,255,.7);font-size:.64rem;font-weight:700;letter-spacing:.1em;padding:9px 12px;text-align:left;position:sticky;top:0;z-index:2}
+.kj-table td{padding:8px 12px;border-bottom:1px solid #EDEAE4;color:#222;vertical-align:middle}
+.kj-table tr:hover td{background:#F7F5F0}
+.kj-table tr[data-phase="設計中"] td{border-left:3px solid #6B9EC6}
+.kj-table tr[data-phase="着工前"] td{border-left:3px solid #E59E40}
+.kj-table tr[data-phase="工事中"] td{border-left:3px solid #5E9E5E}
+.kj-table tr[data-phase="竣工済"] td{border-left:3px solid #9A8C76}
+.kj-table tr[data-phase="引渡済"] td{border-left:3px solid #BBBBBB}
+.kj-name-link{font-family:var(--serif);font-size:.92rem;font-weight:700;color:var(--charcoal);cursor:pointer}
+.kj-name-link:hover{text-decoration:underline;color:#9A8C76}
+.kj-phase-badge{display:inline-flex;align-items:center;font-size:.64rem;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.04em}
+.kj-phase-badge.p0{background:#F0EDEA;color:#888}
+.kj-phase-badge.p1{background:#E8F0F7;color:#2563EB}
+.kj-phase-badge.p2{background:#FFF3DC;color:#92500A}
+.kj-phase-badge.p3{background:#EDF7ED;color:#166534}
+.kj-phase-badge.p4{background:#F0EDE8;color:#9A8C76}
+.kj-phase-badge.p5{background:#F5F5F5;color:#888}
+
+/* 着工詳細パネル */
+.kj-detail{position:fixed;top:0;right:-100%;width:min(700px,95vw);height:100dvh;background:#fff;box-shadow:-12px 0 60px rgba(0,0,0,.18);z-index:200;display:flex;flex-direction:column;transition:right .32s cubic-bezier(.23,1,.32,1)}
+.kj-detail.show{right:0}
+.kj-det-hd{background:#1A1A1A;color:#fff;padding:20px 24px;flex-shrink:0}
+.kj-det-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
+.kj-det-name{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:#fff;flex:1;letter-spacing:.06em;cursor:pointer}
+.kj-det-sub{font-size:.72rem;color:rgba(255,255,255,.5);letter-spacing:.06em;margin-top:4px}
+.kj-det-back{background:none;border:none;color:rgba(255,255,255,.65);font-size:.78rem;cursor:pointer;padding:6px 0;letter-spacing:.06em;white-space:nowrap}
+.kj-det-tabs{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.1);padding-top:2px}
+.kj-det-tab{background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,.38);padding:8px 14px;font-size:.66rem;font-weight:700;letter-spacing:.1em;cursor:pointer;transition:all .18s;white-space:nowrap}
+.kj-det-tab:hover{color:rgba(255,255,255,.8)}
+.kj-det-tab.on{color:#fff;border-bottom-color:#9A8C76}
+.kj-det-body{flex:1;overflow:auto}
+.kj-det-pane{display:none;padding:22px 24px}
+.kj-det-pane.show{display:block}
+.kj-phase-section{margin-bottom:24px;border:1px solid #E8E4DE;border-radius:6px;overflow:hidden}
+.kj-phase-hd{background:#F7F5F0;padding:10px 16px;font-size:.7rem;font-weight:700;letter-spacing:.12em;color:#555;display:flex;align-items:center;gap:8px}
+.kj-phase-hd .ph-icon{font-size:1rem}
+.kj-phase-hd .ph-done{margin-left:auto;font-size:.64rem;color:#5E9E5E;font-weight:700}
+.kj-phase-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:#E8E4DE}
+.kj-field-card{background:#fff;padding:10px 14px}
+.kj-field-lbl{font-size:.62rem;color:#999;letter-spacing:.1em;font-weight:700;margin-bottom:4px;text-transform:uppercase}
+.kj-field-val .kj-editable{display:block;min-height:22px;font-size:.86rem;font-weight:600;color:#2B2B2B;cursor:pointer;padding:2px 0;border-bottom:1px dashed transparent;transition:border-color .15s}
+.kj-field-val .kj-editable:hover{border-bottom-color:#CCC}
+.kj-field-val .kj-editable.empty{color:#CCC;font-size:.78rem;font-style:italic}
+
+/* 着工管理ガントバー */
+.kj-progress{background:#F7F5F0;border-bottom:1px solid #E8E4DE;padding:12px 22px;flex-shrink:0;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.kj-progress-item{display:flex;align-items:center;gap:5px;font-size:.64rem;color:#666;cursor:pointer;padding:4px 8px;border-radius:3px;border:1px solid transparent;transition:all .15s}
+.kj-progress-item:hover{border-color:#DDD;background:#fff}
+.kj-progress-item.active{border-color:#2B2B2B;background:#2B2B2B;color:#fff}
+.kj-progress-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
 
 /* ─────────── オープンボード ─────────── */
 .ob{display:none;flex-direction:column;height:100dvh;overflow:hidden;background:#F7F6F3}
@@ -711,19 +794,38 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     <div class="lslide" style="background-image:url('/int5.jpg')"></div>
   </div>
   <div class="lveil"></div>
-  <div class="hub-wrap">
+  <div class="hub-wrap" style="max-width:960px">
+    <div class="hub-datetime" id="hubClock"></div>
     <img class="hub-logo" src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none'">
-    <div class="hub-eyebrow">HEARTOM LIVING — MANAGEMENT CONSOLE</div>
-    <div class="hub-cards">
-      <div class="hub-card" onclick="enterReception()">
+    <div class="hub-appname">管理コンソール</div>
+    <div class="hub-subtitle">HEARTOM LIVING — MANAGEMENT CONSOLE</div>
+    <div class="hub-divider"></div>
+    <div class="hub-cards" style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px;width:100%;max-width:660px">
+      <div class="hub-card" onclick="enterReception()" style="padding:34px 40px">
         <div class="hub-icon">🏠</div>
         <div class="hub-title">受付管理</div>
+        <div class="hub-card-sep"></div>
         <div class="hub-desc">お客様受付・セッション管理<br>モニター・遠隔操作</div>
       </div>
-      <div class="hub-card" onclick="enterOpenBoard()">
-        <div class="hub-icon">📊</div>
+      <div class="hub-card" onclick="enterOpenBoard()" style="padding:34px 40px">
+        <div class="hub-icon">📋</div>
         <div class="hub-title">オープンボード</div>
+        <div class="hub-badge" id="hubObCount">—</div>
+        <div class="hub-card-sep"></div>
         <div class="hub-desc">顧客追客・商談進捗管理<br>月次集計・ハードル管理</div>
+      </div>
+      <div class="hub-card" onclick="enterKojiBoard()" style="padding:34px 40px">
+        <div class="hub-icon">🏗</div>
+        <div class="hub-title">着工管理</div>
+        <div class="hub-badge" id="hubKjCount">—</div>
+        <div class="hub-card-sep"></div>
+        <div class="hub-desc">着工〜竣工・引渡し管理<br>工程スケジュール追跡</div>
+      </div>
+      <div class="hub-card soon" style="padding:34px 40px">
+        <div class="hub-icon">🗺</div>
+        <div class="hub-title">土地DB</div>
+        <div class="hub-card-sep"></div>
+        <div class="hub-desc">土地情報・区画管理<br style="display:none"><span style="font-size:.6rem;opacity:.6;letter-spacing:.2em">近日公開</span></div>
       </div>
     </div>
   </div>
@@ -803,6 +905,83 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   <!-- 集計 -->
   <div class="ob-pane" data-tab="agg">
     <div class="ob-agg-body" id="ob-agg-content"><div class="ob-empty-state">読み込み中...</div></div>
+  </div>
+</div>
+
+<!-- ─── 着工管理ボード ─── -->
+<div id="kojiboard" class="kj">
+  <div class="kj-hd">
+    <div class="kj-brand">
+      <img src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM" onerror="this.style.display='none'">
+      <div class="kj-hd-ti">着工管理<small>KOJI BOARD</small></div>
+    </div>
+    <div class="kj-tabs">
+      <button class="kj-tab on" data-ktab="list" onclick="kjSwitchTab('list')">📋 案件一覧</button>
+      <button class="kj-tab" data-ktab="timeline" onclick="kjSwitchTab('timeline')">📅 工程カレンダー</button>
+    </div>
+    <div class="kj-hd-tools">
+      <button class="hbtn primary" onclick="kjAddProject()">＋ 新規追加</button>
+      <button class="hbtn ghost" onclick="kjSyncNotion()">🔄 Notion同期</button>
+      <button class="hbtn" onclick="showHub()">‹ 戻る</button>
+    </div>
+  </div>
+
+  <!-- 案件一覧 -->
+  <div class="kj-pane show" data-ktab="list">
+    <div class="kj-filter">
+      <label>フェーズ:</label>
+      <select id="kj-filter-phase" onchange="kjRenderList()" style="width:110px">
+        <option value="">すべて</option>
+        <option>契約前</option><option>設計中</option><option>申請中</option>
+        <option>着工前</option><option>工事中</option><option>竣工済</option><option>引渡済</option>
+      </select>
+      <label>担当:</label>
+      <select id="kj-filter-staff" onchange="kjRenderList()" style="width:100px"><option value="">すべて</option></select>
+      <input type="text" id="kj-q" placeholder="物件名・場所で検索..." style="min-width:160px" oninput="kjRenderList()">
+      <span style="font-size:.72rem;color:#888;margin-left:auto" id="kj-count"></span>
+    </div>
+    <div class="kj-scroll" id="kj-list-content"><div class="kj-empty">読み込み中...</div></div>
+  </div>
+
+  <!-- 工程カレンダー -->
+  <div class="kj-pane" data-ktab="timeline">
+    <div class="kj-scroll" id="kj-timeline-content"><div class="kj-empty">工程表は現在準備中です</div></div>
+  </div>
+</div>
+
+<!-- ─── 着工案件 詳細パネル ─── -->
+<div id="kj-detail" class="kj-detail">
+  <div class="kj-det-hd">
+    <div class="kj-det-top">
+      <button class="kj-det-back" onclick="kjCloseDetail()">‹ 一覧へ戻る</button>
+      <div style="flex:1">
+        <div id="kj-det-name" class="kj-det-name" onclick="kjEditDetName()" title="クリックして編集">—</div>
+        <div id="kj-det-sub" class="kj-det-sub"></div>
+      </div>
+      <span id="kj-det-badge" class="kj-phase-badge p0">—</span>
+    </div>
+    <div class="kj-det-tabs">
+      <button class="kj-det-tab on" data-dtab="info" onclick="kjDetTab('info')">🏗 基本情報</button>
+      <button class="kj-det-tab" data-dtab="pre" onclick="kjDetTab('pre')">📋 契約前</button>
+      <button class="kj-det-tab" data-dtab="design" onclick="kjDetTab('design')">✏️ 設計</button>
+      <button class="kj-det-tab" data-dtab="apply" onclick="kjDetTab('apply')">📄 申請</button>
+      <button class="kj-det-tab" data-dtab="construct" onclick="kjDetTab('construct')">🔧 工事</button>
+      <button class="kj-det-tab" data-dtab="complete" onclick="kjDetTab('complete')">🎉 竣工</button>
+    </div>
+  </div>
+  <div class="kj-det-body">
+    <!-- 基本情報 -->
+    <div class="kj-det-pane show" data-dtab="info" id="kj-pane-info"></div>
+    <!-- 契約前 -->
+    <div class="kj-det-pane" data-dtab="pre" id="kj-pane-pre"></div>
+    <!-- 設計 -->
+    <div class="kj-det-pane" data-dtab="design" id="kj-pane-design"></div>
+    <!-- 申請 -->
+    <div class="kj-det-pane" data-dtab="apply" id="kj-pane-apply"></div>
+    <!-- 工事 -->
+    <div class="kj-det-pane" data-dtab="construct" id="kj-pane-construct"></div>
+    <!-- 竣工 -->
+    <div class="kj-det-pane" data-dtab="complete" id="kj-pane-complete"></div>
   </div>
 </div>
 
@@ -1280,9 +1459,32 @@ function enterOpenBoard(){
 
 function showHub(){
   document.getElementById('openboard').classList.remove('show');
+  document.getElementById('kojiboard').classList.remove('show');
   document.getElementById('app').classList.remove('show');
   document.getElementById('hub').classList.add('show');
+  hubUpdateBadges();
 }
+
+function enterKojiBoard(){
+  document.getElementById('hub').classList.remove('show');
+  document.getElementById('kojiboard').classList.add('show');
+  kjLoad();
+}
+
+// Hub clock + badge updates
+function hubTick(){
+  var el=document.getElementById('hubClock'); if(!el) return;
+  var d=new Date(); var w=['日','月','火','水','木','金','土'][d.getDay()];
+  el.textContent=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+w+'）　'+
+    ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
+}
+function hubUpdateBadges(){
+  var obCnt=obRows.filter(function(r){var s=r['商談ステータス']||''; return ['失注','引渡済'].indexOf(s)<0;}).length;
+  var el=document.getElementById('hubObCount'); if(el) el.textContent=obCnt+'件';
+  var kjCnt=kjRows.filter(function(r){return ['引渡済','完了'].indexOf(kjPhaseOf(r))<0;}).length;
+  var el2=document.getElementById('hubKjCount'); if(el2) el2.textContent=kjCnt+'件';
+}
+setInterval(hubTick,1000); hubTick();
 
 // ★ サブ担当の保存機能追加
 function saveStaff(){localStorage.setItem('admin_staff',document.getElementById('staff').value.trim())}
@@ -2698,6 +2900,7 @@ function obSaveField(row,field,value){
   if(obRows[row]) obRows[row][field]=value;
   obSetCache(obRows);
   post({action:'obUpdateField',row:row,field:field,value:value});
+  if(field==='商談ステータス' && value==='パートナー契約済') kjAutoAddFromOB(obRows[row]);
 }
 
 // ── 除外スタッフ設定 ──
@@ -3285,6 +3488,345 @@ function obImportFromNotion(){
     var bdMsg=(d.birthdays&&d.birthdays.ok)?(' / 誕生日'+d.birthdays.synced+'件'):''
     toast('✅ 同期完了：新規'+d.imported+'件追加、既存'+d.updated+'件更新（計'+d.total+'件）'+bdMsg);
     obLoad();
+  });
+}
+
+// ══════════════════════════════════════════════════
+// 着工管理ボード (Koji Board)
+// ══════════════════════════════════════════════════
+
+var kjRows = [];
+var kjDetailId = null;
+
+var KJ_KUBUN = ['casa','AN','trip','HL','3F','その他'];
+var KJ_STAFF_LIST = ['渡邊','畑田','中山','稲葉','和田','沖'];
+var KJ_KOJI_STAFF = ['田中','斉藤','野村','大熊','中島','ヒロセ','その他'];
+
+var KJ_PHASES = [
+  { key:'info', label:'基本情報', icon:'🏗', tab:'info', fields:[
+    {k:'物件名',l:'物件名',t:'text',full:true},
+    {k:'場所',l:'場所',t:'text',full:true},
+    {k:'区分',l:'区分',t:'sel',opts:KJ_KUBUN},
+    {k:'ステータス',l:'ステータス',t:'sel',opts:['契約前','設計中','申請中','着工前','工事中','竣工済','引渡済']},
+    {k:'営業',l:'営業担当',t:'text'},{k:'工務',l:'工務担当',t:'text'},
+    {k:'建築家',l:'建築家',t:'text'},{k:'IC',l:'IC',t:'text'},
+    {k:'構造',l:'構造',t:'text'},{k:'申請',l:'申請',t:'text'},
+    {k:'開発',l:'開発',t:'text'},{k:'審査機関',l:'審査機関',t:'text'},
+    {k:'銀行',l:'銀行',t:'text'},{k:'大工',l:'大工',t:'text'},
+    {k:'メモ',l:'メモ',t:'text',full:true},
+  ]},
+  { key:'pre', label:'契約前', icon:'📋', tab:'pre', fields:[
+    {k:'初回接客',l:'初回接客',t:'date'},{k:'土地確定',l:'土地確定',t:'date'},
+    {k:'土地契約',l:'土地契約',t:'date'},{k:'敷調依頼',l:'敷調依頼',t:'date'},
+    {k:'測量',l:'測量',t:'text'},{k:'初回P登録',l:'初回P登録',t:'date'},
+    {k:'ライフライン見積',l:'ライフライン見積',t:'date'},
+    {k:'建築家①',l:'建築家①',t:'date'},{k:'ラフ図mtg',l:'ラフ図mtg',t:'date'},
+    {k:'建築家②',l:'建築家②',t:'date'},{k:'建築家③',l:'建築家③',t:'date'},
+    {k:'請負契約日',l:'請負契約日',t:'date'},{k:'土地決済',l:'土地決済',t:'date'},
+  ]},
+  { key:'design', label:'設計', icon:'✏️', tab:'design', fields:[
+    {k:'納図',l:'納図',t:'date'},{k:'見積依頼',l:'見積依頼',t:'date'},
+    {k:'地盤調査',l:'地盤調査',t:'date'},{k:'太陽光',l:'太陽光',t:'text'},
+    {k:'浄化槽',l:'浄化槽',t:'text'},{k:'構造依頼',l:'構造依頼',t:'date'},
+    {k:'ショールーム',l:'ショールーム',t:'date'},{k:'仕様決め',l:'仕様決め',t:'date'},
+    {k:'造作',l:'造作',t:'date'},{k:'電気配線',l:'電気配線',t:'date'},
+    {k:'水廻り',l:'水廻り',t:'date'},{k:'残仕様①',l:'残仕様①',t:'date'},
+    {k:'残仕様②',l:'残仕様②',t:'date'},{k:'外構',l:'外構',t:'text'},
+    {k:'3者打合せ',l:'3者打合せ',t:'date'},{k:'本設依頼',l:'本設依頼',t:'date'},
+    {k:'図面承認',l:'図面承認',t:'date'},{k:'見積承認',l:'見積承認',t:'date'},
+    {k:'製本',l:'製本',t:'date'},{k:'届出関連',l:'届出関連',t:'text'},
+    {k:'PC依頼',l:'PC依頼',t:'text'},
+  ]},
+  { key:'apply', label:'申請', icon:'📄', tab:'apply', fields:[
+    {k:'開発申請',l:'開発申請',t:'date'},{k:'開発許可',l:'開発許可',t:'date'},
+    {k:'開発完了検査',l:'開発完了検査',t:'date'},{k:'適合許可',l:'適合許可',t:'date'},
+    {k:'建確',l:'建確',t:'date'},{k:'長期',l:'長期',t:'date'},
+    {k:'BELS申請',l:'BELS申請',t:'text'},{k:'補助金申請',l:'補助金申請',t:'text'},
+  ]},
+  { key:'construct', label:'着工〜木完', icon:'🔧', tab:'construct', fields:[
+    {k:'解体',l:'解体',t:'text'},{k:'地鎮祭',l:'地鎮祭',t:'date'},
+    {k:'着工金',l:'着工金',t:'date'},{k:'地盤改良',l:'地盤改良',t:'text'},
+    {k:'リードタイム',l:'リードタイム(日)',t:'text'},
+    {k:'基礎着工',l:'基礎着工',t:'date'},{k:'基礎完工',l:'基礎完工',t:'date'},
+    {k:'上棟金',l:'上棟金',t:'date'},{k:'土台',l:'土台',t:'date'},
+    {k:'柱建て',l:'柱建て',t:'date'},{k:'上棟',l:'上棟',t:'date'},
+    {k:'中間検査',l:'中間検査',t:'date'},{k:'配線',l:'配線',t:'date'},
+    {k:'住所変更',l:'住所変更',t:'date'},{k:'木完検査',l:'木完検査',t:'date'},
+    {k:'木完・手形',l:'木完・手形',t:'date'},
+  ]},
+  { key:'complete', label:'竣工・引渡し', icon:'🎉', tab:'complete', fields:[
+    {k:'クロス着工',l:'クロス着工',t:'date'},{k:'クロス完了',l:'クロス完了',t:'date'},
+    {k:'浄化槽検査',l:'浄化槽検査',t:'date'},{k:'完了検査',l:'完了検査',t:'date'},
+    {k:'社内検査',l:'社内検査',t:'date'},{k:'外構完了',l:'外構完了',t:'date'},
+    {k:'竣工立会',l:'竣工立会',t:'date'},{k:'見学会',l:'見学会',t:'text'},
+    {k:'表示(出）',l:'表示(出）',t:'date'},{k:'表示(上）',l:'表示(上）',t:'date'},
+    {k:'金消',l:'金消',t:'date'},{k:'決済',l:'決済',t:'date'},
+    {k:'カメラ',l:'カメラ',t:'date'},{k:'引渡し',l:'引渡し',t:'date'},
+    {k:'入居',l:'入居',t:'date'},
+  ]},
+];
+
+// フェーズ判定（日付の埋まり具合から現在フェーズを推定）
+function kjPhaseOf(r){
+  if(r['ステータス']) return r['ステータス'];
+  if(r['引渡し']) return '引渡済';
+  if(r['竣工立会']) return '竣工済';
+  if(r['基礎着工']) return '工事中';
+  if(r['地鎮祭']) return '着工前';
+  if(r['建確']||r['長期']) return '申請中';
+  if(r['請負契約日']) return '設計中';
+  return '契約前';
+}
+var KJ_PHASE_CLASS={'契約前':'p0','設計中':'p1','申請中':'p1','着工前':'p2','工事中':'p3','竣工済':'p4','引渡済':'p5'};
+
+// データ読み書き
+function kjGetCache(){ try{var d=localStorage.getItem('kj_v1');return d?JSON.parse(d):[];}catch(e){return[];} }
+function kjSetCache(rows){ try{localStorage.setItem('kj_v1',JSON.stringify(rows));}catch(e){} }
+
+function kjLoad(silent){
+  var cached=kjGetCache();
+  if(cached.length && !silent){ kjRows=cached; kjRows.forEach(function(r,i){r._idx=i;}); kjRenderList(); }
+  gasGet('kjGetData',function(d){
+    if(!d||d.error){ if(!cached.length) document.getElementById('kj-list-content').innerHTML='<div class="kj-empty">データ取得エラー</div>'; return; }
+    var newRows=d.rows||[];
+    var prevLen=kjRows.length;
+    kjRows=newRows;
+    kjRows.forEach(function(r,i){r._idx=i;});
+    kjSetCache(kjRows);
+    kjRenderList();
+    if(silent && kjRows.length>prevLen) toast('🔔 着工管理 新規 '+(kjRows.length-prevLen)+'件');
+    hubUpdateBadges();
+  });
+}
+
+function kjRenderList(){
+  var el=document.getElementById('kj-list-content'); if(!el) return;
+  var fPhase=((document.getElementById('kj-filter-phase')||{}).value||'');
+  var fStaff=((document.getElementById('kj-filter-staff')||{}).value||'');
+  var fQ=((document.getElementById('kj-q')||{}).value||'').toLowerCase().trim();
+  var rows=kjRows.filter(function(r){
+    var ph=kjPhaseOf(r);
+    if(fPhase && ph!==fPhase) return false;
+    if(fStaff && r['営業']!==fStaff && r['工務']!==fStaff) return false;
+    if(fQ && (r['物件名']||'').toLowerCase().indexOf(fQ)<0 && (r['場所']||'').toLowerCase().indexOf(fQ)<0) return false;
+    return true;
+  });
+  var cntEl=document.getElementById('kj-count'); if(cntEl) cntEl.textContent=rows.length+'件';
+
+  // Staff filter options
+  var sels=document.getElementById('kj-filter-staff');
+  if(sels && sels.options.length<=1){
+    var staffSet={};
+    kjRows.forEach(function(r){ if(r['営業']) staffSet[r['営業']]=true; if(r['工務']) staffSet[r['工務']]=true; });
+    Object.keys(staffSet).sort().forEach(function(s){ var o=document.createElement('option'); o.value=s; o.textContent=s; sels.appendChild(o); });
+  }
+
+  if(!rows.length){ el.innerHTML='<div class="kj-empty">該当する案件がありません</div>'; return; }
+
+  var html='<table class="kj-table"><thead><tr>'+
+    '<th>物件名</th><th>場所</th><th>区分</th><th>営業</th><th>工務</th>'+
+    '<th>フェーズ</th><th>請負契約</th><th>着工</th><th>上棟</th><th>引渡し</th><th></th>'+
+    '</tr></thead><tbody>';
+
+  rows.forEach(function(r){
+    var ph=kjPhaseOf(r); var pc=KJ_PHASE_CLASS[ph]||'p0';
+    html+='<tr data-phase="'+esc(ph)+'" data-id="'+esc(r._id||'')+'">'+
+      '<td><span class="kj-name-link" onclick="kjOpenDetail(\''+esc(r._id||'')+'\')">'+esc(r['物件名']||'—')+'</span></td>'+
+      '<td style="font-size:.8rem;color:#666">'+esc(r['場所']||'—')+'</td>'+
+      '<td><span style="font-size:.76rem;font-weight:700;color:#666">'+esc(r['区分']||'—')+'</span></td>'+
+      '<td style="font-size:.82rem">'+esc(r['営業']||'—')+'</td>'+
+      '<td style="font-size:.82rem">'+esc(r['工務']||'—')+'</td>'+
+      '<td><span class="kj-phase-badge '+pc+'">'+esc(ph)+'</span></td>'+
+      '<td style="font-size:.8rem;white-space:nowrap">'+kjFmtDate(r['請負契約日'])+'</td>'+
+      '<td style="font-size:.8rem;white-space:nowrap">'+kjFmtDate(r['基礎着工'])+'</td>'+
+      '<td style="font-size:.8rem;white-space:nowrap">'+kjFmtDate(r['上棟'])+'</td>'+
+      '<td style="font-size:.8rem;white-space:nowrap">'+(r['引渡し']?'<span style="color:#166534;font-weight:700">'+kjFmtDate(r['引渡し'])+'</span>':kjFmtDate(r['引渡し']))+'</td>'+
+      '<td><button class="ob-del" onclick="kjConfirmDel(\''+esc(r._id||'')+'\')">✕</button></td>'+
+    '</tr>';
+  });
+  html+='</tbody></table>';
+  el.innerHTML=html;
+}
+
+function kjSwitchTab(tab){
+  document.querySelectorAll('.kj-tab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-ktab')===tab);});
+  document.querySelectorAll('.kj-pane').forEach(function(p){p.classList.toggle('show',p.getAttribute('data-ktab')===tab);});
+}
+
+// ── 詳細パネル ──
+function kjOpenDetail(id){
+  var r=kjRows.find(function(x){return x._id===id;}); if(!r) return;
+  kjDetailId=id;
+  document.getElementById('kj-det-name').textContent=r['物件名']||'—';
+  document.getElementById('kj-det-sub').textContent=[r['場所'],r['区分'],r['営業']?('営業:'+r['営業']):''].filter(Boolean).join('　｜　');
+  var ph=kjPhaseOf(r); var pc=KJ_PHASE_CLASS[ph]||'p0';
+  var b=document.getElementById('kj-det-badge'); b.textContent=ph; b.className='kj-phase-badge '+pc;
+  KJ_PHASES.forEach(function(ph){
+    kjRenderDetPane(ph);
+  });
+  kjDetTab('info');
+  document.getElementById('kj-detail').classList.add('show');
+}
+
+function kjCloseDetail(){
+  document.getElementById('kj-detail').classList.remove('show');
+  kjDetailId=null;
+}
+
+function kjDetTab(tab){
+  document.querySelectorAll('.kj-det-tab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-dtab')===tab);});
+  document.querySelectorAll('.kj-det-pane').forEach(function(p){p.classList.toggle('show',p.getAttribute('data-dtab')===tab);});
+}
+
+function kjRenderDetPane(phase){
+  var paneId='kj-pane-'+phase.tab;
+  var el=document.getElementById(paneId); if(!el) return;
+  var r=kjRows.find(function(x){return x._id===kjDetailId;}); if(!r) return;
+
+  var done=phase.fields.filter(function(f){var v=r[f.k]; return v&&String(v).trim()&&v!=='-'&&v!=='—';}).length;
+  var html='<div class="kj-phase-section">'+
+    '<div class="kj-phase-hd"><span class="ph-icon">'+phase.icon+'</span>'+esc(phase.label)+
+    '<span class="ph-done">'+done+'/'+phase.fields.length+' 完了</span></div>'+
+    '<div class="kj-phase-grid">';
+
+  phase.fields.forEach(function(f){
+    var rawVal=r[f.k]; var val=rawVal!=null?String(rawVal):'';
+    var display='';
+    if(f.t==='date' && val && val.match(/^\d{4}-\d{2}-\d{2}/)) display=kjFmtDate(val);
+    else if(val && val!=='-' && val!=='—') display=esc(val);
+    var span='<span class="kj-editable'+(display?'':' empty')+'" '+
+      'data-id="'+esc(kjDetailId)+'" data-field="'+esc(f.k)+'" data-type="'+esc(f.t)+'" '+
+      'onclick="kjStartEdit(this)">'+
+      (display||'<span style="color:#CCC;font-size:.72rem">—</span>')+
+      '</span>';
+    html+='<div class="kj-field-card'+(f.full?' kj-full':'')+'">'+
+      '<div class="kj-field-lbl">'+esc(f.l)+'</div>'+
+      '<div class="kj-field-val">'+span+'</div>'+
+      '</div>';
+  });
+  html+='</div></div>';
+  el.innerHTML=html;
+}
+
+function kjStartEdit(el){
+  var id=el.getAttribute('data-id');
+  var field=el.getAttribute('data-field');
+  var type=el.getAttribute('data-type');
+  var r=kjRows.find(function(x){return x._id===id;}); if(!r) return;
+  var curVal=r[field]!=null?String(r[field]):'';
+
+  function saveVal(v){
+    r[field]=v; kjSetCache(kjRows);
+    var ph=KJ_PHASES.find(function(p){return p.fields.some(function(f){return f.k===field;});});
+    if(ph) kjRenderDetPane(ph);
+    kjRenderList();
+    // update header badge
+    var phase=kjPhaseOf(r); var pc=KJ_PHASE_CLASS[phase]||'p0';
+    var b=document.getElementById('kj-det-badge'); if(b){b.textContent=phase;b.className='kj-phase-badge '+pc;}
+    post({action:'kjUpdateField',id:id,field:field,value:v});
+  }
+
+  if(type==='date'){
+    var inp=document.createElement('input');
+    inp.type='date'; inp.value=curVal.substring(0,10);
+    inp.style.cssText='font-size:.84rem;padding:3px 6px;border:1px solid #2B2B2B;border-radius:3px;background:#fff;outline:none;width:100%';
+    el.innerHTML=''; el.appendChild(inp); inp.focus();
+    var done=false;
+    function svDate(){ if(done)return;done=true; saveVal(inp.value); }
+    inp.addEventListener('change',svDate);
+    inp.addEventListener('blur',function(){ setTimeout(svDate,100); });
+  } else {
+    var inp2=document.createElement('input');
+    inp2.type='text'; inp2.value=curVal;
+    inp2.style.cssText='font-size:.84rem;padding:3px 6px;border:1px solid #2B2B2B;border-radius:3px;background:#fff;outline:none;width:100%;font-family:inherit';
+    el.innerHTML=''; el.appendChild(inp2); inp2.focus(); inp2.select();
+    var done2=false;
+    function svTxt(){ if(done2)return;done2=true; saveVal(inp2.value.trim()); }
+    inp2.addEventListener('blur',svTxt);
+    inp2.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();inp2.blur();} if(e.key==='Escape'){done2=true;kjRenderDetPane(KJ_PHASES.find(function(p){return p.fields.some(function(f){return f.k===field;});})||KJ_PHASES[0]);} });
+  }
+}
+
+function kjEditDetName(){
+  var r=kjRows.find(function(x){return x._id===kjDetailId;}); if(!r) return;
+  var el=document.getElementById('kj-det-name');
+  var old=r['物件名']||'';
+  var inp=document.createElement('input');
+  inp.value=old;
+  inp.style.cssText='font-family:var(--serif);font-size:1.4rem;font-weight:700;color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);padding:2px 8px;border-radius:3px;outline:none;width:100%;letter-spacing:.06em';
+  el.innerHTML=''; el.appendChild(inp); inp.focus(); inp.select();
+  function save(){
+    var v=inp.value.trim()||old;
+    r['物件名']=v; kjSetCache(kjRows);
+    el.textContent=v;
+    post({action:'kjUpdateField',id:kjDetailId,field:'物件名',value:v});
+    kjRenderList();
+    toast('物件名を更新しました');
+  }
+  inp.addEventListener('blur',save);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();inp.blur();} if(e.key==='Escape'){el.textContent=old;} });
+}
+
+// ── CRUD ──
+function kjAddProject(){
+  var name=prompt('物件名を入力してください（例：田中 一郎様）');
+  if(!name||!name.trim()) return;
+  toast('追加中…');
+  post({action:'kjSaveProject',record:{'物件名':name.trim(),'ステータス':'契約前'}},function(d){
+    if(d&&d.ok){ toast('✅ 追加しました'); kjLoad(); }
+    else toast('⚠️ 追加エラー');
+  });
+}
+
+function kjConfirmDel(id){
+  var r=kjRows.find(function(x){return x._id===id;}); if(!r) return;
+  if(!confirm('「'+r['物件名']+'」を削除しますか？\nこの操作は元に戻せません。')) return;
+  post({action:'kjDeleteProject',id:id},function(d){
+    if(d&&d.ok){ toast('削除しました'); kjLoad(); }
+    else toast('⚠️ 削除エラー');
+  });
+}
+
+function kjSyncNotion(){
+  if(!confirm('Notionの着工管理DBから同期します（未設定項目のみ補完）。続けますか？')) return;
+  toast('Notion同期中…');
+  gasGet('kjSyncNotion',function(d){
+    if(!d||d.error){ toast('⚠️ エラー: '+(d?d.error:'不明')); return; }
+    toast('✅ 着工Notion同期完了: '+d.synced+'件');
+    kjLoad();
+  });
+}
+
+// ── ユーティリティ ──
+function kjFmtDate(s){
+  if(!s) return '<span style="color:#CCC">—</span>';
+  var m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(!m) return esc(String(s));
+  return parseInt(m[1])===new Date().getFullYear()?
+    parseInt(m[2])+'月'+parseInt(m[3])+'日':
+    parseInt(m[1])+'年'+parseInt(m[2])+'月'+parseInt(m[3])+'日';
+}
+
+// OBからパートナーになったら着工管理へ自動追加
+function kjAutoAddFromOB(obRow){
+  if(!obRow||!obRow['顧客名']) return;
+  // Check if already exists
+  var exists=kjRows.some(function(r){ return r._obId===obRow._id || r['物件名']===obRow['顧客名']; });
+  if(exists){ toast('着工管理: 「'+obRow['顧客名']+'」は既に登録済みです'); return; }
+  var rec={
+    '物件名': obRow['顧客名'],
+    '場所': obRow['エリア']||'',
+    '営業': obRow['担当者']||'',
+    '初回P登録': obRow['P申込目標日']||'',
+    'ステータス': '契約前',
+    '_obId': obRow._id||''
+  };
+  toast('着工管理に「'+rec['物件名']+'」を追加中…');
+  post({action:'kjSaveProject',record:rec},function(d){
+    if(d&&d.ok){
+      toast('✅ 着工管理に追加しました: '+rec['物件名']);
+      kjLoad(true);
+    }
   });
 }
 
