@@ -922,7 +922,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     </div>
     <div class="kj-hd-tools">
       <button class="hbtn primary" onclick="kjAddProject()">＋ 新規追加</button>
-      <button class="hbtn ghost" onclick="kjSyncNotion()">🔄 Notion同期</button>
+      <button class="hbtn ghost" onclick="kjImportExcel()">📥 Excel移行</button>
       <button class="hbtn" onclick="showHub()">‹ 戻る</button>
     </div>
   </div>
@@ -3821,13 +3821,14 @@ function kjConfirmDel(id){
   });
 }
 
-function kjSyncNotion(){
-  if(!confirm('Notionの着工管理DBから同期します（未設定項目のみ補完）。続けますか？')) return;
-  toast('Notion同期中…');
-  gasGet('kjSyncNotion',function(d){
+function kjImportExcel(){
+  if(!confirm('着工管理表.xlsx（全期）からデータを移行します。\n※事前にGAS Script Properties に KJ_EXCEL_FILE_ID をセットしてください。\n\n既存データは上書きされます。続けますか？')) return;
+  toast('Excel移行中… しばらくお待ちください（30秒〜2分）');
+  gasGet('kjImportFromExcel',function(d){
     if(!d||d.error){ toast('⚠️ エラー: '+(d?d.error:'不明')); return; }
-    toast('✅ 着工Notion同期完了: '+d.synced+'件');
+    toast('✅ 移行完了: '+d.imported+'件インポート');
     kjLoad();
+    hubUpdateBadges();
   });
 }
 
