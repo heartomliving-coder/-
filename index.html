@@ -1518,17 +1518,33 @@ function initFs(){ setFs(localStorage.getItem('admin_fs')||'s'); }
 function handleCredentialResponse(response) {
   document.getElementById('lerr').textContent = '認証中...';
   var name = '__a' + Date.now();
+  var done = false;
+  var timer = setTimeout(function() {
+    if (!done) {
+      done = true;
+      document.getElementById('lerr').textContent = 'タイムアウト: GASに接続できません。URLを確認してください。';
+    }
+  }, 12000);
   window[name] = function(d) {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
     if (d && d.token) {
       localStorage.setItem('admin_session_token', d.token);
       document.getElementById('lerr').textContent = '';
       showApp();
     } else {
-      document.getElementById('lerr').textContent = d ? d.error : 'ログインに失敗しました';
+      document.getElementById('lerr').textContent = d && d.error ? d.error : 'ログインに失敗しました';
     }
   };
   var s = document.createElement('script');
-  s.src = sendUrl() + '?action=googleLogin&credential=' + response.credential + '&callback=' + name;
+  s.onerror = function() {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    document.getElementById('lerr').textContent = 'GAS接続エラー: ネットワークまたはURLを確認してください。';
+  };
+  s.src = sendUrl() + '?action=googleLogin&credential=' + encodeURIComponent(response.credential) + '&callback=' + name;
   document.body.appendChild(s);
 }
 
