@@ -816,6 +816,21 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .tochi-link-btn:hover{background:#1E40AF;color:#fff;border-color:#1E40AF}
 .tochi-badge-ok{display:inline-flex;align-items:center;gap:4px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:5px;padding:4px 10px;font-size:.73rem;font-weight:700}
 .tochi-badge-ng{display:inline-flex;align-items:center;gap:4px;background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;border-radius:5px;padding:4px 10px;font-size:.73rem;font-weight:700}
+.tochi-pdf-btn{display:inline-flex;align-items:center;gap:4px;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;border-radius:5px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer;transition:all .14s}
+.tochi-pdf-btn:hover{background:#92400E;color:#fff;border-color:#92400E}
+/* 土地DBプレビューモーダル */
+#tochi-pdf-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.72);align-items:center;justify-content:center}
+#tochi-pdf-modal.show{display:flex}
+.tochi-pdf-modal-inner{background:#fff;border-radius:12px;width:min(900px,95vw);height:min(680px,92vh);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.4)}
+.tochi-pdf-modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#2B2B2B;color:#fff;border-radius:12px 12px 0 0;gap:12px;flex-shrink:0}
+.tochi-pdf-modal-title{font-size:.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tochi-pdf-modal-tabs{display:flex;gap:6px;flex-shrink:0}
+.tochi-pdf-modal-tab{background:rgba(255,255,255,.12);color:rgba(255,255,255,.75);border:none;border-radius:5px;padding:5px 12px;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .13s;white-space:nowrap}
+.tochi-pdf-modal-tab.active{background:#fff;color:#2B2B2B}
+.tochi-pdf-modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:1.3rem;cursor:pointer;padding:2px 6px;line-height:1;flex-shrink:0}
+.tochi-pdf-modal-close:hover{color:#fff}
+#tochi-pdf-frame{flex:1;border:none;width:100%;background:#F5F5F5}
+.tochi-pdf-loading{flex:1;display:flex;align-items:center;justify-content:center;color:#888;font-size:.9rem}
 </style>
 </head>
 <body>
@@ -1038,6 +1053,18 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   </div>
   <div class="kj-scroll">
     <div id="tochi-list-content"><div class="kj-empty">読み込み中...</div></div>
+  </div>
+</div>
+
+<!-- ─── 土地DB PDFプレビューモーダル ─── -->
+<div id="tochi-pdf-modal" onclick="if(event.target===this)tochiClosePdfModal()">
+  <div class="tochi-pdf-modal-inner">
+    <div class="tochi-pdf-modal-header">
+      <span class="tochi-pdf-modal-title" id="tochi-pdf-modal-title">PDFプレビュー</span>
+      <div class="tochi-pdf-modal-tabs" id="tochi-pdf-modal-tabs"></div>
+      <button class="tochi-pdf-modal-close" onclick="tochiClosePdfModal()">✕</button>
+    </div>
+    <iframe id="tochi-pdf-frame" src="about:blank"></iframe>
   </div>
 </div>
 
@@ -4081,22 +4108,27 @@ function tochiRenderList(){
 
   var html='<table class="tochi-table"><thead><tr>'+
     '<th style="min-width:120px">顧客名</th>'+
-    '<th style="min-width:260px">所在地</th>'+
+    '<th style="min-width:220px">所在地</th>'+
     '<th style="min-width:110px">Googleマップ</th>'+
-    '<th style="min-width:110px">工事案内図</th>'+
-    '<th style="min-width:110px">見学会案内図</th>'+
+    '<th style="min-width:130px">工事案内図</th>'+
+    '<th style="min-width:130px">見学会案内図</th>'+
     '<th style="min-width:140px">駐車場</th>'+
     '</tr></thead><tbody>';
   rows.forEach(function(r){
-    var hasKoji=!!r['工事案内図'];
-    var hasKengaku=TOCHI_STAFF.some(function(s){return !!r[s.prop];});
+    var kojiUrl=r['工事案内図']||'';
+    var hasKoji=!!kojiUrl;
+    var kengakuUrls=TOCHI_STAFF.filter(function(s){return !!r[s.prop];}).map(function(s){return {label:s.label||s.prop,url:r[s.prop]};});
+    var hasKengaku=kengakuUrls.length>0;
     var gmapUrl=r['Googleマップ']||'';
+    var customerName=r['顧客名']||'';
+    var kojiPdf=hasKoji?'<button class="tochi-pdf-btn" data-pname="'+esc(customerName)+'" data-purls="'+esc(JSON.stringify([{label:\'工事案内図\',url:kojiUrl}]))+'" onclick="tochiOpenPdfBtn(this)">📄 プレビュー</button>':'<span style="color:#CCC;font-size:.76rem">—</span>';
+    var kengakuPdf=hasKengaku?'<button class="tochi-pdf-btn" data-pname="'+esc(customerName)+'" data-purls="'+esc(JSON.stringify(kengakuUrls))+'" onclick="tochiOpenPdfBtn(this)">📄 プレビュー</button>':'<span style="color:#CCC;font-size:.76rem">—</span>';
     html+='<tr>'+
-      '<td><span style="font-weight:700;color:#2B2B2B;font-family:var(--serif)">'+esc(r['顧客名']||'—')+'</span></td>'+
+      '<td><span style="font-weight:700;color:#2B2B2B;font-family:var(--serif)">'+esc(customerName||'—')+'</span></td>'+
       '<td style="font-size:.82rem;color:#444;white-space:normal;line-height:1.5">'+esc(r['所在地']||'—')+'</td>'+
       '<td>'+(gmapUrl?'<a href="'+esc(gmapUrl)+'" target="_blank" class="tochi-link-btn">🗺 地図を開く</a>':'<span style="color:#CCC;font-size:.76rem">—</span>')+'</td>'+
-      '<td>'+(hasKoji?'<span class="tochi-badge-ok">✅ 生成済</span>':'<span class="tochi-badge-ng">⬜ 未生成</span>')+'</td>'+
-      '<td>'+(hasKengaku?'<span class="tochi-badge-ok">✅ あり</span>':'<span class="tochi-badge-ng">⬜ なし</span>')+'</td>'+
+      '<td>'+kojiPdf+'</td>'+
+      '<td>'+kengakuPdf+'</td>'+
       '<td style="font-size:.82rem;color:#444;white-space:normal;line-height:1.5">'+esc(r['駐車場場所']||'—')+'</td>'+
     '</tr>';
   });
@@ -4105,9 +4137,65 @@ function tochiRenderList(){
 }
 
 var TOCHI_STAFF=[
-  {prop:'見学会案内図(畑田)'},{prop:'見学会案内図(中山)'},
-  {prop:'見学会案内図(渡邊)'},{prop:'見学会案内図(沖)'},{prop:'見学会案内図(和田)'}
+  {prop:'見学会案内図(畑田)',label:'畑田'},{prop:'見学会案内図(中山)',label:'中山'},
+  {prop:'見学会案内図(渡邊)',label:'渡邊'},{prop:'見学会案内図(沖)',label:'沖'},{prop:'見学会案内図(和田)',label:'和田'}
 ];
+
+// DriveのURL → iframeで表示できるpreview URLに変換
+function tochiDriveEmbedUrl(url) {
+  if (!url) return '';
+  // https://drive.google.com/file/d/ID/view → /preview
+  var m = url.match(/drive\.google\.com\/file\/d\/([^/?#]+)/);
+  if (m) return 'https://drive.google.com/file/d/' + m[1] + '/preview';
+  // docs.google.com/spreadsheets/d/ID → export as PDF viewer
+  var m2 = url.match(/docs\.google\.com\/spreadsheets\/d\/([^/?#]+)/);
+  if (m2) return 'https://docs.google.com/spreadsheets/d/' + m2[1] + '/preview';
+  return url;
+}
+
+function tochiOpenPdfBtn(btn) {
+  var name = btn.getAttribute('data-pname') || '';
+  var tabs = [];
+  try { tabs = JSON.parse(btn.getAttribute('data-purls') || '[]'); } catch(e) {}
+  tochiOpenPdfModal(name, tabs);
+}
+
+var _tochiPdfTabs = [];
+function tochiOpenPdfModal(customerName, tabs) {
+  _tochiPdfTabs = tabs || [];
+  var modal = document.getElementById('tochi-pdf-modal');
+  var titleEl = document.getElementById('tochi-pdf-modal-title');
+  var tabsEl = document.getElementById('tochi-pdf-modal-tabs');
+  var frame = document.getElementById('tochi-pdf-frame');
+  if (!modal || !frame) return;
+  titleEl.textContent = customerName + ' — PDFプレビュー';
+  // Build tabs
+  tabsEl.innerHTML = '';
+  _tochiPdfTabs.forEach(function(t, i) {
+    var btn = document.createElement('button');
+    btn.className = 'tochi-pdf-modal-tab' + (i === 0 ? ' active' : '');
+    btn.textContent = t.label;
+    btn.onclick = function() {
+      tabsEl.querySelectorAll('.tochi-pdf-modal-tab').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      frame.src = tochiDriveEmbedUrl(t.url);
+    };
+    tabsEl.appendChild(btn);
+  });
+  // Load first tab
+  if (_tochiPdfTabs.length > 0) {
+    frame.src = tochiDriveEmbedUrl(_tochiPdfTabs[0].url);
+  }
+  modal.classList.add('show');
+}
+
+function tochiClosePdfModal() {
+  var modal = document.getElementById('tochi-pdf-modal');
+  var frame = document.getElementById('tochi-pdf-frame');
+  if (modal) modal.classList.remove('show');
+  if (frame) frame.src = 'about:blank';
+  _tochiPdfTabs = [];
+}
 
 function tochiGenerateAll(){
   var unprocessed=tochiRows.filter(function(r){return !r['工事案内図'];});
