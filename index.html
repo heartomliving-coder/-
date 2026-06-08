@@ -4152,7 +4152,7 @@ function tochiRenderList(){
     var hasKengaku=kengakuUrls.length>0;
     var gmapUrl=r['Googleマップ']||'';
     var customerName=r['顧客名']||'';
-    var kojiPdf=hasKoji?'<button class="tochi-pdf-btn" data-pname="'+esc(customerName)+'" data-purls="'+esc(JSON.stringify([{label:\'工事案内図\',url:kojiUrl}]))+'" onclick="tochiOpenPdfBtn(this)">📄 プレビュー</button>':'<span style="color:#CCC;font-size:.76rem">—</span>';
+    var kojiPdf=hasKoji?'<button class="tochi-pdf-btn" data-pname="'+esc(customerName)+'" data-purls="'+esc(JSON.stringify([{label:"工事案内図",url:kojiUrl}]))+'" onclick="tochiOpenPdfBtn(this)">📄 プレビュー</button>':'<span style="color:#CCC;font-size:.76rem">—</span>';
     var kengakuPdf=hasKengaku?'<button class="tochi-pdf-btn" data-pname="'+esc(customerName)+'" data-purls="'+esc(JSON.stringify(kengakuUrls))+'" onclick="tochiOpenPdfBtn(this)">📄 プレビュー</button>':'<span style="color:#CCC;font-size:.76rem">—</span>';
     html+='<tr>'+
       '<td><span style="font-weight:700;color:#2B2B2B;font-family:var(--serif)">'+esc(customerName||'—')+'</span></td>'+
