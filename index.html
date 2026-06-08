@@ -44,7 +44,7 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,1
 .login .lt{font-family:var(--serif);font-size:1.6rem;font-weight:500;color:#fff;letter-spacing:.2em;margin-bottom:0;text-shadow:0 2px 20px rgba(0,0,0,.5)}
 .login .l-divider{width:48px;height:1px;background:rgba(255,255,255,.25);margin:24px auto 32px}
 .login .f{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:16px}
-.login .err{font-size:.86rem;color:#F0A090;min-height:20px;text-align:center;letter-spacing:.04em}
+.login .err{font-size:1rem;color:#FF8080;min-height:24px;text-align:center;letter-spacing:.04em;font-weight:500;padding:4px 0}
 
 /* ─────────── 管理画面（デフォルト） ─────────── */
 .app{display:none;flex-direction:column;height:100dvh;overflow:hidden}
@@ -1545,25 +1545,30 @@ window.addEventListener('pageshow', function(e) {
 });
 
 function handleCredentialResponse(response) {
-  document.getElementById('lerr').textContent = '認証中...';
+  var lerr = document.getElementById('lerr');
+  if (!response || !response.credential) {
+    lerr.textContent = 'エラー: Googleの認証情報が取得できませんでした';
+    return;
+  }
+  lerr.textContent = '認証中...';
   var name = '__a' + Date.now();
   var done = false;
   var timer = setTimeout(function() {
     if (!done) {
       done = true;
-      document.getElementById('lerr').textContent = 'タイムアウト: GASに接続できません。URLを確認してください。';
+      lerr.textContent = 'タイムアウト: GASに接続できません（6秒）。GASのURLを確認してください。';
     }
-  }, 12000);
+  }, 6000);
   window[name] = function(d) {
     if (done) return;
     done = true;
     clearTimeout(timer);
     if (d && d.token) {
       localStorage.setItem('admin_session_token', d.token);
-      document.getElementById('lerr').textContent = '';
+      lerr.textContent = '';
       showApp();
     } else {
-      document.getElementById('lerr').textContent = d && d.error ? d.error : 'ログインに失敗しました';
+      lerr.textContent = d && d.error ? d.error : 'ログインに失敗しました';
     }
   };
   var s = document.createElement('script');
@@ -1571,9 +1576,11 @@ function handleCredentialResponse(response) {
     if (done) return;
     done = true;
     clearTimeout(timer);
-    document.getElementById('lerr').textContent = 'GAS接続エラー: ネットワークまたはURLを確認してください。';
+    lerr.textContent = 'GAS接続エラー: ネットワークまたはURLを確認してください。';
   };
-  s.src = sendUrl() + '?action=googleLogin&credential=' + encodeURIComponent(response.credential) + '&callback=' + name;
+  // ログインは常にデフォルトURLを優先（LocalStorage上書き無視）
+  var loginUrl = SEND_URL_DEFAULT;
+  s.src = loginUrl + '?action=googleLogin&credential=' + encodeURIComponent(response.credential) + '&callback=' + name;
   document.body.appendChild(s);
 }
 
