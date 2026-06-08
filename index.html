@@ -2737,9 +2737,9 @@ function obRenderActive(){
     if(fStaff && r['担当者']!==fStaff) return false;
     return true;
   }).slice().sort(function(a,b){
-    var da=obNormDate(a['来場日']||'')||'9999-99-99';
-    var db=obNormDate(b['来場日']||'')||'9999-99-99';
-    return da>db?1:da<db?-1:(a._row-b._row);
+    var da=obNormDate(a['来場日']||'')||'0000-00-00';
+    var db=obNormDate(b['来場日']||'')||'0000-00-00';
+    return db>da?1:db<da?-1:(b._row-a._row); // 新しい順
   });
   var cntEl=document.getElementById('ob-active-count'); if(cntEl) cntEl.textContent=rows.length+'件';
   if(!rows.length){ el.innerHTML='<div class="ob-empty-state">該当する案件がありません</div>'; return; }
@@ -3521,7 +3521,7 @@ function obToggleDet(el,field,rowIdx){
 function obRenderDetHistory(){
   var r=obRows[obDetailRow]; if(!r) return;
   var tl=document.getElementById('ob-det-timeline'); if(!tl) return;
-  var hist=(r.history||[]).slice().sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+  var hist=(r.history||[]).slice().sort(function(a,b){return b.date>a.date?1:b.date<a.date?-1:0;}); // 新しい順
   // 担当者セレクトだけ更新（obPopulateFilters は全フィルターを上書きするため不使用）
   var tsEl=document.getElementById('tl-staff');
   if(tsEl && tsEl.options.length<=1){ var allS=getStaffList(); tsEl.innerHTML='<option value="">—</option>'+allS.map(function(s){return '<option value="'+esc(s)+'">'+esc(s)+'</option>';}).join(''); }
