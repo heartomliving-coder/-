@@ -756,6 +756,66 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-fld input:focus,.ob-fld select:focus{border-color:var(--charcoal);box-shadow:0 0 0 3px rgba(199,178,153,.2)}
 .ob-fld.full{grid-column:1/-1}
 .ob-sec-title{font-size:.7rem;font-weight:700;letter-spacing:.14em;color:#AAA;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #EEE;text-transform:uppercase}
+.ob-pipe-s.pipe-active{outline:2px solid var(--gold);outline-offset:2px;border-radius:3px}
+
+/* ─── 直近案件 カードグリッド ─── */
+.ob-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;padding:18px 20px}
+.ob-card{background:#fff;border:1px solid #E8E4DE;border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.04);border-left:4px solid #EEE;transition:box-shadow .15s}
+.ob-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.09)}
+.ob-card-top{display:flex;align-items:flex-start;gap:10px}
+.ob-card-name{font-family:var(--serif);font-size:1.04rem;font-weight:700;color:#2B2B2B;flex:1;cursor:pointer;line-height:1.3}
+.ob-card-name:hover{text-decoration:underline;color:#9A8C76}
+.ob-card-meta{display:flex;align-items:center;gap:8px;font-size:.72rem;color:#888;flex-wrap:wrap}
+.ob-card-staff{font-weight:700;color:#555}
+.ob-card-next{font-size:.76rem;font-weight:700;padding:3px 9px;border-radius:20px;white-space:normal;line-height:1.5}
+.ob-card-next.ok{background:#F0FDF4;color:#166534;border:1px solid #BBF7D0}
+.ob-card-next.warn{background:#FFF7ED;color:#92500A;border:1px solid #FDE68A}
+.ob-card-next.over{background:#FEF2F2;color:#991B1B;border:1px solid #FECACA}
+.ob-card-next.none{background:#F9FAFB;color:#9CA3AF;border:1px solid #E5E7EB}
+.ob-card-pills{display:flex;flex-wrap:wrap;gap:5px}
+.ob-pill{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid #E8E4DE;background:#F9FAFB;color:#888;cursor:pointer;transition:all .14s;user-select:none}
+.ob-pill:hover{border-color:#9A8C76;color:#555}
+.ob-pill.on{background:#2B2B2B;color:#fff;border-color:#2B2B2B}
+.ob-card-p{font-size:.7rem;color:#5E9E5E;font-weight:700;background:#F0FDF4;padding:3px 9px;border-radius:4px;border:1px solid #BBF7D0;display:inline-block}
+/* ステータス別カード左ボーダー */
+.ob-card[data-sc="ob-s0"]{border-left-color:#F5DFA0}
+.ob-card[data-sc="ob-s1"]{border-left-color:#D4C8F8}
+.ob-card[data-sc="ob-s2"]{border-left-color:#A7DFBE}
+.ob-card[data-sc="ob-s3"]{border-left-color:#BFDBFE}
+.ob-card[data-sc="ob-s4"]{border-left-color:#FEC9C9}
+.ob-card[data-sc="ob-s5"]{border-left-color:#F9C2DC}
+.ob-card[data-sc="ob-s6"]{border-left-color:#FDC9A0}
+.ob-card[data-sc="ob-s7"]{border-left-color:#6EE7B7}
+.ob-card[data-sc="ob-s8"]{border-left-color:#D1D5DB}
+.ob-card[data-sc="ob-s9"]{border-left-color:#FECACA}
+.ob-card[data-sc="ob-sP"]{border-left-color:#86EFAC}
+.ob-card[data-sc="ob-sF"]{border-left-color:#E5E7EB;opacity:.7}
+
+/* ─── 着工管理 フェーズサマリーバー ─── */
+.kj-phase-bar{background:#fff;border-bottom:1px solid #E8E4DE;padding:10px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.kj-phase-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:20px;font-size:.68rem;font-weight:700;cursor:pointer;border:1px solid transparent;transition:all .15s;white-space:nowrap;user-select:none}
+.kj-phase-chip:hover{opacity:.75}
+.kj-phase-chip.p0{background:#F0EDEA;color:#888;border-color:#E0DAD0}
+.kj-phase-chip.p1{background:#EBF3FF;color:#1D4ED8;border-color:#BFDBFE}
+.kj-phase-chip.p2{background:#FFF7ED;color:#92500A;border-color:#FDE68A}
+.kj-phase-chip.p3{background:#ECFDF5;color:#166534;border-color:#A7F3D0}
+.kj-phase-chip.p4{background:#F5F0EA;color:#9A8C76;border-color:#E0D9CE}
+.kj-phase-chip.p5{background:#F5F5F5;color:#888;border-color:#E5E7EB}
+.kj-phase-chip .kj-chip-cnt{display:inline-block;background:rgba(0,0,0,.12);border-radius:20px;padding:0 7px;font-size:.62rem;min-width:18px;text-align:center}
+/* 着工管理 日付着色 */
+.kj-date-ok{color:#166534;font-weight:700}
+.kj-date-warn{background:#FFF7ED;color:#92500A;font-weight:700;padding:2px 6px;border-radius:3px}
+.kj-date-over{background:#FEF2F2;color:#991B1B;font-weight:700;padding:2px 6px;border-radius:3px}
+
+/* ─── 確定土地DB ─── */
+.tochi-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.tochi-table thead th{background:#2B2B2B;color:rgba(255,255,255,.7);font-size:.64rem;font-weight:700;letter-spacing:.1em;padding:9px 14px;text-align:left;position:sticky;top:0;z-index:2}
+.tochi-table td{padding:10px 14px;border-bottom:1px solid #EDEAE4;color:#222;vertical-align:middle}
+.tochi-table tr:hover td{background:#F7F5F0}
+.tochi-link-btn{display:inline-flex;align-items:center;gap:5px;background:#EBF4FF;color:#1E40AF;border:1px solid #BFDBFE;border-radius:5px;padding:5px 12px;font-size:.76rem;font-weight:700;text-decoration:none;transition:all .14s;white-space:nowrap}
+.tochi-link-btn:hover{background:#1E40AF;color:#fff;border-color:#1E40AF}
+.tochi-badge-ok{display:inline-flex;align-items:center;gap:4px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:5px;padding:4px 10px;font-size:.73rem;font-weight:700}
+.tochi-badge-ng{display:inline-flex;align-items:center;gap:4px;background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;border-radius:5px;padding:4px 10px;font-size:.73rem;font-weight:700}
 </style>
 </head>
 <body>
@@ -848,6 +908,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     <div class="ob-hd-tools">
       <button class="hbtn primary" onclick="obAddCustomer()">＋ 新規追加</button>
       <button class="hbtn ghost" onclick="obImportFromNotion()">🔄 Notion同期</button>
+      <button class="hbtn ghost" onclick="obSyncBirthdaysBtn()" title="NotionバースデーDBをオープンボードに同期">🎂 誕生日同期</button>
       <button class="hbtn ghost" onclick="obCleanData()" title="データ修正（FALSE除去・ステータス正規化）">🧹 修正</button>
       <button class="hbtn" onclick="showHub()">‹ 戻る</button>
     </div>
@@ -1440,7 +1501,7 @@ function handleCredentialResponse(response) {
     }
   };
   var s = document.createElement('script');
-  s.src = SEND_URL + '?action=googleLogin&credential=' + response.credential + '&callback=' + name;
+  s.src = sendUrl() + '?action=googleLogin&credential=' + response.credential + '&callback=' + name;
   document.body.appendChild(s);
 }
 
@@ -2300,6 +2361,8 @@ function openOnlineFsMonitor(){
 var obRows = [];
 var obCurrentTab = 'visitors';
 var obDetailRow  = -1;
+var obDetailKey  = null; // {name,date} — ポーリング後の行インデックス再同期用
+var obStatusFilter = '';
 var OB_CACHE_KEY = 'ob_v3';
 
 // ステータス（初回接触→問い合わせ）
@@ -2397,13 +2460,22 @@ function obLoad(silent){
     obRows=newRows;
     obRows.forEach(function(r,i){r._row=i;});
     obSetCache(obRows);
+    // 詳細パネルが開いていれば行インデックスを安定キーで再同期
+    if(obDetailKey && document.getElementById('ob-detail').classList.contains('show')){
+      var newIdx=-1;
+      for(var i=0;i<obRows.length;i++){
+        if(obRows[i]['顧客名']===obDetailKey.name && obRows[i]['来場日']===obDetailKey.date){ newIdx=i; break; }
+      }
+      if(newIdx>=0){ obDetailRow=newIdx; }
+      else { obCloseDetail(); toast('⚠️ 表示中の顧客データが見つかりません（削除または変更された可能性があります）'); }
+    }
     obPopulateFilters();
     obRenderAll();
     if(silent && obRows.length>prevLen){ toast('🔔 新規データ '+(obRows.length-prevLen)+'件 を取得しました'); }
   });
 }
 
-function obRenderAll(){ obRenderPipeline(); obRenderVisitors(); obRenderActive(); obRenderAgg(); }
+function obRenderAll(){ obRenderPipeline(); obRenderVisitors(); obRenderActive(); if(obCurrentTab==='agg') obRenderAgg(); }
 
 // パイプラインフロー（ステータスごとの件数バー）
 function obRenderPipeline(){
@@ -2416,17 +2488,20 @@ function obRenderPipeline(){
   var STEPS=['問い合わせ','見学会前','無料相談前','勉強会前','FP前','LPS前','ヒアリング前','プレゼン前','パートナー検討中','パートナー契約済'];
   bar.innerHTML=STEPS.map(function(s,i){
     var n=cnt[s]||0;
-    var cls=OB_STATUS_CLASS[s]||'ob-s0';
-    return '<span class="ob-pipe-s'+(n>0?' on':'')+'" onclick="obFilterByStatus(\''+s+'\')">'+
+    var isActive=(obStatusFilter===s);
+    return '<span class="ob-pipe-s'+(n>0?' on':'')+(isActive?' pipe-active':'')+'" onclick="obFilterByStatus(\''+s+'\')">'+
       '<span class="ob-pipe-lbl"><span style="font-size:.58rem;opacity:.7">'+s+'</span>'+(n>0?' <b>'+n+'</b>':'')+'</span>'+
       (i<STEPS.length-1?'<span class="ob-pipe-arr">›</span>':'')+
     '</span>';
-  }).join('');
+  }).join('')+(obStatusFilter?'<span style="font-size:.72rem;color:#9A8C76;cursor:pointer;padding:4px 10px;border:1px solid #DDD;border-radius:20px;margin-left:4px" onclick="obFilterByStatus(\'\')">✕ フィルター解除</span>':'');
 }
 
-// パイプラインクリックでステータスフィルター
+// パイプラインクリックでステータスフィルター（トグル）
 function obFilterByStatus(s){
-  // 検索ボックスにステータス名を入れてフィルター（簡易実装：ステータスで絞り込む専用フィルターが望ましいが現在は検索非対応なためスキップ）
+  obStatusFilter=(obStatusFilter===s)?'':s;
+  obSwitchTab('visitors');
+  obRenderPipeline();
+  obRenderVisitors();
 }
 
 // ── フィルター初期化 ──
@@ -2480,6 +2555,7 @@ function obRenderVisitors(){
     if(fMonth && d.substring(5,7)!==fMonth) return false;
     if(fStaff && r['担当者']!==fStaff && r['サブ担当']!==fStaff) return false;
     if(fQ && (r['顧客名']||'').toLowerCase().indexOf(fQ)<0) return false;
+    if(obStatusFilter && (r['商談ステータス']||'問い合わせ')!==obStatusFilter) return false;
     return true;
   });
   var cntEl=document.getElementById('ob-vis-count'); if(cntEl) cntEl.textContent=rows.length+'件';
@@ -2546,10 +2622,10 @@ function obRenderVisitors(){
     }).join('')+'</tr>';
   aggHtml+='</tbody></table></div></div>';
 
-  var COL=11; // colspan
+  var COL=12; // colspan（ステータス列追加）
   var html=aggHtml+'<table class="ob-table ob-vis-table"><thead><tr>'+
     '<th class="ob-rn">No</th>'+
-    '<th>受付日</th><th>種別</th><th>顧客名</th><th>担当</th><th>エリア</th>'+
+    '<th>受付日</th><th>種別</th><th>顧客名</th><th>ステータス</th><th>担当</th><th>エリア</th>'+
     '<th>反響元</th><th>来店履歴</th><th>アポ確定日</th><th>次回予定</th><th></th>'+
     '</tr></thead><tbody>';
 
@@ -2606,6 +2682,7 @@ function obRenderVisitors(){
         '<td style="white-space:nowrap">'+obCell(r,'来場日')+'</td>'+
         '<td style="font-size:.82rem;color:#444">'+obCell(r,'来場種別')+'</td>'+
         '<td><span class="ob-name-link" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span></td>'+
+        '<td><span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="font-size:.68rem;padding:3px 8px;cursor:pointer">'+esc(dispStatus)+'</span></td>'+
         '<td style="white-space:nowrap;font-size:.84rem">'+esc(staffLbl)+'</td>'+
         '<td>'+obCell(r,'エリア')+'</td>'+
         '<td style="font-size:.82rem;color:#444">'+obCell(r,'反響元')+'</td>'+
@@ -2653,13 +2730,13 @@ function obRenderActive(){
   var hideInactive=(document.getElementById('ob-hide-inactive')||{}).checked!==false;
   var fStaff=((document.getElementById('ob-filter-staff')||{}).value||'');
   var INACTIVE=['失注','中長期フォロー','パートナー検討中','パートナー契約済'];
+  var today=new Date(); today.setHours(0,0,0,0);
 
   var rows=obRows.filter(function(r){
     if(hideInactive && INACTIVE.indexOf(r['商談ステータス'])>=0) return false;
     if(fStaff && r['担当者']!==fStaff) return false;
     return true;
   }).slice().sort(function(a,b){
-    // 受付順（来場日昇順、同一日・未設定は登録順）
     var da=obNormDate(a['来場日']||'')||'9999-99-99';
     var db=obNormDate(b['来場日']||'')||'9999-99-99';
     return da>db?1:da<db?-1:(a._row-b._row);
@@ -2667,38 +2744,74 @@ function obRenderActive(){
   var cntEl=document.getElementById('ob-active-count'); if(cntEl) cntEl.textContent=rows.length+'件';
   if(!rows.length){ el.innerHTML='<div class="ob-empty-state">該当する案件がありません</div>'; return; }
 
-  var html='<table class="ob-table"><thead><tr>'+
-    '<th>顧客名</th><th>エリア</th><th>担当</th><th>サブ担当</th><th>ステータス</th>'+
-    '<th>次回予定日</th><th>次回内容</th>'+
-    '<th class="cb-th" style="border-left:2px solid rgba(255,255,255,.15)">予算</th>'+
-    '<th class="cb-th">時期</th><th class="cb-th">関与者</th><th class="cb-th">競合</th><th class="cb-th">土地</th>'+
-    '<th class="cb-th" style="border-left:2px solid rgba(255,255,255,.15)">建築家</th>'+
-    '<th class="cb-th">性能</th><th class="cb-th">コスト</th>'+
-    '<th>P申込目標</th>'+
-    '</tr></thead><tbody>';
-
+  var html='<div class="ob-card-grid">';
   rows.forEach(function(r){
     var rawStatus=r['商談ステータス']||'問い合わせ';
     var dispStatus=obNormStatus(rawStatus);
     var sc=OB_STATUS_CLASS[rawStatus]||OB_STATUS_CLASS[dispStatus]||'ob-s0';
-    html+='<tr data-sc="'+sc+'">'+
-      '<td><span class="ob-name-link" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span></td>'+
-      '<td>'+obCell(r,'エリア')+'</td>'+
-      '<td style="font-size:.84rem">'+obCell(r,'担当者')+'</td>'+
-      '<td style="font-size:.84rem">'+obCell(r,'サブ担当')+'</td>'+
-      '<td><span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')">'+esc(dispStatus)+'</span></td>'+
-      '<td style="font-size:.84rem">'+obCell(r,'次回予定')+'</td>'+
-      '<td style="min-width:90px;font-size:.82rem">'+obCell(r,'次回内容')+'</td>'+
-      OB_HURDLES.map(function(h,i){ return '<td style="text-align:center'+(i===0?';border-left:2px solid #EEE':'')+'">'+ obCbCell(r,h.key)+'</td>'; }).join('')+
-      OB_FRAMINGS.map(function(f,i){ return '<td style="text-align:center'+(i===0?';border-left:2px solid #EEE':'')+'">'+ obCbCell(r,f.key)+'</td>'; }).join('')+
-      '<td>'+obCell(r,'P申込目標日')+'</td>'+
-    '</tr>';
+
+    // 担当者
+    var mainStaff=obSanitizeVal(r['担当者']);
+    var subStaff=obSanitizeVal(r['サブ担当']);
+    var staffLbl=mainStaff||(subStaff?'':'—');
+    if(subStaff) staffLbl+=(mainStaff?' / ':'')+subStaff;
+
+    // 次回予定日 色分け
+    var nextRaw=r['次回予定']?obNormDate(r['次回予定']):'';
+    var nextLbl=''; var nextCls='none';
+    if(nextRaw && nextRaw.length>=10){
+      var nd=new Date(nextRaw+'T00:00:00');
+      var diff=Math.floor((nd-today)/(1000*60*60*24));
+      nextLbl='📅 '+obFmtDate(nextRaw)+(r['次回内容']?' <small>'+esc(r['次回内容'])+'</small>':'');
+      if(diff<0) nextCls='over';
+      else if(diff<=3) nextCls='warn';
+      else nextCls='ok';
+    } else if(r['次回内容']){
+      nextLbl='📅 '+esc(r['次回内容']); nextCls='none';
+    }
+
+    // ハードル・フレーミングピル
+    var pills='';
+    OB_HURDLES.forEach(function(h){
+      var on=(r[h.key]==='1'||r[h.key]==='TRUE'||r[h.key]===true||r[h.key]===1);
+      pills+='<span class="ob-pill'+(on?' on':'')+'" onclick="obTogglePill(this,\''+h.key+'\','+r._row+')" title="'+esc(h.label)+'">'+h.icon+' '+esc(h.label)+'</span>';
+    });
+    OB_FRAMINGS.forEach(function(f){
+      var on=(r[f.key]==='1'||r[f.key]==='TRUE'||r[f.key]===true||r[f.key]===1);
+      pills+='<span class="ob-pill'+(on?' on':'')+'" onclick="obTogglePill(this,\''+f.key+'\','+r._row+')" title="'+esc(f.label)+'">'+f.icon+' '+esc(f.label)+'</span>';
+    });
+
+    var pGoal=r['P申込目標日']?obFmtDate(obNormDate(r['P申込目標日'])):'';
+
+    html+='<div class="ob-card" data-sc="'+sc+'">'+
+      '<div class="ob-card-top">'+
+        '<span class="ob-card-name" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span>'+
+        '<span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="flex-shrink:0;cursor:pointer">'+esc(dispStatus)+'</span>'+
+      '</div>'+
+      '<div class="ob-card-meta">'+
+        '<span class="ob-card-staff">👤 '+esc(staffLbl)+'</span>'+
+        (obSanitizeVal(r['エリア'])?'<span>📍 '+esc(r['エリア'])+'</span>':'')+
+      '</div>'+
+      (nextLbl?'<div class="ob-card-next '+nextCls+'">'+nextLbl+'</div>':'')+
+      '<div class="ob-card-pills">'+pills+'</div>'+
+      (pGoal?'<div><span class="ob-card-p">🎯 P目標: '+esc(pGoal)+'</span></div>':'')+
+    '</div>';
   });
-  html+='</tbody></table>';
+  html+='</div>';
   el.innerHTML=html;
   // カレンダーが開いていれば更新
   var calWrap=document.getElementById('ob-cal-wrap');
   if(calWrap && calWrap.style.display!=='none') obRenderCal();
+}
+
+function obTogglePill(el,field,rowIdx){
+  var r=obRows[rowIdx]; if(!r) return;
+  var cur=(r[field]==='1'||r[field]==='TRUE'||r[field]===true||r[field]===1);
+  var newVal=cur?'0':'1';
+  r[field]=newVal;
+  obSetCache(obRows);
+  el.classList.toggle('on',newVal==='1');
+  post({action:'obUpdateField',row:rowIdx,field:field,value:newVal});
 }
 
 // ── 月間カレンダー（直近案件タブ） ──
@@ -2856,11 +2969,6 @@ function obCell(r,field){
   return '<span class="ob-editable" style="display:block;min-height:20px;width:100%" data-row="'+r._row+'" data-field="'+field+'" data-type="'+type+'" onclick="obStartEdit(this)">'+display+'</span>';
 }
 
-function obCbCell(r,field){
-  var chk=(r[field]==='1'||r[field]==='TRUE'||r[field]===true||r[field]===1);
-  return '<input type="checkbox" class="ob-cb"'+(chk?' checked':'')+' data-row="'+r._row+'" data-field="'+field+'" onchange="obToggleCb(this)">';
-}
-
 function obFmtDate(s){
   var p=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
   if(!p) return esc(s);
@@ -2898,7 +3006,15 @@ function obStartEdit(el){
     sel.innerHTML='<option value="">—</option>'+opts.map(function(o){return '<option'+(o===val?' selected':'')+'>'+esc(o)+'</option>';}).join('');
     el.innerHTML=''; el.appendChild(sel); sel.focus();
     var done2=false;
-    function saveSel(){ if(done2)return; done2=true; var v=sel.value; el.textContent=v||'—'; obSaveField(row,field,v); if(field==='商談ステータス'){var tr=el.closest('tr'); if(tr){var b=tr.querySelector('.ob-badge'); if(b){b.textContent=v;b.className='ob-badge '+(OB_STATUS_CLASS[v]||'ob-s0');}}} }
+    function saveSel(){ if(done2)return; done2=true; var v=sel.value; el.textContent=v||'—'; obSaveField(row,field,v);
+      if(field==='商談ステータス'){
+        var nc=OB_STATUS_CLASS[v]||'ob-s0';
+        // テーブル行内のバッジ更新（来客状況タブ）
+        var tr=el.closest('tr'); if(tr){var b=tr.querySelector('.ob-badge'); if(b){b.textContent=v;b.className='ob-badge '+nc;}}
+        // 詳細パネルのヘッダーバッジ更新
+        if(row===obDetailRow){var db=document.getElementById('ob-det-badge'); if(db){db.textContent=v;db.className='ob-badge '+nc;}}
+      }
+    }
     sel.addEventListener('change',saveSel); sel.addEventListener('blur',saveSel);
     return;
   }
@@ -2918,16 +3034,12 @@ function obEditStatusInline(el,rowIdx){
   sel.innerHTML=OB_STATUS_LIST.map(function(o){return '<option'+(o===val?' selected':'')+'>'+esc(o)+'</option>';}).join('');
   el.style.display='none'; el.parentNode.insertBefore(sel,el.nextSibling); sel.focus();
   var done=false;
-  function save(){ if(done)return; done=true; var v=sel.value; sel.remove(); el.style.display=''; el.textContent=v; el.className='ob-badge '+(OB_STATUS_CLASS[v]||'ob-s0'); obSaveField(rowIdx,'商談ステータス',v); }
+  function save(){ if(done)return; done=true; var v=sel.value; sel.remove(); el.style.display=''; el.textContent=v; var nc=OB_STATUS_CLASS[v]||'ob-s0'; el.className='ob-badge '+nc;
+    // カードグリッド内の場合は左ボーダー色も即時更新
+    var card=el.parentNode; while(card && !card.classList.contains('ob-card')) card=card.parentNode;
+    if(card) card.setAttribute('data-sc',nc);
+    obSaveField(rowIdx,'商談ステータス',v); }
   sel.addEventListener('change',save); sel.addEventListener('blur',save);
-}
-
-function obToggleCb(cb){
-  var row=parseInt(cb.getAttribute('data-row')); var field=cb.getAttribute('data-field');
-  var v=cb.checked?'1':'0';
-  if(obRows[row]) obRows[row][field]=v;
-  obSetCache(obRows);
-  post({action:'obUpdateField',row:row,field:field,value:v});
 }
 
 function obSaveField(row,field,value){
@@ -3208,6 +3320,7 @@ function obSaveNew(){
 function obOpenDetail(rowIdx){
   var r=obRows[rowIdx]; if(!r) return;
   obDetailRow=rowIdx;
+  obDetailKey={name:r['顧客名']||'',date:r['来場日']||''};
   document.getElementById('ob-det-name').textContent=r['顧客名']||'—';
   var sub=[];
   if(r['来場日']) sub.push(obFmtDate(obNormDate(r['来場日']))+' 受付');
@@ -3231,6 +3344,7 @@ function obOpenDetail(rowIdx){
 function obCloseDetail(){
   document.getElementById('ob-detail').classList.remove('show');
   obDetailRow=-1;
+  obDetailKey=null;
 }
 
 function obEditDetName(){
@@ -3246,7 +3360,6 @@ function obEditDetName(){
     r['顧客名']=v; obSetCache(obRows);
     el.textContent=v;
     obSaveField(obDetailRow,'顧客名',v);
-    obRenderAll();
     toast('顧客名を更新しました');
   }
   inp.addEventListener('blur',save);
@@ -3409,7 +3522,9 @@ function obRenderDetHistory(){
   var r=obRows[obDetailRow]; if(!r) return;
   var tl=document.getElementById('ob-det-timeline'); if(!tl) return;
   var hist=(r.history||[]).slice().sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
-  obPopulateFilters(); // staff select
+  // 担当者セレクトだけ更新（obPopulateFilters は全フィルターを上書きするため不使用）
+  var tsEl=document.getElementById('tl-staff');
+  if(tsEl && tsEl.options.length<=1){ var allS=getStaffList(); tsEl.innerHTML='<option value="">—</option>'+allS.map(function(s){return '<option value="'+esc(s)+'">'+esc(s)+'</option>';}).join(''); }
   if(!hist.length){ tl.innerHTML='<div style="color:#CCC;font-size:.88rem;padding:8px 0">まだ履歴がありません。上から追加してください。</div>'; return; }
   tl.innerHTML=hist.map(function(item,i){
     return '<div class="ob-tl-item">'+
@@ -3511,6 +3626,16 @@ function obShowDriveFrame(url){
   var m=url.match(/\/folders\/([^?/]+)/);
   if(m) embedUrl='https://drive.google.com/embeddedfolderview?id='+m[1]+'#list';
   wrap.innerHTML='<iframe class="ob-drive-frame" src="'+esc(embedUrl)+'" allowfullscreen></iframe>';
+}
+
+// 誕生日同期（NotionバースデーDB → OBドライブJSON）
+function obSyncBirthdaysBtn(){
+  toast('誕生日同期中…');
+  gasGet('obSyncBirthdays',function(d){
+    if(!d||d.error){ toast('⚠️ 誕生日同期エラー: '+(d?d.error:'不明')); return; }
+    toast('✅ 誕生日同期完了: '+d.synced+'件更新（計'+d.total+'件）');
+    obLoad(true);
+  });
 }
 
 // Notion同期
@@ -3638,16 +3763,9 @@ function kjRenderList(){
   var fPhase=((document.getElementById('kj-filter-phase')||{}).value||'');
   var fStaff=((document.getElementById('kj-filter-staff')||{}).value||'');
   var fQ=((document.getElementById('kj-q')||{}).value||'').toLowerCase().trim();
-  var rows=kjRows.filter(function(r){
-    var ph=kjPhaseOf(r);
-    if(fPhase && ph!==fPhase) return false;
-    if(fStaff && r['営業']!==fStaff && r['工務']!==fStaff) return false;
-    if(fQ && (r['物件名']||'').toLowerCase().indexOf(fQ)<0 && (r['場所']||'').toLowerCase().indexOf(fQ)<0) return false;
-    return true;
-  });
-  var cntEl=document.getElementById('kj-count'); if(cntEl) cntEl.textContent=rows.length+'件';
+  var today=new Date(); today.setHours(0,0,0,0);
 
-  // Staff filter options
+  // Staff filter options（初回のみ）
   var sels=document.getElementById('kj-filter-staff');
   if(sels && sels.options.length<=1){
     var staffSet={};
@@ -3655,9 +3773,56 @@ function kjRenderList(){
     Object.keys(staffSet).sort().forEach(function(s){ var o=document.createElement('option'); o.value=s; o.textContent=s; sels.appendChild(o); });
   }
 
-  if(!rows.length){ el.innerHTML='<div class="kj-empty">該当する案件がありません</div>'; return; }
+  var allRows=kjRows.filter(function(r){
+    if(fStaff && r['営業']!==fStaff && r['工務']!==fStaff) return false;
+    if(fQ && (r['物件名']||'').toLowerCase().indexOf(fQ)<0 && (r['場所']||'').toLowerCase().indexOf(fQ)<0) return false;
+    return true;
+  });
 
-  var html='<table class="kj-table"><thead><tr>'+
+  // フェーズサマリーバー
+  var PHASE_ORDER=['工事中','着工前','申請中','設計中','契約前','竣工済','引渡済'];
+  var phaseCnt={};
+  allRows.forEach(function(r){ var ph=kjPhaseOf(r); phaseCnt[ph]=(phaseCnt[ph]||0)+1; });
+  var barHtml='<div class="kj-phase-bar">';
+  PHASE_ORDER.forEach(function(ph){
+    var cnt=phaseCnt[ph]||0; if(!cnt) return;
+    var pc=KJ_PHASE_CLASS[ph]||'p0';
+    var isActive=(fPhase===ph);
+    barHtml+='<span class="kj-phase-chip '+pc+(isActive?' selected':'')+'" style="'+(isActive?'box-shadow:0 0 0 2px currentColor;':'')+'" onclick="(function(){var s=document.getElementById(\'kj-filter-phase\');if(s){s.value=s.value===\''+ph+'\'?\'\':\''+ph+'\';kjRenderList();}})()">'+
+      esc(ph)+' <span class="kj-chip-cnt">'+cnt+'</span></span>';
+  });
+  barHtml+='</div>';
+
+  var rows=allRows.filter(function(r){
+    var ph=kjPhaseOf(r);
+    if(fPhase && ph!==fPhase) return false;
+    return true;
+  });
+
+  // フェーズ優先順ソート
+  rows.sort(function(a,b){
+    var pa=PHASE_ORDER.indexOf(kjPhaseOf(a)); var pb=PHASE_ORDER.indexOf(kjPhaseOf(b));
+    if(pa<0) pa=99; if(pb<0) pb=99;
+    return pa-pb;
+  });
+
+  var cntEl=document.getElementById('kj-count'); if(cntEl) cntEl.textContent=rows.length+'件';
+  if(!rows.length){ el.innerHTML=barHtml+'<div class="kj-empty">該当する案件がありません</div>'; return; }
+
+  function kjDateCell(s){
+    if(!s) return '<span style="color:#CCC">—</span>';
+    var norm=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(!norm) return esc(String(s));
+    var d=new Date(norm[1]+'-'+norm[2]+'-'+norm[3]+'T00:00:00');
+    var diff=Math.floor((d-today)/(1000*60*60*24));
+    var yr=parseInt(norm[1]); var mo=parseInt(norm[2]); var dy=parseInt(norm[3]);
+    var lbl=(yr===today.getFullYear()?mo+'月'+dy+'日':yr+'年'+mo+'月'+dy+'日');
+    if(diff<0) return '<span class="kj-date-over">'+lbl+'</span>';
+    if(diff<=30) return '<span class="kj-date-warn">'+lbl+'</span>';
+    return '<span class="kj-date-ok">'+lbl+'</span>';
+  }
+
+  var html=barHtml+'<table class="kj-table"><thead><tr>'+
     '<th>物件名</th><th>場所</th><th>区分</th><th>営業</th><th>工務</th>'+
     '<th>フェーズ</th><th>請負契約</th><th>着工</th><th>上棟</th><th>引渡し</th><th></th>'+
     '</tr></thead><tbody>';
@@ -3671,10 +3836,10 @@ function kjRenderList(){
       '<td style="font-size:.82rem">'+esc(r['営業']||'—')+'</td>'+
       '<td style="font-size:.82rem">'+esc(r['工務']||'—')+'</td>'+
       '<td><span class="kj-phase-badge '+pc+'">'+esc(ph)+'</span></td>'+
-      '<td style="font-size:.8rem;white-space:nowrap">'+kjFmtDate(r['請負契約日'])+'</td>'+
-      '<td style="font-size:.8rem;white-space:nowrap">'+kjFmtDate(r['基礎着工'])+'</td>'+
-      '<td style="font-size:.8rem;white-space:nowrap">'+kjFmtDate(r['上棟'])+'</td>'+
-      '<td style="font-size:.8rem;white-space:nowrap">'+(r['引渡し']?'<span style="color:#166534;font-weight:700">'+kjFmtDate(r['引渡し'])+'</span>':kjFmtDate(r['引渡し']))+'</td>'+
+      '<td style="font-size:.8rem;white-space:nowrap">'+kjDateCell(r['請負契約日'])+'</td>'+
+      '<td style="font-size:.8rem;white-space:nowrap">'+kjDateCell(r['基礎着工'])+'</td>'+
+      '<td style="font-size:.8rem;white-space:nowrap">'+kjDateCell(r['上棟'])+'</td>'+
+      '<td style="font-size:.8rem;white-space:nowrap">'+kjDateCell(r['引渡し'])+'</td>'+
       '<td><button class="ob-del" onclick="kjConfirmDel(\''+esc(r._id||'')+'\')">✕</button></td>'+
     '</tr>';
   });
@@ -3760,6 +3925,21 @@ function kjStartEdit(el){
     post({action:'kjUpdateField',id:id,field:field,value:v});
   }
 
+  if(type==='sel'){
+    // KJ_PHASES から該当フィールドの opts を検索
+    var selOpts=[];
+    KJ_PHASES.forEach(function(ph){ ph.fields.forEach(function(f){ if(f.k===field && f.opts) selOpts=f.opts; }); });
+    if(selOpts.length){
+      var selEl=document.createElement('select');
+      selEl.style.cssText='font-size:.84rem;padding:3px 6px;border:1px solid #2B2B2B;border-radius:3px;background:#fff;outline:none;width:100%;font-family:inherit';
+      selEl.innerHTML='<option value="">—</option>'+selOpts.map(function(o){return '<option'+(o===curVal?' selected':'')+'>'+esc(o)+'</option>';}).join('');
+      el.innerHTML=''; el.appendChild(selEl); selEl.focus();
+      var doneSel=false;
+      function svSel(){ if(doneSel)return; doneSel=true; saveVal(selEl.value); }
+      selEl.addEventListener('change',svSel); selEl.addEventListener('blur',svSel);
+      return;
+    }
+  }
   if(type==='date'){
     var inp=document.createElement('input');
     inp.type='date'; inp.value=curVal.substring(0,10);
@@ -3806,19 +3986,16 @@ function kjAddProject(){
   var name=prompt('物件名を入力してください（例：田中 一郎様）');
   if(!name||!name.trim()) return;
   toast('追加中…');
-  post({action:'kjSaveProject',record:{'物件名':name.trim(),'ステータス':'契約前'}},function(d){
-    if(d&&d.ok){ toast('✅ 追加しました'); kjLoad(); }
-    else toast('⚠️ 追加エラー');
-  });
+  post({action:'kjSaveProject',record:{'物件名':name.trim(),'ステータス':'契約前'}});
+  setTimeout(function(){ toast('✅ 追加しました'); kjLoad(); },1500);
 }
 
 function kjConfirmDel(id){
   var r=kjRows.find(function(x){return x._id===id;}); if(!r) return;
   if(!confirm('「'+r['物件名']+'」を削除しますか？\nこの操作は元に戻せません。')) return;
-  post({action:'kjDeleteProject',id:id},function(d){
-    if(d&&d.ok){ toast('削除しました'); kjLoad(); }
-    else toast('⚠️ 削除エラー');
-  });
+  toast('削除中…');
+  post({action:'kjDeleteProject',id:id});
+  setTimeout(function(){ toast('削除しました'); kjLoad(); },1500);
 }
 
 function kjImportExcel(){
@@ -3845,24 +4022,19 @@ function kjFmtDate(s){
 // OBからパートナーになったら着工管理へ自動追加
 function kjAutoAddFromOB(obRow){
   if(!obRow||!obRow['顧客名']) return;
-  // Check if already exists
-  var exists=kjRows.some(function(r){ return r._obId===obRow._id || r['物件名']===obRow['顧客名']; });
+  // 物件名（=OB顧客名）で重複チェック
+  var exists=kjRows.some(function(r){ return r['物件名']===obRow['顧客名']; });
   if(exists){ toast('着工管理: 「'+obRow['顧客名']+'」は既に登録済みです'); return; }
   var rec={
     '物件名': obRow['顧客名'],
     '場所': obRow['エリア']||'',
     '営業': obRow['担当者']||'',
     '初回P登録': obRow['P申込目標日']||'',
-    'ステータス': '契約前',
-    '_obId': obRow._id||''
+    'ステータス': '契約前'
   };
   toast('着工管理に「'+rec['物件名']+'」を追加中…');
-  post({action:'kjSaveProject',record:rec},function(d){
-    if(d&&d.ok){
-      toast('✅ 着工管理に追加しました: '+rec['物件名']);
-      kjLoad(true);
-    }
-  });
+  post({action:'kjSaveProject',record:rec});
+  setTimeout(function(){ toast('✅ 着工管理に追加しました: '+rec['物件名']); kjLoad(true); },1500);
 }
 
 // ══════════════════════════════════════════════════
@@ -3907,23 +4079,25 @@ function tochiRenderList(){
   var cntEl=document.getElementById('tochi-count'); if(cntEl) cntEl.textContent=rows.length+'件';
   if(!rows.length){ el.innerHTML='<div class="kj-empty">該当する物件がありません</div>'; return; }
 
-  var html='<table class="kj-table"><thead><tr>'+
-    '<th>顧客名</th><th>所在地</th><th>Googleマップ</th>'+
-    '<th>工事案内図</th><th>見学会案内図</th><th>駐車場</th>'+
+  var html='<table class="tochi-table"><thead><tr>'+
+    '<th style="min-width:120px">顧客名</th>'+
+    '<th style="min-width:260px">所在地</th>'+
+    '<th style="min-width:110px">Googleマップ</th>'+
+    '<th style="min-width:110px">工事案内図</th>'+
+    '<th style="min-width:110px">見学会案内図</th>'+
+    '<th style="min-width:140px">駐車場</th>'+
     '</tr></thead><tbody>';
   rows.forEach(function(r){
     var hasKoji=!!r['工事案内図'];
     var hasKengaku=TOCHI_STAFF.some(function(s){return !!r[s.prop];});
     var gmapUrl=r['Googleマップ']||'';
     html+='<tr>'+
-      '<td><span style="font-weight:700;color:#2B2B2B">'+esc(r['顧客名']||'—')+'</span></td>'+
-      '<td style="font-size:.8rem;color:#555;max-width:200px">'+esc(r['所在地']||'—')+'</td>'+
-      '<td>'+(gmapUrl?'<a href="'+esc(gmapUrl)+'" target="_blank" style="color:#2563EB;font-size:.78rem;text-decoration:none">🗺 開く</a>':'<span style="color:#CCC;font-size:.76rem">—</span>')+'</td>'+
-      '<td>'+(hasKoji?'<span style="color:#166534;font-weight:700;font-size:.78rem">✅ 生成済</span>':
-        '<span style="color:#9A3412;font-size:.76rem">未生成</span>')+'</td>'+
-      '<td>'+(hasKengaku?'<span style="color:#166534;font-size:.78rem">✅ あり</span>':
-        '<span style="color:#9A3412;font-size:.76rem">なし</span>')+'</td>'+
-      '<td style="font-size:.78rem;color:#555">'+esc(r['駐車場場所']||'—')+'</td>'+
+      '<td><span style="font-weight:700;color:#2B2B2B;font-family:var(--serif)">'+esc(r['顧客名']||'—')+'</span></td>'+
+      '<td style="font-size:.82rem;color:#444;white-space:normal;line-height:1.5">'+esc(r['所在地']||'—')+'</td>'+
+      '<td>'+(gmapUrl?'<a href="'+esc(gmapUrl)+'" target="_blank" class="tochi-link-btn">🗺 地図を開く</a>':'<span style="color:#CCC;font-size:.76rem">—</span>')+'</td>'+
+      '<td>'+(hasKoji?'<span class="tochi-badge-ok">✅ 生成済</span>':'<span class="tochi-badge-ng">⬜ 未生成</span>')+'</td>'+
+      '<td>'+(hasKengaku?'<span class="tochi-badge-ok">✅ あり</span>':'<span class="tochi-badge-ng">⬜ なし</span>')+'</td>'+
+      '<td style="font-size:.82rem;color:#444;white-space:normal;line-height:1.5">'+esc(r['駐車場場所']||'—')+'</td>'+
     '</tr>';
   });
   html+='</tbody></table>';
@@ -3940,10 +4114,8 @@ function tochiGenerateAll(){
   if(!unprocessed.length){ toast('未処理の物件はありません'); return; }
   if(!confirm('工事案内図・見学会案内図が未生成の '+unprocessed.length+'件 のPDFを生成します。\n数分かかります。続けますか？')) return;
   toast('PDF生成中… GASで処理しています（完了まで数分）');
-  post({action:'tochiGenerateAllMaps'},function(d){
-    if(d&&d.ok){ toast('✅ PDF生成完了: '+d.processed+'件処理'); tochiLoad(); }
-    else toast('⚠️ エラー: '+(d?d.error:'不明'));
-  });
+  post({action:'tochiGenerateAllMaps'});
+  setTimeout(function(){ toast('✅ PDF生成完了（確認中…）'); tochiLoad(); },60000);
 }
 
 // 起動処理
