@@ -1521,7 +1521,7 @@ window.addEventListener('load', function() {
       auto_select: false
     });
     var wrap = document.getElementById('gsi-btn-wrap');
-    if (wrap) google.accounts.id.renderButton(wrap, { theme: 'outline', size: 'large', text: 'sign_in_with', shape: 'rectangular', width: 280 });
+    if (wrap) google.accounts.id.renderButton(wrap, { theme: 'outline', size: 'large', text: 'sign_in_with', shape: 'rectangular', width: 280, ux_mode: 'popup' });
   }
   renderGsiBtn();
 });
