@@ -849,14 +849,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     <div class="lt">管理コンソール</div>
     <div class="l-divider"></div>
     <div class="f">
-      <div id="g_id_onload"
-           data-client_id="40655412309-av7oitabtv9eb2g3fafc3sb9oulvatcb.apps.googleusercontent.com"
-           data-callback="handleCredentialResponse"
-           data-auto_prompt="false"
-           data-cancel_on_tap_outside="false">
-      </div>
-      <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="center"></div>
-      <div id="g_signin_render" style="margin-top:4px"></div>
+      <div id="g_signin_render"></div>
       <button onclick="loginPickAccount()" style="margin-top:6px;background:none;border:none;color:rgba(255,255,255,.55);font-size:.78rem;cursor:pointer;text-decoration:underline;letter-spacing:.04em">別のアカウントでログイン</button>
       <div class="err" id="lerr"></div>
     </div>
@@ -1522,15 +1515,14 @@ function initFs(){ setFs(localStorage.getItem('admin_fs')||'s'); }
 var __gsiReady = false;
 function initGoogleSignIn() {
   if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
-    setTimeout(initGoogleSignIn, 300); return;
+    setTimeout(initGoogleSignIn, 200); return;
   }
   if (__gsiReady) return;
   __gsiReady = true;
   google.accounts.id.initialize({
     client_id: '40655412309-av7oitabtv9eb2g3fafc3sb9oulvatcb.apps.googleusercontent.com',
     callback: handleCredentialResponse,
-    auto_select: false,
-    cancel_on_tap_outside: false
+    auto_select: false
   });
   var el = document.getElementById('g_signin_render');
   if (el) {
@@ -1539,21 +1531,13 @@ function initGoogleSignIn() {
 }
 window.addEventListener('load', initGoogleSignIn);
 
-// 別のアカウントでログイン（アカウント選択プロンプト）
+// 別のアカウントでログイン
 function loginPickAccount() {
   document.getElementById('lerr').textContent = '';
-  if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
-    document.getElementById('lerr').textContent = 'Googleライブラリ読み込み中...'; return;
-  }
-  google.accounts.id.cancel();
+  if (!__gsiReady) { document.getElementById('lerr').textContent = 'Googleライブラリ読み込み中...'; return; }
   google.accounts.id.disableAutoSelect();
-  google.accounts.id.prompt(function(n) {
-    if (n.isNotDisplayed() || n.isSkippedMoment()) {
-      // プロンプト非表示の場合は通常ボタンを再描画
-      var el = document.getElementById('g_signin_render');
-      if (el) { el.innerHTML = ''; google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', text: 'sign_in_with', width: 300 }); }
-    }
-  });
+  var el = document.getElementById('g_signin_render');
+  if (el) { el.innerHTML = ''; google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', text: 'sign_in_with', shape: 'rectangular', logo_alignment: 'center', width: 300 }); }
 }
 
 // 戻るボタン対応：bfcache から復帰時にセッションを復元
