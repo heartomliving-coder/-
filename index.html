@@ -1709,6 +1709,7 @@ function handleCredentialResponse(response) {
       console.log('[Login] GASレスポンス:', JSON.stringify(d).slice(0, 200));
       if (d && d.token) {
         localStorage.setItem('admin_session_token', d.token);
+        if (d.email) localStorage.setItem('admin_session_email', d.email);
         lerr.textContent = '';
         console.log('[Login] ✅ ログイン成功: ' + d.email);
         showApp();
@@ -1733,10 +1734,11 @@ function handleCredentialResponse(response) {
     });
 }
 
-function logout(){ if(confirm('ログアウトしますか？')){ localStorage.removeItem('admin_session_token'); location.reload(); } }
+function logout(){ if(confirm('ログアウトしますか？')){ localStorage.removeItem('admin_session_token'); localStorage.removeItem('admin_session_email'); location.reload(); } }
 
 function onAuthFail(){
   localStorage.removeItem('admin_session_token');
+  localStorage.removeItem('admin_session_email');
   document.getElementById('app').classList.remove('show');
   document.getElementById('board').style.display='none';
   document.getElementById('login').classList.remove('hide');
@@ -1870,8 +1872,8 @@ function openSettings(tab){
   syncSettingsFsButtons();
   // アカウント情報
   var tok=adminKey();
-  var info=tok?'ログイン中':'未ログイン';
-  try{ var s=tok?JSON.parse(atob(tok.split('.')[1])||'{}'):{}; if(s.email) info='メール: '+s.email; }catch(e){}
+  var storedEmail=localStorage.getItem('admin_session_email')||'';
+  var info=storedEmail?'ログイン: '+storedEmail:(tok?'ログイン中（メール不明）':'未ログイン');
   document.getElementById('stAccountInfo').textContent=info;
   // 端末設定
   renderTerminalSeatList();
@@ -3746,19 +3748,22 @@ function obToggleDet(el,field,rowIdx){
 function obRenderDetHistory(){
   var r=obRows[obDetailRow]; if(!r) return;
   var tl=document.getElementById('ob-det-timeline'); if(!tl) return;
-  var hist=(r.history||[]).slice().sort(function(a,b){return b.date>a.date?1:b.date<a.date?-1:0;}); // 新しい順
+  // 元インデックスを保持したまま新しい順にソート（削除時に元インデックスが必要）
+  var histWithOrigIdx=(r.history||[]).map(function(item,origIdx){ return {item:item,origIdx:origIdx}; })
+    .sort(function(a,b){return b.item.date>a.item.date?1:b.item.date<a.item.date?-1:0;});
   // 担当者セレクトだけ更新（obPopulateFilters は全フィルターを上書きするため不使用）
   var tsEl=document.getElementById('tl-staff');
   if(tsEl && tsEl.options.length<=1){ var allS=getStaffList(); tsEl.innerHTML='<option value="">—</option>'+allS.map(function(s){return '<option value="'+esc(s)+'">'+esc(s)+'</option>';}).join(''); }
-  if(!hist.length){ tl.innerHTML='<div style="color:#CCC;font-size:.88rem;padding:8px 0">まだ履歴がありません。上から追加してください。</div>'; return; }
-  tl.innerHTML=hist.map(function(item,i){
+  if(!histWithOrigIdx.length){ tl.innerHTML='<div style="color:#CCC;font-size:.88rem;padding:8px 0">まだ履歴がありません。上から追加してください。</div>'; return; }
+  tl.innerHTML=histWithOrigIdx.map(function(hw){
+    var item=hw.item; var origIdx=hw.origIdx;
     return '<div class="ob-tl-item">'+
       '<div class="ob-tl-dot"></div>'+
       '<div class="ob-tl-date">'+esc(item.date?obFmtDate(obNormDate(item.date)):'—')+'</div>'+
       '<div class="ob-tl-badge">'+esc(item.type||'')+'</div>'+
       '<div class="ob-tl-content">'+esc(item.content||'')+'</div>'+
       '<div class="ob-tl-staff">'+esc(item.staff||'')+'</div>'+
-      '<button class="ob-tl-del" onclick="obDelHistory('+i+')" title="削除">✕</button>'+
+      '<button class="ob-tl-del" onclick="obDelHistory('+origIdx+')" title="削除">✕</button>'+
     '</div>';
   }).join('');
 }
