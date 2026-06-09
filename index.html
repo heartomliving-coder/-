@@ -1490,6 +1490,32 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 <div id="toast"></div>
 
 <script>
+// ─── OAuth2ポップアップコールバック検出（スクリプト最初に実行）───
+// ポップアップウィンドウとして開かれ、hashにid_tokenがある場合のみ実行
+var __isOAuthCallback = (function() {
+  try {
+    if (!window.opener) return false;
+    var h = location.hash;
+    if (!h || h.length < 2) return false;
+    var params = {};
+    h.substring(1).split('&').forEach(function(p) {
+      var kv = p.split('=');
+      if (kv.length >= 2) params[decodeURIComponent(kv[0])] = decodeURIComponent(kv.slice(1).join('='));
+    });
+    if (params.id_token) {
+      window.opener.__oauthIdToken = params.id_token;
+      setTimeout(function(){ window.close(); }, 50);
+      return true;
+    }
+    if (params.error) {
+      window.opener.__oauthIdToken = null;
+      setTimeout(function(){ window.close(); }, 50);
+      return true;
+    }
+  } catch(e) {}
+  return false;
+})();
+
 var SEND_URL_DEFAULT="https://script.google.com/macros/s/AKfycbxx7Fy7f1qSRWXs4fgN6lperuRwGqwHtP1nFHvXKBkJsl7Elx83Dh1FDvVSmUkP5Xis3A/exec";
 var DEFAULT_CUSTOMER_URL="https://heartom-customer.vercel.app/";
 
@@ -1512,41 +1538,94 @@ function setFs(level){
 function initFs(){ setFs(localStorage.getItem('admin_fs')||'s'); }
 
 var GSI_CLIENT_ID = '40655412309-av7oitabtv9eb2g3fafc3sb9oulvatcb.apps.googleusercontent.com';
+var __gsiInitTries = 0;
 
 function initGoogleSignIn() {
+  __gsiInitTries++;
   if (!window.google || !google.accounts || !google.accounts.id) {
+    if (__gsiInitTries > 100) { // 20秒タイムアウト
+      var c = document.getElementById('gLoginBtn');
+      if (c) c.innerHTML = '<div style="color:rgba(255,255,255,.55);font-size:.78rem;padding:8px">Googleライブラリ読込失敗。<br>再読込してください。<button onclick="location.reload()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;padding:4px 10px;border-radius:3px;cursor:pointer;margin-top:6px;display:block">再読込</button></div>';
+      return;
+    }
     setTimeout(initGoogleSignIn, 200);
     return;
   }
-  google.accounts.id.initialize({
-    client_id: GSI_CLIENT_ID,
-    callback: handleCredentialResponse,
-    ux_mode: 'popup',
-    auto_select: false,
-    cancel_on_tap_outside: true
-  });
-  var container = document.getElementById('gLoginBtn');
-  if (container) {
-    google.accounts.id.renderButton(container, {
-      type: 'standard', size: 'large', theme: 'outline',
-      text: 'sign_in_with', shape: 'rectangular',
-      logo_alignment: 'center', width: 280
+  try {
+    google.accounts.id.initialize({
+      client_id: GSI_CLIENT_ID,
+      callback: handleCredentialResponse,
+      ux_mode: 'popup',
+      auto_select: false,
+      cancel_on_tap_outside: true,
+      itp_support: true
     });
+    var container = document.getElementById('gLoginBtn');
+    if (container) {
+      google.accounts.id.renderButton(container, {
+        type: 'standard', size: 'large', theme: 'outline',
+        text: 'sign_in_with', shape: 'rectangular',
+        logo_alignment: 'center', width: 280
+      });
+    }
+  } catch(err) {
+    var c = document.getElementById('gLoginBtn');
+    if (c) c.innerHTML = '<button onclick="doOAuthPopup()" style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 28px;border-radius:4px;font-size:.9rem;cursor:pointer;width:280px">Googleでログイン</button>';
   }
 }
 
-function doSelectAccount() {
-  if (!window.google || !google.accounts || !google.accounts.id) return;
-  google.accounts.id.initialize({
-    client_id: GSI_CLIENT_ID,
-    callback: handleCredentialResponse,
-    ux_mode: 'popup',
-    auto_select: false
-  });
-  google.accounts.id.prompt();
+// GSIが使えない場合のOAuth2ポップアップ方式（フォールバック）
+function doOAuthPopup(prompt_hint) {
+  var lerr = document.getElementById('lerr');
+  // 登録済みredirectURI（Google Cloud Consoleに登録した値と完全一致）
+  var redirectUri = 'https://heartom-admin.vercel.app/';
+  var params = 'client_id=' + encodeURIComponent(GSI_CLIENT_ID) +
+    '&redirect_uri=' + encodeURIComponent(redirectUri) +
+    '&response_type=id_token' +
+    '&scope=openid%20email%20profile' +
+    '&nonce=' + Math.random().toString(36).slice(2) +
+    '&prompt=' + (prompt_hint || 'select_account');
+  var w = window.open('https://accounts.google.com/o/oauth2/v2/auth?' + params,
+    '_googleLogin', 'width=480,height=560,left=200,top=100,resizable=yes,scrollbars=yes');
+  if (!w) {
+    lerr.textContent = 'ポップアップがブロックされました。ブラウザの設定でポップアップを許可してください';
+    return;
+  }
+  lerr.textContent = 'Googleアカウントを選択中...';
+  var poll = setInterval(function() {
+    if (w.closed) {
+      clearInterval(poll);
+      var tok = window.__oauthIdToken;
+      window.__oauthIdToken = null;
+      if (tok) {
+        handleCredentialResponse({credential: tok});
+      } else {
+        lerr.textContent = 'ログインがキャンセルされました';
+      }
+    }
+  }, 400);
 }
 
-window.addEventListener('load', initGoogleSignIn);
+function doSelectAccount() {
+  if (window.google && google.accounts && google.accounts.id) {
+    try {
+      google.accounts.id.initialize({
+        client_id: GSI_CLIENT_ID,
+        callback: handleCredentialResponse,
+        ux_mode: 'popup',
+        auto_select: false,
+        itp_support: true
+      });
+      google.accounts.id.prompt();
+      return;
+    } catch(e) {}
+  }
+  doOAuthPopup('select_account');
+}
+
+window.addEventListener('load', function() {
+  if (!__isOAuthCallback) initGoogleSignIn();
+});
 
 // 戻るボタン対応：bfcache から復帰時にセッションを復元
 window.addEventListener('pageshow', function(e) {
@@ -1556,19 +1635,35 @@ window.addEventListener('pageshow', function(e) {
 function handleCredentialResponse(response) {
   var lerr = document.getElementById('lerr');
   lerr.textContent = '認証中...';
-  fetch(SEND_URL_DEFAULT + '?action=googleLogin&credential=' + encodeURIComponent(response.credential))
-    .then(function(r) { return r.json(); })
+  var url = SEND_URL_DEFAULT + '?action=googleLogin&credential=' + encodeURIComponent(response.credential);
+  var controller = window.AbortController ? new AbortController() : null;
+  var tid = setTimeout(function() { if (controller) controller.abort(); }, 20000);
+  fetch(url, {
+    method: 'GET',
+    credentials: 'omit',
+    redirect: 'follow',
+    signal: controller ? controller.signal : undefined
+  })
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + r.statusText);
+      return r.json();
+    })
     .then(function(d) {
+      clearTimeout(tid);
       if (d && d.token) {
         localStorage.setItem('admin_session_token', d.token);
         lerr.textContent = '';
         showApp();
       } else {
-        lerr.textContent = d && d.error ? d.error : 'ログインに失敗しました（メール未登録の可能性）';
+        lerr.textContent = d && d.error ? d.error : 'ログインに失敗しました（管理者として未登録の可能性）';
       }
     })
     .catch(function(e) {
-      lerr.textContent = 'GAS接続エラー: ' + (e && e.message ? e.message : '不明なエラー');
+      clearTimeout(tid);
+      var msg = e && e.message ? e.message : String(e);
+      if (msg.indexOf('abort') >= 0 || msg.indexOf('Abort') >= 0) msg = 'タイムアウト（20秒）';
+      lerr.textContent = 'GAS接続エラー: ' + msg;
+      console.error('[Login] GAS fetch error:', e);
     });
 }
 
@@ -4243,9 +4338,11 @@ function tochiGenerateAll(){
   setTimeout(function(){ toast('✅ PDF生成完了（確認中…）'); tochiLoad(); },60000);
 }
 
-// 起動処理
-initFs();
-if(adminKey()){ showApp(); }
+// 起動処理（OAuth2ポップアップコールバックの場合はスキップ）
+if (!__isOAuthCallback) {
+  initFs();
+  if(adminKey()){ showApp(); }
+}
 </script>
 </body>
 </html>
