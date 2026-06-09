@@ -849,9 +849,11 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     <div class="lt">管理コンソール</div>
     <div class="l-divider"></div>
     <div class="f">
-      <div id="gLoginBtn" style="min-height:40px"></div>
-      <button onclick="doSelectAccount()" style="margin-top:4px;background:none;border:none;color:rgba(255,255,255,.55);font-size:.78rem;cursor:pointer;text-decoration:underline;letter-spacing:.04em">別のアカウントでログイン</button>
+      <div id="gLoginBtn" style="min-height:44px;display:flex;align-items:center;justify-content:center"></div>
+      <button id="oauthFallbackBtn" onclick="doOAuthPopup()" style="display:none;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.45);color:#fff;padding:11px 28px;border-radius:4px;font-size:.9rem;cursor:pointer;width:280px;letter-spacing:.04em">🔐 Googleでログイン</button>
+      <button onclick="doOAuthPopup('select_account')" style="margin-top:6px;background:none;border:none;color:rgba(255,255,255,.45);font-size:.74rem;cursor:pointer;text-decoration:underline;letter-spacing:.04em">別の方法でログイン（ポップアップ）</button>
       <div class="err" id="lerr"></div>
+      <div id="gasStatus" style="font-size:.68rem;color:rgba(255,255,255,.35);margin-top:6px;text-align:center;letter-spacing:.04em"></div>
     </div>
   </div>
 </div>
@@ -1539,18 +1541,52 @@ function initFs(){ setFs(localStorage.getItem('admin_fs')||'s'); }
 
 var GSI_CLIENT_ID = '40655412309-av7oitabtv9eb2g3fafc3sb9oulvatcb.apps.googleusercontent.com';
 var __gsiInitTries = 0;
+var __gsiButtonRendered = false;
+
+// GASサーバー接続確認
+function checkGasStatus() {
+  var el = document.getElementById('gasStatus'); if (!el) return;
+  el.textContent = '⏳ サーバー確認中...';
+  fetch(SEND_URL_DEFAULT + '?action=getAdminEmails&_=' + Date.now(), {
+    credentials: 'omit', redirect: 'follow'
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d && d.fixed) {
+      el.textContent = '✅ サーバー接続OK (' + d.all.length + '名登録済み)';
+      el.style.color = 'rgba(100,220,100,.75)';
+    } else {
+      el.textContent = '⚠️ サーバー応答エラー';
+      el.style.color = '#FF8080';
+    }
+  })
+  .catch(function(e) {
+    el.textContent = '❌ サーバー未応答: ' + (e && e.message ? e.message : '不明');
+    el.style.color = '#FF8080';
+    console.error('[Login] GAS status check failed:', e);
+  });
+}
 
 function initGoogleSignIn() {
   __gsiInitTries++;
   if (!window.google || !google.accounts || !google.accounts.id) {
+    if (__gsiInitTries === 1) {
+      console.log('[Login] GSIライブラリ待機中...');
+    }
     if (__gsiInitTries > 100) { // 20秒タイムアウト
+      console.warn('[Login] GSIライブラリ読込タイムアウト。OAuth2フォールバックを表示。');
       var c = document.getElementById('gLoginBtn');
-      if (c) c.innerHTML = '<div style="color:rgba(255,255,255,.55);font-size:.78rem;padding:8px">Googleライブラリ読込失敗。<br>再読込してください。<button onclick="location.reload()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;padding:4px 10px;border-radius:3px;cursor:pointer;margin-top:6px;display:block">再読込</button></div>';
+      if (c) c.innerHTML = '';
+      var fb = document.getElementById('oauthFallbackBtn');
+      if (fb) fb.style.display = 'block';
+      var lerr = document.getElementById('lerr');
+      if (lerr && !lerr.textContent) lerr.textContent = 'Googleライブラリ読込失敗。下の「Googleでログイン」ボタンをご利用ください。';
       return;
     }
     setTimeout(initGoogleSignIn, 200);
     return;
   }
+  console.log('[Login] GSIライブラリ準備完了。ボタン描画中...');
   try {
     google.accounts.id.initialize({
       client_id: GSI_CLIENT_ID,
@@ -1567,17 +1603,23 @@ function initGoogleSignIn() {
         text: 'sign_in_with', shape: 'rectangular',
         logo_alignment: 'center', width: 280
       });
+      __gsiButtonRendered = true;
+      console.log('[Login] GSIボタン描画完了');
     }
   } catch(err) {
+    console.error('[Login] GSI初期化エラー:', err);
     var c = document.getElementById('gLoginBtn');
-    if (c) c.innerHTML = '<button onclick="doOAuthPopup()" style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 28px;border-radius:4px;font-size:.9rem;cursor:pointer;width:280px">Googleでログイン</button>';
+    if (c) c.innerHTML = '';
+    var fb = document.getElementById('oauthFallbackBtn');
+    if (fb) fb.style.display = 'block';
   }
 }
 
-// GSIが使えない場合のOAuth2ポップアップ方式（フォールバック）
+// OAuth2ポップアップ方式（GSI不使用、直接OAuth2認証）
 function doOAuthPopup(prompt_hint) {
   var lerr = document.getElementById('lerr');
-  // 登録済みredirectURI（Google Cloud Consoleに登録した値と完全一致）
+  console.log('[Login] OAuth2ポップアップ開始, prompt=' + (prompt_hint || 'select_account'));
+  // Google Cloud ConsoleのAuthorized Redirect URIに登録した値と完全一致
   var redirectUri = 'https://heartom-admin.vercel.app/';
   var params = 'client_id=' + encodeURIComponent(GSI_CLIENT_ID) +
     '&redirect_uri=' + encodeURIComponent(redirectUri) +
@@ -1586,45 +1628,52 @@ function doOAuthPopup(prompt_hint) {
     '&nonce=' + Math.random().toString(36).slice(2) +
     '&prompt=' + (prompt_hint || 'select_account');
   var w = window.open('https://accounts.google.com/o/oauth2/v2/auth?' + params,
-    '_googleLogin', 'width=480,height=560,left=200,top=100,resizable=yes,scrollbars=yes');
+    '_googleLogin', 'width=520,height=600,left=200,top=80,resizable=yes,scrollbars=yes');
   if (!w) {
-    lerr.textContent = 'ポップアップがブロックされました。ブラウザの設定でポップアップを許可してください';
+    lerr.textContent = 'ポップアップがブロックされました。ブラウザでポップアップを許可してから再度お試しください。';
+    console.warn('[Login] ポップアップブロック');
     return;
   }
-  lerr.textContent = 'Googleアカウントを選択中...';
+  lerr.textContent = 'Googleアカウントを選択中... （ポップアップが開きます）';
   var poll = setInterval(function() {
-    if (w.closed) {
-      clearInterval(poll);
-      var tok = window.__oauthIdToken;
-      window.__oauthIdToken = null;
-      if (tok) {
-        handleCredentialResponse({credential: tok});
-      } else {
-        lerr.textContent = 'ログインがキャンセルされました';
+    try {
+      if (w.closed) {
+        clearInterval(poll);
+        var tok = window.__oauthIdToken;
+        window.__oauthIdToken = null;
+        if (tok) {
+          console.log('[Login] OAuth2トークン取得成功。GAS認証中...');
+          handleCredentialResponse({credential: tok});
+        } else {
+          console.log('[Login] OAuth2ポップアップがキャンセルまたはエラー');
+          lerr.textContent = 'ログインがキャンセルされました。再度お試しください。';
+        }
       }
-    }
+    } catch(e) { /* cross-origin check may fail */ }
   }, 400);
 }
 
 function doSelectAccount() {
-  if (window.google && google.accounts && google.accounts.id) {
+  // GSIが利用可能かつボタンが描画済みの場合はpromptを試みる
+  if (window.google && google.accounts && google.accounts.id && __gsiButtonRendered) {
     try {
-      google.accounts.id.initialize({
-        client_id: GSI_CLIENT_ID,
-        callback: handleCredentialResponse,
-        ux_mode: 'popup',
-        auto_select: false,
-        itp_support: true
+      google.accounts.id.prompt(function(notification) {
+        console.log('[Login] GSI prompt result:', notification.getNotDisplayedReason ? notification.getNotDisplayedReason() : notification);
       });
-      google.accounts.id.prompt();
       return;
-    } catch(e) {}
+    } catch(e) {
+      console.warn('[Login] GSI prompt失敗:', e);
+    }
   }
+  // フォールバック: OAuth2ポップアップ方式
   doOAuthPopup('select_account');
 }
 
 window.addEventListener('load', function() {
-  if (!__isOAuthCallback) initGoogleSignIn();
+  if (!__isOAuthCallback) {
+    initGoogleSignIn();
+    checkGasStatus();
+  }
 });
 
 // 戻るボタン対応：bfcache から復帰時にセッションを復元
@@ -1634,10 +1683,16 @@ window.addEventListener('pageshow', function(e) {
 
 function handleCredentialResponse(response) {
   var lerr = document.getElementById('lerr');
-  lerr.textContent = '認証中...';
+  if (!response || !response.credential) {
+    lerr.textContent = 'Googleトークンが取得できませんでした。再度お試しください。';
+    console.error('[Login] handleCredentialResponse: credentialが空', response);
+    return;
+  }
+  console.log('[Login] Googleトークン取得。GASで検証中...');
+  lerr.textContent = '認証中... （数秒かかります）';
   var url = SEND_URL_DEFAULT + '?action=googleLogin&credential=' + encodeURIComponent(response.credential);
   var controller = window.AbortController ? new AbortController() : null;
-  var tid = setTimeout(function() { if (controller) controller.abort(); }, 20000);
+  var tid = setTimeout(function() { if (controller) controller.abort(); }, 25000);
   fetch(url, {
     method: 'GET',
     credentials: 'omit',
@@ -1645,24 +1700,35 @@ function handleCredentialResponse(response) {
     signal: controller ? controller.signal : undefined
   })
     .then(function(r) {
+      console.log('[Login] GAS応答:', r.status, r.url);
       if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + r.statusText);
       return r.json();
     })
     .then(function(d) {
       clearTimeout(tid);
+      console.log('[Login] GASレスポンス:', JSON.stringify(d).slice(0, 200));
       if (d && d.token) {
         localStorage.setItem('admin_session_token', d.token);
         lerr.textContent = '';
+        console.log('[Login] ✅ ログイン成功: ' + d.email);
         showApp();
+      } else if (d && d.error) {
+        lerr.textContent = '❌ ' + d.error;
+        console.error('[Login] GASエラー:', d.error);
       } else {
-        lerr.textContent = d && d.error ? d.error : 'ログインに失敗しました（管理者として未登録の可能性）';
+        lerr.textContent = 'ログインに失敗しました。管理者として登録されているか確認してください。';
+        console.error('[Login] 不明なレスポンス:', d);
       }
     })
     .catch(function(e) {
       clearTimeout(tid);
       var msg = e && e.message ? e.message : String(e);
-      if (msg.indexOf('abort') >= 0 || msg.indexOf('Abort') >= 0) msg = 'タイムアウト（20秒）';
-      lerr.textContent = 'GAS接続エラー: ' + msg;
+      if (msg.indexOf('abort') >= 0 || msg.indexOf('Abort') >= 0) {
+        msg = 'タイムアウト（25秒）。GASサーバーが応答しませんでした。ページを再読込してお試しください。';
+      } else if (msg.indexOf('Failed to fetch') >= 0 || msg.indexOf('NetworkError') >= 0) {
+        msg = 'ネットワークエラー。インターネット接続を確認してください。';
+      }
+      lerr.textContent = '❌ ' + msg;
       console.error('[Login] GAS fetch error:', e);
     });
 }
