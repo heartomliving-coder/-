@@ -1556,28 +1556,20 @@ window.addEventListener('pageshow', function(e) {
 function handleCredentialResponse(response) {
   var lerr = document.getElementById('lerr');
   lerr.textContent = '認証中...';
-  var name = '__a' + Date.now();
-  var done = false;
-  var timer = setTimeout(function() {
-    if (!done) { done = true; lerr.textContent = 'タイムアウト: GASに接続できません。時間をおいて再試行してください。'; }
-  }, 12000);
-  window[name] = function(d) {
-    if (done) return; done = true; clearTimeout(timer);
-    if (d && d.token) {
-      localStorage.setItem('admin_session_token', d.token);
-      lerr.textContent = '';
-      showApp();
-    } else {
-      lerr.textContent = d && d.error ? d.error : 'ログインに失敗しました';
-    }
-  };
-  var s = document.createElement('script');
-  s.onerror = function() {
-    if (done) return; done = true; clearTimeout(timer);
-    lerr.textContent = 'GAS接続エラー: ネットワークまたはGAS URLを確認してください。';
-  };
-  s.src = SEND_URL_DEFAULT + '?action=googleLogin&credential=' + encodeURIComponent(response.credential) + '&callback=' + name;
-  document.body.appendChild(s);
+  fetch(SEND_URL_DEFAULT + '?action=googleLogin&credential=' + encodeURIComponent(response.credential))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.token) {
+        localStorage.setItem('admin_session_token', d.token);
+        lerr.textContent = '';
+        showApp();
+      } else {
+        lerr.textContent = d && d.error ? d.error : 'ログインに失敗しました（メール未登録の可能性）';
+      }
+    })
+    .catch(function(e) {
+      lerr.textContent = 'GAS接続エラー: ' + (e && e.message ? e.message : '不明なエラー');
+    });
 }
 
 function logout(){ if(confirm('ログアウトしますか？')){ localStorage.removeItem('admin_session_token'); location.reload(); } }
@@ -1932,17 +1924,14 @@ function openBoard(){
 }
 
 function gasGet(action,cb){
-  var name='__a'+Date.now()+Math.random().toString(36).slice(2);
-  var s=document.createElement('script'),done=false;
-  var t=setTimeout(function(){if(done)return;done=true;delete window[name];cb(null)},20000);
-  window[name]=function(d){
-    if(done)return;done=true;clearTimeout(t);delete window[name];if(s.parentNode)s.parentNode.removeChild(s);
-    if(d&&d.error==='auth'){ onAuthFail(); cb(null); return; }
-    cb(d);
-  };
-  s.src=sendUrl()+'?action='+action+'&key='+encodeURIComponent(adminKey())+'&callback='+name+'&_='+Date.now();
-  s.onerror=function(){if(done)return;done=true;clearTimeout(t);delete window[name];cb(null)};
-  document.body.appendChild(s);
+  var url=sendUrl()+'?action='+action+'&key='+encodeURIComponent(adminKey())+'&_='+Date.now();
+  fetch(url)
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.error==='auth'){onAuthFail();cb(null);return;}
+      cb(d);
+    })
+    .catch(function(){cb(null);});
 }
 
 function loadList(){
