@@ -1739,8 +1739,13 @@ function logout(){ if(confirm('ログアウトしますか？')){ localStorage.r
 function onAuthFail(){
   localStorage.removeItem('admin_session_token');
   localStorage.removeItem('admin_session_email');
+  // 全パネルを非表示にしてログイン画面に戻す
   document.getElementById('app').classList.remove('show');
   document.getElementById('board').style.display='none';
+  var hub=document.getElementById('hub'); if(hub) hub.classList.remove('show');
+  var ob=document.getElementById('openboard'); if(ob) ob.classList.remove('show');
+  var kj=document.getElementById('kojiboard'); if(kj) kj.classList.remove('show');
+  var tc=document.getElementById('tochiboard'); if(tc) tc.classList.remove('show');
   document.getElementById('login').classList.remove('hide');
   document.getElementById('lerr').textContent='セッションが切れました。再度ログインしてください';
 }
@@ -1792,6 +1797,8 @@ function enterKojiBoard(){
   document.getElementById('hub').classList.remove('show');
   document.getElementById('kojiboard').classList.add('show');
   kjLoad();
+  // 60秒ごとに自動更新
+  if(!window.__kjPollTimer) window.__kjPollTimer = setInterval(function(){ kjLoad(true); }, 60000);
 }
 
 // Hub clock + badge updates
@@ -2088,13 +2095,24 @@ function openBoard(){
 
 function gasGet(action,cb){
   var url=sendUrl()+'?action='+action+'&key='+encodeURIComponent(adminKey())+'&_='+Date.now();
-  fetch(url)
+  var controller = window.AbortController ? new AbortController() : null;
+  var tid = setTimeout(function(){ if(controller) controller.abort(); }, 30000);
+  fetch(url, {
+    credentials: 'omit',
+    redirect: 'follow',
+    signal: controller ? controller.signal : undefined
+  })
     .then(function(r){return r.json();})
     .then(function(d){
+      clearTimeout(tid);
       if(d&&d.error==='auth'){onAuthFail();cb(null);return;}
       cb(d);
     })
-    .catch(function(){cb(null);});
+    .catch(function(e){
+      clearTimeout(tid);
+      console.warn('[gasGet] '+action+' failed:', e&&e.message?e.message:e);
+      cb(null);
+    });
 }
 
 function loadList(){
@@ -4282,6 +4300,8 @@ function enterTochiBoard(){
   var cached=tochiGetCache();
   if(cached.length){ tochiRows=cached; tochiRenderList(); }
   tochiLoad();
+  // 5分ごとに自動更新（Notion APIはレート制限があるため長め）
+  if(!window.__tcPollTimer) window.__tcPollTimer = setInterval(function(){ tochiLoad(); }, 300000);
 }
 
 function tochiLoad(){
