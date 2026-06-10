@@ -239,6 +239,7 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,1
 .b-seat-cmd.danger:hover { background:#8A3A3A; color:#fff; border-color:#8A3A3A; }
 
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 
 .b-kpi{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:22px 26px;display:flex;align-items:center;gap:22px;margin-bottom:18px}
 .b-kpi .num{font-family:"Playfair Display",serif;font-size:4rem;font-weight:600;line-height:.9;color:var(--gold)}
@@ -919,8 +920,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <button class="ob-tab" data-tab="agg" onclick="obSwitchTab('agg')">📊 集計</button>
     </div>
     <div class="ob-hd-tools">
+      <span id="ob-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
       <button class="hbtn primary" onclick="obAddCustomer()">＋ 新規追加</button>
-      <button class="hbtn ghost" onclick="obImportFromNotion()">🔄 Notion同期</button>
+      <button class="hbtn ghost" onclick="obLoad()" title="手動で最新データを取得">🔄 更新</button>
+      <button class="hbtn ghost" onclick="obImportFromNotion()">📥 Notion同期</button>
       <button class="hbtn ghost" onclick="obSyncBirthdaysBtn()" title="NotionバースデーDBをオープンボードに同期">🎂 誕生日同期</button>
       <button class="hbtn ghost" onclick="obCleanData()" title="データ修正（FALSE除去・ステータス正規化）">🧹 修正</button>
       <button class="hbtn" onclick="showHub()">‹ 戻る</button>
@@ -995,7 +998,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <button class="kj-tab" data-ktab="timeline" onclick="kjSwitchTab('timeline')">📅 工程カレンダー</button>
     </div>
     <div class="kj-hd-tools">
+      <span id="kj-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
       <button class="hbtn primary" onclick="kjAddProject()">＋ 新規追加</button>
+      <button class="hbtn ghost" onclick="kjLoad()" title="手動で最新データを取得">🔄 更新</button>
       <button class="hbtn ghost" onclick="kjImportExcel()">📥 Excel移行</button>
       <button class="hbtn" onclick="showHub()">‹ 戻る</button>
     </div>
@@ -1035,8 +1040,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <button class="kj-tab on" data-ttab="list">📋 物件一覧</button>
     </div>
     <div class="kj-actions">
+      <span id="tc-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
       <button class="hbtn primary" onclick="tochiGenerateAll()">🗺 地図PDF生成（未処理）</button>
-      <button class="hbtn ghost" onclick="tochiLoad()">🔄 Notion同期</button>
+      <button class="hbtn ghost" onclick="tochiLoad(false)">🔄 Notion同期</button>
       <button class="hbtn ghost" onclick="showHub()">‹ 戻る</button>
     </div>
   </div>
@@ -1781,6 +1787,7 @@ function enterOpenBoard(){
   document.getElementById('openboard').classList.add('show');
   obLoadExclStaff();
   obLoad();
+  obUpdateLastUpdatedLabel();
   if(!window.__obPollTimer) window.__obPollTimer=setInterval(function(){ obLoad(true); },60000);
 }
 
@@ -1797,6 +1804,7 @@ function enterKojiBoard(){
   document.getElementById('hub').classList.remove('show');
   document.getElementById('kojiboard').classList.add('show');
   kjLoad();
+  kjUpdateLastUpdatedLabel();
   // 60秒ごとに自動更新
   if(!window.__kjPollTimer) window.__kjPollTimer = setInterval(function(){ kjLoad(true); }, 60000);
 }
@@ -2093,10 +2101,12 @@ function openBoard(){
   window.location.href = '?view=board';
 }
 
-function gasGet(action,cb){
+// timeout: ms (default 45000 for large data, 30000 for small)
+function gasGet(action,cb,timeout){
   var url=sendUrl()+'?action='+action+'&key='+encodeURIComponent(adminKey())+'&_='+Date.now();
+  var ms = timeout || (/^(obGetData|obImportFromNotion|obSyncBirthdays|kjImportFromExcel)/.test(action) ? 60000 : 45000);
   var controller = window.AbortController ? new AbortController() : null;
-  var tid = setTimeout(function(){ if(controller) controller.abort(); }, 30000);
+  var tid = setTimeout(function(){ if(controller) controller.abort(); }, ms);
   fetch(url, {
     credentials: 'omit',
     redirect: 'follow',
@@ -2110,16 +2120,19 @@ function gasGet(action,cb){
     })
     .catch(function(e){
       clearTimeout(tid);
-      console.warn('[gasGet] '+action+' failed:', e&&e.message?e.message:e);
+      var msg=e&&e.message?e.message:String(e);
+      if(msg.indexOf('abort')>=0||msg.indexOf('Abort')>=0) msg='タイムアウト（'+Math.round(ms/1000)+'秒）';
+      console.warn('[gasGet] '+action+' failed:', msg);
       cb(null);
     });
 }
 
 function loadList(){
-  document.getElementById('list').innerHTML='<div class="state">読み込み中...</div>';
+  document.getElementById('list').innerHTML='<div class="state">⏳ 読み込み中...<br><small style="color:#AAA;font-size:.78rem">初回は30秒ほどかかる場合があります</small></div>';
   gasGet('listInfoCustomers',function(d){
+    if(!d){ document.getElementById('list').innerHTML='<div class="state">❌ データ取得エラー<br><small style="color:#AAA">接続を確認して再度お試しください</small><br><button class="rl" style="margin-top:14px" onclick="loadList()">🔄 再読込</button></div>'; return; }
     __all=(d&&d.list)?d.list:[];
-    if(!__all.length){document.getElementById('list').innerHTML='<div class="state">顧客データがありません<br><button class="rl" style="margin-top:14px" onclick="loadList()">再読込</button></div>';return}
+    if(!__all.length){document.getElementById('list').innerHTML='<div class="state">顧客データがありません<br><button class="rl" style="margin-top:14px" onclick="loadList()">🔄 再読込</button></div>';return}
     renderList();
   });
 }
@@ -2695,16 +2708,40 @@ function obGetCache(){try{return JSON.parse(localStorage.getItem(OB_CACHE_KEY)||
 function obSetCache(r){try{localStorage.setItem(OB_CACHE_KEY,JSON.stringify(r));}catch(e){}}
 
 // ── ロード ──
+var __obLastUpdated = 0;
+var __obLoading = false;
+
 function obLoad(silent){
+  if(__obLoading && silent) return; // サイレント更新は同時実行しない
+  __obLoading = true;
   var cached=obGetCache();
   if(cached.length && !silent){ obRows=cached; obRows.forEach(function(r,i){r._row=i;}); obPopulateFilters(); obRenderAll(); }
+  // キャッシュがない初回ロード時はローディングアニメーション表示
+  if(!cached.length){
+    document.getElementById('ob-visitors-content').innerHTML='<div class="ob-empty-state" style="color:#888"><div style="font-size:2rem;margin-bottom:16px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div><br>データ読み込み中...<br><small style="color:#BBB;font-size:.78rem">初回は30〜60秒かかる場合があります</small></div>';
+  }
   gasGet('obGetData',function(d){
-    if(!d||d.error){ if(!cached.length) document.getElementById('ob-visitors-content').innerHTML='<div class="ob-empty-state">データ取得エラー<br><button class="hbtn" style="margin-top:12px" onclick="obLoad()">再読み込み</button></div>'; return; }
+    __obLoading = false;
+    if(!d||d.error){
+      var errMsg=(d&&d.error)?d.error:'通信エラー';
+      if(!cached.length){
+        document.getElementById('ob-visitors-content').innerHTML='<div class="ob-empty-state">❌ データ取得エラー: '+errMsg+'<br><small style="color:#BBB">GASサーバーへの接続に失敗しました</small><br><button class="hbtn" style="margin-top:14px" onclick="obLoad()">🔄 再読み込み</button></div>';
+      } else if(!silent){
+        toast('⚠️ データ取得エラー。キャッシュを表示中。');
+      }
+      return;
+    }
     var newRows=d.rows||[];
     var prevLen=obRows.length;
+    // ユーザーが入力中の場合は再描画をスキップ
+    var ae=document.activeElement;
+    var userEditing = ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
+      (document.getElementById('ob-detail').contains(ae) || document.getElementById('ob-visitors-content').contains(ae) || document.getElementById('ob-active-content').contains(ae));
     obRows=newRows;
     obRows.forEach(function(r,i){r._row=i;});
     obSetCache(obRows);
+    __obLastUpdated=Date.now();
+    obUpdateLastUpdatedLabel();
     // 詳細パネルが開いていれば行インデックスを安定キーで再同期
     if(obDetailKey && document.getElementById('ob-detail').classList.contains('show')){
       var newIdx=-1;
@@ -2715,9 +2752,16 @@ function obLoad(silent){
       else { obCloseDetail(); toast('⚠️ 表示中の顧客データが見つかりません（削除または変更された可能性があります）'); }
     }
     obPopulateFilters();
-    obRenderAll();
+    if(!userEditing){ obRenderAll(); }
     if(silent && obRows.length>prevLen){ toast('🔔 新規データ '+(obRows.length-prevLen)+'件 を取得しました'); }
+    hubUpdateBadges();
   });
+}
+
+function obUpdateLastUpdatedLabel(){
+  var el=document.getElementById('ob-last-updated'); if(!el||!__obLastUpdated) return;
+  var d=new Date(__obLastUpdated);
+  el.textContent='最終更新 '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
 }
 
 function obRenderAll(){ obRenderPipeline(); obRenderVisitors(); obRenderActive(); if(obCurrentTab==='agg') obRenderAgg(); }
@@ -3990,20 +4034,51 @@ var KJ_PHASE_CLASS={'契約前':'p0','設計中':'p1','申請中':'p1','着工�
 function kjGetCache(){ try{var d=localStorage.getItem('kj_v1');return d?JSON.parse(d):[];}catch(e){return[];} }
 function kjSetCache(rows){ try{localStorage.setItem('kj_v1',JSON.stringify(rows));}catch(e){} }
 
+var __kjLastUpdated = 0;
+var __kjLoading = false;
+
 function kjLoad(silent){
+  if(__kjLoading && silent) return;
+  __kjLoading = true;
   var cached=kjGetCache();
   if(cached.length && !silent){ kjRows=cached; kjRows.forEach(function(r,i){r._idx=i;}); kjRenderList(); }
+  if(!cached.length){
+    document.getElementById('kj-list-content').innerHTML='<div class="kj-empty" style="color:#888"><div style="font-size:2rem;margin-bottom:12px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div><br>データ読み込み中...</div>';
+  }
   gasGet('kjGetData',function(d){
-    if(!d||d.error){ if(!cached.length) document.getElementById('kj-list-content').innerHTML='<div class="kj-empty">データ取得エラー</div>'; return; }
+    if(!d||d.error){
+      __kjLoading = false;
+      var errMsg=(d&&d.error)?d.error:'通信エラー';
+      if(!cached.length){
+        document.getElementById('kj-list-content').innerHTML=
+          '<div class="kj-empty">❌ データ取得エラー: '+errMsg+
+          '<br><button class="hbtn" style="margin-top:12px" onclick="kjLoad()">🔄 再読み込み</button></div>';
+      } else if(!silent){
+        toast('⚠️ 着工管理データ取得エラー。キャッシュを表示中。');
+      }
+      return;
+    }
+    __kjLoading = false;
     var newRows=d.rows||[];
     var prevLen=kjRows.length;
     kjRows=newRows;
     kjRows.forEach(function(r,i){r._idx=i;});
     kjSetCache(kjRows);
-    kjRenderList();
+    __kjLastUpdated=Date.now();
+    kjUpdateLastUpdatedLabel();
+    var ae=document.activeElement;
+    var userEditing = ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
+      document.getElementById('kj-list-content').contains(ae);
+    if(!userEditing){ kjRenderList(); }
     if(silent && kjRows.length>prevLen) toast('🔔 着工管理 新規 '+(kjRows.length-prevLen)+'件');
     hubUpdateBadges();
   });
+}
+
+function kjUpdateLastUpdatedLabel(){
+  var el=document.getElementById('kj-last-updated'); if(!el||!__kjLastUpdated) return;
+  var d=new Date(__kjLastUpdated);
+  el.textContent='最終更新 '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
 }
 
 function kjRenderList(){
@@ -4055,7 +4130,12 @@ function kjRenderList(){
   });
 
   var cntEl=document.getElementById('kj-count'); if(cntEl) cntEl.textContent=rows.length+'件';
-  if(!rows.length){ el.innerHTML=barHtml+'<div class="kj-empty">該当する案件がありません</div>'; return; }
+  if(!rows.length){
+    var noDataMsg = kjRows.length===0
+      ? '<div class="kj-empty">着工管理データがありません<br><small style="color:#CCC;font-size:.82rem">「＋ 新規追加」ボタンで追加、または「📥 Excel移行」でExcelから取り込んでください</small><br><br><button class="hbtn primary" onclick="kjAddProject()" style="margin:0 4px">＋ 新規追加</button><button class="hbtn ghost" onclick="kjImportExcel()" style="margin:0 4px">📥 Excel移行</button></div>'
+      : '<div class="kj-empty">フィルター条件に該当する案件がありません<br><small style="color:#CCC;font-size:.82rem">フィルターを変更するか、検索条件をクリアしてください</small></div>';
+    el.innerHTML=barHtml+noDataMsg; return;
+  }
 
   function kjDateCell(s){
     if(!s) return '<span style="color:#CCC">—</span>';
@@ -4294,25 +4374,42 @@ var tochiRows = [];
 function tochiGetCache(){ try{var d=localStorage.getItem('tc_v1');return d?JSON.parse(d):[];}catch(e){return[];} }
 function tochiSetCache(rows){ try{localStorage.setItem('tc_v1',JSON.stringify(rows));}catch(e){} }
 
+var __tcLastUpdated = 0;
+
 function enterTochiBoard(){
   document.getElementById('hub').classList.remove('show');
   document.getElementById('tochiboard').classList.add('show');
   var cached=tochiGetCache();
   if(cached.length){ tochiRows=cached; tochiRenderList(); }
-  tochiLoad();
+  tochiLoad(false); // 初回は非サイレント
   // 5分ごとに自動更新（Notion APIはレート制限があるため長め）
-  if(!window.__tcPollTimer) window.__tcPollTimer = setInterval(function(){ tochiLoad(); }, 300000);
+  if(!window.__tcPollTimer) window.__tcPollTimer = setInterval(function(){ tochiLoad(true); }, 300000);
 }
 
-function tochiLoad(){
-  toast('Notionから読み込み中…');
+function tcUpdateLastUpdatedLabel(){
+  var el=document.getElementById('tc-last-updated'); if(!el||!__tcLastUpdated) return;
+  var d=new Date(__tcLastUpdated);
+  el.textContent='最終更新 '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
+}
+
+function tochiLoad(silent){
+  if(!silent){ toast('Notionから読み込み中…'); }
+  var el=document.getElementById('tochi-list-content');
+  if(!tochiRows.length && el){ el.innerHTML='<div class="kj-empty">⏳ Notionから読み込み中...</div>'; }
   gasGet('tochiGetData',function(d){
-    if(!d||d.error){ toast('⚠️ 取得エラー: '+(d?d.error:'不明')); return; }
+    if(!d||d.error){
+      var errMsg=(d&&d.error)?d.error:'通信エラー';
+      if(!tochiRows.length && el){ el.innerHTML='<div class="kj-empty">データ取得エラー: '+errMsg+'<br><button class="hbtn" style="margin-top:12px" onclick="tochiLoad(false)">🔄 再読み込み</button></div>'; }
+      else if(!silent){ toast('⚠️ 土地DB取得エラー: '+errMsg); }
+      return;
+    }
     tochiRows=d.rows||[];
     tochiSetCache(tochiRows);
     tochiRenderList();
+    __tcLastUpdated=Date.now();
+    tcUpdateLastUpdatedLabel();
     hubUpdateBadges();
-    toast('✅ 土地DB 読み込み完了: '+tochiRows.length+'件');
+    if(!silent){ toast('✅ 土地DB 読み込み完了: '+tochiRows.length+'件'); }
   });
 }
 
