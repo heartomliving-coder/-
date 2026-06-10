@@ -547,6 +547,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 /* 顧客名リンク */
 .ob-name-link{font-family:var(--serif);font-weight:700;color:var(--charcoal);cursor:pointer;border-bottom:1px solid transparent;transition:all .15s;font-size:.96rem}
 .ob-name-link:hover{color:var(--gold-d,#9A7B4B);border-bottom-color:var(--gold)}
+.ob-name-sub{font-size:.68rem;color:#9A8C76;margin-top:2px;line-height:1.3;letter-spacing:.02em}
 
 /* 月グループヘッダー */
 .ob-month-hd td{background:#EFEBE3;font-weight:700;font-size:.78rem;letter-spacing:.08em;padding:8px 16px;border-top:2px solid #D8CFC2;border-bottom:1px solid #D8CFC2;border-right:none !important}
@@ -592,8 +593,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-empty-state{padding:80px 20px;text-align:center;color:#BBB;font-size:.9rem;line-height:2.2}
 
 /* 履歴チップ（一覧表示 — 全件） */
-.ob-hist-chips{display:flex;gap:4px;flex-wrap:wrap;max-width:260px}
-.ob-hist-chip{font-size:.68rem;padding:3px 8px;border-radius:20px;white-space:nowrap;font-weight:600;flex-shrink:0;background:#F0EDE8;color:#666;border:1px solid #E0DAD0}
+.ob-hist-chips{display:flex;gap:4px;flex-wrap:wrap;max-width:340px}
+.ob-hist-chip{font-size:.68rem;padding:3px 9px;border-radius:20px;white-space:nowrap;font-weight:600;flex-shrink:0;background:#F0EDE8;color:#666;border:1px solid #E0DAD0;cursor:default}
 .ob-hist-chip.new{background:#2B2B2B;color:#fff;border-color:#2B2B2B}
 
 /* 月ヘッダー ＋追加ボタン */
@@ -768,6 +769,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-card-name:hover{text-decoration:underline;color:#9A8C76}
 .ob-card-meta{display:flex;align-items:center;gap:8px;font-size:.72rem;color:#888;flex-wrap:wrap}
 .ob-card-staff{font-weight:700;color:#555}
+.ob-card-last{font-size:.72rem;color:#9A8C76;font-weight:600}
 .ob-card-next{font-size:.76rem;font-weight:700;padding:3px 9px;border-radius:20px;white-space:normal;line-height:1.5}
 .ob-card-next.ok{background:#F0FDF4;color:#166534;border:1px solid #BBF7D0}
 .ob-card-next.warn{background:#FFF7ED;color:#92500A;border:1px solid #FDE68A}
@@ -832,6 +834,27 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .tochi-pdf-modal-close:hover{color:#fff}
 #tochi-pdf-frame{flex:1;border:none;width:100%;background:#F5F5F5}
 .tochi-pdf-loading{flex:1;display:flex;align-items:center;justify-content:center;color:#888;font-size:.9rem}
+/* 土地DB ビュー切替 */
+.tochi-viewtoggle{display:flex;gap:0;margin:0 0 16px;border:1px solid #DDD6CC;border-radius:8px;overflow:hidden;width:fit-content;background:#fff}
+.tochi-viewtoggle button{background:#fff;border:none;padding:8px 18px;font-size:.8rem;font-weight:700;color:#9A8C76;cursor:pointer;transition:all .14s;border-right:1px solid #EEE8DE}
+.tochi-viewtoggle button:last-child{border-right:none}
+.tochi-viewtoggle button.active{background:#2B2B2B;color:#fff}
+/* 土地DB カードグリッド */
+.tochi-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:20px}
+.tochi-card{background:#fff;border:1px solid #EAE4DA;border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(80,66,46,.07);transition:transform .16s,box-shadow .16s;display:flex;flex-direction:column}
+.tochi-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(80,66,46,.16)}
+.tochi-card-map{position:relative;width:100%;height:190px;background:#EEEAE2}
+.tochi-card-map iframe{width:100%;height:100%;border:none;display:block}
+.tochi-card-nomap{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#B5AB99;font-size:.86rem}
+.tochi-card-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:7px}
+.tochi-card-name{font-family:var(--serif);font-weight:700;font-size:1.06rem;color:#2B2B2B;letter-spacing:.02em}
+.tochi-card-loc{font-size:.78rem;color:#5C5346;line-height:1.5;word-break:break-word}
+.tochi-card-park{font-size:.74rem;color:#7A6E5C;line-height:1.4}
+.tochi-card-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.tochi-card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.tochi-tag{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.02em}
+.tochi-tag.on{background:#F0FDF4;color:#166534;border:1px solid #BBF7D0}
+.tochi-tag.off{background:#F7F5F0;color:#A89C88;border:1px solid #E5DFD4}
 </style>
 </head>
 <body>
@@ -941,7 +964,11 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <select id="ob-filter-month" onchange="obRenderVisitors()" style="width:80px"></select>
       <label>担当:</label>
       <select id="ob-vis-staff" onchange="obRenderVisitors()" style="width:100px"></select>
-      <input type="text" id="ob-vis-q" placeholder="顧客名で検索..." style="min-width:140px" oninput="obRenderVisitors()">
+      <input type="text" id="ob-vis-q" placeholder="顧客名・電話・反響元で検索..." style="min-width:170px" oninput="obRenderVisitors()">
+      <select id="ob-vis-sort" onchange="obRenderVisitors()" style="width:120px" title="並び順">
+        <option value="desc">新しい順</option>
+        <option value="asc">古い順</option>
+      </select>
       <span class="ob-filter-count" id="ob-vis-count"></span>
     </div>
     <div class="ob-scroll">
@@ -1151,6 +1178,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
         <input type="text" id="tl-content" class="tl-content" placeholder="内容を入力...">
         <select id="tl-staff" style="width:100px"></select>
         <button class="hbtn primary" onclick="obAddHistoryItem()">追加</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 2px 8px">
+        <div class="ob-sec-title" style="margin:0">来店・接触履歴</div>
+        <span id="ob-hist-count" style="font-size:.72rem;color:#9A8C76;font-weight:600"></span>
       </div>
       <div class="ob-timeline" id="ob-det-timeline"></div>
     </div>
@@ -2703,6 +2734,37 @@ function obDateToYM(s){
   return d.substring(0,7); // "2026-06"
 }
 
+// ── 来店履歴の重複除去 ──
+// 同一の正規化日付＋種別の履歴を1件にまとめ、意味のある内容を優先する。
+// （ISO形式 "2026-06-05" と 日本語形式 "2026年6月5日" の二重登録を解消）
+var OB_GENERIC_HIST=['','来場','初回','初回来場','打ち合わせ','notionより同期','notion同期','—','-'];
+function obHistContentScore(c){
+  var s=String(c||'').trim().toLowerCase();
+  if(!s) return 0;
+  if(OB_GENERIC_HIST.indexOf(s)>=0) return 1; // 汎用ラベル
+  return 3; // 反響元/見学会名など具体的な内容
+}
+function obDedupHistory(history){
+  if(!history||!history.length) return [];
+  var map={}; var order=[];
+  history.forEach(function(h){
+    if(!h) return;
+    var nd=obNormDate(h.date||'');
+    var key=nd+'|'+(h.type||'');
+    if(!map[key]){ map[key]={date:nd||h.date||'',type:h.type||'',content:h.content||'',staff:h.staff||''}; order.push(key); }
+    else{
+      var cur=map[key];
+      // より具体的な内容を採用
+      if(obHistContentScore(h.content)>obHistContentScore(cur.content)) cur.content=h.content||cur.content;
+      // 担当者は空を埋める
+      if(!cur.staff && h.staff) cur.staff=h.staff;
+    }
+  });
+  var out=order.map(function(k){return map[k];});
+  out.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+  return out;
+}
+
 // ── キャッシュ ──
 function obGetCache(){try{return JSON.parse(localStorage.getItem(OB_CACHE_KEY)||'[]');}catch(e){return[];}}
 function obSetCache(r){try{localStorage.setItem(OB_CACHE_KEY,JSON.stringify(r));}catch(e){}}
@@ -2837,13 +2899,18 @@ function obRenderVisitors(){
   var fMonth=((document.getElementById('ob-filter-month')||{}).value||'');
   var fStaff=((document.getElementById('ob-vis-staff')||{}).value||'');
   var fQ=((document.getElementById('ob-vis-q')||{}).value||'').toLowerCase().trim();
+  var sortAsc=((document.getElementById('ob-vis-sort')||{}).value||'desc')==='asc';
 
   var rows=obRows.filter(function(r){
     var d=obNormDate(r['来場日']||'');
     if(fYear && d.substring(0,4)!==fYear) return false;
     if(fMonth && d.substring(5,7)!==fMonth) return false;
     if(fStaff && r['担当者']!==fStaff && r['サブ担当']!==fStaff) return false;
-    if(fQ && (r['顧客名']||'').toLowerCase().indexOf(fQ)<0) return false;
+    if(fQ){
+      var k=r.karte||{};
+      var hay=((r['顧客名']||'')+' '+(k['フリガナ']||'')+' '+(k['電話番号']||'')+' '+(r['反響元']||'')+' '+(r['エリア']||'')+' '+(k['住所']||'')).toLowerCase();
+      if(hay.indexOf(fQ)<0) return false;
+    }
     if(obStatusFilter && (r['商談ステータス']||'問い合わせ')!==obStatusFilter) return false;
     return true;
   });
@@ -2857,10 +2924,10 @@ function obRenderVisitors(){
     if(!groups[ym]){groups[ym]=[];mOrder.push(ym);}
     groups[ym].push(r);
   });
-  // 新しい月が上（降順）
+  // 月の並び順（デフォルト：新しい月が上）。未設定は常に最後
   mOrder.sort(function(a,b){
     if(a==='未設定') return 1; if(b==='未設定') return -1;
-    return b>a?1:b<a?-1:0;
+    return sortAsc ? (a>b?1:a<b?-1:0) : (b>a?1:b<a?-1:0);
   });
 
   // ── 月別集計サマリーテーブル（スプレッドシート形式）──
@@ -2920,10 +2987,11 @@ function obRenderVisitors(){
 
   mOrder.forEach(function(ym){
     var mr=groups[ym];
-    // 月内を受付日昇順にソート
+    // 月内の並び順（選択した方向に従う）。同日は元の順序を維持
     mr.sort(function(a,b){
       var da=obNormDate(a['来場日']||''), db=obNormDate(b['来場日']||'');
-      return da>db?1:da<db?-1:0;
+      if(da===db) return 0;
+      return sortAsc ? (da>db?1:-1) : (da>db?-1:1);
     });
     var lbl=ym==='未設定'?'日付未設定':(function(){var p=ym.split('-');return parseInt(p[0])+'年'+parseInt(p[1])+'月';})();
     var pCnt=0; var evCnt={};
@@ -2966,11 +3034,18 @@ function obRenderVisitors(){
       var subStaff=obSanitizeVal(r['サブ担当']);
       var staffLbl=mainStaff||(subStaff?'':'—');
       if(subStaff) staffLbl+=(mainStaff?' / ':'')+subStaff;
+      var k=r.karte||{};
+      var kana=obSanitizeVal(k['フリガナ']||'');
+      var tel=obSanitizeVal(k['電話番号']||'');
+      var subInfo=[];
+      if(kana) subInfo.push(esc(kana));
+      if(tel) subInfo.push('<span style="color:#7A6E5C">📞'+esc(tel)+'</span>');
+      var nameSub=subInfo.length?'<div class="ob-name-sub">'+subInfo.join('　')+'</div>':'';
       html+='<tr data-sc="'+sc+'" data-row="'+r._row+'">'+
         '<td class="ob-rn">'+monthN+'</td>'+
         '<td style="white-space:nowrap">'+obCell(r,'来場日')+'</td>'+
         '<td style="font-size:.82rem;color:#444">'+obCell(r,'来場種別')+'</td>'+
-        '<td><span class="ob-name-link" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span></td>'+
+        '<td><span class="ob-name-link" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span>'+nameSub+'</td>'+
         '<td><span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="font-size:.68rem;padding:3px 8px;cursor:pointer">'+esc(dispStatus)+'</span></td>'+
         '<td style="white-space:nowrap;font-size:.84rem">'+esc(staffLbl)+'</td>'+
         '<td>'+obCell(r,'エリア')+'</td>'+
@@ -2998,14 +3073,18 @@ function obQuickAddVisitor(ym){
 }
 
 function obHistChips(r){
-  var h=(r.history||[]).slice().sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+  var h=obDedupHistory(r.history||[]);
   if(!h.length) return '<span class="ob-hist-chip" style="color:#DDD;border-color:#EEE">—</span>';
   var last=h.length-1;
   var chips=h.map(function(item,i){
     var d=item.date?obNormDate(item.date):'';
     var shortD=d?(function(){var p=d.match(/^(\d{4})-(\d{2})-(\d{2})/);return p?parseInt(p[2])+'月'+parseInt(p[3])+'日':'';}()):'';
-    var lbl=(shortD?shortD+' ':'')+(item.type||'');
-    return '<span class="ob-hist-chip'+(i===last?' new':'')+'">'+esc(lbl)+'</span>';
+    // 内容（反響元・見学会名など）も表示。汎用ラベルは種別と重複するため省略
+    var content=String(item.content||'').trim();
+    var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0;
+    var lbl=(shortD?shortD+' ':'')+(item.type||'')+((content&&!isGeneric)?'・'+content:'');
+    var title=(shortD?shortD+' ':'')+(item.type||'')+(content?'：'+content:'')+(item.staff?'（'+item.staff+'）':'');
+    return '<span class="ob-hist-chip'+(i===last?' new':'')+'" title="'+esc(title)+'">'+esc(lbl)+'</span>';
   });
   // 全件表示（切り捨てなし）
   return chips.join('');
@@ -3072,6 +3151,13 @@ function obRenderActive(){
 
     var pGoal=r['P申込目標日']?obFmtDate(obNormDate(r['P申込目標日'])):'';
 
+    // 最終接触日（重複除去後の最新履歴）と連絡先
+    var hist=obDedupHistory(r.history||[]);
+    var lastH=hist.length?hist[hist.length-1]:null;
+    var lastLbl=lastH?('🕐 最終 '+obFmtDate(obNormDate(lastH.date))+(lastH.type?'・'+esc(lastH.type):'')):'';
+    var k=r.karte||{};
+    var tel=obSanitizeVal(k['電話番号']||'');
+
     html+='<div class="ob-card" data-sc="'+sc+'">'+
       '<div class="ob-card-top">'+
         '<span class="ob-card-name" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span>'+
@@ -3080,7 +3166,9 @@ function obRenderActive(){
       '<div class="ob-card-meta">'+
         '<span class="ob-card-staff">👤 '+esc(staffLbl)+'</span>'+
         (obSanitizeVal(r['エリア'])?'<span>📍 '+esc(r['エリア'])+'</span>':'')+
+        (tel?'<span>📞 '+esc(tel)+'</span>':'')+
       '</div>'+
+      (lastLbl?'<div class="ob-card-last">'+lastLbl+'</div>':'')+
       (nextLbl?'<div class="ob-card-next '+nextCls+'">'+nextLbl+'</div>':'')+
       '<div class="ob-card-pills">'+pills+'</div>'+
       (pGoal?'<div><span class="ob-card-p">🎯 P目標: '+esc(pGoal)+'</span></div>':'')+
@@ -3810,22 +3898,24 @@ function obToggleDet(el,field,rowIdx){
 function obRenderDetHistory(){
   var r=obRows[obDetailRow]; if(!r) return;
   var tl=document.getElementById('ob-det-timeline'); if(!tl) return;
-  // 元インデックスを保持したまま新しい順にソート（削除時に元インデックスが必要）
-  var histWithOrigIdx=(r.history||[]).map(function(item,origIdx){ return {item:item,origIdx:origIdx}; })
-    .sort(function(a,b){return b.item.date>a.item.date?1:b.item.date<a.item.date?-1:0;});
   // 担当者セレクトだけ更新（obPopulateFilters は全フィルターを上書きするため不使用）
   var tsEl=document.getElementById('tl-staff');
   if(tsEl && tsEl.options.length<=1){ var allS=getStaffList(); tsEl.innerHTML='<option value="">—</option>'+allS.map(function(s){return '<option value="'+esc(s)+'">'+esc(s)+'</option>';}).join(''); }
-  if(!histWithOrigIdx.length){ tl.innerHTML='<div style="color:#CCC;font-size:.88rem;padding:8px 0">まだ履歴がありません。上から追加してください。</div>'; return; }
-  tl.innerHTML=histWithOrigIdx.map(function(hw){
-    var item=hw.item; var origIdx=hw.origIdx;
+  // 重複除去した履歴を新しい順に表示。削除は「正規化日付＋種別」キーで全該当を削除
+  var deduped=obDedupHistory(r.history||[]).slice().sort(function(a,b){return b.date>a.date?1:b.date<a.date?-1:0;});
+  var cntEl=document.getElementById('ob-hist-count'); if(cntEl) cntEl.textContent=deduped.length?('全'+deduped.length+'件'):'';
+  if(!deduped.length){ tl.innerHTML='<div style="color:#CCC;font-size:.88rem;padding:8px 0">まだ履歴がありません。上から追加してください。</div>'; return; }
+  tl.innerHTML=deduped.map(function(item){
+    var content=String(item.content||'').trim();
+    var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0;
+    var key=obNormDate(item.date||'')+'|'+(item.type||'');
     return '<div class="ob-tl-item">'+
       '<div class="ob-tl-dot"></div>'+
       '<div class="ob-tl-date">'+esc(item.date?obFmtDate(obNormDate(item.date)):'—')+'</div>'+
       '<div class="ob-tl-badge">'+esc(item.type||'')+'</div>'+
-      '<div class="ob-tl-content">'+esc(item.content||'')+'</div>'+
+      '<div class="ob-tl-content">'+esc(isGeneric?'':content)+'</div>'+
       '<div class="ob-tl-staff">'+esc(item.staff||'')+'</div>'+
-      '<button class="ob-tl-del" onclick="obDelHistory('+origIdx+')" title="削除">✕</button>'+
+      '<button class="ob-tl-del" onclick="obDelHistoryByKey(\''+esc(key).replace(/'/g,"\\'")+'\')" title="削除">✕</button>'+
     '</div>';
   }).join('');
 }
@@ -3857,6 +3947,26 @@ function obDelHistory(histIdx){
   obRenderDetHistory();
   obRenderVisitors();
   post({action:'obDeleteHistory',row:obDetailRow,histIndex:histIdx});
+  toast('削除しました');
+}
+
+// 重複除去後のタイムラインから削除：同一キー（正規化日付＋種別）の元エントリを全て削除
+function obDelHistoryByKey(key){
+  var r=obRows[obDetailRow]; if(!r||!r.history) return;
+  if(!confirm('この履歴を削除しますか？')) return;
+  // 末尾から削除してインデックスずれを防止。GASへは各インデックスの削除を送信
+  var toDel=[];
+  for(var i=0;i<r.history.length;i++){
+    var h=r.history[i];
+    if((obNormDate(h.date||'')+'|'+(h.type||''))===key) toDel.push(i);
+  }
+  for(var j=toDel.length-1;j>=0;j--){
+    r.history.splice(toDel[j],1);
+    post({action:'obDeleteHistory',row:obDetailRow,histIndex:toDel[j]});
+  }
+  obSetCache(obRows);
+  obRenderDetHistory();
+  obRenderVisitors();
   toast('削除しました');
 }
 
@@ -4413,6 +4523,29 @@ function tochiLoad(silent){
   });
 }
 
+var tochiViewMode = localStorage.getItem('tochi_view') || 'card';
+function tochiSetView(m){ tochiViewMode=m; localStorage.setItem('tochi_view',m); tochiRenderList(); }
+
+// 所在地(座標 or 住所) / GoogleマップURL から埋め込み地図URLを生成（APIキー不要）
+function tochiMapQuery(r){
+  var loc=String(r['所在地']||'').trim();
+  if(/^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/.test(loc)) return loc.replace(/\s+/g,'');
+  // GoogleマップURLの query= から抽出
+  var gm=String(r['Googleマップ']||'');
+  var m=gm.match(/[?&]query=([^&]+)/);
+  if(m){ try{ return decodeURIComponent(m[1]); }catch(e){ return m[1]; } }
+  return loc;
+}
+function tochiMapEmbedUrl(r){
+  var q=tochiMapQuery(r); if(!q) return '';
+  return 'https://maps.google.com/maps?q='+encodeURIComponent(q)+'&z=16&hl=ja&output=embed';
+}
+function tochiMapOpenUrl(r){
+  if(r['Googleマップ']) return r['Googleマップ'];
+  var q=tochiMapQuery(r); if(!q) return '';
+  return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);
+}
+
 function tochiRenderList(){
   var el=document.getElementById('tochi-list-content'); if(!el) return;
   var fQ=((document.getElementById('tochi-q')||{}).value||'').toLowerCase().trim();
@@ -4424,12 +4557,62 @@ function tochiRenderList(){
     return true;
   });
   var cntEl=document.getElementById('tochi-count'); if(cntEl) cntEl.textContent=rows.length+'件';
-  if(!rows.length){ el.innerHTML='<div class="kj-empty">該当する物件がありません</div>'; return; }
+  // ビュー切替トグル
+  var toggle='<div class="tochi-viewtoggle">'+
+    '<button class="'+(tochiViewMode==='card'?'active':'')+'" onclick="tochiSetView(\'card\')">🗂 カード</button>'+
+    '<button class="'+(tochiViewMode==='table'?'active':'')+'" onclick="tochiSetView(\'table\')">📋 テーブル</button>'+
+    '</div>';
+  if(!rows.length){ el.innerHTML=toggle+'<div class="kj-empty">該当する物件がありません</div>'; return; }
 
+  if(tochiViewMode==='table'){ el.innerHTML=toggle+tochiRenderTable(rows); return; }
+
+  // ── カードビュー（地図インラインプレビュー付き）──
+  var html='<div class="tochi-card-grid">';
+  rows.forEach(function(r){
+    var customerName=r['顧客名']||'—';
+    var loc=r['所在地']||'';
+    var kojiUrl=r['工事案内図']||'';
+    var hasKoji=!!kojiUrl;
+    var kengakuUrls=TOCHI_STAFF.filter(function(s){return !!r[s.prop];}).map(function(s){return {label:s.label||s.prop,url:r[s.prop]};});
+    var hasKengaku=kengakuUrls.length>0;
+    var embed=tochiMapEmbedUrl(r);
+    var openUrl=tochiMapOpenUrl(r);
+    var parking=obSanitizeVal(r['駐車場場所']||'');
+
+    var allTabs=[];
+    if(embed) allTabs.push({label:'🗺 地図',url:embed,type:'map'});
+    if(hasKoji) allTabs.push({label:'工事案内図',url:kojiUrl});
+    kengakuUrls.forEach(function(k){ allTabs.push({label:'見学会・'+k.label,url:k.url}); });
+
+    html+='<div class="tochi-card">'+
+      '<div class="tochi-card-map">'+
+        (embed?'<iframe src="'+esc(embed)+'" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>'
+              :'<div class="tochi-card-nomap">📍 地図情報なし</div>')+
+      '</div>'+
+      '<div class="tochi-card-body">'+
+        '<div class="tochi-card-name">'+esc(customerName)+'</div>'+
+        '<div class="tochi-card-loc">📍 '+esc(loc||'所在地未登録')+'</div>'+
+        (parking?'<div class="tochi-card-park">🅿 '+esc(parking)+'</div>':'')+
+        '<div class="tochi-card-actions">'+
+          (openUrl?'<a href="'+esc(openUrl)+'" target="_blank" class="tochi-link-btn">🗺 地図を開く</a>':'')+
+          (allTabs.length?'<button class="tochi-pdf-btn" data-pname="'+esc(customerName)+'" data-purls="'+esc(JSON.stringify(allTabs))+'" onclick="tochiOpenPdfBtn(this)">📄 資料プレビュー</button>':'')+
+        '</div>'+
+        '<div class="tochi-card-tags">'+
+          '<span class="tochi-tag '+(hasKoji?'on':'off')+'">工事案内図 '+(hasKoji?'✓':'未')+'</span>'+
+          '<span class="tochi-tag '+(hasKengaku?'on':'off')+'">見学会案内図 '+(hasKengaku?kengakuUrls.length+'件':'未')+'</span>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  });
+  html+='</div>';
+  el.innerHTML=toggle+html;
+}
+
+function tochiRenderTable(rows){
   var html='<table class="tochi-table"><thead><tr>'+
     '<th style="min-width:120px">顧客名</th>'+
     '<th style="min-width:220px">所在地</th>'+
-    '<th style="min-width:110px">Googleマップ</th>'+
+    '<th style="min-width:110px">地図</th>'+
     '<th style="min-width:130px">工事案内図</th>'+
     '<th style="min-width:130px">見学会案内図</th>'+
     '<th style="min-width:140px">駐車場</th>'+
@@ -4439,21 +4622,24 @@ function tochiRenderList(){
     var hasKoji=!!kojiUrl;
     var kengakuUrls=TOCHI_STAFF.filter(function(s){return !!r[s.prop];}).map(function(s){return {label:s.label||s.prop,url:r[s.prop]};});
     var hasKengaku=kengakuUrls.length>0;
-    var gmapUrl=r['Googleマップ']||'';
+    var openUrl=tochiMapOpenUrl(r);
+    var embed=tochiMapEmbedUrl(r);
     var customerName=r['顧客名']||'';
+    var mapTabs=[]; if(embed) mapTabs.push({label:'🗺 地図',url:embed,type:'map'});
+    var mapBtn=embed?'<button class="tochi-pdf-btn" data-pname="'+esc(customerName)+'" data-purls="'+esc(JSON.stringify(mapTabs))+'" onclick="tochiOpenPdfBtn(this)">🗺 プレビュー</button>':(openUrl?'<a href="'+esc(openUrl)+'" target="_blank" class="tochi-link-btn">🗺 開く</a>':'<span style="color:#CCC;font-size:.76rem">—</span>');
     var kojiPdf=hasKoji?'<button class="tochi-pdf-btn" data-pname="'+esc(customerName)+'" data-purls="'+esc(JSON.stringify([{label:"工事案内図",url:kojiUrl}]))+'" onclick="tochiOpenPdfBtn(this)">📄 プレビュー</button>':'<span style="color:#CCC;font-size:.76rem">—</span>';
-    var kengakuPdf=hasKengaku?'<button class="tochi-pdf-btn" data-pname="'+esc(customerName)+'" data-purls="'+esc(JSON.stringify(kengakuUrls))+'" onclick="tochiOpenPdfBtn(this)">📄 プレビュー</button>':'<span style="color:#CCC;font-size:.76rem">—</span>';
+    var kengakuPdf=hasKengaku?'<button class="tochi-pdf-btn" data-pname="'+esc(customerName)+'" data-purls="'+esc(JSON.stringify(kengakuUrls))+'" onclick="tochiOpenPdfBtn(this)">📄 '+kengakuUrls.length+'件</button>':'<span style="color:#CCC;font-size:.76rem">—</span>';
     html+='<tr>'+
       '<td><span style="font-weight:700;color:#2B2B2B;font-family:var(--serif)">'+esc(customerName||'—')+'</span></td>'+
       '<td style="font-size:.82rem;color:#444;white-space:normal;line-height:1.5">'+esc(r['所在地']||'—')+'</td>'+
-      '<td>'+(gmapUrl?'<a href="'+esc(gmapUrl)+'" target="_blank" class="tochi-link-btn">🗺 地図を開く</a>':'<span style="color:#CCC;font-size:.76rem">—</span>')+'</td>'+
+      '<td>'+mapBtn+'</td>'+
       '<td>'+kojiPdf+'</td>'+
       '<td>'+kengakuPdf+'</td>'+
       '<td style="font-size:.82rem;color:#444;white-space:normal;line-height:1.5">'+esc(r['駐車場場所']||'—')+'</td>'+
     '</tr>';
   });
   html+='</tbody></table>';
-  el.innerHTML=html;
+  return html;
 }
 
 var TOCHI_STAFF=[
@@ -4462,8 +4648,11 @@ var TOCHI_STAFF=[
 ];
 
 // DriveのURL → iframeで表示できるpreview URLに変換
-function tochiDriveEmbedUrl(url) {
+function tochiDriveEmbedUrl(url, type) {
   if (!url) return '';
+  if (type === 'map') return url; // 地図埋め込みURLはそのまま
+  // 地図埋め込みURLはそのまま通す
+  if (/maps\.google\.com|google\.com\/maps/.test(url) && /output=embed/.test(url)) return url;
   // https://drive.google.com/file/d/ID/view → /preview
   var m = url.match(/drive\.google\.com\/file\/d\/([^/?#]+)/);
   if (m) return 'https://drive.google.com/file/d/' + m[1] + '/preview';
@@ -4488,7 +4677,7 @@ function tochiOpenPdfModal(customerName, tabs) {
   var tabsEl = document.getElementById('tochi-pdf-modal-tabs');
   var frame = document.getElementById('tochi-pdf-frame');
   if (!modal || !frame) return;
-  titleEl.textContent = customerName + ' — PDFプレビュー';
+  titleEl.textContent = customerName + ' — 資料プレビュー';
   // Build tabs
   tabsEl.innerHTML = '';
   _tochiPdfTabs.forEach(function(t, i) {
@@ -4498,13 +4687,13 @@ function tochiOpenPdfModal(customerName, tabs) {
     btn.onclick = function() {
       tabsEl.querySelectorAll('.tochi-pdf-modal-tab').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
-      frame.src = tochiDriveEmbedUrl(t.url);
+      frame.src = tochiDriveEmbedUrl(t.url, t.type);
     };
     tabsEl.appendChild(btn);
   });
   // Load first tab
   if (_tochiPdfTabs.length > 0) {
-    frame.src = tochiDriveEmbedUrl(_tochiPdfTabs[0].url);
+    frame.src = tochiDriveEmbedUrl(_tochiPdfTabs[0].url, _tochiPdfTabs[0].type);
   }
   modal.classList.add('show');
 }
