@@ -29,22 +29,30 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--tx);
   -webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,118,.06),transparent 60%)}
 
-/* ─────────── ログイン画面 ─────────── */
-.login{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;background:#0E0E0F;padding:30px;overflow:hidden}
+/* ─────────── ログイン画面（社内管理システム） ─────────── */
+.login{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(1100px 560px at 50% -18%,rgba(154,140,118,.12),transparent 60%),linear-gradient(180deg,#16171B 0%,#0D0D10 100%);
+  padding:24px;overflow:hidden}
 .login:not(.hide){display:flex}
-.login .lslides{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.login .lslide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;will-change:opacity,transform;animation:lKen 36s linear infinite}
-.login .lslide:nth-child(2){animation-delay:9s}.login .lslide:nth-child(3){animation-delay:18s}.login .lslide:nth-child(4){animation-delay:27s}
-.login .lveil{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(5,5,8,.72) 0%,rgba(5,5,8,.44) 42%,rgba(5,5,8,.78) 100%)}
-.login .lveil::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 75% 55% at 50% 46%,transparent 30%,rgba(0,0,0,.3) 100%)}
+.login::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.6;
+  background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);
+  background-size:46px 46px;-webkit-mask-image:radial-gradient(ellipse 72% 68% at 50% 42%,#000 28%,transparent 76%);mask-image:radial-gradient(ellipse 72% 68% at 50% 42%,#000 28%,transparent 76%)}
 @keyframes lKen{0%{opacity:0;transform:scale(1.06)}8%{opacity:1}25%{opacity:1}33%{opacity:0;transform:scale(1.12)}100%{opacity:0}}
-.login .lwrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%;padding:0 20px}
-.login .logo{height:50px;margin-bottom:24px;opacity:.98;filter:drop-shadow(0 2px 20px rgba(0,0,0,.55))}
-.login .lo{font-family:"Playfair Display",serif;font-size:.74rem;letter-spacing:.48em;color:rgba(255,255,255,.55);margin-bottom:10px;text-transform:uppercase}
-.login .lt{font-family:var(--serif);font-size:1.6rem;font-weight:500;color:#fff;letter-spacing:.2em;margin-bottom:0;text-shadow:0 2px 20px rgba(0,0,0,.5)}
-.login .l-divider{width:48px;height:1px;background:rgba(255,255,255,.25);margin:24px auto 32px}
-.login .f{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:16px}
-.login .err{font-size:1rem;color:#FF8080;min-height:24px;text-align:center;letter-spacing:.04em;font-weight:500;padding:4px 0}
+.login .lcard{position:relative;z-index:1;width:100%;max-width:404px;
+  background:linear-gradient(180deg,rgba(33,34,40,.94),rgba(21,22,26,.96));
+  border:1px solid rgba(255,255,255,.10);border-radius:14px;
+  box-shadow:0 26px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05);padding:38px 34px 30px}
+.login .lbrand{display:flex;align-items:center;justify-content:center;gap:13px;margin-bottom:20px}
+.login .lbrand img{height:30px;filter:brightness(0) invert(1);opacity:.95}
+.login .lbrand .lbd{width:1px;height:24px;background:rgba(255,255,255,.2)}
+.login .lbrand .lbn{font-family:"Playfair Display",serif;font-size:.66rem;letter-spacing:.32em;color:rgba(255,255,255,.6);text-transform:uppercase}
+.login .lt{font-family:var(--serif);font-size:1.46rem;font-weight:600;color:#fff;letter-spacing:.16em;text-align:center;margin:0 0 5px}
+.login .lo{font-family:"Playfair Display",serif;font-size:.58rem;letter-spacing:.36em;color:var(--gold);text-align:center;text-transform:uppercase;margin-bottom:20px}
+.login .l-divider{width:auto;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);margin:0 0 22px}
+.login .f{width:100%;display:flex;flex-direction:column;align-items:center;gap:14px}
+.login .lhint{display:flex;align-items:center;gap:7px;font-size:.72rem;color:rgba(255,255,255,.5);letter-spacing:.02em;margin-bottom:2px}
+.login .err{font-size:.92rem;color:#FF8B8B;min-height:20px;text-align:center;letter-spacing:.03em;font-weight:500}
+.login .lfoot{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-size:.6rem;letter-spacing:.18em;color:rgba(255,255,255,.3);z-index:1}
 
 /* ─────────── 管理画面（デフォルト） ─────────── */
 .app{display:none;flex-direction:column;height:100dvh;overflow:hidden}
@@ -860,26 +868,25 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 <body>
 
 <div id="login" class="login">
-  <div class="lslides">
-    <div class="lslide" style="background-image:url('https://www.heartom.co.jp/wp-content/themes/heartom2023/images/home/img_fv00.jpg')"></div>
-    <div class="lslide" style="background-image:url('https://www.heartom.co.jp/wp-content/themes/heartom2023/images/home/img_fv03.jpg')"></div>
-    <div class="lslide" style="background-image:url('https://www.heartom.co.jp/wp-content/themes/heartom2023/images/home/img_fv01.jpg')"></div>
-    <div class="lslide" style="background-image:url('https://www.heartom.co.jp/wp-content/themes/heartom2023/images/home/img_fv04.jpg')"></div>
-  </div>
-  <div class="lveil"></div>
-  <div class="lwrap">
-    <img class="logo" src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none'">
-    <div class="lo">HEARTOM LIVING</div>
+  <div class="lcard">
+    <div class="lbrand">
+      <img src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none'">
+      <div class="lbd"></div>
+      <div class="lbn">HEARTOM LIVING</div>
+    </div>
     <div class="lt">管理コンソール</div>
+    <div class="lo">Management Console</div>
     <div class="l-divider"></div>
     <div class="f">
+      <div class="lhint">🔒 社内アカウントでサインインしてください</div>
       <div id="gLoginBtn" style="min-height:44px;display:flex;align-items:center;justify-content:center"></div>
-      <button id="oauthFallbackBtn" onclick="doOAuthPopup()" style="display:none;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.45);color:#fff;padding:11px 28px;border-radius:4px;font-size:.9rem;cursor:pointer;width:280px;letter-spacing:.04em">🔐 Googleでログイン</button>
-      <button onclick="doOAuthPopup('select_account')" style="margin-top:6px;background:none;border:none;color:rgba(255,255,255,.45);font-size:.74rem;cursor:pointer;text-decoration:underline;letter-spacing:.04em">別の方法でログイン（ポップアップ）</button>
+      <button id="oauthFallbackBtn" onclick="doOAuthPopup()" style="display:none;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.45);color:#fff;padding:11px 28px;border-radius:6px;font-size:.9rem;cursor:pointer;width:280px;letter-spacing:.04em">🔐 Googleでログイン</button>
+      <button onclick="doOAuthPopup('select_account')" style="background:none;border:none;color:rgba(255,255,255,.42);font-size:.74rem;cursor:pointer;text-decoration:underline;letter-spacing:.04em">別のアカウントでログイン</button>
       <div class="err" id="lerr"></div>
-      <div id="gasStatus" style="font-size:.68rem;color:rgba(255,255,255,.35);margin-top:6px;text-align:center;letter-spacing:.04em"></div>
+      <div id="gasStatus" style="font-size:.66rem;color:rgba(255,255,255,.32);text-align:center;letter-spacing:.04em"></div>
     </div>
   </div>
+  <div class="lfoot">© HEARTOM LIVING — MANAGEMENT SYSTEM</div>
 </div>
 
 <!-- ─── モード選択ハブ ─── -->
@@ -1171,11 +1178,16 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     <div class="ob-det-pane" data-dtab="history" id="ob-det-pane-history">
       <div class="ob-tl-add">
         <input type="date" id="tl-date" style="width:140px">
-        <select id="tl-type" style="width:120px">
+        <select id="tl-type" style="width:118px" title="種別">
           <option>来場</option><option>電話</option><option>オンライン</option>
           <option>打ち合わせ</option><option>現地見学</option><option>プレゼン</option><option>その他</option>
         </select>
-        <input type="text" id="tl-content" class="tl-content" placeholder="内容を入力...">
+        <select id="tl-source" style="width:120px" title="反響元">
+          <option value="">反響元…</option>
+          <option>HP</option><option>電話</option><option>家づくり学校</option><option>FC</option>
+          <option>友人紹介</option><option>Instagram</option><option>ポータルサイト</option><option>その他</option>
+        </select>
+        <input type="text" id="tl-content" class="tl-content" placeholder="内容（任意）..." onkeydown="if(event.key==='Enter')obAddHistoryItem()">
         <select id="tl-staff" style="width:100px"></select>
         <button class="hbtn primary" onclick="obAddHistoryItem()">追加</button>
       </div>
@@ -2751,13 +2763,14 @@ function obDedupHistory(history){
     if(!h) return;
     var nd=obNormDate(h.date||'');
     var key=nd+'|'+(h.type||'');
-    if(!map[key]){ map[key]={date:nd||h.date||'',type:h.type||'',content:h.content||'',staff:h.staff||''}; order.push(key); }
+    if(!map[key]){ map[key]={date:nd||h.date||'',type:h.type||'',content:h.content||'',staff:h.staff||'',source:h.source||''}; order.push(key); }
     else{
       var cur=map[key];
       // より具体的な内容を採用
       if(obHistContentScore(h.content)>obHistContentScore(cur.content)) cur.content=h.content||cur.content;
-      // 担当者は空を埋める
+      // 担当者・反響元は空を埋める
       if(!cur.staff && h.staff) cur.staff=h.staff;
+      if(!cur.source && h.source) cur.source=h.source;
     }
   });
   var out=order.map(function(k){return map[k];});
@@ -3913,6 +3926,7 @@ function obRenderDetHistory(){
       '<div class="ob-tl-dot"></div>'+
       '<div class="ob-tl-date">'+esc(item.date?obFmtDate(obNormDate(item.date)):'—')+'</div>'+
       '<div class="ob-tl-badge">'+esc(item.type||'')+'</div>'+
+      (item.source?'<span style="font-size:.66rem;font-weight:700;color:#9A8C76;border:1px solid rgba(154,140,118,.45);border-radius:3px;padding:1px 6px;white-space:nowrap" title="反響元">'+esc(item.source)+'</span>':'')+
       '<div class="ob-tl-content">'+esc(isGeneric?'':content)+'</div>'+
       '<div class="ob-tl-staff">'+esc(item.staff||'')+'</div>'+
       '<button class="ob-tl-del" onclick="obDelHistoryByKey(\''+esc(key).replace(/'/g,"\\'")+'\')" title="削除">✕</button>'+
@@ -3926,16 +3940,22 @@ function obAddHistoryItem(){
   var type=document.getElementById('tl-type').value;
   var content=document.getElementById('tl-content').value.trim();
   var staff=document.getElementById('tl-staff').value;
-  if(!content){ toast('内容を入力してください'); return; }
+  var srcEl=document.getElementById('tl-source');
+  var source=srcEl?srcEl.value:'';
+  // 反響元が未選択なら顧客の反響元で補完
+  if(!source) source=r['反響元']||'';
   if(!date){ var t=new Date(); date=t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2); }
+  // 内容が空でも種別・反響元があれば登録可（手動入力を簡単に）
+  if(!content && !type && !source){ toast('種別・反響元・内容のいずれかを入力してください'); return; }
   if(!r.history) r.history=[];
-  r.history.push({date:date,type:type,content:content,staff:staff});
+  r.history.push({date:date,type:type,content:content,staff:staff,source:source});
   r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
   obSetCache(obRows);
   obRenderDetHistory();
   obRenderVisitors();
   document.getElementById('tl-content').value='';
-  post({action:'obAddHistory',row:obDetailRow,date:date,type:type,content:content,staff:staff});
+  if(srcEl) srcEl.value='';
+  post({action:'obAddHistory',row:obDetailRow,date:date,type:type,content:content,staff:staff,source:source});
   toast('履歴を追加しました');
 }
 
