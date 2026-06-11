@@ -2692,9 +2692,9 @@ function sendCustomer(idx){
   var c=__all[idx]; if(!c)return;
   var masterId=(c.dbSource==='master')?(c.id||''):'';
   var tg=getTarget();
-  
-  // ★ すぐにプレビュー画面（モニター）を開く（真っ暗な待機時間を無くす）
-  openFsMonitor(tg);
+
+  // ★ セッション送信 → iframeは1.8秒後にリロード（旧セッションデータが映り込まないよう）
+  openFsMonitor(tg, true);
 
   var payload={action:'pushSession',isNew:false,screen:tg,staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',
     customer:{name:c.name||'',furigana:c.furigana||'',tel:c.tel||'',email:c.email||'',postalCode:c.postalCode||'',address:c.address||'',masterId:masterId,threadId:(c.threadId&&c.threadId.indexOf('notion_')!==0)?c.threadId:''}};
@@ -2705,9 +2705,9 @@ function sendCustomer(idx){
 
 function sendNew(){
   var tg=getTarget();
-  
-  // ★ すぐにプレビュー画面（モニター）を開く（真っ暗な待機時間を無くす）
-  openFsMonitor(tg);
+
+  // ★ 新規セッション送信 → iframeは1.8秒後にリロード（旧データが映り込まないよう）
+  openFsMonitor(tg, true);
 
   post({action:'pushSession',isNew:true,screen:tg,staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',customer:{}});
   toast('新規のお客様の入力画面を 受付'+screenLabel(tg)+' に送信しました');
@@ -2731,6 +2731,8 @@ function clearScreen(screen){
   setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
 }
 
+var __lastCmdSent = 0; // 遠隔コマンド送信タイムスタンプ（heartomPreview消去バグ防止用）
+
 function sendCommand(screen, type, payload) {
   var cmd = { type: type };
   if(type==='navigate') cmd.step = payload;
@@ -2738,6 +2740,9 @@ function sendCommand(screen, type, payload) {
   if(type==='setValue') { cmd.field = payload.field; cmd.value = payload.value; }
   if(type==='setChip') { cmd.field = payload.field; cmd.value = payload.value; }
   if(type==='setImg') { cmd.field = payload.field; cmd.value = payload.value; }
+
+  // ★ コマンド送信時刻を記録（updateFsMonitorのheartomPreview上書きを10秒間防ぐ）
+  __lastCmdSent = Date.now();
 
   post({ action: 'pushCommand', screen: screen, command: cmd });
 
@@ -2780,12 +2785,25 @@ function screenLabel(n){
 var __fsScreenId = null;
 var __lastSessions = [];
 var __lastMonitors = {};
-function openFsMonitor(n) {
+function openFsMonitor(n, delayIframe) {
   __fsScreenId = String(n);
   var u=customerUrl(); var fr=document.getElementById('previewFrame');
-  if(fr){ fr.src = u + (u.indexOf('?')>=0?'&':'?') + 'preview=1&screen=' + encodeURIComponent(n); }
   document.getElementById('fsMonitor').classList.remove('hide');
   updateFsMonitor(__lastSessions, __lastMonitors);
+  // delayIframe=true: 新規セッション送信直後のため、GASが更新されるまで1.8秒待ってからiframeを読み込む
+  // これにより「旧データが一瞬表示される」バグを防ぐ
+  if(fr){
+    if(delayIframe){
+      fr.src = 'about:blank';
+      setTimeout(function(){
+        if(__fsScreenId === String(n)){
+          fr.src = u + (u.indexOf('?')>=0?'&':'?') + 'preview=1&screen=' + encodeURIComponent(n);
+        }
+      }, 1800);
+    } else {
+      fr.src = u + (u.indexOf('?')>=0?'&':'?') + 'preview=1&screen=' + encodeURIComponent(n);
+    }
+  }
 }
 
 function closeFsMonitor() {
@@ -2838,20 +2856,27 @@ function updateFsMonitor(sessions, monitors) {
   // 送信した直後（まだお客様がiPadで操作していない段階）でもプレビュー画面を強制表示
   if(fr) {
     fr.classList.remove('hide');
-    try { 
+    try {
       if(fr.contentWindow) {
-        // お客様がまだ操作していない場合は、セッションから基礎データを渡して描画
-        var detail = m ? m.detail : {
-          husbandName: s.customer ? s.customer.name : '',
-          husbandFurigana: s.customer ? s.customer.furigana : '',
-          husbandPhone: s.customer ? s.customer.tel : '',
-          husbandEmail: s.customer ? s.customer.email : '',
-          postalCode: s.customer ? s.customer.postalCode : '',
-          address: s.customer ? s.customer.address : ''
-        };
-        fr.contentWindow.postMessage({type:'heartomPreview', detail: detail}, '*'); 
+        // ★ 遠隔コマンド送信から10秒以内はheartomPreviewを送らない
+        // （setValue等で入力した値がポーリングで上書きされる「一瞬消える」バグを防ぐ）
+        var cmdAge = Date.now() - (__lastCmdSent || 0);
+        if(cmdAge > 10000){
+          // お客様がまだ操作していない場合のみ基礎データを渡す（モニターデータがある場合は送らない）
+          if(!m){
+            var detail = {
+              husbandName: s.customer ? s.customer.name : '',
+              husbandFurigana: s.customer ? s.customer.furigana : '',
+              husbandPhone: s.customer ? s.customer.tel : '',
+              husbandEmail: s.customer ? s.customer.email : '',
+              postalCode: s.customer ? s.customer.postalCode : '',
+              address: s.customer ? s.customer.address : ''
+            };
+            fr.contentWindow.postMessage({type:'heartomPreview', detail: detail}, '*');
+          }
+        }
       }
-    } catch(e){} 
+    } catch(e){}
   }
   if(idle) idle.classList.add('hide');
 
@@ -3950,7 +3975,10 @@ function obSaveField(row,field,value){
   }
   obSetCache(obRows);
   post({action:'obUpdateField',row:row,field:field,value:value});
-  if(field==='商談ステータス' && value==='パートナー契約済') kjAutoAddFromOB(obRows[row]);
+  if(field==='商談ステータス' && value==='パートナー契約済'){
+    kjAutoAddFromOB(obRows[row]);
+    tochiAutoAddFromOB(obRows[row]); // 土地DBにも自動追加
+  }
 }
 
 // ── 除外スタッフ設定 ──
@@ -4732,14 +4760,26 @@ var KJ_PHASES = [
 ];
 
 // フェーズ判定（常にマイルストーン日付から判定 ─ ストアドステータスは最終フォールバックのみ）
+function kjParseDate(v){
+  // YYYY-MM-DD または YYYY/MM/DD 両方に対応
+  var m=String(v||'').match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})/);
+  if(!m) return null;
+  var d=new Date(m[1]+'-'+m[2]+'-'+m[3]+'T00:00:00');
+  return isNaN(d.getTime())?null:d;
+}
+
 function kjPhaseOf(r){
   var td=new Date(); td.setHours(0,0,0,0);
   // ① 引渡し日が設定されている場合は最優先
   if(r['引渡し']){
-    var m=String(r['引渡し']).match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if(m){
-      var dd=new Date(m[1]+'-'+m[2]+'-'+m[3]+'T00:00:00');
-      if(dd<=td) return '引渡済';
+    var dd=kjParseDate(r['引渡し']);
+    if(dd){
+      if(dd<=td){
+        // ★ 引渡し日が過ぎていても、実際の竣工確認マイルストーンがなければ引渡済にしない
+        // （計画日のみで実際の手渡しが済んでいないケースを誤判定しないため）
+        if(r['竣工立会']||r['社内検査']||r['完了検査']||r['カメラ']||(r['ステータス']==='引渡済')) return '引渡済';
+        return '竣工済'; // 日付だけ過ぎている → 竣工済として扱う
+      }
       // 引渡し予定日が未来 → 直近完了マイルストーンで判定
       if(r['竣工立会']||r['社内検査']||r['完了検査']||r['カメラ']) return '竣工済';
       if(r['基礎着工']||r['上棟']||r['木完検査']) return '工事中';
@@ -4877,7 +4917,7 @@ function kjRenderList(){
 
   function kjDateCell(s){
     if(!s) return '<span style="color:#CCC">—</span>';
-    var norm=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    var norm=String(s).match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})/); // YYYY-MM-DD / YYYY/MM/DD 両対応
     if(!norm) return esc(String(s));
     var d=new Date(norm[1]+'-'+norm[2]+'-'+norm[3]+'T00:00:00');
     var diff=Math.floor((d-today)/(1000*60*60*24));
@@ -4934,7 +4974,8 @@ function kjSwitchTab(tab){
 function kjRenderTimeline(){
   var el=document.getElementById('kj-timeline-content'); if(!el) return;
   el.style.overflow='auto';
-  function iso(r,f){ var m=String(r[f]||'').match(/^(\d{4})-(\d{2})-(\d{2})/); return m?(m[1]+'-'+m[2]+'-'+m[3]):''; }
+  // YYYY-MM-DD と YYYY/MM/DD 両形式に対応
+  function iso(r,f){ var m=String(r[f]||'').match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})/); return m?(m[1]+'-'+m[2]+'-'+m[3]):''; }
   var fStaff=((document.getElementById('kj-filter-staff')||{}).value||'');
   var fPhase=((document.getElementById('kj-filter-phase')||{}).value||'');
   var fQ=((document.getElementById('kj-q')||{}).value||'').toLowerCase().trim();
@@ -4966,37 +5007,44 @@ function kjRenderTimeline(){
   while((cy<ey||(cy===ey&&cm<=em)) && guard<120){
     months.push(cy+'-'+('0'+cm).slice(-2)); cm++; if(cm>12){cm=1;cy++;} guard++;
   }
-  var colW=54, labelW=220, rowH=44, hdrH=52, totalW=labelW+months.length*colW;
+  var colW=64, labelW=260, rowH=52, totalW=labelW+months.length*colW;
   function mIdx(d){ var k=d.substr(0,7); for(var i=0;i<months.length;i++) if(months[i]===k) return i; return -1; }
-  var colors={p0:'#C8C4BE',p1:'#6B9EC6',p2:'#E59E40',p3:'#5E9E5E',p4:'#9A8C76',p5:'#A0C0A0'};
-  var phLabel={p0:'契約前',p1:'設計・申請',p2:'着工前',p3:'工事中',p4:'竣工済',p5:'引渡済'};
+  // フェーズカラー（視認性重視・コントラスト強化）
+  var colors={p0:'#B0A898',p1:'#4A90C8',p2:'#E88C20',p3:'#3E9E5E',p4:'#8A7C68',p5:'#7CB87C'};
+  var bgColors={p0:'rgba(176,168,152,.08)',p1:'rgba(74,144,200,.06)',p2:'rgba(232,140,32,.06)',p3:'rgba(62,158,94,.06)',p4:'rgba(138,124,104,.06)',p5:'rgba(124,184,124,.08)'};
   var todayK=new Date().toISOString().substr(0,7);
   var todayFull=new Date().toISOString().substr(0,10);
+  // 今月スクロール位置
+  var nowIdx=mIdx(todayK);
 
-  var h='<div style="min-width:'+totalW+'px;font-family:inherit;font-size:.85rem">';
+  var h='<div style="min-width:'+totalW+'px;font-family:inherit">';
 
-  // ── ヘッダー行（年・月） ──
-  // 年グループ
+  // ── ヘッダー：年グループ ──
   var yearGroups={};
   months.forEach(function(m,i){ var y=m.substr(0,4); if(!yearGroups[y]) yearGroups[y]={start:i,count:0}; yearGroups[y].count++; });
-  h+='<div style="display:flex;position:sticky;top:0;z-index:5">';
-  h+='<div style="width:'+labelW+'px;flex:0 0 '+labelW+'px;position:sticky;left:0;z-index:6;background:#1A1A1A;border-bottom:1px solid rgba(255,255,255,.1)"></div>';
+  h+='<div style="display:flex;position:sticky;top:0;z-index:8;box-shadow:0 2px 6px rgba(0,0,0,.18)">';
+  h+='<div style="width:'+labelW+'px;flex:0 0 '+labelW+'px;position:sticky;left:0;z-index:9;background:#1A1A1A;border-right:2px solid rgba(255,255,255,.12)"></div>';
   Object.keys(yearGroups).sort().forEach(function(y){
     var g=yearGroups[y];
-    h+='<div style="width:'+(g.count*colW)+'px;flex:0 0 '+(g.count*colW)+'px;text-align:center;background:#1A1A1A;color:rgba(255,255,255,.8);font-size:.74rem;font-weight:700;padding:6px 0;letter-spacing:.08em;border-left:2px solid rgba(154,140,118,.5)">'+y+'年</div>';
-  });
-  h+='</div>';
-  // 月行
-  h+='<div style="display:flex;position:sticky;top:26px;z-index:5">';
-  h+='<div style="width:'+labelW+'px;flex:0 0 '+labelW+'px;position:sticky;left:0;z-index:6;background:#2B2B2B;color:rgba(255,255,255,.6);font-size:.68rem;font-weight:700;padding:7px 14px;border-right:1px solid rgba(255,255,255,.08)">物件名 / フェーズ</div>';
-  months.forEach(function(m){
-    var p=m.split('-'); var isNow=(m===todayK);
-    h+='<div style="width:'+colW+'px;flex:0 0 '+colW+'px;text-align:center;background:'+(isNow?'#3D3525':'#2B2B2B')+';color:'+(isNow?'#D4A853':'rgba(255,255,255,.65)')+';font-size:.72rem;font-weight:'+(isNow?'700':'400')+';padding:6px 0;border-left:1px solid rgba(255,255,255,.08);white-space:nowrap">'+parseInt(p[1])+'月</div>';
+    h+='<div style="width:'+(g.count*colW)+'px;flex:0 0 '+(g.count*colW)+'px;text-align:center;background:#1A1A1A;color:rgba(255,255,255,.9);font-size:.8rem;font-weight:700;padding:7px 0;letter-spacing:.1em;border-left:2px solid rgba(154,140,118,.4)">'+y+'年</div>';
   });
   h+='</div>';
 
-  // ── 案件行 ──
-  // フェーズ別グループ化
+  // ── ヘッダー：月行 ──
+  h+='<div style="display:flex;position:sticky;top:31px;z-index:8">';
+  h+='<div style="width:'+labelW+'px;flex:0 0 '+labelW+'px;position:sticky;left:0;z-index:9;background:#2B2B2B;color:rgba(255,255,255,.55);font-size:.7rem;font-weight:700;padding:8px 16px;border-right:2px solid rgba(255,255,255,.12);display:flex;align-items:center">物件名 / フェーズ</div>';
+  months.forEach(function(m,mi){
+    var p=m.split('-'); var isNow=(m===todayK);
+    h+='<div style="width:'+colW+'px;flex:0 0 '+colW+'px;text-align:center;background:'+(isNow?'rgba(212,168,83,.25)':'#2B2B2B')+';color:'+(isNow?'#FFD580':'rgba(255,255,255,.7)')+';font-size:.82rem;font-weight:'+(isNow?'800':'400')+';padding:8px 0;border-left:1px solid rgba(255,255,255,.08);white-space:nowrap;position:relative">'+
+      parseInt(p[1])+'月'+
+      (isNow?'<span style="position:absolute;bottom:0;left:0;width:100%;height:2px;background:#FFD580;border-radius:2px 2px 0 0"></span>':'')+
+    '</div>';
+  });
+  h+='</div>';
+
+  // ── 今日の縦線（全行に渡る） ── (位置はCSS positionで決まるので行ごとに描く)
+
+  // ── フェーズ別グループ化 ──
   var phaseGroups={};
   var phaseOrder=['工事中','着工前','申請中','設計中','竣工済','引渡済','契約前'];
   items.forEach(function(it){
@@ -5009,64 +5057,94 @@ function kjRenderTimeline(){
     var group=phaseGroups[ph]; if(!group||!group.length) return;
     var pc=KJ_PHASE_CLASS[ph]||'p0';
     var bgColor=colors[pc]||'#9A8C76';
-    h+='<div style="display:flex;background:#F5F3EF;border-top:2px solid '+bgColor+';border-bottom:1px solid #E0DAD2">';
-    h+='<div style="width:'+labelW+'px;flex:0 0 '+labelW+'px;position:sticky;left:0;z-index:2;background:#F5F3EF;padding:5px 14px;display:flex;align-items:center;gap:8px">';
-    h+='<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+bgColor+'"></span>';
-    h+='<span style="font-size:.72rem;font-weight:700;color:#555;letter-spacing:.08em">'+esc(ph)+' （'+group.length+'件）</span>';
-    h+='</div>';
-    h+='<div style="flex:0 0 '+(months.length*colW)+'px;height:30px"></div></div>';
+    var rowBgColor=bgColors[pc]||'transparent';
 
+    // フェーズヘッダー行
+    h+='<div style="display:flex;background:'+rowBgColor+';border-top:2px solid '+bgColor+';border-bottom:1px solid rgba(0,0,0,.07)">';
+    h+='<div style="width:'+labelW+'px;flex:0 0 '+labelW+'px;position:sticky;left:0;z-index:3;background:'+rowBgColor+';padding:6px 16px;display:flex;align-items:center;gap:10px;border-right:2px solid rgba(0,0,0,.06)">';
+    h+='<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:'+bgColor+';flex-shrink:0"></span>';
+    h+='<span style="font-size:.78rem;font-weight:800;color:#333;letter-spacing:.06em">'+esc(ph)+'</span>';
+    h+='<span style="font-size:.72rem;font-weight:600;color:#999;margin-left:2px">'+group.length+'件</span>';
+    h+='</div>';
+    h+='<div style="flex:1;position:relative;height:34px">';
+    // 今月ハイライト（ヘッダー行）
+    if(nowIdx>=0) h+='<div style="position:absolute;left:'+(nowIdx*colW-labelW+labelW)+'px;top:0;width:'+colW+'px;height:100%;background:rgba(212,168,83,.05);pointer-events:none"></div>';
+    h+='</div></div>';
+
+    // 案件行
     group.forEach(function(it){
       var r=it.r;
       var si=mIdx(it.start), ei=mIdx(it.end);
       if(si<0) si=0; if(ei<0) ei=months.length-1;
-      var left=si*colW+3, width=Math.max((ei-si+1)*colW-6, colW-8);
+      var left=si*colW+4, width=Math.max((ei-si+1)*colW-8, colW/2);
       var milestones=[];
       var msFields=[
         {k:'請負契約日',label:'契',color:'#2B6CB0'},
-        {k:'地鎮祭',label:'地',color:'#6B46C1'},
+        {k:'地鎮祭',label:'地',color:'#7C3AED'},
         {k:'基礎着工',label:'着',color:'#C05621'},
         {k:'上棟',label:'棟',color:'#276749'},
         {k:'竣工立会',label:'竣',color:'#9A8C76'},
-        {k:'引渡し',label:'渡',color:'#C0392B'}
+        {k:'引渡し',label:'渡',color:'#DC2626'}
       ];
       msFields.forEach(function(ms){
         var d=iso(r,ms.k); if(!d) return;
         var mi=mIdx(d); if(mi<0) return;
         milestones.push({idx:mi,label:ms.label,color:ms.color,date:d});
       });
-      var rowBg=(it.end<todayFull)?'#F9F7F5':'#fff';
-      h+='<div style="display:flex;border-bottom:1px solid #EDEAE4;background:'+rowBg+';min-height:'+rowH+'px">';
-      h+='<div style="width:'+labelW+'px;flex:0 0 '+labelW+'px;position:sticky;left:0;z-index:2;background:'+rowBg+';padding:6px 14px;cursor:pointer;border-right:1px solid #EDEAE4;display:flex;flex-direction:column;justify-content:center" onclick="kjOpenDetail(\''+esc(r._id||'')+'\')">'+
-        '<div style="font-size:.84rem;font-weight:600;color:#222;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:'+(labelW-28)+'px">'+esc(r['物件名']||'—')+'</div>'+
-        '<div style="font-size:.68rem;color:#888;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:'+(labelW-28)+'px">'+esc([r['場所'],r['営業']?r['営業']:''].filter(Boolean).join(' · '))+'</div>'+
+      var isPast=(it.end<todayFull);
+      var rowBg=isPast?'rgba(0,0,0,.02)':'#fff';
+      var nameColor=isPast?'#AAA':'#1A1A1A';
+      var subColor=isPast?'#BBB':'#888';
+
+      h+='<div style="display:flex;border-bottom:1px solid #ECEAE5;background:'+rowBg+';min-height:'+rowH+'px;transition:background .15s" onmouseover="this.style.background=\'#F0EDE8\'" onmouseout="this.style.background=\''+rowBg+'\'">';
+      h+='<div style="width:'+labelW+'px;flex:0 0 '+labelW+'px;position:sticky;left:0;z-index:2;background:inherit;padding:8px 16px;cursor:pointer;border-right:1px solid #E5E2DC;display:flex;flex-direction:column;justify-content:center;gap:3px" onclick="kjOpenDetail(\''+esc(r._id||'')+'\')">'+
+        '<div style="font-size:.88rem;font-weight:700;color:'+nameColor+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:'+(labelW-32)+'px;line-height:1.3">'+esc(r['物件名']||'—')+'</div>'+
+        (r['場所']||r['区分']||r['営業']?
+          '<div style="font-size:.7rem;color:'+subColor+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:'+(labelW-32)+'px">'+
+            esc([r['場所']||'',r['区分']||'',r['営業']?'🧑 '+r['営業']:''].filter(Boolean).join('  '))+
+          '</div>':'')+
       '</div>';
+
       h+='<div style="position:relative;flex:0 0 '+(months.length*colW)+'px;height:'+rowH+'px">';
-      // 今月ハイライト列
-      var nowIdx=mIdx(todayK);
-      if(nowIdx>=0) h+='<div style="position:absolute;left:'+(nowIdx*colW)+'px;top:0;width:'+colW+'px;height:'+rowH+'px;background:rgba(212,168,83,.07);pointer-events:none"></div>';
+      // グリッド月縦線
+      months.forEach(function(m,mi){
+        var isN=(m===todayK);
+        h+='<div style="position:absolute;left:'+(mi*colW)+'px;top:0;width:'+colW+'px;height:100%;border-left:1px solid '+(isN?'rgba(212,168,83,.35)':'rgba(0,0,0,.04)')+';background:'+(isN?'rgba(212,168,83,.06)':'transparent')+';pointer-events:none"></div>';
+      });
+      // 今日の縦ライン
+      if(nowIdx>=0) h+='<div style="position:absolute;left:'+(nowIdx*colW+colW/2)+'px;top:0;width:2px;height:100%;background:rgba(212,168,83,.7);pointer-events:none;z-index:1"></div>';
       // バー
-      h+='<div title="'+esc(r['物件名']||'')+'：'+esc(it.start)+' 〜 '+esc(it.end)+'" style="position:absolute;left:'+left+'px;top:14px;width:'+width+'px;height:16px;background:'+bgColor+';border-radius:8px;opacity:.85;box-shadow:0 1px 4px rgba(0,0,0,.15)"></div>';
-      // マイルストーン
+      var barY=Math.round((rowH-14)/2);
+      h+='<div title="'+esc((r['物件名']||'')+'：'+it.start+' 〜 '+it.end)+'" style="position:absolute;left:'+left+'px;top:'+barY+'px;width:'+width+'px;height:14px;background:'+bgColor+';border-radius:7px;opacity:'+(isPast?.5:.88)+';box-shadow:0 2px 6px rgba(0,0,0,.18);z-index:2"></div>';
+      // マイルストーン（ピン付き）
       milestones.forEach(function(ms){
-        var mx=ms.idx*colW+colW/2-6;
-        h+='<div title="'+esc(ms.label+'：'+ms.date)+'" style="position:absolute;left:'+mx+'px;top:10px;width:12px;height:24px;display:flex;flex-direction:column;align-items:center;gap:0">'+
-          '<div style="width:10px;height:10px;border-radius:50%;background:'+ms.color+';border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>'+
-          '<div style="font-size:8px;color:'+ms.color+';font-weight:700;white-space:nowrap">'+ms.label+'</div>'+
+        var mx=ms.idx*colW+Math.round(colW/2)-7;
+        var msDate=ms.date?ms.date.replace(/^(\d{4})-(\d{2})-(\d{2})$/,'$1/$2/$3'):'';
+        h+='<div title="'+esc(ms.label+'  '+msDate)+'" style="position:absolute;left:'+mx+'px;top:'+(barY-8)+'px;width:14px;height:30px;display:flex;flex-direction:column;align-items:center;z-index:3;cursor:default">'+
+          '<div style="width:14px;height:14px;border-radius:50%;background:'+ms.color+';border:2.5px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.35)"></div>'+
+          '<div style="font-size:9px;font-weight:800;color:'+ms.color+';white-space:nowrap;line-height:1.2;text-shadow:0 1px 2px rgba(255,255,255,.9)">'+ms.label+'</div>'+
         '</div>';
       });
       h+='</div></div>';
     });
   });
   h+='</div>';
-  // 凡例
-  h+='<div style="padding:12px 18px;background:#F5F3EF;border-top:1px solid #E0DAD2;display:flex;gap:16px;flex-wrap:wrap;align-items:center">';
-  h+='<span style="font-size:.7rem;color:#888;font-weight:700">マイルストーン：</span>';
-  [{l:'契 契約',c:'#2B6CB0'},{l:'地 地鎮祭',c:'#6B46C1'},{l:'着 着工',c:'#C05621'},{l:'棟 上棟',c:'#276749'},{l:'竣 竣工',c:'#9A8C76'},{l:'渡 引渡',c:'#C0392B'}].forEach(function(x){
-    h+='<span style="display:inline-flex;align-items:center;gap:4px;font-size:.72rem"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+x.c+'"></span>'+esc(x.l)+'</span>';
+
+  // ── 凡例 ──
+  h+='<div style="padding:12px 20px;background:#F5F3EF;border-top:2px solid #E0DAD2;display:flex;gap:20px;flex-wrap:wrap;align-items:center">';
+  h+='<span style="font-size:.72rem;color:#888;font-weight:800;letter-spacing:.06em">マイルストーン：</span>';
+  [{l:'契 請負契約',c:'#2B6CB0'},{l:'地 地鎮祭',c:'#7C3AED'},{l:'着 基礎着工',c:'#C05621'},{l:'棟 上棟',c:'#276749'},{l:'竣 竣工立会',c:'#9A8C76'},{l:'渡 引渡し',c:'#DC2626'}].forEach(function(x){
+    h+='<span style="display:inline-flex;align-items:center;gap:5px;font-size:.76rem;color:#444"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:'+x.c+';flex-shrink:0"></span>'+esc(x.l)+'</span>';
   });
   h+='</div>';
   el.innerHTML=h;
+  // 今月を画面中央付近にスクロール
+  if(nowIdx>=0){
+    setTimeout(function(){
+      var scrollTarget=labelW+nowIdx*colW-(el.offsetWidth||800)/2+colW;
+      el.scrollLeft=Math.max(0,scrollTarget);
+    },50);
+  }
 }
 
 // ── 詳細パネル ──
@@ -5254,6 +5332,21 @@ function kjAutoAddFromOB(obRow){
   setTimeout(function(){ toast('✅ 着工管理に追加しました: '+rec['物件名']); kjLoad(true); },1500);
 }
 
+// OBステータスがパートナー契約済になったら土地DBにも自動追加
+function tochiAutoAddFromOB(obRow){
+  if(!obRow||!obRow['顧客名']) return;
+  // 顧客名で重複チェック
+  var exists=tochiRows.some(function(r){ return r['顧客名']===obRow['顧客名']; });
+  if(exists){ toast('土地DB: 「'+obRow['顧客名']+'」は既に登録済みです'); return; }
+  var name=obRow['顧客名'];
+  toast('土地DBに「'+name+'」を追加中…');
+  post({action:'tochiAddEntry',name:name});
+  setTimeout(function(){
+    toast('✅ 土地DBに追加しました: '+name+'\n所在地を入力すると地図・案内図が自動生成されます');
+    tochiLoad(true);
+  },1800);
+}
+
 // ══════════════════════════════════════════════════
 // 土地DB (TochiBoard)
 // ══════════════════════════════════════════════════
@@ -5347,7 +5440,8 @@ function tochiRenderList(){
 
   // ── カードビュー（地図インラインプレビュー付き）──
   var html='<div class="tochi-card-grid">';
-  rows.forEach(function(r){
+  rows.forEach(function(r,ri){
+    var rowIdx=tochiRows.indexOf(r);
     var customerName=r['顧客名']||'—';
     var loc=r['所在地']||'';
     var kojiUrl=r['工事案内図']||'';
@@ -5357,24 +5451,38 @@ function tochiRenderList(){
     var embed=tochiMapEmbedUrl(r);
     var openUrl=tochiMapOpenUrl(r);
     var parking=obSanitizeVal(r['駐車場場所']||'');
+    var notionId=r['_notionId']||'';
 
     var allTabs=[];
     if(embed) allTabs.push({label:'🗺 地図',url:embed,type:'map'});
     if(hasKoji) allTabs.push({label:'工事案内図',url:kojiUrl});
     kengakuUrls.forEach(function(k){ allTabs.push({label:'見学会・'+k.label,url:k.url}); });
 
-    html+='<div class="tochi-card">'+
+    html+='<div class="tochi-card" id="tochi-card-'+rowIdx+'">'+
       '<div class="tochi-card-map">'+
         (embed?'<iframe src="'+esc(embed)+'" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>'
-              :'<div class="tochi-card-nomap">📍 地図情報なし</div>')+
+              :'<div class="tochi-card-nomap">📍 所在地を入力すると地図が表示されます</div>')+
       '</div>'+
       '<div class="tochi-card-body">'+
         '<div class="tochi-card-name">'+esc(customerName)+'</div>'+
-        '<div class="tochi-card-loc">📍 '+esc(loc||'所在地未登録')+'</div>'+
+        // ── 所在地：インライン編集対応 ──
+        '<div class="tochi-card-loc" id="tochi-loc-disp-'+rowIdx+'" onclick="tochiEditAddress('+rowIdx+')" title="クリックして住所を編集">'+
+          '📍 '+(loc?esc(loc):'<span style="color:#C0A070;font-style:italic">所在地をクリックして入力</span>')+
+        '</div>'+
+        '<div id="tochi-loc-edit-'+rowIdx+'" style="display:none;padding:4px 0">'+
+          '<input id="tochi-loc-inp-'+rowIdx+'" type="text" value="'+esc(loc)+'" placeholder="例: 千葉市中央区2-1-3" '+
+            'style="width:100%;padding:6px 10px;border:1.5px solid #C0A070;border-radius:5px;font-size:.84rem;outline:none" '+
+            'data-row="'+rowIdx+'" data-nid="'+esc(notionId)+'">'+
+          '<div style="display:flex;gap:6px;margin-top:6px">'+
+            '<button onclick="tochiSaveAddress('+rowIdx+')" style="flex:1;background:#C0A070;color:#fff;border:none;border-radius:4px;padding:6px 0;font-size:.78rem;font-weight:700;cursor:pointer">💾 保存・地図生成</button>'+
+            '<button onclick="tochiCancelEditAddress('+rowIdx+')" style="background:#EEE;border:none;border-radius:4px;padding:6px 10px;font-size:.78rem;cursor:pointer">✕</button>'+
+          '</div>'+
+        '</div>'+
         (parking?'<div class="tochi-card-park">🅿 '+esc(parking)+'</div>':'')+
         '<div class="tochi-card-actions">'+
           (openUrl?'<a href="'+esc(openUrl)+'" target="_blank" class="tochi-link-btn">🗺 地図を開く</a>':'')+
           (allTabs.length?'<button class="tochi-pdf-btn" data-pname="'+esc(customerName)+'" data-purls="'+esc(JSON.stringify(allTabs))+'" onclick="tochiOpenPdfBtn(this)">📄 資料プレビュー</button>':'')+
+          (!hasKoji&&loc?'<button onclick="tochiGenerateOne(\''+esc(notionId)+'\',\''+esc(customerName)+'\')" style="display:inline-flex;align-items:center;gap:4px;background:#EDF7EF;color:#166534;border:1px solid #BBF7D0;border-radius:5px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">🔨 案内図生成</button>':'')+
         '</div>'+
         '<div class="tochi-card-tags">'+
           '<span class="tochi-tag '+(hasKoji?'on':'off')+'">工事案内図 '+(hasKoji?'✓':'未')+'</span>'+
@@ -5492,6 +5600,60 @@ function tochiGenerateAll(){
   toast('PDF生成中… GASで処理しています（完了まで数分）');
   post({action:'tochiGenerateAllMaps'});
   setTimeout(function(){ toast('✅ PDF生成完了（確認中…）'); tochiLoad(); },60000);
+}
+
+// ── 土地DB 所在地インライン編集 ──
+function tochiEditAddress(rowIdx){
+  var disp=document.getElementById('tochi-loc-disp-'+rowIdx);
+  var edit=document.getElementById('tochi-loc-edit-'+rowIdx);
+  if(!disp||!edit) return;
+  disp.style.display='none';
+  edit.style.display='block';
+  var inp=document.getElementById('tochi-loc-inp-'+rowIdx);
+  if(inp){ inp.focus(); inp.select(); }
+}
+
+function tochiCancelEditAddress(rowIdx){
+  var disp=document.getElementById('tochi-loc-disp-'+rowIdx);
+  var edit=document.getElementById('tochi-loc-edit-'+rowIdx);
+  if(disp) disp.style.display='';
+  if(edit) edit.style.display='none';
+}
+
+function tochiSaveAddress(rowIdx){
+  var inp=document.getElementById('tochi-loc-inp-'+rowIdx);
+  if(!inp) return;
+  var address=inp.value.trim();
+  var notionId=inp.getAttribute('data-nid')||'';
+  var r=tochiRows[rowIdx];
+  if(!r){ toast('❌ データが見つかりません'); return; }
+  if(!address){ toast('所在地を入力してください'); return; }
+  // ローカルキャッシュ更新
+  r['所在地']=address;
+  tochiSetCache(tochiRows);
+  // GASに保存（Notionを更新）
+  toast('所在地を保存中…');
+  gasGet('tochiGetData',function(){},500); // キャッシュ先行
+  post({action:'tochiSaveField',notionId:notionId,field:'所在地',value:address});
+  // 保存後に案内図生成を自動トリガー
+  setTimeout(function(){
+    toast('✅ 住所を保存しました。地図・工事案内図・見学会案内図を生成中…（数分かかります）');
+    post({action:'tochiGenerateAllMaps'});
+    setTimeout(function(){ tochiLoad(true); },90000);
+  },1200);
+  // UI更新
+  var disp=document.getElementById('tochi-loc-disp-'+rowIdx);
+  var edit=document.getElementById('tochi-loc-edit-'+rowIdx);
+  if(disp){ disp.innerHTML='📍 '+esc(address); disp.style.display=''; }
+  if(edit) edit.style.display='none';
+}
+
+// 個別案内図生成（所在地が登録済みの1件のみ）
+function tochiGenerateOne(notionId, customerName){
+  if(!notionId){ toast('Notion IDが未設定です'); return; }
+  toast('「'+customerName+'」の地図・案内図を生成中…（数分かかります）');
+  post({action:'tochiGenerateAllMaps'}); // GASはis_emptyフィルタで自動的に対象を限定
+  setTimeout(function(){ toast('✅ 生成完了（確認中…）'); tochiLoad(true); },90000);
 }
 
 // 起動処理（OAuth2ポップアップコールバックの場合はスキップ）
