@@ -1197,9 +1197,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
         <option value="asc">古い順</option>
         <option value="desc">新しい順</option>
       </select>
+      <button class="hbtn ghost" onclick="obJumpToLatestMonth()" title="最新月の先頭にスクロール" style="font-size:.72rem;padding:5px 10px;white-space:nowrap">最新月へ ↓</button>
       <span class="ob-filter-count" id="ob-vis-count"></span>
     </div>
-    <div class="ob-scroll">
+    <div class="ob-scroll" id="ob-vis-scroll">
       <div id="ob-visitors-content"><div class="ob-empty-state">読み込み中...</div></div>
     </div>
   </div>
@@ -3888,52 +3889,15 @@ function obRenderBirthday(){
   var today=new Date();
   var todayStr=today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2);
 
-  // ── 今後60日の誕生日（upcoming） ──
-  var upcoming=[];
-  bdays.forEach(function(b){
-    var thisYear=today.getFullYear();
-    var bdThisYear=new Date(thisYear+'-'+b.mmdd);
-    var bdNextYear=new Date((thisYear+1)+'-'+b.mmdd);
-    var target=bdThisYear>=today?bdThisYear:bdNextYear;
-    var daysUntil=Math.ceil((target-today)/(1000*60*60*24));
-    if(daysUntil<=60){
-      upcoming.push({b:b,daysUntil:daysUntil,targetDate:target.getFullYear()+'-'+b.mmdd});
-    }
-  });
-  upcoming.sort(function(a,x){return a.daysUntil-x.daysUntil;});
-
-  if(upcoming.length){
-    var upHtml='<div style="font-size:.7rem;font-weight:700;letter-spacing:.12em;color:#AAA;margin-bottom:10px">📅 今後60日以内の誕生日</div>';
-    upHtml+='<div class="ob-bday-list">';
-    upcoming.forEach(function(u){
-      var b=u.b; var d=u.daysUntil;
-      var todayMark=d===0?'🎉 今日！':d===1?'⭐ 明日':d+'日後';
-      var age=new Date(u.targetDate).getFullYear()-b.birthYear;
-      var isSoon=d<=7; var isToday=d===0;
-      upHtml+='<div class="ob-bday-item'+(isToday?' today-bd':isSoon?' soon':'')+'" onclick="obOpenDetail('+b.row+')">'+
-        '<span class="ob-bday-date">'+b.mmdd.replace('-','月')+'日</span>'+
-        '<span class="ob-bday-name">'+esc(b.name)+'<span style="font-size:.72rem;color:#AAA;margin-left:6px">('+b.suffix+')</span></span>'+
-        '<span class="ob-bday-age">'+age+'歳</span>'+
-        '<span class="ob-bday-soon">'+todayMark+'</span>'+
-      '</div>';
-    });
-    upHtml+='</div>';
-    upEl.innerHTML=upHtml;
-    upEl.style.display='block';
-  } else {
-    upEl.innerHTML='<div class="ob-bday-empty">今後60日以内の誕生日はありません</div>';
-    upEl.style.display='block';
-  }
-
-  // ── 月間カレンダー ──
+  // ── ① 月間カレンダーを最上部に表示 ──
   var monthStr=('0'+(obBdayMonth+1)).slice(-2);
   var DOW=['日','月','火','水','木','金','土'];
   var calHtml='<div class="ob-bday-cal">';
   calHtml+='<div class="ob-bday-cal-nav">'+
     '<button class="ob-btn-sm" onclick="obBdayMove(-1)">◀</button>'+
-    '<span>'+obBdayYear+'年'+(obBdayMonth+1)+'月</span>'+
+    '<span style="font-size:1rem;font-weight:700;letter-spacing:.06em">'+obBdayYear+'年'+(obBdayMonth+1)+'月</span>'+
     '<button class="ob-btn-sm" onclick="obBdayMove(1)">▶</button>'+
-    '<button class="ob-btn-sm" onclick="obBdayToday()">今月</button>'+
+    '<button class="ob-btn-sm" onclick="obBdayToday()" style="margin-left:6px">今月</button>'+
   '</div>';
   calHtml+='<div class="ob-cal-grid">'+
     DOW.map(function(d,i){return '<div class="ob-cal-dh'+(i===0?' sun':i===6?' sat':'')+'" style="'+(i===0?'color:#E85858':i===6?'color:#4A90D9':'')+'">'+d+'</div>';}).join('');
@@ -3948,7 +3912,7 @@ function obRenderBirthday(){
     var dayBdays=bdays.filter(function(b){return b.mmdd===dayMMDD;});
     var dow=new Date(obBdayYear,obBdayMonth,dd).getDay();
     var dotw=dow===0?'color:#C0392B':dow===6?'color:#2980B9':'';
-    calHtml+='<div class="ob-cal-day'+(isToday2?' today':'')+'" style="min-height:60px">'+
+    calHtml+='<div class="ob-cal-day'+(isToday2?' today':'')+'" style="min-height:64px">'+
       '<div class="ob-cal-dn" style="'+dotw+'">'+dd+'</div>'+
       dayBdays.map(function(b){
         var age=obBdayYear-b.birthYear;
@@ -3960,11 +3924,11 @@ function obRenderBirthday(){
   for(var ti=0;ti<trailing;ti++) calHtml+='<div class="ob-cal-day other-month"></div>';
   calHtml+='</div></div>';
 
-  // 月の誕生日一覧
+  // ② 月の誕生日一覧（カレンダー直下）
   var monthBdays=bdays.filter(function(b){return b.mmdd.substring(0,2)===monthStr;})
     .sort(function(a,b){return a.mmdd>b.mmdd?1:a.mmdd<b.mmdd?-1:0;});
   if(monthBdays.length){
-    calHtml+='<div style="margin-top:18px"><div style="font-size:.7rem;font-weight:700;letter-spacing:.12em;color:#AAA;margin-bottom:10px">'+(obBdayMonth+1)+'月の誕生日一覧</div>'+
+    calHtml+='<div style="margin-top:18px"><div style="font-size:.7rem;font-weight:700;letter-spacing:.12em;color:#AAA;margin-bottom:10px">'+(obBdayMonth+1)+'月の誕生日一覧（'+monthBdays.length+'人）</div>'+
       '<div class="ob-bday-list">';
     monthBdays.forEach(function(b){
       var age=obBdayYear-b.birthYear;
@@ -3976,10 +3940,69 @@ function obRenderBirthday(){
     });
     calHtml+='</div></div>';
   } else {
-    calHtml+='<div class="ob-bday-empty">'+(obBdayMonth+1)+'月の誕生日登録はありません<br><small>各顧客の カルテ タブから誕生日を登録してください</small></div>';
+    calHtml+='<div class="ob-bday-empty">'+(obBdayMonth+1)+'月の誕生日登録はありません</div>';
   }
 
+  // ③ 今後60日の誕生日（折りたたみ式でカレンダー下に）
+  var upcoming=[];
+  bdays.forEach(function(b){
+    var thisYear=today.getFullYear();
+    var bdThisYear=new Date(thisYear+'-'+b.mmdd);
+    var bdNextYear=new Date((thisYear+1)+'-'+b.mmdd);
+    var target=bdThisYear>=today?bdThisYear:bdNextYear;
+    var daysUntil=Math.ceil((target-today)/(1000*60*60*24));
+    if(daysUntil<=60) upcoming.push({b:b,daysUntil:daysUntil,targetDate:target.getFullYear()+'-'+b.mmdd});
+  });
+  upcoming.sort(function(a,x){return a.daysUntil-x.daysUntil;});
+
+  if(upcoming.length){
+    calHtml+='<div class="ob-bday-upcoming-wrap" style="margin-top:24px">'+
+      '<div class="ob-bday-upcoming-hd" onclick="this.parentNode.classList.toggle(\'open\')" style="cursor:pointer;display:flex;align-items:center;gap:8px;font-size:.7rem;font-weight:700;letter-spacing:.12em;color:#AAA;margin-bottom:0;padding:10px 12px;background:#F5F3EF;border-radius:6px;border:1px solid #E5E0D8">'+
+        '<span>📅 今後60日以内の誕生日（'+upcoming.length+'人）</span><span style="margin-left:auto;font-size:.8rem">▾</span></div>'+
+      '<div class="ob-bday-upcoming-body" style="display:none;margin-top:6px"><div class="ob-bday-list">';
+    upcoming.forEach(function(u){
+      var b=u.b; var d=u.daysUntil;
+      var todayMark=d===0?'🎉 今日！':d===1?'⭐ 明日':d+'日後';
+      var age=new Date(u.targetDate).getFullYear()-b.birthYear;
+      var isSoon=d<=7; var isToday=d===0;
+      calHtml+='<div class="ob-bday-item'+(isToday?' today-bd':isSoon?' soon':'')+'" onclick="obOpenDetail('+b.row+')">'+
+        '<span class="ob-bday-date">'+b.mmdd.replace('-','月')+'日</span>'+
+        '<span class="ob-bday-name">'+esc(b.name)+'<span style="font-size:.72rem;color:#AAA;margin-left:6px">('+b.suffix+')</span></span>'+
+        '<span class="ob-bday-age">'+age+'歳</span>'+
+        '<span class="ob-bday-soon">'+todayMark+'</span>'+
+      '</div>';
+    });
+    calHtml+='</div></div></div>';
+    // 折りたたみトグル用スクリプト（inline onclick で対応済み）
+  }
+
+  upEl.style.display='none'; // upcoming は mainEl 内に統合
   mainEl.innerHTML=calHtml;
+
+  // 折りたたみ開閉
+  mainEl.querySelectorAll('.ob-bday-upcoming-hd').forEach(function(hd){
+    hd.addEventListener('click',function(){
+      var body=hd.parentNode.querySelector('.ob-bday-upcoming-body');
+      var isOpen=hd.parentNode.classList.contains('open');
+      body.style.display=isOpen?'block':'none';
+    });
+  });
+}
+
+// ── 最新月へジャンプ ──
+function obJumpToLatestMonth(){
+  var scroll=document.getElementById('ob-vis-scroll');
+  if(!scroll) return;
+  var sortAsc=((document.getElementById('ob-vis-sort')||{}).value||'desc')==='asc';
+  var hdRows=scroll.querySelectorAll('tr.ob-month-hd');
+  if(!hdRows.length){ toast('データがありません'); return; }
+  // 古い順(asc)なら最後の月ヘッダ、新しい順(desc)なら最初の月ヘッダ
+  var target=sortAsc ? hdRows[hdRows.length-1] : hdRows[0];
+  if(target){
+    var tableTop=scroll.getBoundingClientRect().top;
+    var rowTop=target.getBoundingClientRect().top;
+    scroll.scrollTop += (rowTop - tableTop) - 10;
+  }
 }
 
 // ── データクリーニング（FALSE除去・ステータス正規化）──
