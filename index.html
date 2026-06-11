@@ -1024,6 +1024,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   .hub-header .hh-title{font-size:.78rem;letter-spacing:.08em}
   .hub-header .hh-notif{display:none}
   #hubUserInfo{display:none!important}
+  .hub-header-btnrow{display:none!important}
   .hub-main{padding:12px}
   .hub-recent-list{max-height:200px}
 }
@@ -1082,6 +1083,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   .hub-header .hh-title{font-size:.8rem;letter-spacing:.1em}
   .hub-header .hh-notif{display:none}
   #hubUserInfo{display:none!important}
+  .hub-header-btnrow .hub-acct-btn{display:none}
   .hub-cards-grid{grid-template-columns:1fr}
   .hub-card{padding:18px 20px}
   .hub-main{padding:14px}
@@ -1173,7 +1175,11 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
         <div id="hubUserEmail" style="font-size:.6rem;color:rgba(255,255,255,.38);letter-spacing:.01em;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
       </div>
     </div>
-    <button onclick="logout()" style="background:rgba(255,80,80,.15);border:1px solid rgba(255,80,80,.3);color:rgba(255,180,180,.9);padding:7px 14px;border-radius:6px;font-size:.74rem;cursor:pointer;letter-spacing:.04em;white-space:nowrap;font-family:inherit;transition:all .2s" onmouseover="this.style.background='rgba(255,80,80,.28)'" onmouseout="this.style.background='rgba(255,80,80,.15)'">ログアウト</button>
+    <div class="hub-header-btnrow" style="display:flex;align-items:center;gap:8px">
+      <button onclick="openSettings('connection')" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);padding:7px 13px;border-radius:6px;font-size:.9rem;cursor:pointer;letter-spacing:.02em;white-space:nowrap;font-family:inherit;transition:all .2s;line-height:1" title="設定" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">⚙️</button>
+      <button onclick="openSettings('account')" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);padding:7px 12px;border-radius:6px;font-size:.72rem;cursor:pointer;letter-spacing:.04em;white-space:nowrap;font-family:inherit;transition:all .2s" title="アカウント管理" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">👥 アカウント</button>
+      <button onclick="logout()" style="background:rgba(255,80,80,.15);border:1px solid rgba(255,80,80,.3);color:rgba(255,180,180,.9);padding:7px 14px;border-radius:6px;font-size:.74rem;cursor:pointer;letter-spacing:.04em;white-space:nowrap;font-family:inherit;transition:all .2s" onmouseover="this.style.background='rgba(255,80,80,.28)'" onmouseout="this.style.background='rgba(255,80,80,.15)'">ログアウト</button>
+    </div>
   </div>
   <!-- ボディ -->
   <div class="hub-body">
@@ -1886,11 +1892,14 @@ function adminKey(){
   if(ts && Date.now() - ts > SESSION_EXPIRE_MS){
     localStorage.removeItem('admin_session_token');
     localStorage.removeItem('admin_session_email');
+    localStorage.removeItem('admin_session_name');
     localStorage.removeItem('admin_session_ts');
     return '';
   }
   return tok;
 }
+// 設定モーダルをどこからでも開けるようにグローバルエイリアスを設定
+function showSettings(tab){ openSettings(tab||'account'); }
 var __all=[];
 
 function esc(s){return(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -2161,6 +2170,7 @@ function showApp(){
     if(kjCached.length){ kjRows=kjCached; kjRows.forEach(function(r,i){r._idx=i;}); }
     hubUpdateBadges();
     setTimeout(function(){ obLoad(true); kjLoad(true); }, 400);
+    setTimeout(function(){ hubLoadTodayKpi(); }, 1200);
   }
 }
 
@@ -2199,6 +2209,7 @@ function showHub(){
   // ハブ戻り時：バックグラウンドで最新データを取得（他ユーザーの変更も反映）
   obLoad(true);
   kjLoad(true);
+  setTimeout(function(){ hubLoadTodayKpi(); }, 800);
 }
 
 // ハブ滞在中でも60秒ごとにデータ自動同期（ログイン中のみ）
@@ -2314,6 +2325,19 @@ function hubRenderBdayMini(){
 function hubOpenBdayTab(){
   enterOpenBoard();
   setTimeout(function(){ obSwitchTab('birthday'); },300);
+}
+
+// 本日の受付件数をハブKPIに反映
+function hubLoadTodayKpi(){
+  if(!adminKey()) return;
+  gasGet('listActivityLog',function(d){
+    if(!d||!d.list) return;
+    var valid=d.list.filter(function(a){ return (a.customerName||'').trim()!=='新規来場' && (a.customerName||'').trim()!==''; });
+    var t=new Date(); var ts=t.getFullYear()+'/'+('0'+(t.getMonth()+1)).slice(-2)+'/'+('0'+t.getDate()).slice(-2);
+    var cnt=valid.filter(function(a){return (a.at||'').indexOf(ts)===0}).length;
+    var el=document.getElementById('hubKpiToday'); if(el) el.textContent=cnt;
+    var sub=document.getElementById('hubKpiTodaySub'); if(sub) sub.textContent=cnt?cnt+'名来場':'本日はまだ0名';
+  }, 12000);
 }
 
 setInterval(hubTick,1000); hubTick();
@@ -2594,10 +2618,12 @@ function openBoard(){
   window.location.href = '?view=board';
 }
 
-// timeout: ms (default 45000 for large data, 30000 for small)
+// timeout: ms (poll系は8秒, 大量データは60秒, それ以外は45秒)
 function gasGet(action,cb,timeout){
   var url=sendUrl()+'?action='+action+'&key='+encodeURIComponent(adminKey())+'&_='+Date.now();
-  var ms = timeout || (/^(obGetData|obImportFromNotion|obSyncBirthdays|kjImportFromExcel)/.test(action) ? 60000 : 45000);
+  var ms = timeout ||
+    (/^(obGetData|obImportFromNotion|obSyncBirthdays|kjImportFromExcel|tochiGetData)/.test(action) ? 60000 :
+     /^(listSessions|listMonitors|listActivityLog)/.test(action) ? 8000 : 45000);
   var controller = window.AbortController ? new AbortController() : null;
   var tid = setTimeout(function(){ if(controller) controller.abort(); }, ms);
   fetch(url, {
@@ -2890,17 +2916,27 @@ function renderSeatsWithMonitor(sessions, monitors){
   document.getElementById('seats').innerHTML=html;
 }
 
+// ── モニター：listSessions と listMonitors を並列フェッチで高速化 ──
+var __pollStatusRunning = false;
 function pollStatus(){
-  gasGet('listSessions',function(dSession){
-    gasGet('listMonitors',function(dMonitor){
-      var arr=(dSession&&dSession.sessions)?dSession.sessions:[];
-      var mons=(dMonitor&&dMonitor.monitors)?dMonitor.monitors:{};
-      renderSeatsWithMonitor(arr, mons);
-      updateFsMonitor(arr, mons); 
-      var now=new Date();
-      document.getElementById('liveTime').textContent='最終更新 '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2)+':'+('0'+now.getSeconds()).slice(-2);
-    });
-  });
+  if(__pollStatusRunning) return; // 前のポーリング未完了なら新しいものを起動しない
+  __pollStatusRunning = true;
+  var done=0, sessResult=null, monResult=null;
+  function tryFinish(){
+    if(++done < 2) return; // 両方揃うまで待つ
+    __pollStatusRunning = false;
+    // エラー時は前回データをフォールバック（画面が空白になるのを防ぐ）
+    var arr=(sessResult&&sessResult.sessions)?sessResult.sessions:__lastSessions;
+    var mons=(monResult&&monResult.monitors)?monResult.monitors:__lastMonitors;
+    renderSeatsWithMonitor(arr, mons);
+    updateFsMonitor(arr, mons);
+    var now=new Date();
+    var lv=document.getElementById('liveTime');
+    if(lv) lv.textContent='最終更新 '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2)+':'+('0'+now.getSeconds()).slice(-2);
+  }
+  // 2つを同時に発火（並列）
+  gasGet('listSessions',function(d){ sessResult=d; tryFinish(); });
+  gasGet('listMonitors',function(d){ monResult=d; tryFinish(); });
 }
 
 function loadDash(){
@@ -2972,18 +3008,25 @@ function renderBoardSeats(sessions, monitors){
   }).join('');
 }
 
+// ── モニターボード：同じく並列フェッチ ──
+var __pollBoardRunning = false;
 function pollBoard(){
-  gasGet('listSessions',function(dSession){
-    gasGet('listMonitors',function(dMonitor){
-      var arr=(dSession&&dSession.sessions)?dSession.sessions:[];
-      var mons=(dMonitor&&dMonitor.monitors)?dMonitor.monitors:{};
-      renderBoardSeats(arr, mons);
-      updateFsMonitor(arr, mons); 
-      var n=new Date();
-      var lv = document.getElementById('b_live');
-      if(lv) lv.textContent='更新 '+('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2)+':'+('0'+n.getSeconds()).slice(-2);
-    });
-  });
+  if(__pollBoardRunning) return;
+  __pollBoardRunning = true;
+  var done=0, sessResult=null, monResult=null;
+  function tryFinish(){
+    if(++done < 2) return;
+    __pollBoardRunning = false;
+    var arr=(sessResult&&sessResult.sessions)?sessResult.sessions:__lastSessions;
+    var mons=(monResult&&monResult.monitors)?monResult.monitors:__lastMonitors;
+    renderBoardSeats(arr, mons);
+    updateFsMonitor(arr, mons);
+    var n=new Date();
+    var lv = document.getElementById('b_live');
+    if(lv) lv.textContent='更新 '+('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2)+':'+('0'+n.getSeconds()).slice(-2);
+  }
+  gasGet('listSessions',function(d){ sessResult=d; tryFinish(); });
+  gasGet('listMonitors',function(d){ monResult=d; tryFinish(); });
 }
 
 function loadBoardDash(){
@@ -3277,7 +3320,9 @@ function obLoad(silent){
       else { obCloseDetail(); toast('⚠️ 表示中の顧客データが見つかりません（削除または変更された可能性があります）'); }
     }
     obPopulateFilters();
-    if(!userEditing){ obRenderAll(); }
+    // OBボードが表示中のときだけ再描画（非表示中は不要なDOM操作を省略）
+    var obVisible = document.getElementById('openboard').classList.contains('show');
+    if(!userEditing && obVisible){ obRenderAll(); }
     if(silent && obRows.length>prevLen){ toast('🔔 新規データ '+(obRows.length-prevLen)+'件 を取得しました'); }
     hubUpdateBadges();
   });
@@ -4756,7 +4801,9 @@ function kjLoad(silent){
     var ae=document.activeElement;
     var userEditing = ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
       document.getElementById('kj-list-content').contains(ae);
-    if(!userEditing){ kjRenderList(); }
+    // KJボードが表示中のときだけ再描画
+    var kjVisible = document.getElementById('kojiboard').classList.contains('show');
+    if(!userEditing && kjVisible){ kjRenderList(); }
     if(silent && kjRows.length>prevLen) toast('🔔 着工管理 新規 '+(kjRows.length-prevLen)+'件');
     hubUpdateBadges();
   });
