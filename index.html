@@ -1100,6 +1100,67 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   .hub-cards-grid{grid-template-columns:1fr}
   .ob-hurdle-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ── 営業MTGボード ── */
+.mtg{display:none;flex-direction:column;height:100vh;overflow:hidden;background:#F5F3EF}
+.mtg.show{display:flex}
+.mtg-hd{flex-shrink:0;background:linear-gradient(135deg,#1A2A4A 0%,#0F1E38 100%);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:2px solid rgba(74,144,217,.3)}
+.mtg-brand{display:flex;align-items:center;gap:10px;margin-right:8px}
+.mtg-hd-ti{font-family:Georgia,serif;font-size:1.15rem;font-weight:700;letter-spacing:.08em;white-space:nowrap}
+.mtg-hd-ti small{display:block;font-size:.58rem;font-weight:400;letter-spacing:.14em;opacity:.55;font-family:sans-serif}
+.mtg-tabs{display:flex;gap:0;align-self:flex-end}
+.mtg-tab{background:none;border:none;border-bottom:3px solid transparent;color:rgba(255,255,255,.45);padding:10px 16px;font-size:.8rem;font-weight:700;letter-spacing:.08em;cursor:pointer;white-space:nowrap;transition:all .18s}
+.mtg-tab:hover{color:rgba(255,255,255,.85)}
+.mtg-tab.on{color:#fff;border-bottom-color:#4A90D9}
+.mtg-hd-tools{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mtg-pane{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0}
+.mtg-pane.show{display:flex}
+.mtg-filter{flex-shrink:0;background:#fff;border-bottom:1px solid #E8E4DC;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mtg-filter-count{font-size:.78rem;color:#888;margin-left:4px}
+.mtg-scroll{flex:1;overflow-y:auto;padding:20px}
+.mtg-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.mtg-card{background:#fff;border:1px solid #E8E4DE;border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.05);border-left:4px solid #4A90D9;transition:box-shadow .15s,transform .15s;cursor:pointer}
+.mtg-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.12);transform:translateY(-2px)}
+.mtg-card.cw{border-left-color:#00B900}
+.mtg-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mtg-card-name{font-weight:700;font-size:1rem;color:#1A2A4A;cursor:pointer}
+.mtg-card-name:hover{text-decoration:underline}
+.mtg-card-meta{display:flex;flex-wrap:wrap;gap:6px;font-size:.78rem;color:#666}
+.mtg-card-content{font-size:.85rem;color:#333;line-height:1.55;max-height:60px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.mtg-card-footer{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:#999;padding-top:6px;border-top:1px solid #F0ECE4}
+.mtg-temp{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;font-size:.72rem;font-weight:700}
+.mtg-temp.hot{background:#FEE2E2;color:#DC2626}
+.mtg-temp.warm{background:#FEF9C3;color:#CA8A04}
+.mtg-temp.cold{background:#DBEAFE;color:#2563EB}
+.mtg-temp.none{background:#F3F4F6;color:#6B7280}
+.mtg-status{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700;background:#E0E7FF;color:#3730A3}
+/* ── MTG 詳細ドロワー ── */
+.mtg-detail{position:fixed;top:0;right:-480px;width:480px;max-width:100%;height:100%;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.18);z-index:3000;transition:right .3s ease;display:flex;flex-direction:column;overflow:hidden}
+.mtg-detail.open{right:0}
+.mtg-det-hd{background:linear-gradient(135deg,#1A2A4A,#0F1E38);color:#fff;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.mtg-det-hd-name{font-size:1.1rem;font-weight:700}
+.mtg-det-body{flex:1;overflow-y:auto;padding:20px}
+.mtg-det-field{margin-bottom:16px}
+.mtg-det-label{font-size:.72rem;font-weight:700;color:#888;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.mtg-det-val{font-size:.9rem;color:#222;line-height:1.6;white-space:pre-wrap;word-break:break-all}
+.mtg-det-val.editable{background:#FAFAF8;border:1px solid #E0DAD0;border-radius:6px;padding:7px 10px;cursor:pointer}
+.mtg-det-val.editable:hover{border-color:#9A8C76;background:#FFF8EE}
+.mtg-det-input{width:100%;border:1.5px solid #4A90D9;border-radius:6px;padding:7px 10px;font-size:.9rem;background:#fff;outline:none}
+.mtg-det-input:focus{box-shadow:0 0 0 3px rgba(74,144,217,.18)}
+.mtg-det-actions{flex-shrink:0;padding:14px 20px;border-top:1px solid #EDE9E2;display:flex;gap:8px;background:#FAFAF8}
+/* ── MTG 設定タブ ── */
+.mtg-settings-body{padding:28px;max-width:560px}
+.mtg-settings-section{background:#fff;border:1px solid #E8E4DC;border-radius:10px;padding:20px 24px;margin-bottom:20px}
+.mtg-settings-section h3{font-size:.9rem;font-weight:700;color:#1A2A4A;margin:0 0 14px;letter-spacing:.04em}
+.mtg-settings-row{margin-bottom:14px}
+.mtg-settings-row label{display:block;font-size:.78rem;color:#666;margin-bottom:5px}
+.mtg-settings-row input,.mtg-settings-row select,.mtg-settings-row textarea{width:100%;border:1px solid #DDD;border-radius:6px;padding:8px 10px;font-size:.88rem;background:#FAFAF8}
+.mtg-settings-row textarea{resize:vertical;min-height:90px;font-family:monospace;font-size:.8rem}
+.mtg-room-list{border:1px solid #DDD;border-radius:6px;overflow:hidden;margin-top:8px}
+.mtg-room-item{padding:9px 14px;cursor:pointer;font-size:.85rem;border-bottom:1px solid #F0EDE8;display:flex;justify-content:space-between;align-items:center}
+.mtg-room-item:hover{background:#F5F1EB}
+.mtg-room-item.sel{background:#EBF4FF;font-weight:700;color:#1A4F8C}
+@media(max-width:600px){.mtg-detail{width:100%;right:-100%}.mtg-card-grid{grid-template-columns:1fr}.mtg-hd{padding:10px 12px;gap:8px}}
 </style>
 </head>
 <body>
@@ -1233,6 +1294,12 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
           <div class="hc-title">土地DB</div>
           <span class="hc-badge" id="hubTcCount">—</span>
           <div class="hc-desc">確定土地・物件管理<br>工事案内図・見学会案内図</div>
+        </div>
+        <div class="hub-card" onclick="enterMtgBoard()">
+          <div class="hc-icon">💼</div>
+          <div class="hc-title">営業MTG</div>
+          <span class="hc-badge" id="hubMtgCount">—</span>
+          <div class="hc-desc">面談報告・商談管理<br>Chatwork自動取込</div>
         </div>
       </div>
       <!-- 直近受付プレビュー -->
@@ -1672,6 +1739,105 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     </div>
   </div>
 </div>
+
+<!-- ─── 営業MTGボード ─── -->
+<div id="mtgboard" class="mtg">
+  <div class="mtg-hd">
+    <div class="mtg-brand">
+      <span style="font-size:1.5rem">💼</span>
+      <div class="mtg-hd-ti">営業MTG<small>MEETING BOARD</small></div>
+    </div>
+    <div class="mtg-tabs">
+      <button class="mtg-tab on" data-tab="list" onclick="mtgSwitchTab('list')">📋 MTG一覧</button>
+      <button class="mtg-tab" data-tab="settings" onclick="mtgSwitchTab('settings')">⚙ Chatwork設定</button>
+    </div>
+    <div class="mtg-hd-tools">
+      <button class="hbtn ghost" onclick="mtgLoad()" title="最新データ取得">🔄 更新</button>
+      <button class="hbtn" style="background:#00B900;border-color:#00B900;color:#fff" onclick="mtgSyncChatwork()" title="Chatworkから面談報告を取込">💬 Chatwork取込</button>
+      <button class="hbtn primary" onclick="mtgAddNew()">＋ 手動追加</button>
+      <button class="hbtn" onclick="showHub()">‹ 戻る</button>
+    </div>
+  </div>
+
+  <!-- MTG一覧タブ -->
+  <div class="mtg-pane show" data-tab="list">
+    <div class="mtg-filter">
+      <label>担当:</label>
+      <select id="mtg-filter-staff" onchange="mtgRenderList()" style="width:100px"></select>
+      <label>ステータス:</label>
+      <select id="mtg-filter-status" onchange="mtgRenderList()" style="width:130px">
+        <option value="">全て</option>
+        <option>問い合わせ</option><option>見学会前</option><option>無料相談前</option>
+        <option>勉強会前</option><option>FP前</option><option>LPS前</option>
+        <option>ヒアリング前</option><option>プレゼン前</option>
+        <option>パートナー検討中</option><option>パートナー契約済</option>
+        <option>中長期フォロー</option><option>失注</option>
+      </select>
+      <label>温度感:</label>
+      <select id="mtg-filter-temp" onchange="mtgRenderList()" style="width:90px">
+        <option value="">全て</option><option>🔥 熱い</option><option>💛 普通</option><option>🧊 冷たい</option>
+      </select>
+      <input type="text" id="mtg-filter-q" placeholder="顧客名・内容で検索…" style="min-width:160px" oninput="mtgRenderList()">
+      <span class="mtg-filter-count" id="mtg-count"></span>
+    </div>
+    <div class="mtg-scroll">
+      <div id="mtg-list-content"><div style="text-align:center;padding:60px 20px;color:#999">読み込み中...</div></div>
+    </div>
+  </div>
+
+  <!-- Chatwork設定タブ -->
+  <div class="mtg-pane" data-tab="settings">
+    <div class="mtg-scroll">
+      <div class="mtg-settings-body">
+        <div class="mtg-settings-section">
+          <h3>🔑 Chatwork API 設定</h3>
+          <div class="mtg-settings-row">
+            <label>APIトークン（Chatwork個人設定→API管理から発行）</label>
+            <input type="password" id="mtg-cw-token" placeholder="Chatwork APIトークンを入力">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="hbtn primary" onclick="mtgSaveTokenAndListRooms()">保存してルーム一覧を取得</button>
+            <span id="mtg-cw-token-status" style="font-size:.8rem;color:#888;align-self:center"></span>
+          </div>
+        </div>
+        <div class="mtg-settings-section" id="mtg-rooms-section" style="display:none">
+          <h3>💬 面談報告チャットルームを選択</h3>
+          <p style="font-size:.8rem;color:#666;margin:0 0 12px">取り込む対象のチャットルームをクリックして選択してください。</p>
+          <div id="mtg-room-list" class="mtg-room-list"></div>
+          <div id="mtg-selected-room" style="margin-top:10px;font-size:.82rem;color:#1A4F8C;font-weight:700"></div>
+          <button class="hbtn primary" onclick="mtgSaveRoomId()" style="margin-top:12px">このルームを保存</button>
+        </div>
+        <div class="mtg-settings-section">
+          <h3>📝 メッセージ取込テンプレート（任意）</h3>
+          <p style="font-size:.78rem;color:#666;margin:0 0 10px">Chatworkメッセージの書き方例を入力すると解析精度が上がります。<br>空欄でも自動解析します。</p>
+          <div class="mtg-settings-row">
+            <label>テンプレート例（実際の投稿フォーマット）</label>
+            <textarea id="mtg-cw-template" placeholder="例：&#10;【顧客名】○○様&#10;【面談日】2026/06/11&#10;【担当者】山田&#10;【内容】土地の相談。予算3000万。&#10;【次回アクション】プラン提案&#10;【温度感】熱い"></textarea>
+          </div>
+          <button class="hbtn primary" onclick="mtgSaveTemplate()">テンプレートを保存</button>
+          <span id="mtg-tmpl-status" style="font-size:.8rem;color:#888;margin-left:10px"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MTG詳細ドロワー -->
+<div id="mtg-detail" class="mtg-detail">
+  <div class="mtg-det-hd">
+    <div class="mtg-det-hd-name" id="mtg-det-name">—</div>
+    <div style="display:flex;gap:6px">
+      <button class="hbtn" style="padding:5px 12px;font-size:.78rem;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3)" onclick="mtgOpenInOB()">📋 OBで見る</button>
+      <button class="hbtn" style="padding:5px 12px;font-size:.78rem;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3)" onclick="mtgCloseDetail()">✕</button>
+    </div>
+  </div>
+  <div class="mtg-det-body" id="mtg-det-body"></div>
+  <div class="mtg-det-actions">
+    <button class="hbtn primary" onclick="mtgSaveDetail()">💾 保存</button>
+    <button class="hbtn ghost" style="color:#DC2626;border-color:#DC2626" onclick="mtgDeleteEntry()">🗑 削除</button>
+  </div>
+</div>
+<div id="mtg-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2999" onclick="mtgCloseDetail()"></div>
 
 <div id="fsMonitor" class="fs-monitor hide">
   <div class="fsm-head">
@@ -2209,10 +2375,18 @@ function enterOpenBoard(){
   if(!window.__obPollTimer) window.__obPollTimer=setInterval(function(){ obLoad(true); },60000);
 }
 
+function enterMtgBoard(){
+  document.getElementById('hub').classList.remove('show');
+  document.getElementById('mtgboard').classList.add('show');
+  mtgLoad();
+  if(!window.__mtgPollTimer) window.__mtgPollTimer = setInterval(function(){ mtgLoad(true); }, 60000);
+}
+
 function showHub(){
   document.getElementById('openboard').classList.remove('show');
   document.getElementById('kojiboard').classList.remove('show');
   document.getElementById('tochiboard').classList.remove('show');
+  document.getElementById('mtgboard').classList.remove('show');
   document.getElementById('app').classList.remove('show');
   document.getElementById('hub').classList.add('show');
   hubUpdateBadges();
@@ -2646,7 +2820,7 @@ function openBoard(){
 function gasGet(action,cb,timeout){
   var url=sendUrl()+'?action='+action+'&key='+encodeURIComponent(adminKey())+'&_='+Date.now();
   var ms = timeout ||
-    (/^(obGetData|obImportFromNotion|obSyncBirthdays|kjImportFromExcel|tochiGetData)/.test(action) ? 60000 :
+    (/^(obGetData|obImportFromNotion|obSyncBirthdays|kjImportFromExcel|tochiGetData|mtgGetData|mtgSyncChatwork)/.test(action) ? 60000 :
      /^(listSessions|listMonitors|listActivityLog)/.test(action) ? 8000 : 45000);
   var controller = window.AbortController ? new AbortController() : null;
   var tid = setTimeout(function(){ if(controller) controller.abort(); }, ms);
@@ -5691,6 +5865,384 @@ function tochiGenerateOne(notionId, customerName){
 if (!__isOAuthCallback) {
   initFs();
   if(adminKey()){ showApp(); }
+}
+
+// ══════════════════════════════════════════════════
+// 営業MTGボード JavaScript
+// ══════════════════════════════════════════════════
+
+var MTG_CACHE_KEY = 'mtg_v1';
+var mtgRows = [];
+var __mtgLoading = false;
+var __mtgCurrentTab = 'list';
+var __mtgDetailId = null;
+var __mtgSelectedRoomId = null;
+
+function mtgGetCache(){ try{var d=localStorage.getItem(MTG_CACHE_KEY);return d?JSON.parse(d):[];}catch(e){return[];} }
+function mtgSetCache(r){ try{localStorage.setItem(MTG_CACHE_KEY,JSON.stringify(r));}catch(e){} }
+
+function mtgLoad(silent){
+  if(__mtgLoading && silent) return;
+  __mtgLoading = true;
+  var cached = mtgGetCache();
+  if(cached.length && !silent){ mtgRows=cached; mtgRows.forEach(function(r,i){r._idx=i;}); mtgPopulateStaffFilter(); mtgRenderList(); }
+  gasGet('mtgGetData', function(d){
+    __mtgLoading = false;
+    if(!d||d.error){ if(!silent) toast('⚠️ MTGデータ取得エラー: '+(d?d.error:'通信エラー')); return; }
+    mtgRows = d.rows || [];
+    mtgRows.forEach(function(r,i){r._idx=i;});
+    mtgSetCache(mtgRows);
+    mtgPopulateStaffFilter();
+    mtgRenderList();
+    // ハブバッジ更新
+    var badge = document.getElementById('hubMtgCount');
+    if(badge) badge.textContent = mtgRows.length ? mtgRows.length+'件' : '—';
+    // Chatwork設定を復元（設定タブ）
+    if(d.cwRoomId){ __mtgSelectedRoomId = d.cwRoomId; }
+    var roomStatus = document.getElementById('mtg-selected-room');
+    if(roomStatus && d.cwRoomId) roomStatus.textContent = '✅ 設定済みルームID: '+d.cwRoomId;
+    var tokenStatus = document.getElementById('mtg-cw-token-status');
+    if(tokenStatus) tokenStatus.textContent = d.hasCwToken ? '✅ APIトークン保存済み' : '未設定';
+    var tmplEl = document.getElementById('mtg-cw-template');
+    if(tmplEl && d.cwTemplate) tmplEl.value = d.cwTemplate;
+  });
+}
+
+function mtgPopulateStaffFilter(){
+  var el = document.getElementById('mtg-filter-staff'); if(!el) return;
+  var cv = el.value;
+  var staffs = {};
+  mtgRows.forEach(function(r){ if(r['担当者']) staffs[r['担当者']]=true; });
+  el.innerHTML = '<option value="">全員</option>' +
+    Object.keys(staffs).sort().map(function(s){ return '<option value="'+esc(s)+'"'+(s===cv?' selected':'')+'>'+esc(s)+'</option>'; }).join('');
+}
+
+function mtgSwitchTab(tab){
+  __mtgCurrentTab = tab;
+  document.querySelectorAll('.mtg-tab').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-tab')===tab); });
+  document.querySelectorAll('#mtgboard .mtg-pane').forEach(function(p){ p.classList.toggle('show', p.getAttribute('data-tab')===tab); });
+}
+
+// 温度感クラス
+function mtgTempClass(v){
+  if(!v) return 'none';
+  if(/熱|hot|高/i.test(v)) return 'hot';
+  if(/冷|cold|低/i.test(v)) return 'cold';
+  return 'warm';
+}
+function mtgTempLabel(v){
+  if(!v) return '—';
+  if(/熱|hot|高/i.test(v)) return '🔥 熱い';
+  if(/冷|cold|低/i.test(v)) return '🧊 冷たい';
+  return '💛 普通';
+}
+
+function mtgRenderList(){
+  var el = document.getElementById('mtg-list-content'); if(!el) return;
+  var fStaff = (document.getElementById('mtg-filter-staff')||{}).value||'';
+  var fStatus = (document.getElementById('mtg-filter-status')||{}).value||'';
+  var fTemp = (document.getElementById('mtg-filter-temp')||{}).value||'';
+  var fQ = ((document.getElementById('mtg-filter-q')||{}).value||'').toLowerCase().trim();
+
+  var rows = mtgRows.filter(function(r){
+    if(fStaff && r['担当者']!==fStaff) return false;
+    if(fStatus && r['商談ステータス']!==fStatus) return false;
+    if(fTemp && mtgTempLabel(r['温度感'])!==fTemp) return false;
+    if(fQ){
+      var hay = ((r['顧客名']||'')+' '+(r['面談内容']||'')+' '+(r['次回アクション']||'')+' '+(r['担当者']||'')).toLowerCase();
+      if(hay.indexOf(fQ)<0) return false;
+    }
+    return true;
+  });
+
+  // 最新面談日順
+  rows.sort(function(a,b){
+    var da=a['面談日']||a['_created']||'', db=b['面談日']||b['_created']||'';
+    return db>da?1:db<da?-1:0;
+  });
+
+  var cntEl = document.getElementById('mtg-count');
+  if(cntEl) cntEl.textContent = rows.length+'件';
+
+  if(!rows.length){
+    el.innerHTML='<div style="text-align:center;padding:60px 20px;color:#999">'+(mtgRows.length?'条件に合うMTGがありません':'まだMTGがありません。「手動追加」または「Chatwork取込」で追加してください')+'</div>';
+    return;
+  }
+
+  var html = '<div class="mtg-card-grid">';
+  rows.forEach(function(r){
+    var tc = mtgTempClass(r['温度感']);
+    var tl = mtgTempLabel(r['温度感']);
+    var isCw = r['_source']==='chatwork';
+    var dateDisp = r['面談日'] ? r['面談日'].replace(/(\d{4})-(\d{2})-(\d{2})/,'$1/$2/$3') : '—';
+    var nextDisp = r['次回予定日'] ? r['次回予定日'].replace(/(\d{4})-(\d{2})-(\d{2})/,'$1/$2/$3') : '';
+    var status = r['商談ステータス']||'';
+    var content = r['面談内容']||'';
+
+    html += '<div class="mtg-card'+(isCw?' cw':'')+'" onclick="mtgOpenDetail(\''+esc(r._id)+'\')">' +
+      '<div class="mtg-card-top">' +
+        '<span class="mtg-card-name">'+esc(r['顧客名']||'—')+'</span>' +
+        '<span class="mtg-temp '+tc+'">'+tl+'</span>' +
+      '</div>' +
+      '<div class="mtg-card-meta">' +
+        '<span>📅 '+esc(dateDisp)+'</span>' +
+        (r['担当者']?'<span>👤 '+esc(r['担当者'])+'</span>':'')+
+        (status?'<span class="mtg-status">'+esc(status)+'</span>':'')+
+        (isCw?'<span style="color:#00B900;font-size:.7rem">💬 CW取込</span>':'')+
+      '</div>' +
+      (content?'<div class="mtg-card-content">'+esc(content)+'</div>':'')+
+      '<div class="mtg-card-footer">' +
+        (r['次回アクション']?'<span>📌 '+esc(r['次回アクション'])+'</span>':'<span></span>')+
+        (nextDisp?'<span>🗓 次回 '+esc(nextDisp)+'</span>':'<span></span>')+
+      '</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+// ── 詳細ドロワー ──
+var MTG_FIELDS = [
+  {key:'顧客名',       label:'顧客名',         type:'text'},
+  {key:'面談日',       label:'面談日',         type:'date'},
+  {key:'担当者',       label:'担当者',         type:'text'},
+  {key:'商談ステータス',label:'商談ステータス', type:'sel',
+    opts:['問い合わせ','見学会前','無料相談前','勉強会前','FP前','LPS前','ヒアリング前','プレゼン前','パートナー検討中','パートナー契約済','中長期フォロー','失注']},
+  {key:'温度感',       label:'温度感',         type:'sel', opts:['🔥 熱い','💛 普通','🧊 冷たい','']},
+  {key:'面談内容',     label:'面談内容',       type:'textarea'},
+  {key:'次回アクション',label:'次回アクション', type:'text'},
+  {key:'次回予定日',   label:'次回予定日',     type:'date'},
+  {key:'_rawMessage',  label:'Chatwork原文',   type:'textarea', readonly:true}
+];
+
+function mtgOpenDetail(id){
+  var r = mtgRows.find(function(x){ return x._id===id; });
+  if(!r) return;
+  __mtgDetailId = id;
+  document.getElementById('mtg-det-name').textContent = r['顧客名']||'—';
+  var body = document.getElementById('mtg-det-body');
+  var html = '';
+  MTG_FIELDS.forEach(function(f){
+    var val = r[f.key]||'';
+    if(!val && f.readonly) return; // 空のreadonly項目は非表示
+    html += '<div class="mtg-det-field">' +
+      '<div class="mtg-det-label">'+esc(f.label)+'</div>';
+    if(f.readonly){
+      html += '<div class="mtg-det-val" style="font-size:.78rem;color:#666;background:#F5F5F5;padding:8px 10px;border-radius:6px;white-space:pre-wrap">'+esc(val)+'</div>';
+    } else if(f.type==='textarea'){
+      html += '<textarea class="mtg-det-input" data-field="'+esc(f.key)+'" rows="4" style="resize:vertical">'+esc(val)+'</textarea>';
+    } else if(f.type==='sel'){
+      html += '<select class="mtg-det-input" data-field="'+esc(f.key)+'">'+
+        f.opts.map(function(o){ return '<option'+(o===val?' selected':'')+'>'+esc(o)+'</option>'; }).join('')+
+      '</select>';
+    } else if(f.type==='date'){
+      html += '<input class="mtg-det-input" type="date" data-field="'+esc(f.key)+'" value="'+esc(val)+'">';
+    } else {
+      html += '<input class="mtg-det-input" type="text" data-field="'+esc(f.key)+'" value="'+esc(val)+'">';
+    }
+    html += '</div>';
+  });
+  body.innerHTML = html;
+  document.getElementById('mtg-detail').classList.add('open');
+  document.getElementById('mtg-overlay').style.display='block';
+}
+
+function mtgCloseDetail(){
+  document.getElementById('mtg-detail').classList.remove('open');
+  document.getElementById('mtg-overlay').style.display='none';
+  __mtgDetailId = null;
+}
+
+function mtgSaveDetail(){
+  if(!__mtgDetailId) return;
+  var r = mtgRows.find(function(x){ return x._id===__mtgDetailId; });
+  if(!r) return;
+  var inputs = document.querySelectorAll('#mtg-det-body [data-field]');
+  var updates = [];
+  inputs.forEach(function(el){
+    var field = el.getAttribute('data-field');
+    var value = el.value;
+    if(r[field] !== value){
+      r[field] = value;
+      updates.push({field:field, value:value});
+    }
+  });
+  if(!updates.length){ toast('変更なし'); return; }
+  mtgSetCache(mtgRows);
+  mtgRenderList();
+  updates.forEach(function(u){
+    post({action:'mtgUpdateField', id:__mtgDetailId, field:u.field, value:u.value});
+  });
+  toast('✅ 保存しました');
+  // 顧客名変更時はヘッダーも更新
+  var nameEl = document.getElementById('mtg-det-name');
+  if(nameEl) nameEl.textContent = r['顧客名']||'—';
+}
+
+function mtgDeleteEntry(){
+  if(!__mtgDetailId) return;
+  var r = mtgRows.find(function(x){ return x._id===__mtgDetailId; });
+  if(!confirm('「'+(r?r['顧客名']:'このMTG')+'」の記録を削除しますか？')) return;
+  var id = __mtgDetailId;
+  mtgCloseDetail();
+  mtgRows = mtgRows.filter(function(x){ return x._id!==id; });
+  mtgRows.forEach(function(x,i){x._idx=i;});
+  mtgSetCache(mtgRows);
+  mtgRenderList();
+  post({action:'mtgDeleteEntry', id:id});
+  toast('🗑 削除しました');
+}
+
+function mtgOpenInOB(){
+  if(!__mtgDetailId) return;
+  var r = mtgRows.find(function(x){ return x._id===__mtgDetailId; });
+  if(!r||!r['顧客名']) return;
+  mtgCloseDetail();
+  showHub();
+  setTimeout(function(){
+    enterOpenBoard();
+    setTimeout(function(){
+      var qEl = document.getElementById('ob-vis-q');
+      if(qEl){ qEl.value=r['顧客名']; obRenderVisitors(); obSwitchTab('visitors'); }
+    }, 600);
+  }, 200);
+}
+
+// ── 新規MTG追加 ──
+function mtgAddNew(){
+  var today = new Date();
+  var dateStr = today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2);
+  var tmpId = '__new__';
+  var newRec = {_id:tmpId, '面談日':dateStr, '顧客名':'', '担当者':'', '面談内容':'', '次回アクション':'', '商談ステータス':'', '温度感':'💛 普通'};
+  mtgRows.unshift(newRec);
+  mtgRows.forEach(function(r,i){r._idx=i;});
+  mtgRenderList();
+  // 新規詳細を開く
+  __mtgDetailId = tmpId;
+  document.getElementById('mtg-det-name').textContent = '新規MTG';
+  var body = document.getElementById('mtg-det-body');
+  var html = '';
+  MTG_FIELDS.forEach(function(f){
+    if(f.readonly) return;
+    var val = newRec[f.key]||'';
+    html += '<div class="mtg-det-field"><div class="mtg-det-label">'+esc(f.label)+'</div>';
+    if(f.type==='textarea'){
+      html += '<textarea class="mtg-det-input" data-field="'+f.key+'" rows="4"></textarea>';
+    } else if(f.type==='sel'){
+      html += '<select class="mtg-det-input" data-field="'+f.key+'">'+f.opts.map(function(o){return '<option'+(o===val?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select>';
+    } else if(f.type==='date'){
+      html += '<input class="mtg-det-input" type="date" data-field="'+f.key+'" value="'+val+'">';
+    } else {
+      html += '<input class="mtg-det-input" type="text" data-field="'+f.key+'" value="'+esc(val)+'">';
+    }
+    html += '</div>';
+  });
+  body.innerHTML = html;
+  // 保存ボタンを「新規保存」に
+  var saveBtn = document.querySelector('.mtg-det-actions .hbtn.primary');
+  if(saveBtn){
+    saveBtn.textContent = '💾 新規保存';
+    saveBtn.onclick = function(){
+      var inputs = document.querySelectorAll('#mtg-det-body [data-field]');
+      var rec = {};
+      inputs.forEach(function(el){ rec[el.getAttribute('data-field')]=el.value; });
+      if(!rec['顧客名']){ toast('⚠️ 顧客名を入力してください'); return; }
+      rec._id = Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+      rec._created = new Date().toISOString();
+      // tmpIdを本IDに差し替え
+      var idx = mtgRows.findIndex(function(r){ return r._id==='__new__'; });
+      if(idx>=0) mtgRows[idx] = rec; else mtgRows.unshift(rec);
+      mtgRows.forEach(function(r,i){r._idx=i;});
+      mtgSetCache(mtgRows);
+      mtgRenderList();
+      mtgCloseDetail();
+      post({action:'mtgSaveEntry', record:rec});
+      toast('✅ MTGを保存しました');
+      // 保存ボタンを元に戻す
+      if(saveBtn){ saveBtn.textContent='💾 保存'; saveBtn.onclick=mtgSaveDetail; }
+    };
+  }
+  document.getElementById('mtg-detail').classList.add('open');
+  document.getElementById('mtg-overlay').style.display='block';
+}
+
+// ── Chatwork同期 ──
+function mtgSyncChatwork(){
+  toast('💬 Chatworkから面談報告を取込中…');
+  gasGet('mtgGetData', function(cfg){
+    if(!cfg||cfg.error){ toast('⚠️ 設定確認エラー'); return; }
+    if(!cfg.hasCwToken){
+      toast('⚠️ Chatwork APIトークンが未設定です。設定タブから保存してください。');
+      mtgSwitchTab('settings'); return;
+    }
+    if(!cfg.cwRoomId){
+      toast('⚠️ 面談報告チャットルームが未設定です。設定タブから選択してください。');
+      mtgSwitchTab('settings'); return;
+    }
+    gasGet('mtgSyncChatwork', function(d){
+      if(!d||d.error){ toast('⚠️ Chatwork取込エラー: '+(d?d.error:'通信エラー')); return; }
+      if(d.added===0){ toast('💬 新しいメッセージなし（既取込済み）'); }
+      else { toast('✅ '+d.added+'件の面談報告を取込みました: '+d.names.slice(0,3).join('、')+(d.names.length>3?'…':'')); }
+      mtgLoad(true);
+    });
+  });
+}
+
+// ── Chatwork設定 ──
+function mtgSaveTokenAndListRooms(){
+  var token = (document.getElementById('mtg-cw-token')||{}).value||'';
+  if(!token){ toast('⚠️ APIトークンを入力してください'); return; }
+  var status = document.getElementById('mtg-cw-token-status');
+  if(status) status.textContent = '保存中…';
+  // トークンをPOSTで保存（no-cors）してからGETでルーム一覧取得
+  post({action:'mtgSaveCwSettings', cwToken:token});
+  setTimeout(function(){
+    if(status) status.textContent = '✅ 保存完了。ルーム一覧取得中…';
+    gasGet('mtgListCwRooms', function(rd){
+      if(!rd||rd.error){ toast('⚠️ ルーム取得エラー: '+(rd?rd.error:'通信エラー（トークンが正しいか確認してください）')); if(status) status.textContent='⚠️ APIエラー'; return; }
+      if(status) status.textContent='✅ APIトークン保存済み（'+rd.rooms.length+'ルーム取得）';
+      var section = document.getElementById('mtg-rooms-section');
+      if(section) section.style.display='';
+      var listEl = document.getElementById('mtg-room-list');
+      if(!listEl) return;
+      var currentRoomId = __mtgSelectedRoomId;
+      listEl.innerHTML = rd.rooms.sort(function(a,b){ return a.name>b.name?1:a.name<b.name?-1:0; }).map(function(r){
+        var isSel = String(r.id)===String(currentRoomId);
+        return '<div class="mtg-room-item'+(isSel?' sel':'')+'" onclick="mtgSelectRoom(\''+r.id+'\',\''+esc(r.name)+'\')" data-rid="'+r.id+'">' +
+          '<span>'+esc(r.name)+'</span>' +
+          '<span style="font-size:.72rem;color:#999">ID:'+r.id+(r.unread?' 🔔'+r.unread:'')+'</span>' +
+          '</div>';
+      }).join('');
+    });
+  }, 2000); // POST完了を待ってからGET
+}
+
+var __mtgSelectedRoomName = '';
+function mtgSelectRoom(id, name){
+  __mtgSelectedRoomId = id;
+  __mtgSelectedRoomName = name;
+  document.querySelectorAll('.mtg-room-item').forEach(function(el){
+    el.classList.toggle('sel', el.getAttribute('data-rid')===String(id));
+  });
+  var sel = document.getElementById('mtg-selected-room');
+  if(sel) sel.textContent = '選択中: 「'+name+'」(ID:'+id+')';
+}
+
+function mtgSaveRoomId(){
+  if(!__mtgSelectedRoomId){ toast('⚠️ ルームを選択してください'); return; }
+  post({action:'mtgSaveCwSettings', cwRoomId:String(__mtgSelectedRoomId)}, function(d){
+    if(!d||d.error){ toast('⚠️ 保存エラー'); return; }
+    toast('✅ 「'+__mtgSelectedRoomName+'」を面談報告チャットとして保存しました');
+  });
+}
+
+function mtgSaveTemplate(){
+  var tmpl = (document.getElementById('mtg-cw-template')||{}).value||'';
+  post({action:'mtgSaveCwSettings', cwTemplate:tmpl}, function(d){
+    var st = document.getElementById('mtg-tmpl-status');
+    if(d&&d.ok){ if(st) st.textContent='✅ 保存完了'; toast('テンプレート保存しました'); }
+    else { if(st) st.textContent='⚠️ 失敗'; }
+  });
 }
 </script>
 </body>
