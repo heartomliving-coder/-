@@ -969,7 +969,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 /* ─── メインエリア ─── */
 .hub-main{overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:22px}
 /* PC幅広: 4カード横並び / 通常: 2×2 */
-.hub-cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.hub-cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media(max-width:1280px){.hub-cards-grid{grid-template-columns:repeat(2,1fr)}}
 /* カード：グラスモーフィズム */
 /* ── ハブカード再設計 ── */
@@ -1100,6 +1100,20 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   .hub-cards-grid{grid-template-columns:1fr}
   .ob-hurdle-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ── ハブ Googleカレンダーウィジェット ── */
+.hub-gcal{background:rgba(4,5,9,.35);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:14px 18px;margin-top:4px}
+.hub-gcal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.hub-gcal-title{font-size:.75rem;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.55);text-transform:uppercase}
+.hub-gcal-date{font-size:.72rem;color:rgba(255,255,255,.38)}
+.hub-gcal-list{display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto}
+.hub-gcal-ev{display:flex;align-items:baseline;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.hub-gcal-ev:last-child{border-bottom:none}
+.hub-gcal-time{font-size:.72rem;color:rgba(255,255,255,.45);white-space:nowrap;min-width:52px}
+.hub-gcal-name{font-size:.78rem;color:rgba(255,255,255,.82);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hub-gcal-cal{font-size:.66rem;color:rgba(255,255,255,.3);white-space:nowrap;max-width:80px;overflow:hidden;text-overflow:ellipsis}
+.hub-gcal-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.hub-gcal-empty{font-size:.78rem;color:rgba(255,255,255,.3);text-align:center;padding:12px 0}
 
 /* ── 営業MTGボード ── */
 .mtg{display:none;flex-direction:column;height:100vh;overflow:hidden;background:#F5F3EF}
@@ -1301,7 +1315,25 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
           <span class="hc-badge" id="hubMtgCount">—</span>
           <div class="hc-desc">面談報告・商談管理<br>Chatwork自動取込</div>
         </div>
+        <div class="hub-card soon" title="準備中">
+          <div class="hc-icon">👤</div>
+          <div class="hc-title">顧客情報DB</div>
+          <span class="hc-badge">準備中</span>
+          <div class="hc-desc">Notion顧客マスタ連携<br>OB・Drive・KJ統合</div>
+        </div>
       </div>
+
+      <!-- Googleカレンダー（本日の予定） -->
+      <div class="hub-gcal">
+        <div class="hub-gcal-hd">
+          <span class="hub-gcal-title">📅 本日のスケジュール</span>
+          <span class="hub-gcal-date" id="hubGcalDate">—</span>
+        </div>
+        <div class="hub-gcal-list" id="hubGcalList">
+          <div class="hub-gcal-empty">読み込み中...</div>
+        </div>
+      </div>
+
       <!-- 直近受付プレビュー -->
       <div class="hub-recent">
         <div class="hub-recent-hd">
@@ -2337,6 +2369,7 @@ function showApp(){
     hubUpdateBadges();
     setTimeout(function(){ obLoad(true); kjLoad(true); }, 400);
     setTimeout(function(){ hubLoadTodayKpi(); }, 1200);
+    setTimeout(function(){ hubLoadGcal(); }, 2000); // Googleカレンダー
     // ★ ログイン直後に誕生日をバックグラウンドで自動同期
     setTimeout(function(){
       if(!adminKey()) return;
@@ -2394,6 +2427,7 @@ function showHub(){
   obLoad(true);
   kjLoad(true);
   setTimeout(function(){ hubLoadTodayKpi(); }, 800);
+  setTimeout(function(){ hubLoadGcal(); }, 1500);
 }
 
 // ★ ログイン後は常時60秒ごとにOB・KJを自動同期（どのビューを開いていても更新される）
@@ -2536,6 +2570,38 @@ function hubLoadTodayKpi(){
     var el=document.getElementById('hubKpiToday'); if(el) el.textContent=cnt;
     var sub=document.getElementById('hubKpiTodaySub'); if(sub) sub.textContent=cnt?cnt+'名来場':'本日はまだ0名';
   }, 12000);
+}
+
+// ── Google カレンダー（本日の予定）──
+function hubLoadGcal(){
+  if(!adminKey()) return;
+  var dateEl=document.getElementById('hubGcalDate');
+  if(dateEl){
+    var d=new Date(); var w=['日','月','火','水','木','金','土'][d.getDay()];
+    dateEl.textContent=d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()+'（'+w+'）';
+  }
+  gasGet('gcalGetToday',function(d){
+    var el=document.getElementById('hubGcalList'); if(!el) return;
+    if(!d||d.error){
+      el.innerHTML='<div class="hub-gcal-empty" style="color:rgba(255,100,100,.6)">カレンダー取得エラー（GAS再デプロイが必要な場合があります）</div>';
+      return;
+    }
+    if(!d.events||!d.events.length){
+      el.innerHTML='<div class="hub-gcal-empty">本日の予定はありません</div>';
+      return;
+    }
+    el.innerHTML = d.events.map(function(ev){
+      // カレンダー色をドットに
+      var color = ev.color || '#9A8C76';
+      // Calendarカラーコードをhexに変換（GASは#RRGGBB形式）
+      return '<div class="hub-gcal-ev">' +
+        '<span class="hub-gcal-dot" style="background:'+esc(color)+'"></span>'+
+        '<span class="hub-gcal-time">'+esc(ev.start)+'〜'+esc(ev.end)+'</span>'+
+        '<span class="hub-gcal-name" title="'+esc(ev.title)+'">'+esc(ev.title)+'</span>'+
+        '<span class="hub-gcal-cal" title="'+esc(ev.calendar)+'">'+esc(ev.calendar)+'</span>'+
+      '</div>';
+    }).join('');
+  }, 15000);
 }
 
 setInterval(hubTick,1000); hubTick();
@@ -2926,7 +2992,9 @@ function clearScreen(screen){
   post({action:'clearSession',screen:tg});
   toast('受付'+screenLabel(tg)+' を待機に戻しました');
   if(__fsScreenId === String(tg)) closeFsMonitor();
-  setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
+  // 待機に戻したら自動的にハブへ戻る（受付管理画面が再表示されないように）
+  if(!isBoardView) setTimeout(function(){ showHub(); }, 800);
+  else setTimeout(function(){ pollBoard(); }, 1200);
 }
 
 var __lastCmdSent = 0; // 遠隔コマンド送信タイムスタンプ（heartomPreview消去バグ防止用）
@@ -5974,10 +6042,12 @@ function mtgRenderList(){
     var tc = mtgTempClass(r['温度感']);
     var tl = mtgTempLabel(r['温度感']);
     var isCw = r['_source']==='chatwork';
-    var dateDisp = r['面談日'] ? r['面談日'].replace(/(\d{4})-(\d{2})-(\d{2})/,'$1/$2/$3') : '—';
+    var dateDisp = r['面談日'] ? r['面談日'].replace(/(\d{4})-(\d{2})-(\d{2})/,'$1/$2/$3') : (r['面談時間']||'—');
     var nextDisp = r['次回予定日'] ? r['次回予定日'].replace(/(\d{4})-(\d{2})-(\d{2})/,'$1/$2/$3') : '';
     var status = r['商談ステータス']||'';
     var content = r['面談内容']||'';
+    var obIdx = mtgFindObRow(r['顧客名']);
+    var hasOb = obIdx >= 0;
 
     html += '<div class="mtg-card'+(isCw?' cw':'')+'" onclick="mtgOpenDetail(\''+esc(r._id)+'\')">' +
       '<div class="mtg-card-top">' +
@@ -5989,6 +6059,7 @@ function mtgRenderList(){
         (r['担当者']?'<span>👤 '+esc(r['担当者'])+'</span>':'')+
         (status?'<span class="mtg-status">'+esc(status)+'</span>':'')+
         (isCw?'<span style="color:#00B900;font-size:.7rem">💬 CW取込</span>':'')+
+        (hasOb?'<span style="color:#4A90D9;font-size:.7rem" title="OBに顧客あり">📋 OB紐付</span>':'')+
       '</div>' +
       (content?'<div class="mtg-card-content">'+esc(content)+'</div>':'')+
       '<div class="mtg-card-footer">' +
@@ -5999,6 +6070,17 @@ function mtgRenderList(){
   });
   html += '</div>';
   el.innerHTML = html;
+}
+
+// MTG顧客名からOBのrow indexを探す（姓・名・様の違いを吸収）
+function mtgFindObRow(name){
+  if(!name||!obRows||!obRows.length) return -1;
+  var norm = name.replace(/様$/, '').replace(/\s/g,'');
+  for(var i=0;i<obRows.length;i++){
+    var obn = (obRows[i]['顧客名']||'').replace(/様$/,'').replace(/\s/g,'');
+    if(obn && norm && (obn===norm||obn.indexOf(norm)>=0||norm.indexOf(obn)>=0)) return i;
+  }
+  return -1;
 }
 
 // ── 詳細ドロワー ──
@@ -6097,13 +6179,20 @@ function mtgOpenInOB(){
   if(!__mtgDetailId) return;
   var r = mtgRows.find(function(x){ return x._id===__mtgDetailId; });
   if(!r||!r['顧客名']) return;
+  var obIdx = mtgFindObRow(r['顧客名']);
   mtgCloseDetail();
   showHub();
   setTimeout(function(){
     enterOpenBoard();
     setTimeout(function(){
-      var qEl = document.getElementById('ob-vis-q');
-      if(qEl){ qEl.value=r['顧客名']; obRenderVisitors(); obSwitchTab('visitors'); }
+      if(obIdx >= 0){
+        // 直接詳細を開く
+        obOpenDetail(obIdx);
+      } else {
+        // 名前検索にフォールバック
+        var qEl = document.getElementById('ob-vis-q');
+        if(qEl){ qEl.value=r['顧客名']; obRenderVisitors(); obSwitchTab('visitors'); }
+      }
     }, 600);
   }, 200);
 }
