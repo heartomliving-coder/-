@@ -29,30 +29,34 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--tx);
   -webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,118,.06),transparent 60%)}
 
-/* ─────────── ログイン画面（社内管理システム） ─────────── */
-.login{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
-  background:radial-gradient(1100px 560px at 50% -18%,rgba(154,140,118,.12),transparent 60%),linear-gradient(180deg,#16171B 0%,#0D0D10 100%);
-  padding:24px;overflow:hidden}
-.login:not(.hide){display:flex}
-.login::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.6;
-  background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);
-  background-size:46px 46px;-webkit-mask-image:radial-gradient(ellipse 72% 68% at 50% 42%,#000 28%,transparent 76%);mask-image:radial-gradient(ellipse 72% 68% at 50% 42%,#000 28%,transparent 76%)}
+/* ─────────── ログイン画面（社内業務システム / スプリット） ─────────── */
 @keyframes lKen{0%{opacity:0;transform:scale(1.06)}8%{opacity:1}25%{opacity:1}33%{opacity:0;transform:scale(1.12)}100%{opacity:0}}
-.login .lcard{position:relative;z-index:1;width:100%;max-width:404px;
-  background:linear-gradient(180deg,rgba(33,34,40,.94),rgba(21,22,26,.96));
-  border:1px solid rgba(255,255,255,.10);border-radius:14px;
-  box-shadow:0 26px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05);padding:38px 34px 30px}
-.login .lbrand{display:flex;align-items:center;justify-content:center;gap:13px;margin-bottom:20px}
-.login .lbrand img{height:30px;filter:brightness(0) invert(1);opacity:.95}
-.login .lbrand .lbd{width:1px;height:24px;background:rgba(255,255,255,.2)}
-.login .lbrand .lbn{font-family:"Playfair Display",serif;font-size:.66rem;letter-spacing:.32em;color:rgba(255,255,255,.6);text-transform:uppercase}
-.login .lt{font-family:var(--serif);font-size:1.46rem;font-weight:600;color:#fff;letter-spacing:.16em;text-align:center;margin:0 0 5px}
-.login .lo{font-family:"Playfair Display",serif;font-size:.58rem;letter-spacing:.36em;color:var(--gold);text-align:center;text-transform:uppercase;margin-bottom:20px}
-.login .l-divider{width:auto;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);margin:0 0 22px}
-.login .f{width:100%;display:flex;flex-direction:column;align-items:center;gap:14px}
-.login .lhint{display:flex;align-items:center;gap:7px;font-size:.72rem;color:rgba(255,255,255,.5);letter-spacing:.02em;margin-bottom:2px}
-.login .err{font-size:.92rem;color:#FF8B8B;min-height:20px;text-align:center;letter-spacing:.03em;font-weight:500}
-.login .lfoot{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-size:.6rem;letter-spacing:.18em;color:rgba(255,255,255,.3);z-index:1}
+.login{position:fixed;inset:0;z-index:50;display:none;background:#0E0E10}
+.login:not(.hide){display:flex}
+.login .lleft{flex:1.05;position:relative;background:linear-gradient(150deg,#24262C 0%,#15161A 55%,#0E0F12 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(36px,5vw,58px);overflow:hidden}
+.login .lleft::before{content:'';position:absolute;inset:0;opacity:.55;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:40px 40px;-webkit-mask-image:radial-gradient(ellipse 85% 65% at 28% 30%,#000,transparent 82%);mask-image:radial-gradient(ellipse 85% 65% at 28% 30%,#000,transparent 82%)}
+.login .lleft::after{content:'';position:absolute;width:540px;height:540px;right:-170px;bottom:-210px;border-radius:50%;background:radial-gradient(circle,rgba(154,140,118,.22),transparent 65%);pointer-events:none}
+.login .lbrand{display:flex;align-items:center;gap:13px;position:relative;z-index:1}
+.login .lbrand img{height:32px;filter:brightness(0) invert(1);opacity:.96}
+.login .lbrand .lbn{font-family:"Playfair Display",serif;font-size:.74rem;letter-spacing:.32em;color:rgba(255,255,255,.7);text-transform:uppercase}
+.login .lhero{position:relative;z-index:1}
+.login .lhero .eyebrow{font-family:"Playfair Display",serif;font-size:.64rem;letter-spacing:.4em;color:var(--gold);text-transform:uppercase;margin-bottom:16px}
+.login .lhero h1{font-family:var(--serif);font-size:clamp(1.9rem,3.4vw,2.6rem);font-weight:600;letter-spacing:.12em;line-height:1.32;margin:0 0 16px;color:#fff}
+.login .lhero p{font-size:.9rem;color:rgba(255,255,255,.58);letter-spacing:.04em;line-height:1.95;max-width:430px}
+.login .lmods{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.login .lmods span{font-size:.68rem;letter-spacing:.06em;color:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:6px 14px;background:rgba(255,255,255,.04)}
+.login .lcopy{position:relative;z-index:1;font-size:.6rem;letter-spacing:.18em;color:rgba(255,255,255,.3)}
+.login .lright{flex:.95;background:#F6F4EF;display:flex;align-items:center;justify-content:center;padding:30px}
+.login .lcard{width:100%;max-width:384px;background:#fff;border:1px solid #E8E4DB;border-radius:16px;box-shadow:0 22px 64px rgba(20,18,14,.13);padding:42px 38px}
+.login .lcard .cbrand{display:flex;align-items:center;gap:11px;margin-bottom:22px}
+.login .lcard .cbrand img{height:24px;opacity:.9}
+.login .lcard .cbrand span{font-family:"Playfair Display",serif;font-size:.62rem;letter-spacing:.28em;color:var(--tx3);text-transform:uppercase}
+.login .lcard .lt{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--charcoal);letter-spacing:.06em;margin:0 0 4px}
+.login .lcard .lsub{font-size:.76rem;color:var(--tx3);letter-spacing:.03em;margin-bottom:26px}
+.login .f{display:flex;flex-direction:column;align-items:center;gap:14px}
+.login .lhint{display:flex;align-items:center;gap:7px;font-size:.74rem;color:var(--tx2);letter-spacing:.02em;align-self:flex-start;margin-bottom:2px}
+.login .err{font-size:.9rem;color:#C0392B;min-height:20px;text-align:center;font-weight:600;letter-spacing:.02em}
+@media(max-width:860px){ .login .lleft{display:none} .login .lright{flex:1} }
 
 /* ─────────── 管理画面（デフォルト） ─────────── */
 .app{display:none;flex-direction:column;height:100dvh;overflow:hidden}
@@ -868,25 +872,37 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 <body>
 
 <div id="login" class="login">
-  <div class="lcard">
+  <div class="lleft">
     <div class="lbrand">
       <img src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none'">
-      <div class="lbd"></div>
       <div class="lbn">HEARTOM LIVING</div>
     </div>
-    <div class="lt">管理コンソール</div>
-    <div class="lo">Management Console</div>
-    <div class="l-divider"></div>
-    <div class="f">
-      <div class="lhint">🔒 社内アカウントでサインインしてください</div>
-      <div id="gLoginBtn" style="min-height:44px;display:flex;align-items:center;justify-content:center"></div>
-      <button id="oauthFallbackBtn" onclick="doOAuthPopup()" style="display:none;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.45);color:#fff;padding:11px 28px;border-radius:6px;font-size:.9rem;cursor:pointer;width:280px;letter-spacing:.04em">🔐 Googleでログイン</button>
-      <button onclick="doOAuthPopup('select_account')" style="background:none;border:none;color:rgba(255,255,255,.42);font-size:.74rem;cursor:pointer;text-decoration:underline;letter-spacing:.04em">別のアカウントでログイン</button>
-      <div class="err" id="lerr"></div>
-      <div id="gasStatus" style="font-size:.66rem;color:rgba(255,255,255,.32);text-align:center;letter-spacing:.04em"></div>
+    <div class="lhero">
+      <div class="eyebrow">Management Console</div>
+      <h1>管理コンソール</h1>
+      <p>受付・顧客管理・着工管理・土地データベースをひとつに統合した、社内業務システムです。</p>
+      <div class="lmods"><span>受付モニター</span><span>オープンボード</span><span>着工管理</span><span>土地DB</span><span>誕生日同期</span></div>
+    </div>
+    <div class="lcopy">© HEARTOM LIVING — MANAGEMENT SYSTEM</div>
+  </div>
+  <div class="lright">
+    <div class="lcard">
+      <div class="cbrand">
+        <img src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none'">
+        <span>HEARTOM LIVING</span>
+      </div>
+      <div class="lt">サインイン</div>
+      <div class="lsub">管理コンソールにアクセスします</div>
+      <div class="f">
+        <div class="lhint">🔒 許可された社内Googleアカウントでログイン</div>
+        <div id="gLoginBtn" style="min-height:44px;display:flex;align-items:center;justify-content:center"></div>
+        <button id="oauthFallbackBtn" onclick="doOAuthPopup()" style="display:none;background:var(--charcoal);border:none;color:#fff;padding:11px 28px;border-radius:8px;font-size:.9rem;cursor:pointer;width:100%;max-width:280px;letter-spacing:.04em">🔐 Googleでログイン</button>
+        <button onclick="doOAuthPopup('select_account')" style="background:none;border:none;color:var(--tx3);font-size:.74rem;cursor:pointer;text-decoration:underline;letter-spacing:.04em">別のアカウントでログイン</button>
+        <div class="err" id="lerr"></div>
+        <div id="gasStatus" style="font-size:.66rem;color:var(--tx4);text-align:center;letter-spacing:.04em"></div>
+      </div>
     </div>
   </div>
-  <div class="lfoot">© HEARTOM LIVING — MANAGEMENT SYSTEM</div>
 </div>
 
 <!-- ─── モード選択ハブ ─── -->
@@ -1182,12 +1198,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
           <option>来場</option><option>電話</option><option>オンライン</option>
           <option>打ち合わせ</option><option>現地見学</option><option>プレゼン</option><option>その他</option>
         </select>
-        <select id="tl-source" style="width:120px" title="反響元">
-          <option value="">反響元…</option>
-          <option>HP</option><option>電話</option><option>家づくり学校</option><option>FC</option>
-          <option>友人紹介</option><option>Instagram</option><option>ポータルサイト</option><option>その他</option>
-        </select>
-        <input type="text" id="tl-content" class="tl-content" placeholder="内容（任意）..." onkeydown="if(event.key==='Enter')obAddHistoryItem()">
+        <input type="text" id="tl-content" class="tl-content" placeholder="内容（見学会名など・任意）..." onkeydown="if(event.key==='Enter')obAddHistoryItem()">
         <select id="tl-staff" style="width:100px"></select>
         <button class="hbtn primary" onclick="obAddHistoryItem()">追加</button>
       </div>
@@ -3094,7 +3105,7 @@ function obHistChips(r){
     var shortD=d?(function(){var p=d.match(/^(\d{4})-(\d{2})-(\d{2})/);return p?parseInt(p[2])+'月'+parseInt(p[3])+'日':'';}()):'';
     // 内容（反響元・見学会名など）も表示。汎用ラベルは種別と重複するため省略
     var content=String(item.content||'').trim();
-    var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0;
+    var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0||OB_SOURCES.indexOf(content)>=0;
     var lbl=(shortD?shortD+' ':'')+(item.type||'')+((content&&!isGeneric)?'・'+content:'');
     var title=(shortD?shortD+' ':'')+(item.type||'')+(content?'：'+content:'')+(item.staff?'（'+item.staff+'）':'');
     return '<span class="ob-hist-chip'+(i===last?' new':'')+'" title="'+esc(title)+'">'+esc(lbl)+'</span>';
@@ -3914,19 +3925,18 @@ function obRenderDetHistory(){
   // 担当者セレクトだけ更新（obPopulateFilters は全フィルターを上書きするため不使用）
   var tsEl=document.getElementById('tl-staff');
   if(tsEl && tsEl.options.length<=1){ var allS=getStaffList(); tsEl.innerHTML='<option value="">—</option>'+allS.map(function(s){return '<option value="'+esc(s)+'">'+esc(s)+'</option>';}).join(''); }
-  // 重複除去した履歴を新しい順に表示。削除は「正規化日付＋種別」キーで全該当を削除
-  var deduped=obDedupHistory(r.history||[]).slice().sort(function(a,b){return b.date>a.date?1:b.date<a.date?-1:0;});
+  // 重複除去した履歴を日付昇順（古い順・1日が上）に表示。削除は「正規化日付＋種別」キーで全該当を削除
+  var deduped=obDedupHistory(r.history||[]).slice().sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
   var cntEl=document.getElementById('ob-hist-count'); if(cntEl) cntEl.textContent=deduped.length?('全'+deduped.length+'件'):'';
   if(!deduped.length){ tl.innerHTML='<div style="color:#CCC;font-size:.88rem;padding:8px 0">まだ履歴がありません。上から追加してください。</div>'; return; }
   tl.innerHTML=deduped.map(function(item){
     var content=String(item.content||'').trim();
-    var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0;
+    var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0||OB_SOURCES.indexOf(content)>=0;
     var key=obNormDate(item.date||'')+'|'+(item.type||'');
     return '<div class="ob-tl-item">'+
       '<div class="ob-tl-dot"></div>'+
       '<div class="ob-tl-date">'+esc(item.date?obFmtDate(obNormDate(item.date)):'—')+'</div>'+
       '<div class="ob-tl-badge">'+esc(item.type||'')+'</div>'+
-      (item.source?'<span style="font-size:.66rem;font-weight:700;color:#9A8C76;border:1px solid rgba(154,140,118,.45);border-radius:3px;padding:1px 6px;white-space:nowrap" title="反響元">'+esc(item.source)+'</span>':'')+
       '<div class="ob-tl-content">'+esc(isGeneric?'':content)+'</div>'+
       '<div class="ob-tl-staff">'+esc(item.staff||'')+'</div>'+
       '<button class="ob-tl-del" onclick="obDelHistoryByKey(\''+esc(key).replace(/'/g,"\\'")+'\')" title="削除">✕</button>'+
@@ -3940,22 +3950,17 @@ function obAddHistoryItem(){
   var type=document.getElementById('tl-type').value;
   var content=document.getElementById('tl-content').value.trim();
   var staff=document.getElementById('tl-staff').value;
-  var srcEl=document.getElementById('tl-source');
-  var source=srcEl?srcEl.value:'';
-  // 反響元が未選択なら顧客の反響元で補完
-  if(!source) source=r['反響元']||'';
   if(!date){ var t=new Date(); date=t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2); }
-  // 内容が空でも種別・反響元があれば登録可（手動入力を簡単に）
-  if(!content && !type && !source){ toast('種別・反響元・内容のいずれかを入力してください'); return; }
+  // 内容が空でも種別があれば登録可（手動入力を簡単に）
+  if(!content && !type){ toast('種別または内容を入力してください'); return; }
   if(!r.history) r.history=[];
-  r.history.push({date:date,type:type,content:content,staff:staff,source:source});
+  r.history.push({date:date,type:type,content:content,staff:staff});
   r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
   obSetCache(obRows);
   obRenderDetHistory();
   obRenderVisitors();
   document.getElementById('tl-content').value='';
-  if(srcEl) srcEl.value='';
-  post({action:'obAddHistory',row:obDetailRow,date:date,type:type,content:content,staff:staff,source:source});
+  post({action:'obAddHistory',row:obDetailRow,date:date,type:type,content:content,staff:staff});
   toast('履歴を追加しました');
 }
 
@@ -4252,12 +4257,16 @@ function kjRenderList(){
     return true;
   });
 
-  // フェーズ優先順ソート
-  rows.sort(function(a,b){
-    var pa=PHASE_ORDER.indexOf(kjPhaseOf(a)); var pb=PHASE_ORDER.indexOf(kjPhaseOf(b));
-    if(pa<0) pa=99; if(pb<0) pb=99;
-    return pa-pb;
-  });
+  // 最新順ソート（最新の工程日付が新しい順）
+  function kjLatestISO(r){
+    var best='';
+    ['引渡し','入居','上棟','基礎着工','請負契約日','土地契約'].forEach(function(f){
+      var m=String(r[f]||'').match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if(m){ var iso=m[1]+m[2]+m[3]; if(iso>best) best=iso; }
+    });
+    return best;
+  }
+  rows.sort(function(a,b){ var la=kjLatestISO(a),lb=kjLatestISO(b); return la<lb?1:la>lb?-1:0; });
 
   var cntEl=document.getElementById('kj-count'); if(cntEl) cntEl.textContent=rows.length+'件';
   if(!rows.length){
@@ -4280,14 +4289,9 @@ function kjRenderList(){
     return '<span class="kj-date-ok">'+lbl+'</span>';
   }
 
-  var html=barHtml+'<table class="kj-table"><thead><tr>'+
-    '<th>物件名</th><th>場所</th><th>区分</th><th>営業</th><th>工務</th>'+
-    '<th>フェーズ</th><th>請負契約</th><th>着工</th><th>上棟</th><th>引渡し</th><th></th>'+
-    '</tr></thead><tbody>';
-
-  rows.forEach(function(r){
+  function kjRowHtml(r){
     var ph=kjPhaseOf(r); var pc=KJ_PHASE_CLASS[ph]||'p0';
-    html+='<tr data-phase="'+esc(ph)+'" data-id="'+esc(r._id||'')+'">'+
+    return '<tr data-phase="'+esc(ph)+'" data-id="'+esc(r._id||'')+'">'+
       '<td><span class="kj-name-link" onclick="kjOpenDetail(\''+esc(r._id||'')+'\')">'+esc(r['物件名']||'—')+'</span></td>'+
       '<td style="font-size:.8rem;color:#666">'+esc(r['場所']||'—')+'</td>'+
       '<td><span style="font-size:.76rem;font-weight:700;color:#666">'+esc(r['区分']||'—')+'</span></td>'+
@@ -4300,6 +4304,22 @@ function kjRenderList(){
       '<td style="font-size:.8rem;white-space:nowrap">'+kjDateCell(r['引渡し'])+'</td>'+
       '<td><button class="ob-del" onclick="kjConfirmDel(\''+esc(r._id||'')+'\')">✕</button></td>'+
     '</tr>';
+  }
+  // 期ごとにグループ化（新しい期が上・その他は最後）
+  var groups={}, gorder=[];
+  rows.forEach(function(r){ var k=String(r['_期']||'').trim()||'その他'; if(!groups[k]){groups[k]=[];gorder.push(k);} groups[k].push(r); });
+  gorder.sort(function(a,b){
+    if(a==='その他') return 1; if(b==='その他') return -1;
+    var na=(String(a).match(/(\d+)/)||['','-1'])[1], nb=(String(b).match(/(\d+)/)||['','-1'])[1];
+    return parseInt(nb,10)-parseInt(na,10);
+  });
+  var html=barHtml+'<table class="kj-table"><thead><tr>'+
+    '<th>物件名</th><th>場所</th><th>区分</th><th>営業</th><th>工務</th>'+
+    '<th>フェーズ</th><th>請負契約</th><th>着工</th><th>上棟</th><th>引渡し</th><th></th>'+
+    '</tr></thead><tbody>';
+  gorder.forEach(function(k){
+    html+='<tr class="kj-term-hd"><td colspan="11" style="background:linear-gradient(90deg,#2B2B2B,#3a3937);color:#fff;font-weight:700;letter-spacing:.08em;padding:7px 14px;font-size:.76rem">'+esc(k)+' <span style="color:#9A8C76;font-weight:600">（'+groups[k].length+'件）</span></td></tr>';
+    groups[k].forEach(function(r){ html+=kjRowHtml(r); });
   });
   html+='</tbody></table>';
   el.innerHTML=html;
@@ -4308,6 +4328,64 @@ function kjRenderList(){
 function kjSwitchTab(tab){
   document.querySelectorAll('.kj-tab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-ktab')===tab);});
   document.querySelectorAll('.kj-pane').forEach(function(p){p.classList.toggle('show',p.getAttribute('data-ktab')===tab);});
+  if(tab==='timeline') kjRenderTimeline();
+}
+
+// 工程カレンダー（月次ガント：請負契約〜引渡しのバーを月軸で表示）
+function kjRenderTimeline(){
+  var el=document.getElementById('kj-timeline-content'); if(!el) return;
+  el.style.overflow='auto';
+  function iso(r,f){ var m=String(r[f]||'').match(/^(\d{4})-(\d{2})-(\d{2})/); return m?(m[1]+'-'+m[2]+'-'+m[3]):''; }
+  var fStaff=((document.getElementById('kj-filter-staff')||{}).value||'');
+  var fPhase=((document.getElementById('kj-filter-phase')||{}).value||'');
+  var fQ=((document.getElementById('kj-q')||{}).value||'').toLowerCase().trim();
+  var items=[];
+  kjRows.forEach(function(r){
+    if(fStaff && r['営業']!==fStaff && r['工務']!==fStaff) return;
+    if(fPhase && kjPhaseOf(r)!==fPhase) return;
+    if(fQ && (r['物件名']||'').toLowerCase().indexOf(fQ)<0 && (r['場所']||'').toLowerCase().indexOf(fQ)<0) return;
+    var start=iso(r,'請負契約日')||iso(r,'土地契約')||iso(r,'地鎮祭')||iso(r,'基礎着工');
+    var end=iso(r,'引渡し')||iso(r,'入居')||iso(r,'上棟')||iso(r,'基礎着工')||start;
+    if(!start && !end) return;
+    if(!start) start=end; if(!end) end=start;
+    if(end<start){ var t=start; start=end; end=t; }
+    items.push({r:r,start:start,end:end});
+  });
+  if(!items.length){ el.innerHTML='<div class="kj-empty">工程に表示できる日付（請負契約〜引渡し）が入った案件がありません</div>'; return; }
+  items.sort(function(a,b){ return a.start<b.start?1:a.start>b.start?-1:0; }); // 新しい順
+  var minM=items[0].start, maxM=items[0].end;
+  items.forEach(function(it){ if(it.start<minM)minM=it.start; if(it.end>maxM)maxM=it.end; });
+  var months=[]; var y=parseInt(minM.substr(0,4),10), mo=parseInt(minM.substr(5,2),10);
+  var ey=parseInt(maxM.substr(0,4),10), em=parseInt(maxM.substr(5,2),10), guard=0;
+  while((y<ey||(y===ey&&mo<=em)) && guard<96){ months.push(y+'-'+('0'+mo).slice(-2)); mo++; if(mo>12){mo=1;y++;} guard++; }
+  var colW=42, labelW=210, totalW=labelW+months.length*colW;
+  function mIdx(d){ var k=d.substr(0,7); for(var i=0;i<months.length;i++) if(months[i]===k) return i; return -1; }
+  var colors={p0:'#BBBBBB',p1:'#6B9EC6',p2:'#E59E40',p3:'#5E9E5E',p4:'#9A8C76',p5:'#C9C2B6'};
+  var todayK=new Date().toISOString().substr(0,7);
+  var h='<div style="min-width:'+totalW+'px;font-family:inherit">';
+  // ヘッダー（月軸）
+  h+='<div style="display:flex;position:sticky;top:0;z-index:3">'+
+     '<div style="width:'+labelW+'px;flex:0 0 '+labelW+'px;position:sticky;left:0;z-index:4;background:#2B2B2B;color:#fff;font-size:.66rem;font-weight:700;padding:9px 12px">物件名 / 工程（請負契約〜引渡し）</div>';
+  months.forEach(function(m){ var p=m.split('-'); var showY=(p[1]==='01'||m===months[0]); var isNow=(m===todayK);
+    h+='<div style="width:'+colW+'px;flex:0 0 '+colW+'px;text-align:center;background:'+(isNow?'#3a352b':'#2B2B2B')+';color:rgba(255,255,255,.65);font-size:.56rem;padding:7px 0;border-left:1px solid rgba(255,255,255,.1)">'+(showY?('<b style="color:#9A8C76">'+p[0].substr(2)+"</b><br>"):'')+p[1]+'月</div>'; });
+  h+='</div>';
+  // 行（案件ごとのバー）
+  items.forEach(function(it){
+    var r=it.r, ph=kjPhaseOf(r), pc=KJ_PHASE_CLASS[ph]||'p0';
+    var si=mIdx(it.start), ei=mIdx(it.end); if(si<0)si=0; if(ei<0)ei=months.length-1;
+    var left=si*colW+2, width=Math.max((ei-si+1)*colW-4,colW-6);
+    h+='<div style="display:flex;border-bottom:1px solid #EDEAE4;background:#fff">'+
+       '<div style="width:'+labelW+'px;flex:0 0 '+labelW+'px;position:sticky;left:0;z-index:2;background:#fff;padding:6px 12px;cursor:pointer;border-right:1px solid #EDEAE4" onclick="kjOpenDetail(\''+esc(r._id||'')+'\')">'+
+         '<div style="font-size:.78rem;font-weight:600;color:#222;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:'+(labelW-24)+'px">'+esc(r['物件名']||'—')+'</div>'+
+         '<div style="font-size:.62rem;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:'+(labelW-24)+'px">'+esc(r['場所']||'')+' ・ '+esc(ph)+'</div>'+
+       '</div>'+
+       '<div style="position:relative;flex:0 0 '+(months.length*colW)+'px;height:40px">'+
+         '<div title="'+esc(r['物件名']||'')+'：'+esc(it.start)+' 〜 '+esc(it.end)+'" style="position:absolute;left:'+left+'px;top:12px;width:'+width+'px;height:16px;background:'+(colors[pc]||'#5E9E5E')+';border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.18)"></div>'+
+       '</div>'+
+     '</div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
 }
 
 // ── 詳細パネル ──
