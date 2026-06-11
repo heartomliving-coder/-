@@ -1135,6 +1135,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 /* ── 営業MTGボード ── */
 .mtg{display:none;flex-direction:column;height:100vh;overflow:hidden;background:#F5F3EF}
 .mtg.show{display:flex}
+#custboard{display:none;flex-direction:column;height:100dvh;overflow:hidden;background:#F3F1EE}
+#custboard.show{display:flex}
 .mtg-hd{flex-shrink:0;background:linear-gradient(135deg,#1A2A4A 0%,#0F1E38 100%);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:2px solid rgba(74,144,217,.3)}
 .mtg-brand{display:flex;align-items:center;gap:10px;margin-right:8px}
 .mtg-hd-ti{font-family:Georgia,serif;font-size:1.15rem;font-weight:700;letter-spacing:.08em;white-space:nowrap}
@@ -1332,11 +1334,11 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
           <span class="hc-badge" id="hubMtgCount">—</span>
           <div class="hc-desc">面談報告・商談管理<br>Chatwork自動取込</div>
         </div>
-        <div class="hub-card soon" title="準備中">
+        <div class="hub-card" onclick="enterCustBoard()">
           <div class="hc-icon">👤</div>
           <div class="hc-title">顧客情報DB</div>
-          <span class="hc-badge">準備中</span>
-          <div class="hc-desc">Notion顧客マスタ連携<br>OB・Drive・KJ統合</div>
+          <span class="hc-badge" id="hc-cust-cnt">—</span>
+          <div class="hc-desc">Notion顧客マスタ連携<br>OB・KJ・Chatwork統合</div>
         </div>
       </div>
 
@@ -1809,6 +1811,63 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
         <div class="b-lbl">直近の受付</div>
         <div class="b-recent" id="b_recent"><span class="b-empty">読み込み中…</span></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 顧客情報DBボード ─── -->
+<div id="custboard" class="kj">
+  <div class="kj-hd">
+    <div class="kj-brand">
+      <img src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM" onerror="this.style.display='none'">
+      <div class="kj-hd-ti">顧客情報DB<small>CUSTOMER DATABASE</small></div>
+    </div>
+    <div class="kj-actions">
+      <span id="cust-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
+      <button class="hbtn ghost" onclick="custLoad()">🔄 Notion同期</button>
+      <button class="hbtn ghost" onclick="showHub()">‹ 戻る</button>
+    </div>
+  </div>
+  <div class="kj-filter" style="gap:10px;padding:12px 20px">
+    <input id="cust-q" type="text" placeholder="名前・電話・メールで検索..." oninput="custRenderList()" style="padding:6px 12px;border:1px solid #DDD;border-radius:4px;font-size:.84rem;width:280px;outline:none">
+    <select id="cust-filter-status" onchange="custRenderList()" style="padding:6px 10px;border:1px solid #DDD;border-radius:4px;font-size:.82rem">
+      <option value="">ステータス: すべて</option>
+      <option value="パートナー契約済">パートナー契約済</option>
+      <option value="商談中">商談中</option>
+      <option value="見込み">見込み</option>
+    </select>
+    <span id="cust-count" style="font-size:.8rem;color:#888;margin-left:auto"></span>
+  </div>
+  <div class="kj-scroll">
+    <div id="cust-list-content"><div class="kj-empty">読み込み中...</div></div>
+  </div>
+</div>
+
+<!-- 顧客情報DB 詳細パネル -->
+<div id="cust-detail" class="ob-detail">
+  <div class="ob-det-hd">
+    <div class="ob-det-top">
+      <button class="ob-det-back" onclick="custCloseDetail()">‹ 一覧へ戻る</button>
+      <div id="cust-det-name" style="font-size:1.1rem;font-weight:700;color:#1A1A1A;flex:1">—</div>
+    </div>
+    <div class="ob-det-tabs">
+      <button class="ob-det-tab on" data-ctab="info" onclick="custDetTab('info')">👤 基本情報</button>
+      <button class="ob-det-tab" data-ctab="ob" onclick="custDetTab('ob')">📊 OB履歴</button>
+      <button class="ob-det-tab" data-ctab="kj" onclick="custDetTab('kj')">🏗 着工</button>
+      <button class="ob-det-tab" data-ctab="chatwork" onclick="custDetTab('chatwork')">💬 Chatwork</button>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto">
+    <div id="cust-pane-info" class="ob-det-pane show" data-ctab="info" style="padding:20px 24px"></div>
+    <div id="cust-pane-ob" class="ob-det-pane" data-ctab="ob" style="padding:20px 24px"></div>
+    <div id="cust-pane-kj" class="ob-det-pane" data-ctab="kj" style="padding:20px 24px"></div>
+    <div id="cust-pane-chatwork" class="ob-det-pane" data-ctab="chatwork" style="padding:20px 24px">
+      <div class="kj-cw-room-sel">
+        <select id="cust-cw-room-select"><option value="">— ルームを選択 —</option></select>
+        <button class="hbtn" onclick="custLoadCwRooms()">🔄 更新</button>
+        <button class="hbtn primary" onclick="custSaveCwRoom()">保存・表示</button>
+      </div>
+      <div id="cust-cw-msgs-wrap"><div class="kj-cw-empty">ルームを選択してメッセージを表示</div></div>
     </div>
   </div>
 </div>
@@ -2384,6 +2443,7 @@ function onAuthFail(){
   var ob=document.getElementById('openboard'); if(ob) ob.classList.remove('show');
   var kj=document.getElementById('kojiboard'); if(kj) kj.classList.remove('show');
   var tc=document.getElementById('tochiboard'); if(tc) tc.classList.remove('show');
+  var cb=document.getElementById('custboard'); if(cb) cb.classList.remove('show');
   document.getElementById('login').classList.remove('hide');
   document.getElementById('lerr').textContent='セッションが切れました。再度ログインしてください';
 }
@@ -2461,6 +2521,7 @@ function showHub(){
   document.getElementById('kojiboard').classList.remove('show');
   document.getElementById('tochiboard').classList.remove('show');
   document.getElementById('mtgboard').classList.remove('show');
+  document.getElementById('custboard').classList.remove('show');
   document.getElementById('app').classList.remove('show');
   document.getElementById('hub').classList.add('show');
   hubUpdateBadges();
@@ -2927,7 +2988,7 @@ function openBoard(){
 function gasGet(action,cb,timeout){
   var url=sendUrl()+'?action='+action+'&key='+encodeURIComponent(adminKey())+'&_='+Date.now();
   var ms = timeout ||
-    (/^(obGetData|obImportFromNotion|obSyncBirthdays|kjImportFromExcel|tochiGetData|mtgGetData|mtgSyncChatwork|kjGetCwMessages|mtgListCwRooms)/.test(action) ? 60000 :
+    (/^(obGetData|obImportFromNotion|obSyncBirthdays|kjImportFromExcel|tochiGetData|mtgGetData|mtgSyncChatwork|kjGetCwMessages|mtgListCwRooms|listInfoCustomers)/.test(action) ? 90000 :
      /^(listSessions|listMonitors|listActivityLog)/.test(action) ? 8000 : 45000);
   var controller = window.AbortController ? new AbortController() : null;
   var tid = setTimeout(function(){ if(controller) controller.abort(); }, ms);
@@ -6085,6 +6146,220 @@ if (!__isOAuthCallback) {
 // ══════════════════════════════════════════════════
 // 営業MTGボード JavaScript
 // ══════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════
+// 顧客情報DB ボード
+// ═══════════════════════════════════════════
+var custRows = [];
+var custDetailId = null;
+var __custLoaded = false;
+
+function enterCustBoard(){
+  document.getElementById('hub').classList.remove('show');
+  document.getElementById('custboard').classList.add('show');
+  custLoad();
+}
+
+function custLoad(){
+  var el=document.getElementById('cust-list-content');
+  if(!__custLoaded && el) el.innerHTML='<div class="kj-empty">⏳ Notionから読み込み中（初回は30秒ほどかかる場合があります）...</div>';
+  var lu=document.getElementById('cust-last-updated');
+  if(lu) lu.textContent='';
+  gasGet('listInfoCustomers',function(d){
+    if(!d||d.error){
+      if(el) el.innerHTML='<div class="kj-empty">❌ 取得エラー: '+(d&&d.error||'接続を確認してください')+'<br><button class="hbtn" style="margin-top:12px" onclick="custLoad()">🔄 再読み込み</button></div>';
+      return;
+    }
+    custRows=(d.list||[]);
+    __custLoaded=true;
+    var cnt=document.getElementById('hc-cust-cnt'); if(cnt) cnt.textContent=custRows.length+'件';
+    if(lu) lu.textContent='更新: '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+    custRenderList();
+  }, 90000);
+}
+
+function custRenderList(){
+  var el=document.getElementById('cust-list-content'); if(!el) return;
+  var fQ=((document.getElementById('cust-q')||{}).value||'').toLowerCase().trim();
+  var fSt=((document.getElementById('cust-filter-status')||{}).value||'');
+  var rows=custRows.filter(function(r){
+    if(fQ && !((r.name||'')+(r.furigana||'')+(r.tel||'')+(r.email||'')+(r.address||'')).toLowerCase().includes(fQ)) return false;
+    if(fSt && r.status!==fSt) return false;
+    return true;
+  });
+  var cntEl=document.getElementById('cust-count'); if(cntEl) cntEl.textContent=rows.length+'件';
+  if(!rows.length){ el.innerHTML='<div class="kj-empty">該当する顧客がいません</div>'; return; }
+  // OB/KJ名前マッピング（高速検索用）
+  var obNames={}, kjNames={};
+  (obRows||[]).forEach(function(r){ if(r['顧客名']) obNames[(r['顧客名']||'').replace(/\s/g,'').replace(/様$/,'')]=true; });
+  (kjRows||[]).forEach(function(r){ if(r['物件名']) kjNames[(r['物件名']||'').replace(/\s/g,'').replace(/様$/,'')]=true; });
+  function normName(n){ return (n||'').replace(/\s/g,'').replace(/様$/,''); }
+  var html='<table class="tochi-table"><thead><tr>'+
+    '<th>氏名</th><th>ステータス</th><th>電話番号</th><th>登録日</th><th>OB</th><th>KJ</th>'+
+    '</tr></thead><tbody>'+
+    rows.map(function(r){
+      var nm=normName(r.name);
+      var hasOB=!!(nm&&obNames[nm]);
+      var hasKJ=!!(nm&&kjNames[nm]);
+      var statusColor={'パートナー契約済':'#22C55E','商談中':'#3B82F6','見込み':'#F59E0B'}[r.status]||'#9CA3AF';
+      return '<tr style="cursor:pointer" onclick="custOpenDetail(\''+esc(r.id||'')+'\')">'+
+        '<td><strong>'+esc(r.name||'—')+'</strong>'+(r.furigana?'<br><span style="font-size:.72rem;color:#888">'+esc(r.furigana)+'</span>':'')+'</td>'+
+        '<td>'+(r.status?'<span style="color:'+statusColor+';font-weight:700;font-size:.78rem">'+esc(r.status)+'</span>':'<span style="color:#CCC">—</span>')+'</td>'+
+        '<td>'+esc(r.tel||'—')+'</td>'+
+        '<td>'+esc((r.registeredAt||'').substring(0,10)||'—')+'</td>'+
+        '<td style="text-align:center">'+(hasOB?'<span style="color:#22C55E">✓</span>':'<span style="color:#EEE">—</span>')+'</td>'+
+        '<td style="text-align:center">'+(hasKJ?'<span style="color:#3B82F6">✓</span>':'<span style="color:#EEE">—</span>')+'</td>'+
+        '</tr>';
+    }).join('')+'</tbody></table>';
+  el.innerHTML=html;
+}
+
+function custOpenDetail(id){
+  var r=custRows.find(function(x){return x.id===id;}); if(!r) return;
+  custDetailId=id;
+  document.getElementById('cust-det-name').textContent=(r.name||'—')+' 様';
+  custDetTab('info');
+  document.getElementById('cust-detail').classList.add('show');
+}
+
+function custCloseDetail(){
+  document.getElementById('cust-detail').classList.remove('show');
+  custDetailId=null;
+}
+
+function custDetTab(tab){
+  document.querySelectorAll('[data-ctab]').forEach(function(el){
+    var isBtn=el.classList.contains('ob-det-tab');
+    var isPane=el.classList.contains('ob-det-pane');
+    if(isBtn) el.classList.toggle('on',el.getAttribute('data-ctab')===tab);
+    if(isPane) el.classList.toggle('show',el.getAttribute('data-ctab')===tab);
+  });
+  if(tab==='info') custRenderInfo();
+  if(tab==='ob') custRenderOb();
+  if(tab==='kj') custRenderKj();
+  if(tab==='chatwork') custRenderChatwork();
+}
+
+function custRenderInfo(){
+  var r=custRows.find(function(x){return x.id===custDetailId;}); if(!r) return;
+  var pane=document.getElementById('cust-pane-info'); if(!pane) return;
+  function row(lbl,val){ return val?'<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #F0EDE8"><span style="min-width:100px;color:#888;font-size:.78rem">'+esc(lbl)+'</span><span style="flex:1;font-size:.84rem">'+esc(val)+'</span></div>':''; }
+  var statusColor={'パートナー契約済':'#22C55E','商談中':'#3B82F6','見込み':'#F59E0B'}[r.status]||'#9CA3AF';
+  var notionUrl='https://notion.so/'+r.id.replace(/-/g,'');
+  pane.innerHTML='<div style="display:flex;flex-direction:column;gap:0">'+
+    row('氏名',r.name)+ row('フリガナ',r.furigana)+ row('電話番号',r.tel)+
+    row('メール',r.email)+ row('住所',r.address)+ row('登録日',r.registeredAt?r.registeredAt.substring(0,10):'')+
+    (r.status?'<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #F0EDE8"><span style="min-width:100px;color:#888;font-size:.78rem">ステータス</span><span style="color:'+statusColor+';font-weight:700;font-size:.84rem">'+esc(r.status)+'</span></div>':'')+
+    '</div>'+
+    '<a href="'+esc(notionUrl)+'" target="_blank" style="display:inline-block;margin-top:16px;padding:8px 16px;background:#1A1A1A;color:#fff;text-decoration:none;border-radius:5px;font-size:.78rem">🔗 Notionで開く</a>';
+}
+
+function custRenderOb(){
+  var r=custRows.find(function(x){return x.id===custDetailId;}); if(!r) return;
+  var pane=document.getElementById('cust-pane-ob'); if(!pane) return;
+  var nm=(r.name||'').replace(/\s/g,'').replace(/様$/,'');
+  var obIdx=mtgFindObRow(r.name);
+  if(obIdx<0){
+    pane.innerHTML='<div class="kj-empty">オープンボードに一致する顧客が見つかりません</div>'+
+      '<button class="hbtn primary" style="margin-top:12px" onclick="enterOpenBoard()">OBボードを開く</button>';
+    return;
+  }
+  var obR=obRows[obIdx];
+  var statusOpts=['初回来場','2回目来場','3回目以上','商談中','パートナー申込','パートナー契約済','契約済み','失注','見送り'];
+  var lastVisit=(obR['最終接触日']||obR['来場日']||'').substring(0,10);
+  pane.innerHTML='<div style="background:#F8FDF9;border:1px solid #D1FAE5;border-radius:8px;padding:16px;margin-bottom:16px">'+
+    '<div style="font-size:.72rem;color:#888;margin-bottom:6px">オープンボード</div>'+
+    '<div style="font-size:1rem;font-weight:700;margin-bottom:4px">'+esc(obR['顧客名']||'—')+'</div>'+
+    '<div style="font-size:.82rem;color:#444">'+esc(obR['商談ステータス']||'—')+' ｜ 最終接触: '+esc(lastVisit||'不明')+'</div>'+
+    '</div>'+
+    '<button class="hbtn primary" onclick="showHub();setTimeout(function(){ enterOpenBoard();setTimeout(function(){ obOpenDetail('+obIdx+'); },400); },100)">📊 OB詳細を開く</button>';
+}
+
+function custRenderKj(){
+  var r=custRows.find(function(x){return x.id===custDetailId;}); if(!r) return;
+  var pane=document.getElementById('cust-pane-kj'); if(!pane) return;
+  var nm=(r.name||'').replace(/\s/g,'').replace(/様$/,'');
+  // KJで物件名に顧客名が含まれるものを検索
+  var kjMatch=kjRows.filter(function(kr){
+    var kn=(kr['物件名']||'').replace(/\s/g,'').replace(/様$/,'');
+    return nm && (kn===nm||kn.indexOf(nm)>=0||nm.indexOf(kn)>=0);
+  });
+  if(!kjMatch.length){
+    pane.innerHTML='<div class="kj-empty">着工管理表に一致する案件が見つかりません</div>'+
+      '<button class="hbtn primary" style="margin-top:12px" onclick="enterKojiBoard()">着工管理を開く</button>';
+    return;
+  }
+  pane.innerHTML='<div style="font-size:.78rem;color:#888;margin-bottom:10px">'+kjMatch.length+'件の着工案件が見つかりました</div>'+
+    kjMatch.map(function(kr){
+      var ph=kjPhaseOf(kr); var pc=KJ_PHASE_CLASS[ph]||'p0';
+      return '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:12px 16px;margin-bottom:10px;cursor:pointer" onclick="showHub();setTimeout(function(){ enterKojiBoard();setTimeout(function(){ kjOpenDetail(\''+esc(kr._id||'')+'\'); },500); },100)">'+
+        '<div style="font-size:.72rem;color:#888;margin-bottom:4px">着工案件</div>'+
+        '<div style="font-size:.95rem;font-weight:700">'+esc(kr['物件名']||'—')+'</div>'+
+        '<span class="kj-phase-badge '+pc+'" style="font-size:.72rem;margin-top:4px;display:inline-block">'+esc(ph)+'</span>'+
+        '</div>';
+    }).join('');
+}
+
+function custRenderChatwork(){
+  var r=custRows.find(function(x){return x.id===custDetailId;}); if(!r) return;
+  var sel=document.getElementById('cust-cw-room-select'); if(!sel) return;
+  var savedRoomId=r['cwRoomId']||'';
+  if(sel.options.length<=1){
+    custLoadCwRooms(function(){
+      if(savedRoomId){ sel.value=savedRoomId; custFetchCwMessages(savedRoomId); }
+    });
+  } else {
+    if(savedRoomId){ sel.value=savedRoomId; custFetchCwMessages(savedRoomId); }
+  }
+}
+
+function custLoadCwRooms(cb){
+  var sel=document.getElementById('cust-cw-room-select'); if(!sel) return;
+  sel.innerHTML='<option value="">読み込み中...</option>';
+  gasGet('mtgListCwRooms',function(d){
+    sel.innerHTML='<option value="">— ルームを選択 —</option>';
+    if(d && d.rooms && d.rooms.length){
+      d.rooms.forEach(function(rm){
+        var opt=document.createElement('option');
+        opt.value=rm.id; opt.textContent=rm.name+(rm.unread?' ['+rm.unread+']':'');
+        sel.appendChild(opt);
+      });
+    }
+    if(cb) cb();
+  });
+}
+
+function custSaveCwRoom(){
+  var r=custRows.find(function(x){return x.id===custDetailId;}); if(!r) return;
+  var sel=document.getElementById('cust-cw-room-select'); if(!sel) return;
+  var roomId=sel.value;
+  r['cwRoomId']=roomId;
+  if(roomId){ custFetchCwMessages(roomId); toast('ルームを保存しました'); }
+  else { document.getElementById('cust-cw-msgs-wrap').innerHTML='<div class="kj-cw-empty">ルームを選択してください</div>'; }
+}
+
+function custFetchCwMessages(roomId){
+  var wrap=document.getElementById('cust-cw-msgs-wrap'); if(!wrap) return;
+  wrap.innerHTML='<div class="kj-cw-empty">読み込み中...</div>';
+  gasGet('kjGetCwMessages&roomId='+encodeURIComponent(roomId), function(d){
+    if(!d || d.error){
+      wrap.innerHTML='<div class="kj-cw-empty" style="color:#E55">'+esc(d?d.error:'取得エラー')+'</div>';
+      return;
+    }
+    var msgs=d.messages||[];
+    if(!msgs.length){ wrap.innerHTML='<div class="kj-cw-empty">メッセージがありません</div>'; return; }
+    wrap.innerHTML='<div class="kj-cw-msgs">'+msgs.map(function(m){
+      var dt=m.time?new Date(m.time*1000):null;
+      var timeStr=dt?(('0'+(dt.getMonth()+1)).slice(-2)+'/'+('0'+dt.getDate()).slice(-2)+' '+('0'+dt.getHours()).slice(-2)+':'+('0'+dt.getMinutes()).slice(-2)):'';
+      var iconHtml=m.iconUrl?'<img class="kj-cw-msg-icon" src="'+esc(m.iconUrl)+'" loading="lazy">':'<div class="kj-cw-msg-icon"></div>';
+      return '<div class="kj-cw-msg">'+iconHtml+
+        '<div class="kj-cw-msg-body">'+
+          '<div class="kj-cw-msg-hd"><span class="kj-cw-msg-name">'+esc(m.name||'—')+'</span><span class="kj-cw-msg-time">'+esc(timeStr)+'</span></div>'+
+          '<div class="kj-cw-msg-text">'+esc(m.body||'')+'</div>'+
+        '</div></div>';
+    }).join('')+'</div>';
+  });
+}
 
 var MTG_CACHE_KEY = 'mtg_v1';
 var mtgRows = [];
