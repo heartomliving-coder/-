@@ -1383,7 +1383,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     <div class="ob-hd-tools">
       <span id="ob-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
       <button class="hbtn primary" onclick="obAddCustomer()">＋ 新規追加</button>
-      <button class="hbtn ghost" onclick="obLoad()" title="手動で最新データを取得">🔄 更新</button>
+      <button class="hbtn ghost" onclick="obLoad(false,true)" title="手動で最新データを取得">🔄 更新</button>
       <button class="hbtn ghost" onclick="obImportFromNotion()">📥 Notion同期</button>
       <button class="hbtn ghost" onclick="obSyncBirthdaysBtn()" title="NotionバースデーDBをオープンボードに同期">🎂 誕生日同期</button>
       <button class="hbtn ghost" onclick="obCleanData()" title="データ修正（FALSE除去・ステータス正規化）">🧹 修正</button>
@@ -1466,7 +1466,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     <div class="kj-hd-tools">
       <span id="kj-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
       <button class="hbtn primary" onclick="kjAddProject()">＋ 新規追加</button>
-      <button class="hbtn ghost" onclick="kjLoad()" title="手動で最新データを取得">🔄 更新</button>
+      <button class="hbtn ghost" onclick="kjLoad(false,true)" title="手動で最新データを取得">🔄 更新</button>
       <button class="hbtn ghost" onclick="kjImportExcel()">📥 Excel移行</button>
       <button class="hbtn" onclick="showHub()">‹ 戻る</button>
     </div>
@@ -1521,7 +1521,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     <div class="kj-actions">
       <span id="tc-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
       <button class="hbtn primary" onclick="tochiGenerateAll()">🗺 地図PDF生成（未処理）</button>
-      <button class="hbtn ghost" onclick="tochiLoad(false)">🔄 Notion同期</button>
+      <button class="hbtn ghost" onclick="tochiLoad(false,true)">🔄 Notion同期</button>
       <button class="hbtn ghost" onclick="showHub()">‹ 戻る</button>
     </div>
   </div>
@@ -1897,7 +1897,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <button class="mtg-tab" data-tab="settings" onclick="mtgSwitchTab('settings')">⚙ Chatwork設定</button>
     </div>
     <div class="mtg-hd-tools">
-      <button class="hbtn ghost" onclick="mtgLoad()" title="最新データ取得">🔄 更新</button>
+      <button class="hbtn ghost" onclick="mtgLoad(false,true)" title="最新データ取得">🔄 更新</button>
       <button class="hbtn" style="background:#00B900;border-color:#00B900;color:#fff" onclick="mtgSyncChatwork()" title="Chatworkから面談報告を取込">💬 Chatwork取込</button>
       <button class="hbtn primary" onclick="mtgAddNew()">＋ 手動追加</button>
       <button class="hbtn" onclick="showHub()">‹ 戻る</button>
@@ -2602,14 +2602,14 @@ function enterOpenBoard(){
   obLoadExclStaff();
   obLoad();
   obUpdateLastUpdatedLabel();
-  if(!window.__obPollTimer) window.__obPollTimer=setInterval(function(){ obLoad(true); },60000);
+  if(!window.__obPollTimer) window.__obPollTimer=setInterval(function(){ obLoad(true,true); },CACHE_TTL_MS);
 }
 
 function enterMtgBoard(){
   document.getElementById('hub').classList.remove('show');
   document.getElementById('mtgboard').classList.add('show');
   mtgLoad();
-  if(!window.__mtgPollTimer) window.__mtgPollTimer = setInterval(function(){ mtgLoad(true); }, 60000);
+  if(!window.__mtgPollTimer) window.__mtgPollTimer = setInterval(function(){ mtgLoad(true,true); }, CACHE_TTL_MS);
 }
 
 function showHub(){
@@ -2621,20 +2621,20 @@ function showHub(){
   document.getElementById('app').classList.remove('show');
   document.getElementById('hub').classList.add('show');
   hubUpdateBadges();
-  // ハブ戻り時：バックグラウンドで最新データを取得（他ユーザーの変更も反映）
+  // ハブ戻り時：キャッシュが古い場合のみバックグラウンド取得
   obLoad(true);
   kjLoad(true);
   setTimeout(function(){ hubLoadTodayKpi(); }, 800);
   setTimeout(function(){ hubLoadGcal(); }, 1500);
 }
 
-// ★ ログイン後は常時60秒ごとにOB・KJを自動同期（どのビューを開いていても更新される）
+// ★ ログイン後は30分ごとにOB・KJをバックグラウンド同期（キャッシュが古くなったタイミングで更新）
 if(!window.__globalPollTimer){
   window.__globalPollTimer = setInterval(function(){
     if(!adminKey()) return; // 未ログイン時はスキップ
-    obLoad(true);
-    kjLoad(true);
-  }, 60000);
+    obLoad(true, true);  // force=true で強制取得
+    kjLoad(true, true);
+  }, CACHE_TTL_MS); // 30分ごと
 }
 
 // ★ 誕生日は10分ごとにバックグラウンドで自動同期
@@ -2657,7 +2657,7 @@ function enterKojiBoard(){
   kjLoad();
   kjUpdateLastUpdatedLabel();
   // 60秒ごとに自動更新
-  if(!window.__kjPollTimer) window.__kjPollTimer = setInterval(function(){ kjLoad(true); }, 60000);
+  if(!window.__kjPollTimer) window.__kjPollTimer = setInterval(function(){ kjLoad(true,true); }, CACHE_TTL_MS);
 }
 
 // Hub clock + badge updates
@@ -3767,6 +3767,15 @@ var obDetailKey  = null; // {name,date} — ポーリング後の行インデッ
 var obStatusFilter = '';
 var OB_CACHE_KEY = 'ob_v3';
 
+// ── キャッシュ有効期限（デフォルト30分）─────────────────────
+// 手動「🔄 更新」は常にGASから取得、それ以外はこの期間内はキャッシュを使う
+var CACHE_TTL_MS = 30 * 60 * 1000; // 30分
+function isCacheFresh(tsKey){
+  var ts = parseInt(localStorage.getItem(tsKey) || '0');
+  return ts > 0 && (Date.now() - ts) < CACHE_TTL_MS;
+}
+function stampCache(tsKey){ localStorage.setItem(tsKey, String(Date.now())); }
+
 // ステータス（初回接触→問い合わせ）
 var OB_STATUS_LIST = ['問い合わせ','見学会前','無料相談前','勉強会前','FP前','LPS前',
   'ヒアリング前','プレゼン前','中長期フォロー','返信なし','パートナー検討中','パートナー契約済','失注'];
@@ -3881,17 +3890,25 @@ function obDedupHistory(history){
 
 // ── キャッシュ ──
 function obGetCache(){try{return JSON.parse(localStorage.getItem(OB_CACHE_KEY)||'[]');}catch(e){return[];}}
-function obSetCache(r){try{localStorage.setItem(OB_CACHE_KEY,JSON.stringify(r));}catch(e){}}
+function obSetCache(r){try{localStorage.setItem(OB_CACHE_KEY,JSON.stringify(r)); stampCache('ob_v3_ts');}catch(e){}}
 
 // ── ロード ──
 var __obLastUpdated = 0;
 var __obLoading = false;
 
-function obLoad(silent){
+function obLoad(silent, force){
   if(__obLoading && silent) return; // サイレント更新は同時実行しない
-  __obLoading = true;
   var cached=obGetCache();
-  if(cached.length && !silent){ obRows=cached; obRows.forEach(function(r,i){r._row=i;}); obPopulateFilters(); obRenderAll(); }
+  // キャッシュが新鮮 かつ 強制更新でない場合はGASを叩かず即表示
+  if(cached.length && !force && isCacheFresh('ob_v3_ts')){
+    obRows=cached; obRows.forEach(function(r,i){r._row=i;});
+    obPopulateFilters(); obRenderAll();
+    obUpdateLastUpdatedLabel();
+    hubUpdateBadges();
+    return;
+  }
+  __obLoading = true;
+  if(cached.length){ obRows=cached; obRows.forEach(function(r,i){r._row=i;}); obPopulateFilters(); obRenderAll(); }
   // キャッシュがない初回ロード時はローディングアニメーション表示
   if(!cached.length){
     document.getElementById('ob-visitors-content').innerHTML='<div class="ob-empty-state" style="color:#888"><div style="font-size:2rem;margin-bottom:16px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div><br>データ読み込み中...<br><small style="color:#BBB;font-size:.78rem">初回は30〜60秒かかる場合があります</small></div>';
@@ -3937,9 +3954,14 @@ function obLoad(silent){
 }
 
 function obUpdateLastUpdatedLabel(){
-  var el=document.getElementById('ob-last-updated'); if(!el||!__obLastUpdated) return;
-  var d=new Date(__obLastUpdated);
-  el.textContent='最終更新 '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
+  var el=document.getElementById('ob-last-updated'); if(!el) return;
+  var ts=parseInt(localStorage.getItem('ob_v3_ts')||'0') || __obLastUpdated;
+  if(!ts){ el.textContent=''; return; }
+  var d=new Date(ts);
+  var minsAgo=Math.round((Date.now()-ts)/60000);
+  var age = minsAgo<=0?'たった今':minsAgo<60?minsAgo+'分前':Math.round(minsAgo/60)+'時間前';
+  el.textContent='最終更新 '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+' ('+age+')';
+  el.title='次回自動更新: '+(isCacheFresh('ob_v3_ts')?Math.round((CACHE_TTL_MS-(Date.now()-ts))/60000)+'分後':'まもなく');
 }
 
 function obRenderAll(){ obRenderPipeline(); obRenderVisitors(); obRenderActive(); if(obCurrentTab==='agg') obRenderAgg(); }
@@ -5395,16 +5417,23 @@ var KJ_PHASE_CLASS={'契約前':'p0','設計中':'p1','申請中':'p1','着工�
 
 // データ読み書き
 function kjGetCache(){ try{var d=localStorage.getItem('kj_v1');return d?JSON.parse(d):[];}catch(e){return[];} }
-function kjSetCache(rows){ try{localStorage.setItem('kj_v1',JSON.stringify(rows));}catch(e){} }
+function kjSetCache(rows){ try{localStorage.setItem('kj_v1',JSON.stringify(rows)); stampCache('kj_v1_ts');}catch(e){} }
 
 var __kjLastUpdated = 0;
 var __kjLoading = false;
 
-function kjLoad(silent){
+function kjLoad(silent, force){
   if(__kjLoading && silent) return;
-  __kjLoading = true;
   var cached=kjGetCache();
-  if(cached.length && !silent){ kjRows=cached; kjRows.forEach(function(r,i){r._idx=i;}); kjRenderList(); }
+  // キャッシュが新鮮 かつ 強制更新でない場合はGASを叩かず即表示
+  if(cached.length && !force && isCacheFresh('kj_v1_ts')){
+    kjRows=cached; kjRows.forEach(function(r,i){r._idx=i;});
+    kjRenderList(); kjUpdateLastUpdatedLabel();
+    hubUpdateBadges();
+    return;
+  }
+  __kjLoading = true;
+  if(cached.length){ kjRows=cached; kjRows.forEach(function(r,i){r._idx=i;}); kjRenderList(); }
   if(!cached.length){
     document.getElementById('kj-list-content').innerHTML='<div class="kj-empty" style="color:#888"><div style="font-size:2rem;margin-bottom:12px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div><br>データ読み込み中...</div>';
   }
@@ -5441,9 +5470,14 @@ function kjLoad(silent){
 }
 
 function kjUpdateLastUpdatedLabel(){
-  var el=document.getElementById('kj-last-updated'); if(!el||!__kjLastUpdated) return;
-  var d=new Date(__kjLastUpdated);
-  el.textContent='最終更新 '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
+  var el=document.getElementById('kj-last-updated'); if(!el) return;
+  var ts=parseInt(localStorage.getItem('kj_v1_ts')||'0') || __kjLastUpdated;
+  if(!ts){ el.textContent=''; return; }
+  var d=new Date(ts);
+  var minsAgo=Math.round((Date.now()-ts)/60000);
+  var age = minsAgo<=0?'たった今':minsAgo<60?minsAgo+'分前':Math.round(minsAgo/60)+'時間前';
+  el.textContent='最終更新 '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+' ('+age+')';
+  el.title='次回自動更新: '+(isCacheFresh('kj_v1_ts')?Math.round((CACHE_TTL_MS-(Date.now()-ts))/60000)+'分後':'まもなく');
 }
 
 function kjRenderList(){
@@ -6062,7 +6096,7 @@ function tochiAutoAddFromOB(obRow){
 var tochiRows = [];
 
 function tochiGetCache(){ try{var d=localStorage.getItem('tc_v1');return d?JSON.parse(d):[];}catch(e){return[];} }
-function tochiSetCache(rows){ try{localStorage.setItem('tc_v1',JSON.stringify(rows));}catch(e){} }
+function tochiSetCache(rows){ try{localStorage.setItem('tc_v1',JSON.stringify(rows)); stampCache('tc_v1_ts');}catch(e){} }
 
 var __tcLastUpdated = 0;
 
@@ -6071,9 +6105,9 @@ function enterTochiBoard(){
   document.getElementById('tochiboard').classList.add('show');
   var cached=tochiGetCache();
   if(cached.length){ tochiRows=cached; tochiRenderList(); }
-  tochiLoad(false); // 初回は非サイレント
+  tochiLoad(false); // キャッシュ新鮮なら即返る、古ければ取得
   // 5分ごとに自動更新（Notion APIはレート制限があるため長め）
-  if(!window.__tcPollTimer) window.__tcPollTimer = setInterval(function(){ tochiLoad(true); }, 300000);
+  if(!window.__tcPollTimer) window.__tcPollTimer = setInterval(function(){ tochiLoad(true,true); }, CACHE_TTL_MS);
 }
 
 function tcUpdateLastUpdatedLabel(){
@@ -6082,7 +6116,13 @@ function tcUpdateLastUpdatedLabel(){
   el.textContent='最終更新 '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
 }
 
-function tochiLoad(silent){
+function tochiLoad(silent, force){
+  var cached=tochiGetCache();
+  // キャッシュが新鮮 かつ 強制更新でない場合は即表示
+  if(cached.length && !force && isCacheFresh('tc_v1_ts')){
+    tochiRows=cached; tochiRenderList(); tcUpdateLastUpdatedLabel();
+    return;
+  }
   if(!silent){ toast('Notionから読み込み中…'); }
   var el=document.getElementById('tochi-list-content');
   if(!tochiRows.length && el){ el.innerHTML='<div class="kj-empty">⏳ Notionから読み込み中...</div>'; }
@@ -6603,13 +6643,20 @@ var __mtgDetailId = null;
 var __mtgSelectedRoomId = null;
 
 function mtgGetCache(){ try{var d=localStorage.getItem(MTG_CACHE_KEY);return d?JSON.parse(d):[];}catch(e){return[];} }
-function mtgSetCache(r){ try{localStorage.setItem(MTG_CACHE_KEY,JSON.stringify(r));}catch(e){} }
+function mtgSetCache(r){ try{localStorage.setItem(MTG_CACHE_KEY,JSON.stringify(r)); stampCache('mtg_v1_ts');}catch(e){} }
 
-function mtgLoad(silent){
+function mtgLoad(silent, force){
   if(__mtgLoading && silent) return;
-  __mtgLoading = true;
   var cached = mtgGetCache();
-  if(cached.length && !silent){ mtgRows=cached; mtgRows.forEach(function(r,i){r._idx=i;}); mtgPopulateStaffFilter(); mtgRenderList(); }
+  // キャッシュが新鮮 かつ 強制更新でない場合は即表示
+  if(cached.length && !force && isCacheFresh('mtg_v1_ts')){
+    mtgRows=cached; mtgRows.forEach(function(r,i){r._idx=i;});
+    mtgPopulateStaffFilter(); mtgRenderList();
+    hubUpdateBadges();
+    return;
+  }
+  __mtgLoading = true;
+  if(cached.length){ mtgRows=cached; mtgRows.forEach(function(r,i){r._idx=i;}); mtgPopulateStaffFilter(); mtgRenderList(); }
   gasGet('mtgGetData', function(d){
     __mtgLoading = false;
     if(!d||d.error){ if(!silent) toast('⚠️ MTGデータ取得エラー: '+(d?d.error:'通信エラー')); return; }
