@@ -1491,7 +1491,20 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 
   <!-- 工程カレンダー -->
   <div class="kj-pane" data-ktab="timeline">
-    <div class="kj-scroll" id="kj-timeline-content"><div class="kj-empty">工程表は現在準備中です</div></div>
+    <div class="kj-filter">
+      <label>フェーズ:</label>
+      <select id="kj-tl-phase" onchange="kjRenderTimeline()" style="width:110px">
+        <option value="">すべて</option>
+        <option>契約前</option><option>設計中</option><option>申請中</option>
+        <option>着工前</option><option>工事中</option><option>竣工済</option><option>引渡済</option>
+      </select>
+      <label>担当:</label>
+      <select id="kj-tl-staff" onchange="kjRenderTimeline()" style="width:100px"><option value="">すべて</option></select>
+      <input type="text" id="kj-tl-q" placeholder="物件名で検索..." style="min-width:160px" oninput="kjRenderTimeline()">
+      <button class="hbtn" onclick="kjTlScrollToday()" style="margin-left:auto">📍 今月へ</button>
+      <span style="font-size:.72rem;color:#888" id="kj-tl-count"></span>
+    </div>
+    <div class="kj-scroll" id="kj-timeline-content"><div class="kj-empty">📅 「工程カレンダー」タブをクリックすると表示されます</div></div>
   </div>
 </div>
 
@@ -5548,15 +5561,28 @@ function kjSwitchTab(tab){
   if(tab==='timeline') kjRenderTimeline();
 }
 
+function kjTlScrollToday(){
+  var el=document.getElementById('kj-timeline-content'); if(!el) return;
+  var now=el.querySelector('.kj-tl-today');
+  if(now) now.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+
 // 工程カレンダー（月次ガント：請負契約〜引渡しのバーを月軸で表示）
 function kjRenderTimeline(){
   var el=document.getElementById('kj-timeline-content'); if(!el) return;
   el.style.overflow='auto';
+  // 担当者フィルターの初期化（初回のみ）
+  var tlSels=document.getElementById('kj-tl-staff');
+  if(tlSels && tlSels.options.length<=1){
+    var staffSet={};
+    kjRows.forEach(function(r){ if(r['営業']) staffSet[r['営業']]=true; if(r['工務']) staffSet[r['工務']]=true; });
+    Object.keys(staffSet).sort().forEach(function(s){ var o=document.createElement('option'); o.value=s; o.textContent=s; tlSels.appendChild(o); });
+  }
   // YYYY-MM-DD と YYYY/MM/DD 両形式に対応
   function iso(r,f){ var m=String(r[f]||'').match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})/); return m?(m[1]+'-'+m[2]+'-'+m[3]):''; }
-  var fStaff=((document.getElementById('kj-filter-staff')||{}).value||'');
-  var fPhase=((document.getElementById('kj-filter-phase')||{}).value||'');
-  var fQ=((document.getElementById('kj-q')||{}).value||'').toLowerCase().trim();
+  var fStaff=((document.getElementById('kj-tl-staff')||document.getElementById('kj-filter-staff')||{}).value||'');
+  var fPhase=((document.getElementById('kj-tl-phase')||document.getElementById('kj-filter-phase')||{}).value||'');
+  var fQ=((document.getElementById('kj-tl-q')||document.getElementById('kj-q')||{}).value||'').toLowerCase().trim();
   var items=[];
   kjRows.forEach(function(r){
     if(fStaff && r['営業']!==fStaff && r['工務']!==fStaff) return;
@@ -5569,6 +5595,7 @@ function kjRenderTimeline(){
     if(end<start){ var t=start; start=end; end=t; }
     items.push({r:r,start:start,end:end});
   });
+  var cntTl=document.getElementById('kj-tl-count'); if(cntTl) cntTl.textContent=items.length+'件';
   if(!items.length){ el.innerHTML='<div class="kj-empty">工程に表示できる日付が入った案件がありません</div>'; return; }
   items.sort(function(a,b){
     var pa=KJ_PHASE_CLASS[kjPhaseOf(a.r)]||'p0', pb=KJ_PHASE_CLASS[kjPhaseOf(b.r)]||'p0';
@@ -5613,7 +5640,7 @@ function kjRenderTimeline(){
   h+='<div style="width:'+labelW+'px;flex:0 0 '+labelW+'px;position:sticky;left:0;z-index:9;background:#2B2B2B;color:rgba(255,255,255,.55);font-size:.7rem;font-weight:700;padding:8px 16px;border-right:2px solid rgba(255,255,255,.12);display:flex;align-items:center">物件名 / フェーズ</div>';
   months.forEach(function(m,mi){
     var p=m.split('-'); var isNow=(m===todayK);
-    h+='<div style="width:'+colW+'px;flex:0 0 '+colW+'px;text-align:center;background:'+(isNow?'rgba(212,168,83,.25)':'#2B2B2B')+';color:'+(isNow?'#FFD580':'rgba(255,255,255,.7)')+';font-size:.82rem;font-weight:'+(isNow?'800':'400')+';padding:8px 0;border-left:1px solid rgba(255,255,255,.08);white-space:nowrap;position:relative">'+
+    h+='<div'+(isNow?' class="kj-tl-today"':'')+' style="width:'+colW+'px;flex:0 0 '+colW+'px;text-align:center;background:'+(isNow?'rgba(212,168,83,.25)':'#2B2B2B')+';color:'+(isNow?'#FFD580':'rgba(255,255,255,.7)')+';font-size:.82rem;font-weight:'+(isNow?'800':'400')+';padding:8px 0;border-left:1px solid rgba(255,255,255,.08);white-space:nowrap;position:relative">'+
       parseInt(p[1])+'月'+
       (isNow?'<span style="position:absolute;bottom:0;left:0;width:100%;height:2px;background:#FFD580;border-radius:2px 2px 0 0"></span>':'')+
     '</div>';
