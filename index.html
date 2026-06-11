@@ -18,9 +18,10 @@
   --serif:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
   --fs:1;                
 }
-:root[data-fs="s"] {--fs:.92}   
-:root[data-fs="l"] {--fs:1.10}  
-:root[data-fs="xl"]{--fs:1.26}  
+:root[data-fs="s"] {--fs:1.00}
+:root[data-fs="m"] {--fs:1.08}
+:root[data-fs="l"] {--fs:1.18}
+:root[data-fs="xl"]{--fs:1.32}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{font-size:calc(16px * var(--fs))}
@@ -78,7 +79,7 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,1
 .fsctl .seg button.on{background:#fff;color:var(--charcoal)}
 
 .hbtn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.22);color:#fff;
-  border-radius:0;padding:12px 17px;font-size:.82rem;font-weight:600;letter-spacing:.06em;cursor:pointer;white-space:nowrap;transition:all .18s}
+  border-radius:4px;padding:10px 18px;font-size:.86rem;font-weight:600;letter-spacing:.06em;cursor:pointer;white-space:nowrap;transition:all .18s}
 .hbtn:hover{border-color:rgba(255,255,255,.55)}
 .hbtn:active{opacity:.8}
 .hbtn.primary{background:#fff;border-color:#fff;color:var(--charcoal)}
@@ -298,11 +299,62 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,1
 .pdf-wrap { flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
 /* ════════════ 視認性改善パッチ（管理画面） ════════════ */
 :root{--danger:#B4524A;--danger-d:#9A3F38}
-/* 文字サイズ段階：標準を等倍に底上げ（従来 標準=0.92 で小さすぎた） */
-:root[data-fs="s"]{--fs:1}
-:root[data-fs="l"]{--fs:1.14}
-:root[data-fs="xl"]{--fs:1.30}
+/* 文字サイズ段階（管理画面オーバーライド）*/
+:root[data-fs="s"]{--fs:1.00}
+:root[data-fs="m"]{--fs:1.08}
+:root[data-fs="l"]{--fs:1.18}
+:root[data-fs="xl"]{--fs:1.32}
 
+/* ════════════ 全体UI操作性パッチ ════════════ */
+/* --- フィルターバー --- */
+.ob-filter{padding:10px 18px;gap:10px}
+.ob-filter label{font-size:.82rem;font-weight:700;color:#555}
+.ob-filter select,.ob-filter input[type=text]{padding:8px 12px;font-size:.9rem;border-radius:5px;height:36px}
+.ob-filter-count{font-size:.80rem}
+.ob-filter-chk{font-size:.84rem;gap:7px}
+.ob-filter-chk input{width:16px;height:16px}
+/* --- テーブル --- */
+.ob-table{font-size:.92rem}
+.ob-table thead th{font-size:.74rem;padding:10px 12px}
+.ob-table td{padding:9px 12px}
+.ob-name-link{font-size:1.02rem}
+.ob-name-sub{font-size:.76rem}
+.ob-badge{font-size:.80rem;padding:4px 12px}
+.ob-month-hd td{font-size:.84rem;padding:10px 18px}
+.ob-month-label{font-size:1.08rem}
+.ob-sc .sl{font-size:.68rem}
+.ob-sc .sv{font-size:.88rem}
+/* --- 月カレンダー --- */
+.ob-cal-grid{font-size:.78rem}
+.ob-cal-dh{font-size:.68rem;padding:5px}
+.ob-cal-day{min-height:60px;padding:5px 6px}
+.ob-cal-dn{font-size:.72rem}
+.ob-cal-ev{font-size:.66rem;padding:2px 5px}
+/* --- 誕生日一覧 --- */
+.ob-bday-item{padding:10px 16px}
+/* --- 小ボタン --- */
+.ob-btn-sm{padding:5px 13px;font-size:.78rem;border-radius:4px}
+.ob-month-add{padding:3px 12px;font-size:.74rem}
+/* --- KJ テーブル --- */
+.kj-table{font-size:.9rem}
+.kj-table thead th{font-size:.72rem;padding:10px 14px}
+.kj-filter input,.kj-filter select{padding:8px 12px;font-size:.88rem}
+.kj-filter label{font-size:.80rem}
+.kj-name-link{font-size:.96rem}
+.kj-phase-badge{font-size:.72rem;padding:4px 12px}
+/* --- ヘッダーツールバー --- */
+.hbtn{padding:8px 16px;font-size:.84rem}
+.hbtn.primary{padding:8px 18px}
+/* --- タブ --- */
+.ob-tab{font-size:.82rem;padding:13px 18px}
+.kj-tab{font-size:.80rem;padding:12px 20px}
+/* --- ハブカード --- */
+.hub-title{font-size:1.30rem}
+.hub-desc{font-size:.76rem;line-height:1.9}
+.hub-icon{font-size:3rem}
+/* --- 設定パネル --- */
+.st-sec{font-size:.82rem}
+.st-row label{font-size:.84rem}
 /* 字間を詰めて日本語の可読性を確保（ブランド見出しは対象外） */
 .seats-h,.seat-h,.seat-st,.dc-l,.dr-h,.seat-meta{letter-spacing:.04em}
 
@@ -638,7 +690,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-cal-day.today{border-color:var(--gold);background:#FFFBEF}
 .ob-cal-day.other-month{background:#F2F0ED;color:#CCC}
 .ob-cal-dn{font-size:.65rem;font-weight:700;color:#888;margin-bottom:2px}
-.ob-cal-ev{display:block;background:var(--charcoal);color:#fff;border-radius:2px;padding:1px 4px;margin-bottom:1px;font-size:.58rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.ob-cal-ev{display:block;background:var(--charcoal);color:#fff;border-radius:3px;padding:2px 5px;margin-bottom:2px;font-size:.66rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
 .ob-cal-ev:hover{background:var(--gold);color:#2B2B2B}
 
 /* 誕生日カレンダー */
@@ -648,15 +700,15 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-bday-item:hover{background:#FFF8EE;border-color:#E0CFA8}
 .ob-bday-item.soon{border-color:#F5C842;background:#FFFDF0}
 .ob-bday-item.today-bd{border-color:var(--gold);background:#FFFBEF;box-shadow:0 0 0 2px rgba(154,140,118,.18)}
-.ob-bday-date{font-size:.84rem;font-weight:700;color:#555;min-width:52px}
-.ob-bday-name{flex:1;font-size:.86rem;font-weight:600;color:#2B2B2B}
-.ob-bday-age{font-size:.72rem;color:#AAA;min-width:40px;text-align:right;font-weight:700}
-.ob-bday-soon{font-size:.72rem;font-weight:700;color:#E6920A;min-width:60px;text-align:right}
-.ob-bday-cal{padding:16px 20px}
-.ob-bday-cal-nav{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.ob-bday-cal-nav span{font-weight:700;font-size:.92rem;min-width:100px;text-align:center}
+.ob-bday-date{font-size:.9rem;font-weight:700;color:#555;min-width:56px}
+.ob-bday-name{flex:1;font-size:.92rem;font-weight:600;color:#2B2B2B}
+.ob-bday-age{font-size:.80rem;color:#888;min-width:44px;text-align:right;font-weight:700}
+.ob-bday-soon{font-size:.78rem;font-weight:700;color:#E6920A;min-width:64px;text-align:right}
+.ob-bday-cal{padding:18px 22px}
+.ob-bday-cal-nav{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.ob-bday-cal-nav span{font-weight:700;font-size:1rem;min-width:110px;text-align:center}
 .ob-bday-ev{background:#FEF0D0 !important;color:#9A6B0A !important;border:1px solid #F5DFA0 !important}
-.ob-bday-empty{color:#BBB;font-size:.88rem;padding:20px 0;text-align:center}
+.ob-bday-empty{color:#BBB;font-size:.92rem;padding:22px 0;text-align:center}
 
 /* ステータス別行の左ボーダー（視認性向上）*/
 .ob-table tr[data-sc] td:first-child{border-left:3px solid transparent}
@@ -902,9 +954,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .hub-kpi{background:rgba(255,255,255,.07);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:16px 18px;transition:all .2s;cursor:default}
 .hub-kpi:hover{border-color:rgba(154,140,118,.4)}
 .hub-kpi-val{font-family:"Playfair Display",serif;font-size:2.4rem;font-weight:600;line-height:1;color:#fff;letter-spacing:.01em}
-.hub-kpi-lbl{font-size:.62rem;letter-spacing:.16em;color:rgba(255,255,255,.45);font-weight:700;margin-top:8px;text-transform:uppercase}
-.hub-kpi-sub{font-size:.68rem;color:#9A8C76;margin-top:3px;font-weight:600}
-.hub-side-sec{font-size:.58rem;letter-spacing:.22em;color:rgba(255,255,255,.3);font-weight:700;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.06);margin-top:2px}
+.hub-kpi-lbl{font-size:.72rem;letter-spacing:.12em;color:rgba(255,255,255,.55);font-weight:700;margin-top:8px;text-transform:uppercase}
+.hub-kpi-sub{font-size:.76rem;color:#9A8C76;margin-top:3px;font-weight:600}
+.hub-side-sec{font-size:.68rem;letter-spacing:.18em;color:rgba(255,255,255,.38);font-weight:700;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.06);margin-top:2px}
 .hub-bday-mini{display:flex;flex-direction:column;gap:5px}
 .hub-bday-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:6px;border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:background .12s}
 .hub-bday-row:hover{background:rgba(255,255,255,.08);border-color:rgba(154,140,118,.3)}
@@ -963,9 +1015,11 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   .hub-card{padding:18px 20px}
   .hub-card .hc-icon{font-size:1.6rem;margin-bottom:8px}
   .hub-card .hc-title{font-size:.9rem}
-  .hub-header{padding:10px 14px}
+  .hub-header{padding:10px 14px;gap:8px}
   .hub-header .hh-clock{font-size:1.1rem}
   .hub-header .hh-title{font-size:.78rem;letter-spacing:.08em}
+  .hub-header .hh-notif{display:none}
+  #hubUserInfo{display:none!important}
   .hub-main{padding:12px}
   .hub-recent-list{max-height:200px}
 }
@@ -1023,6 +1077,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   .hub-header{padding:10px 14px;gap:10px}
   .hub-header .hh-title{font-size:.8rem;letter-spacing:.1em}
   .hub-header .hh-notif{display:none}
+  #hubUserInfo{display:none!important}
   .hub-cards-grid{grid-template-columns:1fr}
   .hub-card{padding:18px 20px}
   .hub-main{padding:14px}
@@ -1067,11 +1122,16 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <div class="lsub">管理コンソールにアクセスします</div>
       <div class="f">
         <div class="lhint">🔒 許可された社内Googleアカウントでログイン</div>
+        <!-- Google GSI ボタン（ライブラリ読込成功時に表示） -->
         <div id="gLoginBtn" style="min-height:44px;display:flex;align-items:center;justify-content:center"></div>
-        <button id="oauthFallbackBtn" onclick="doOAuthPopup()" style="display:none;background:var(--charcoal);border:none;color:#fff;padding:11px 28px;border-radius:8px;font-size:.9rem;cursor:pointer;width:100%;max-width:280px;letter-spacing:.04em">🔐 Googleでログイン</button>
-        <button onclick="doOAuthPopup('select_account')" style="background:none;border:none;color:var(--tx3);font-size:.74rem;cursor:pointer;text-decoration:underline;letter-spacing:.04em">別のアカウントでログイン</button>
-        <div class="err" id="lerr"></div>
-        <div id="gasStatus" style="font-size:.66rem;color:var(--tx4);text-align:center;letter-spacing:.04em"></div>
+        <!-- フォールバック：初期表示あり、GSI成功時に非表示 -->
+        <button id="oauthFallbackBtn" onclick="doOAuthPopup()" style="background:var(--charcoal);border:none;color:#fff;padding:13px 28px;border-radius:8px;font-size:.92rem;cursor:pointer;width:100%;max-width:280px;letter-spacing:.04em;display:flex;align-items:center;justify-content:center;gap:10px">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+          Googleでログイン
+        </button>
+        <button onclick="doOAuthPopup('select_account')" style="background:none;border:none;color:var(--tx3);font-size:.78rem;cursor:pointer;text-decoration:underline;letter-spacing:.04em;padding:4px 0">別のアカウントでログイン</button>
+        <div class="err" id="lerr" style="font-size:.82rem"></div>
+        <div id="gasStatus" style="font-size:.72rem;color:var(--tx4);text-align:center;letter-spacing:.03em"></div>
       </div>
     </div>
   </div>
@@ -1101,6 +1161,15 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <div class="hh-clock" id="hubClockTime">--:--:--</div>
       <div class="hh-date" id="hubClockDate"></div>
     </div>
+    <!-- ログインユーザー表示 -->
+    <div id="hubUserInfo" style="display:flex;align-items:center;gap:8px;padding:4px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:all .2s" onclick="showSettings()" title="設定">
+      <span style="font-size:1rem">👤</span>
+      <div style="line-height:1.2">
+        <div id="hubUserEmail" style="font-size:.72rem;color:rgba(255,255,255,.85);letter-spacing:.02em;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+        <div style="font-size:.6rem;color:rgba(255,255,255,.4);letter-spacing:.06em">ログイン中</div>
+      </div>
+    </div>
+    <button onclick="logout()" style="background:rgba(255,80,80,.15);border:1px solid rgba(255,80,80,.3);color:rgba(255,180,180,.9);padding:7px 14px;border-radius:6px;font-size:.74rem;cursor:pointer;letter-spacing:.04em;white-space:nowrap;font-family:inherit;transition:all .2s" onmouseover="this.style.background='rgba(255,80,80,.28)'" onmouseout="this.style.background='rgba(255,80,80,.15)'">ログアウト</button>
   </div>
   <!-- ボディ -->
   <div class="hub-body">
@@ -1178,10 +1247,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <div class="ob-hd-ti">オープンボード<small>OPEN BOARD</small></div>
     </div>
     <div class="ob-tabs">
-      <button class="ob-tab on" data-tab="visitors" onclick="obSwitchTab('visitors')">📅 来客状況</button>
-      <button class="ob-tab" data-tab="active" onclick="obSwitchTab('active')">🔥 直近案件</button>
-      <button class="ob-tab" data-tab="birthday" onclick="obSwitchTab('birthday')">🎂 誕生日</button>
+      <button class="ob-tab on" data-tab="active" onclick="obSwitchTab('active')">🔥 直近案件</button>
+      <button class="ob-tab" data-tab="visitors" onclick="obSwitchTab('visitors')">📅 来客状況</button>
       <button class="ob-tab" data-tab="agg" onclick="obSwitchTab('agg')">📊 集計</button>
+      <button class="ob-tab" data-tab="birthday" onclick="obSwitchTab('birthday')">🎂 誕生日</button>
     </div>
     <div class="ob-hd-tools">
       <span id="ob-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
@@ -1195,7 +1264,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   </div>
 
   <!-- 来客状況 -->
-  <div class="ob-pane show" data-tab="visitors">
+  <div class="ob-pane" data-tab="visitors">
     <!-- パイプラインフロー -->
     <div class="ob-pipeline" id="ob-pipeline-bar"></div>
     <div class="ob-filter">
@@ -1227,7 +1296,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   </div>
 
   <!-- 直近案件 -->
-  <div class="ob-pane" data-tab="active">
+  <div class="ob-pane show" data-tab="active">
     <div class="ob-filter">
       <label class="ob-filter-chk"><input type="checkbox" id="ob-hide-inactive" checked onchange="obRenderActive()"> 失注・中長期を非表示</label>
       <label>担当:</label>
@@ -1721,7 +1790,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
           <div class="st-row">
             <label>文字の大きさ</label>
             <div class="st-fsbtns">
-              <button class="st-fsbtn" data-fs="s"  onclick="setFs('s')">標準</button>
+              <button class="st-fsbtn" data-fs="s"  onclick="setFs('s')">小</button>
+              <button class="st-fsbtn" data-fs="m"  onclick="setFs('m')">標準</button>
               <button class="st-fsbtn" data-fs="l"  onclick="setFs('l')">大</button>
               <button class="st-fsbtn" data-fs="xl" onclick="setFs('xl')">特大</button>
             </div>
@@ -1803,7 +1873,20 @@ var DEFAULT_CUSTOMER_URL="https://heartom-customer.vercel.app/";
 
 function sendUrl(){ return (localStorage.getItem('admin_gas_url')||SEND_URL_DEFAULT).trim(); }
 function customerUrl(){ return (localStorage.getItem('admin_customer_url')||DEFAULT_CUSTOMER_URL).trim(); }
-function adminKey(){ return localStorage.getItem('admin_session_token') || ''; }
+var SESSION_EXPIRE_MS = 8 * 60 * 60 * 1000; // 8時間
+
+function adminKey(){
+  var tok = localStorage.getItem('admin_session_token') || '';
+  if(!tok) return '';
+  var ts = parseInt(localStorage.getItem('admin_session_ts') || '0', 10);
+  if(ts && Date.now() - ts > SESSION_EXPIRE_MS){
+    localStorage.removeItem('admin_session_token');
+    localStorage.removeItem('admin_session_email');
+    localStorage.removeItem('admin_session_ts');
+    return '';
+  }
+  return tok;
+}
 var __all=[];
 
 function esc(s){return(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -1817,7 +1900,7 @@ function setFs(level){
   localStorage.setItem('admin_fs',level);
   document.querySelectorAll('.st-fsbtn').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-fs')===level); });
 }
-function initFs(){ setFs(localStorage.getItem('admin_fs')||'s'); }
+function initFs(){ setFs(localStorage.getItem('admin_fs')||'m'); }
 
 var GSI_CLIENT_ID = '40655412309-av7oitabtv9eb2g3fafc3sb9oulvatcb.apps.googleusercontent.com';
 var __gsiInitTries = 0;
@@ -1884,6 +1967,9 @@ function initGoogleSignIn() {
         logo_alignment: 'center', width: 280
       });
       __gsiButtonRendered = true;
+      // GSIボタン表示成功時はフォールバックを非表示
+      var fb2 = document.getElementById('oauthFallbackBtn');
+      if(fb2) fb2.style.display = 'none';
       console.log('[Login] GSIボタン描画完了');
     }
   } catch(err) {
@@ -1989,6 +2075,7 @@ function handleCredentialResponse(response) {
       console.log('[Login] GASレスポンス:', JSON.stringify(d).slice(0, 200));
       if (d && d.token) {
         localStorage.setItem('admin_session_token', d.token);
+        localStorage.setItem('admin_session_ts', String(Date.now()));
         if (d.email) localStorage.setItem('admin_session_email', d.email);
         lerr.textContent = '';
         console.log('[Login] ✅ ログイン成功: ' + d.email);
@@ -2014,11 +2101,19 @@ function handleCredentialResponse(response) {
     });
 }
 
-function logout(){ if(confirm('ログアウトしますか？')){ localStorage.removeItem('admin_session_token'); localStorage.removeItem('admin_session_email'); location.reload(); } }
+function logout(){
+  if(confirm('ログアウトしますか？')){
+    localStorage.removeItem('admin_session_token');
+    localStorage.removeItem('admin_session_email');
+    localStorage.removeItem('admin_session_ts');
+    location.reload();
+  }
+}
 
 function onAuthFail(){
   localStorage.removeItem('admin_session_token');
   localStorage.removeItem('admin_session_email');
+  localStorage.removeItem('admin_session_ts');
   // 全パネルを非表示にしてログイン画面に戻す
   document.getElementById('app').classList.remove('show');
   document.getElementById('board').style.display='none';
@@ -2032,6 +2127,13 @@ function onAuthFail(){
 
 function showApp(){
   document.getElementById('login').classList.add('hide');
+  // ログインユーザーメール表示
+  var emailEl = document.getElementById('hubUserEmail');
+  if(emailEl){
+    var em = localStorage.getItem('admin_session_email') || '';
+    emailEl.textContent = em || 'ログイン中';
+    emailEl.title = em;
+  }
   if (isBoardView) {
     document.getElementById('board').style.display = 'flex';
     initBoard();
@@ -2973,7 +3075,7 @@ function openOnlineFsMonitor(){
 //  オープンボード JS  — 全面再設計版
 // ════════════════════════════════════════════════
 var obRows = [];
-var obCurrentTab = 'visitors';
+var obCurrentTab = 'active';
 var obDetailRow  = -1;
 var obDetailKey  = null; // {name,date} — ポーリング後の行インデックス再同期用
 var obStatusFilter = '';
@@ -3193,7 +3295,9 @@ function obPopulateFilters(){
   var allStaff=getStaffList(); allStaff.forEach(function(s){staffs[s]=true;});
 
   var yEl=document.getElementById('ob-filter-year');
-  var curY=yEl?yEl.value:'';
+  var thisYear=String(new Date().getFullYear());
+  var curY=yEl?yEl.value:(years[thisYear]?thisYear:'');
+  if(yEl && !yEl.value) curY=years[thisYear]?thisYear:'';
   if(yEl) yEl.innerHTML='<option value="">全年</option>'+Object.keys(years).sort().reverse().map(function(y){return '<option'+(y===curY?' selected':'')+'>'+y+'</option>';}).join('');
 
   var mEl=document.getElementById('ob-filter-month');
@@ -3254,6 +3358,13 @@ function obRenderVisitors(){
   mOrder.sort(function(a,b){
     if(a==='未設定') return 1; if(b==='未設定') return -1;
     return sortAsc ? (a>b?1:a<b?-1:0) : (b>a?1:b<a?-1:0);
+  });
+  // 月内の行を日付順ソート
+  mOrder.forEach(function(ym){
+    groups[ym].sort(function(a,b){
+      var da=obNormDate(a['来場日']||''), db=obNormDate(b['来場日']||'');
+      return sortAsc ? (da>db?1:da<db?-1:0) : (db>da?1:db<da?-1:0);
+    });
   });
 
   // ── 月別集計サマリーテーブル（スプレッドシート形式）──
@@ -3929,7 +4040,7 @@ function obRenderBirthday(){
       '<div class="ob-cal-dn" style="'+dotw+'">'+dd+'</div>'+
       dayBdays.map(function(b){
         var age=obBdayYear-b.birthYear;
-        return '<span class="ob-cal-ev ob-bday-ev" onclick="obOpenDetail('+b.row+')" title="'+esc(b.name+' '+b.suffix+' '+age+'歳')+'">🎂'+esc(b.name.substring(0,3))+'</span>';
+        return '<span class="ob-cal-ev ob-bday-ev" onclick="obOpenDetail('+b.row+')" title="'+esc(b.name+' '+b.suffix+' '+age+'歳')+'">🎂<span style="font-size:.78rem">'+esc(b.name.length>5?b.name.substring(0,5)+'…':b.name)+'</span></span>';
       }).join('')+
     '</div>';
   }
