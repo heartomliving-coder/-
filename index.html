@@ -686,11 +686,11 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 /* 月間カレンダー */
 .ob-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:.7rem;margin-bottom:10px}
 .ob-cal-dh{background:#2B2B2B;color:#fff;text-align:center;padding:4px;font-weight:700;font-size:.6rem;letter-spacing:.06em}
-.ob-cal-day{background:#FAF8F5;border:1px solid #E8E4DE;border-radius:2px;padding:4px 5px;min-height:52px;position:relative;vertical-align:top}
+.ob-cal-day{background:#FAF8F5;border:1px solid #E8E4DE;border-radius:2px;padding:4px 5px;min-height:72px;position:relative;vertical-align:top}
 .ob-cal-day.today{border-color:var(--gold);background:#FFFBEF}
 .ob-cal-day.other-month{background:#F2F0ED;color:#CCC}
 .ob-cal-dn{font-size:.65rem;font-weight:700;color:#888;margin-bottom:2px}
-.ob-cal-ev{display:block;background:var(--charcoal);color:#fff;border-radius:3px;padding:2px 5px;margin-bottom:2px;font-size:.66rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.ob-cal-ev{display:block;background:var(--charcoal);color:#fff;border-radius:3px;padding:2px 5px;margin-bottom:2px;font-size:.66rem;white-space:normal;word-break:break-all;cursor:pointer;line-height:1.4}
 .ob-cal-ev:hover{background:var(--gold);color:#2B2B2B}
 
 /* 誕生日カレンダー */
@@ -4040,7 +4040,7 @@ function obRenderBirthday(){
       '<div class="ob-cal-dn" style="'+dotw+'">'+dd+'</div>'+
       dayBdays.map(function(b){
         var age=obBdayYear-b.birthYear;
-        return '<span class="ob-cal-ev ob-bday-ev" onclick="obOpenDetail('+b.row+')" title="'+esc(b.name+' '+b.suffix+' '+age+'歳')+'">🎂<span style="font-size:.78rem">'+esc(b.name.length>5?b.name.substring(0,5)+'…':b.name)+'</span></span>';
+        return '<span class="ob-cal-ev ob-bday-ev" onclick="obOpenDetail('+b.row+')" title="'+esc(b.name+' '+b.suffix+' '+age+'歳')+'">🎂'+esc(b.name)+'</span>';
       }).join('')+
     '</div>';
   }
