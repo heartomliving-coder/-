@@ -5666,15 +5666,16 @@ function kjShowDriveFrame(url){
 function kjRenderDetChatwork(){
   var r=kjRows.find(function(x){return x._id===kjDetailId;}); if(!r) return;
   var sel=document.getElementById('kj-cw-room-select'); if(!sel) return;
-  // 保存済みルームIDがあれば選択状態にする
+  var wrap=document.getElementById('kj-cw-msgs-wrap'); if(wrap) wrap.innerHTML='<div class="kj-cw-empty">ルームを選択してメッセージを表示</div>';
   var savedRoomId=r['cwRoomId']||'';
-  // ルームリストを読み込む（まだ選択肢がなければ取得）
   if(sel.options.length<=1){
     kjLoadCwRooms(function(){
-      if(savedRoomId){ sel.value=savedRoomId; kjFetchCwMessages(savedRoomId); }
+      sel.value=savedRoomId||''; // 必ず保存済み or 空にリセット
+      if(savedRoomId) kjFetchCwMessages(savedRoomId);
     });
   } else {
-    if(savedRoomId){ sel.value=savedRoomId; kjFetchCwMessages(savedRoomId); }
+    sel.value=savedRoomId||''; // 必ず保存済み or 空にリセット（前の顧客の選択を引き継がないよう）
+    if(savedRoomId) kjFetchCwMessages(savedRoomId);
   }
 }
 
@@ -6303,13 +6304,16 @@ function custRenderKj(){
 function custRenderChatwork(){
   var r=custRows.find(function(x){return x.id===custDetailId;}); if(!r) return;
   var sel=document.getElementById('cust-cw-room-select'); if(!sel) return;
+  var wrap=document.getElementById('cust-cw-msgs-wrap'); if(wrap) wrap.innerHTML='<div class="kj-cw-empty">ルームを選択してメッセージを表示</div>';
   var savedRoomId=r['cwRoomId']||'';
   if(sel.options.length<=1){
     custLoadCwRooms(function(){
-      if(savedRoomId){ sel.value=savedRoomId; custFetchCwMessages(savedRoomId); }
+      sel.value=savedRoomId||'';
+      if(savedRoomId) custFetchCwMessages(savedRoomId);
     });
   } else {
-    if(savedRoomId){ sel.value=savedRoomId; custFetchCwMessages(savedRoomId); }
+    sel.value=savedRoomId||''; // 前の顧客の選択をリセット
+    if(savedRoomId) custFetchCwMessages(savedRoomId);
   }
 }
 
