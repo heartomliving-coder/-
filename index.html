@@ -2014,10 +2014,12 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     <div class="st-wrap">
       <nav class="st-nav">
         <button class="st-tab on"  id="stab-connection" onclick="showSettingsTab('connection')">🔗<br>接続</button>
+        <button class="st-tab"     id="stab-supabase"   onclick="showSettingsTab('supabase')">🗄<br>DB</button>
         <button class="st-tab"     id="stab-event"      onclick="showSettingsTab('event')">📅<br>イベント</button>
         <button class="st-tab"     id="stab-staff"      onclick="showSettingsTab('staff')">👤<br>担当者</button>
         <button class="st-tab"     id="stab-terminal"   onclick="showSettingsTab('terminal')">🪑<br>端末</button>
         <button class="st-tab"     id="stab-display"    onclick="showSettingsTab('display')">🖥<br>表示</button>
+        <button class="st-tab"     id="stab-datatools"  onclick="showSettingsTab('datatools')">🔧<br>管理</button>
         <button class="st-tab"     id="stab-account"    onclick="showSettingsTab('account')">🔓<br>アカウント</button>
       </nav>
       <div class="st-body">
@@ -2036,6 +2038,40 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
             <div class="hint">iPad に表示するお客様入力画面の URL。</div>
           </div>
           <button class="st-save" onclick="saveConnectionSettings()">保存する</button>
+        </div>
+
+        <!-- Supabase設定 -->
+        <div class="st-pane" id="tab-supabase">
+          <div class="st-sec">🗄 Supabase データベース設定</div>
+          <div style="font-size:.8rem;color:#666;margin-bottom:12px;line-height:1.6">
+            データをSupabaseに保存すると、複数端末でリアルタイム同期が可能になります。<br>
+            <a href="https://supabase.com" target="_blank" style="color:#3B82F6">supabase.com</a> でプロジェクトを作成し、
+            <strong>Project Settings → API → service_role key</strong> を設定してください。
+          </div>
+          <div id="sb-status-banner" style="padding:8px 12px;border-radius:6px;font-size:.8rem;margin-bottom:14px;display:none"></div>
+          <div class="st-row">
+            <label>Supabase URL</label>
+            <input id="setSbUrl" placeholder="https://xxxxxxxxxxxx.supabase.co" style="font-family:monospace;font-size:.82rem">
+            <div class="hint">Project Settings > API > Project URL</div>
+          </div>
+          <div class="st-row">
+            <label>Service Role Key</label>
+            <input id="setSbKey" type="password" placeholder="eyJhbGci..." style="font-family:monospace;font-size:.82rem">
+            <div class="hint">Project Settings > API > service_role （⚠️GAS側のScript Propertiesに保存されます。フロントエンドに公開されません）</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <button class="st-save" onclick="sbSaveAndTest()">💾 保存してテスト</button>
+            <button class="hbtn" onclick="sbTestOnly()">🔌 接続テスト</button>
+          </div>
+          <div id="sb-test-result" style="margin-top:10px;font-size:.82rem;min-height:1.5em"></div>
+
+          <div class="st-sec" style="margin-top:20px">📋 セットアップ手順</div>
+          <ol style="font-size:.8rem;color:#555;line-height:2;margin:0;padding-left:20px">
+            <li><a href="https://supabase.com/dashboard" target="_blank" style="color:#3B82F6">Supabaseダッシュボード</a>でNew Projectを作成</li>
+            <li>SQL Editor で <code style="background:#F3F4F6;padding:1px 4px;border-radius:3px">supabase_schema.sql</code> を実行</li>
+            <li>上のURL・Service Role Keyを入力して「保存してテスト」</li>
+            <li>GASを再デプロイ後、「データ移行」タブから既存データを移行</li>
+          </ol>
         </div>
 
         <!-- イベント設定 -->
@@ -2104,6 +2140,53 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
               <button class="st-fsbtn" data-fs="xl" onclick="setFs('xl')">特大</button>
             </div>
           </div>
+        </div>
+
+        <!-- データ管理・メンテナンス -->
+        <div class="st-pane" id="tab-datatools">
+          <div class="st-sec">🔄 データ同期</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <button class="hbtn" onclick="dtSyncOB()" style="padding:10px;text-align:left">
+              <div style="font-size:.88rem;font-weight:700">📊 OB同期</div>
+              <div style="font-size:.72rem;color:#888;margin-top:2px">Notionから最新データを取込</div>
+            </button>
+            <button class="hbtn" onclick="dtSyncKJ()" style="padding:10px;text-align:left">
+              <div style="font-size:.88rem;font-weight:700">🏗 着工管理同期</div>
+              <div style="font-size:.72rem;color:#888;margin-top:2px">スプレッドシートから再取込</div>
+            </button>
+            <button class="hbtn" onclick="dtSyncTochi()" style="padding:10px;text-align:left">
+              <div style="font-size:.88rem;font-weight:700">🏠 土地DB同期</div>
+              <div style="font-size:.72rem;color:#888;margin-top:2px">Notionから再取得</div>
+            </button>
+            <button class="hbtn" onclick="dtSyncBdays()" style="padding:10px;text-align:left">
+              <div style="font-size:.88rem;font-weight:700">🎂 誕生日同期</div>
+              <div style="font-size:.72rem;color:#888;margin-top:2px">Notionから誕生日を再取込</div>
+            </button>
+          </div>
+
+          <div class="st-sec">🗄 Supabaseへのデータ移行</div>
+          <div style="font-size:.8rem;color:#666;margin-bottom:10px">
+            既存のOB・着工管理・MTGデータをSupabaseへ一括移行します。Supabase設定が完了してから実行してください。
+          </div>
+          <button class="st-save" onclick="dtMigrateToSupabase()">🚀 Supabaseへ全データ移行</button>
+          <div id="dt-migrate-result" style="margin-top:10px;font-size:.82rem;min-height:1.5em"></div>
+
+          <div class="st-sec" style="margin-top:16px">🧹 キャッシュ管理</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="hbtn" onclick="dtClearOBCache()">OBキャッシュクリア</button>
+            <button class="hbtn" onclick="dtClearKJCache()">KJキャッシュクリア</button>
+            <button class="hbtn" onclick="dtClearAllCache()">🗑 全キャッシュクリア</button>
+          </div>
+          <div id="dt-cache-result" style="margin-top:8px;font-size:.8rem;color:#22C55E;min-height:1em"></div>
+
+          <div class="st-sec" style="margin-top:16px">🔌 接続テスト</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="hbtn" onclick="dtTestGAS()">GAS接続テスト</button>
+            <button class="hbtn" onclick="dtTestSupabase()">Supabase接続テスト</button>
+            <button class="hbtn" onclick="dtTestCalendar()">Googleカレンダーテスト</button>
+            <button class="hbtn" onclick="dtTestChatwork()">Chatworkテスト</button>
+          </div>
+          <div id="dt-test-result" style="margin-top:8px;font-size:.8rem;min-height:3em;white-space:pre-line"></div>
         </div>
 
         <!-- アカウント -->
@@ -2950,11 +3033,131 @@ function removeAdminEmailFromUI(email) {
 }
 
 function showSettingsTab(name){
-  ['connection','event','staff','terminal','display','account'].forEach(function(t){
-    document.getElementById('tab-'+t).classList.toggle('show', t===name);
+  ['connection','supabase','event','staff','terminal','display','datatools','account'].forEach(function(t){
+    var pane=document.getElementById('tab-'+t); if(pane) pane.classList.toggle('show', t===name);
     var btn=document.getElementById('stab-'+t);
     if(btn) btn.classList.toggle('on', t===name);
   });
+}
+
+// ── Supabase settings ──────────────────────────────────────
+function sbSaveAndTest(){
+  var url=(document.getElementById('sb-url')||{}).value||'';
+  var key=(document.getElementById('sb-key')||{}).value||'';
+  url=url.trim(); key=key.trim();
+  var el=document.getElementById('sb-test-result');
+  if(!url||!key){if(el)el.textContent='❌ URLとService Role Keyを入力してください';return;}
+  if(el){el.textContent='⏳ 保存中...';el.style.color='#888';}
+  post({action:'sbSaveSettings',gasKey:adminKey(),supabaseUrl:url,supabaseKey:key});
+  setTimeout(function(){
+    sbTestOnly(url,key);
+  },2000);
+}
+function sbTestOnly(urlArg,keyArg){
+  var el=document.getElementById('sb-test-result');
+  if(el){el.textContent='⏳ 接続テスト中...';el.style.color='#888';}
+  gasGet('sbTestConnection',function(d){
+    if(!d){if(el){el.textContent='❌ GAS接続エラー（GASが応答しませんでした）';el.style.color='#EF4444';} return;}
+    if(d.ok){
+      if(el){el.textContent='✅ Supabase接続成功！';el.style.color='#22C55E';}
+      toast('Supabase接続OK！');
+    } else {
+      if(el){el.textContent='❌ Supabase接続失敗: '+(d.error||'不明なエラー');el.style.color='#EF4444';}
+    }
+  });
+}
+
+// ── Data tools ─────────────────────────────────────────────
+function dtSyncOB(){
+  toast('OBデータ同期中...');
+  gasGet('obGetData',function(d){
+    if(d&&d.rows){obRows=d.rows; toast('OB同期完了（'+obRows.length+'件）'); }
+    else toast('OB同期失敗');
+  },90000);
+}
+function dtSyncKJ(){
+  toast('着工管理データ同期中...');
+  gasGet('kjImportFromExcel',function(d){
+    if(d&&d.rows){kjRows=d.rows; toast('KJ同期完了（'+kjRows.length+'件）'); }
+    else toast('KJ同期失敗');
+  },90000);
+}
+function dtSyncTochi(){
+  toast('土地DB同期中...');
+  gasGet('tochiGetData',function(d){
+    if(d&&d.rows){tochiRows=d.rows; toast('土地DB同期完了（'+tochiRows.length+'件）'); }
+    else toast('土地DB同期失敗');
+  },90000);
+}
+function dtSyncBdays(){
+  toast('誕生日データ同期中...');
+  gasGet('obSyncBirthdays',function(d){
+    if(d&&d.ok){toast('誕生日同期完了');}
+    else toast('誕生日同期失敗');
+  },90000);
+}
+function dtMigrateToSupabase(){
+  var el=document.getElementById('dt-migrate-result');
+  if(el){el.textContent='⏳ Supabaseへ移行中...この処理には1〜2分かかることがあります';el.style.color='#888';}
+  gasGet('sbMigrateAll',function(d){
+    if(!d){if(el){el.textContent='❌ GASが応答しませんでした';el.style.color='#EF4444';} return;}
+    if(d.ok){
+      var msg='✅ 移行完了！\nOB: '+(d.ob||0)+'件\nKJ: '+(d.kj||0)+'件\nMTG: '+(d.mtg||0)+'件';
+      if(el){el.textContent=msg;el.style.color='#22C55E';}
+      toast('Supabase移行完了！');
+    } else {
+      if(el){el.textContent='❌ 移行失敗: '+(d.error||'不明');el.style.color='#EF4444';}
+    }
+  },120000);
+}
+function dtClearOBCache(){
+  localStorage.removeItem('cache_ob'); obRows=null;
+  var el=document.getElementById('dt-cache-result'); if(el)el.textContent='OBキャッシュをクリアしました';
+  toast('OBキャッシュをクリアしました');
+}
+function dtClearKJCache(){
+  localStorage.removeItem('cache_kj'); kjRows=null;
+  var el=document.getElementById('dt-cache-result'); if(el)el.textContent='KJキャッシュをクリアしました';
+  toast('KJキャッシュをクリアしました');
+}
+function dtClearAllCache(){
+  ['cache_ob','cache_kj','cache_mtg','cache_tochi','cache_bdays'].forEach(function(k){ localStorage.removeItem(k); });
+  obRows=null; kjRows=null; tochiRows=null;
+  var el=document.getElementById('dt-cache-result'); if(el)el.textContent='✅ 全キャッシュをクリアしました';
+  toast('全キャッシュをクリアしました');
+}
+function dtTestGAS(){
+  var el=document.getElementById('dt-test-result');
+  if(el){el.textContent='⏳ GAS接続テスト中...';el.style.color='#888';}
+  gasGet('ping',function(d){
+    if(d&&d.pong){if(el){el.textContent='✅ GAS接続OK';el.style.color='#22C55E';}}
+    else{if(el){el.textContent='❌ GAS接続失敗';el.style.color='#EF4444';}}
+  });
+}
+function dtTestSupabase(){
+  var el=document.getElementById('dt-test-result');
+  if(el){el.textContent='⏳ Supabase接続テスト中...';el.style.color='#888';}
+  gasGet('sbTestConnection',function(d){
+    if(!d){if(el){el.textContent='❌ GASが応答しません';el.style.color='#EF4444';} return;}
+    if(d.ok){if(el){el.textContent='✅ Supabase接続OK';el.style.color='#22C55E';}}
+    else{if(el){el.textContent='❌ Supabase接続失敗: '+(d.error||'未設定かもしれません');el.style.color='#EF4444';}}
+  });
+}
+function dtTestCalendar(){
+  var el=document.getElementById('dt-test-result');
+  if(el){el.textContent='⏳ カレンダーテスト中...';el.style.color='#888';}
+  gasGet('gcalGetToday',function(d){
+    if(d&&d.events!==undefined){if(el){el.textContent='✅ Googleカレンダー接続OK（本日 '+d.events.length+'件）';el.style.color='#22C55E';}}
+    else{if(el){el.textContent='❌ カレンダー取得失敗';el.style.color='#EF4444';}}
+  });
+}
+function dtTestChatwork(){
+  var el=document.getElementById('dt-test-result');
+  if(el){el.textContent='⏳ Chatworkテスト中...';el.style.color='#888';}
+  gasGet('mtgListCwRooms',function(d){
+    if(d&&d.rooms){if(el){el.textContent='✅ Chatwork接続OK（'+d.rooms.length+'ルーム）';el.style.color='#22C55E';}}
+    else{if(el){el.textContent='❌ Chatwork接続失敗（CW_TOKENを確認してください）';el.style.color='#EF4444';}}
+  },90000);
 }
 function saveConnectionSettings(){
   var gasUrl=document.getElementById('setGasUrl').value.trim();
