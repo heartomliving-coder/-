@@ -2171,6 +2171,16 @@ function showApp(){
     hubUpdateBadges();
     setTimeout(function(){ obLoad(true); kjLoad(true); }, 400);
     setTimeout(function(){ hubLoadTodayKpi(); }, 1200);
+    // ★ ログイン直後に誕生日をバックグラウンドで自動同期
+    setTimeout(function(){
+      if(!adminKey()) return;
+      gasGet('obSyncBirthdays',function(d){
+        if(d && !d.error){
+          obLoad(true);
+          obLoadAllBdays(true);
+        }
+      });
+    }, 3000);
   }
 }
 
@@ -2212,13 +2222,27 @@ function showHub(){
   setTimeout(function(){ hubLoadTodayKpi(); }, 800);
 }
 
-// ハブ滞在中でも60秒ごとにデータ自動同期（ログイン中のみ）
-if(!window.__hubPollTimer){
-  window.__hubPollTimer = setInterval(function(){
+// ★ ログイン後は常時60秒ごとにOB・KJを自動同期（どのビューを開いていても更新される）
+if(!window.__globalPollTimer){
+  window.__globalPollTimer = setInterval(function(){
     if(!adminKey()) return; // 未ログイン時はスキップ
-    var hubVisible = document.getElementById('hub') && document.getElementById('hub').classList.contains('show');
-    if(hubVisible){ obLoad(true); kjLoad(true); }
+    obLoad(true);
+    kjLoad(true);
   }, 60000);
+}
+
+// ★ 誕生日は10分ごとにバックグラウンドで自動同期
+if(!window.__bdaySyncTimer){
+  window.__bdaySyncTimer = setInterval(function(){
+    if(!adminKey()) return;
+    gasGet('obSyncBirthdays',function(d){
+      if(d && !d.error){
+        // 同期後に誕生日データを再読み込み（トーストは出さない）
+        obLoad(true);
+        obLoadAllBdays(true);
+      }
+    });
+  }, 600000); // 10分ごと
 }
 
 function enterKojiBoard(){
@@ -4769,18 +4793,20 @@ function kjParseDate(v){
 
 function kjPhaseOf(r){
   var td=new Date(); td.setHours(0,0,0,0);
-  // ① 引渡し日が設定されている場合は最優先
+
+  // ★ 引渡済 はスタッフが明示的にステータスを「引渡済」にした場合のみ
+  //    日付や竣工マイルストーンだけで自動判定しない（誤判定防止）
+  if(r['ステータス']==='引渡済') return '引渡済';
+
+  // ① 引渡し日が設定されている場合
   if(r['引渡し']){
     var dd=kjParseDate(r['引渡し']);
     if(dd){
-      if(dd<=td){
-        // ★ 引渡し日が過ぎていても、実際の竣工確認マイルストーンがなければ引渡済にしない
-        // （計画日のみで実際の手渡しが済んでいないケースを誤判定しないため）
-        if(r['竣工立会']||r['社内検査']||r['完了検査']||r['カメラ']||(r['ステータス']==='引渡済')) return '引渡済';
-        return '竣工済'; // 日付だけ過ぎている → 竣工済として扱う
-      }
-      // 引渡し予定日が未来 → 直近完了マイルストーンで判定
+      // 竣工確認マイルストーンあり → 竣工済
       if(r['竣工立会']||r['社内検査']||r['完了検査']||r['カメラ']) return '竣工済';
+      // 引渡し予定日が過去（マイルストーンなし）→ 竣工済として扱う
+      if(dd<=td) return '竣工済';
+      // 引渡し予定日が未来 → 直近マイルストーンで判定
       if(r['基礎着工']||r['上棟']||r['木完検査']) return '工事中';
       if(r['地鎮祭']||r['着工金']) return '着工前';
       if(r['建確']||r['長期']||r['開発申請']) return '申請中';
@@ -4788,13 +4814,15 @@ function kjPhaseOf(r){
       return '竣工済'; // 引渡し予定があれば最低竣工済
     }
   }
+
   // ② 引渡し日なし → マイルストーン実績から判定（高い方優先）
   if(r['竣工立会']||r['社内検査']||r['完了検査']||r['カメラ']) return '竣工済';
   if(r['基礎着工']||r['上棟']||r['木完検査']) return '工事中';
   if(r['地鎮祭']||r['着工金']) return '着工前';
   if(r['建確']||r['長期']||r['開発申請']) return '申請中';
   if(r['請負契約日']||r['納図']||r['地盤調査']) return '設計中';
-  // ③ 日付情報なし → ストアドステータスを参考（引渡済/竣工済は日付なしなので無効化）
+
+  // ③ 日付情報なし → ストアドステータスを参考（引渡済/竣工済は上で除外済み）
   var stored=r['ステータス'];
   if(stored && stored!=='引渡済' && stored!=='竣工済') return stored;
   return '契約前';
