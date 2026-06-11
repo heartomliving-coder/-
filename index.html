@@ -2853,7 +2853,7 @@ function updateFsMonitor(sessions, monitors) {
 
   var on = (s.status === 'received');
   
-  // 送信した直後（まだお客様がiPadで操作していない段階）でもプレビュー画面を強制表示
+  // プレビュー画面を表示し、お客様の入力状態を反映する
   if(fr) {
     fr.classList.remove('hide');
     try {
@@ -2862,18 +2862,17 @@ function updateFsMonitor(sessions, monitors) {
         // （setValue等で入力した値がポーリングで上書きされる「一瞬消える」バグを防ぐ）
         var cmdAge = Date.now() - (__lastCmdSent || 0);
         if(cmdAge > 10000){
-          // お客様がまだ操作していない場合のみ基礎データを渡す（モニターデータがある場合は送らない）
-          if(!m){
-            var detail = {
-              husbandName: s.customer ? s.customer.name : '',
-              husbandFurigana: s.customer ? s.customer.furigana : '',
-              husbandPhone: s.customer ? s.customer.tel : '',
-              husbandEmail: s.customer ? s.customer.email : '',
-              postalCode: s.customer ? s.customer.postalCode : '',
-              address: s.customer ? s.customer.address : ''
-            };
-            fr.contentWindow.postMessage({type:'heartomPreview', detail: detail}, '*');
-          }
+          // モニターデータがある場合はお客様の最新入力状態(m.detail)を使って反映
+          // ない場合はセッションの基本情報（名前・連絡先）を表示
+          var detail = (m && m.detail) ? m.detail : {
+            husbandName: s.customer ? s.customer.name : '',
+            husbandFurigana: s.customer ? s.customer.furigana : '',
+            husbandPhone: s.customer ? s.customer.tel : '',
+            husbandEmail: s.customer ? s.customer.email : '',
+            postalCode: s.customer ? s.customer.postalCode : '',
+            address: s.customer ? s.customer.address : ''
+          };
+          fr.contentWindow.postMessage({type:'heartomPreview', detail: detail}, '*');
         }
       }
     } catch(e){}
