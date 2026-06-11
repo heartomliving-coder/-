@@ -3511,7 +3511,7 @@ function obSwitchTab(tab){
   document.querySelectorAll('.ob-tab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-tab')===tab);});
   document.querySelectorAll('#openboard .ob-pane').forEach(function(p){p.classList.toggle('show',p.getAttribute('data-tab')===tab);});
   if(tab==='agg') obRenderAgg();
-  if(tab==='birthday') obRenderBirthday();
+  if(tab==='birthday'){ obLoadAllBdays(); obRenderBirthday(); }
 }
 
 // ── 誕生日カレンダー ──
@@ -3554,7 +3554,39 @@ function obGetBdays(){
       result.push({mmdd:mmdd,birthYear:birthYear,name:custName,suffix:suffix,displayName:dispName,row:r._row,rawDate:norm,source:'notion'});
     });
   });
+  // ③ Notion誕生日DB 全件（顧客に未紐付けのものも含めて全表示）
+  if(__obAllBdays && __obAllBdays.length){
+    var custByMaster={};
+    obRows.forEach(function(r){ var nid=String(r['NotionID']||'').replace(/-/g,''); if(nid&&!custByMaster[nid]) custByMaster[nid]={name:r['顧客名']||'—',row:r._row}; });
+    var seen={};
+    result.forEach(function(e){ seen[e.mmdd+'|'+(e.displayName||e.name)]=true; });
+    __obAllBdays.forEach(function(b){
+      if(!b.date) return;
+      var norm=obNormDate(b.date); if(!norm||norm.length<5) return;
+      if(norm.length===5) norm='1900-'+norm;
+      if(norm.length<10) return;
+      var mmdd=norm.substring(5,10);
+      var birthYear=parseInt(norm.substring(0,4)); if(isNaN(birthYear)||birthYear<1900) birthYear=1900;
+      var mid=String(b.masterId||'').replace(/-/g,'');
+      var cust=mid?custByMaster[mid]:null;
+      var custName=cust?cust.name:(b.name||'家族');
+      var dispName=b.name||custName;
+      var key=mmdd+'|'+dispName;
+      if(seen[key]) return; seen[key]=true;
+      result.push({mmdd:mmdd,birthYear:birthYear,name:custName,suffix:(b.type||b.gender||'家族'),displayName:dispName,row:cust?cust.row:-1,rawDate:norm,source:'notion-all'});
+    });
+  }
   return result;
+}
+
+var __obAllBdays=null;
+function obLoadAllBdays(force){
+  if(__obAllBdays!==null && !force) return;
+  __obAllBdays=__obAllBdays||[];
+  gasGet('obGetAllBirthdays',function(d){
+    __obAllBdays=(d&&d.birthdays)?d.birthdays:[];
+    obRenderBirthday();
+  });
 }
 
 function obBdayMove(d){ obBdayMonth+=d; if(obBdayMonth>11){obBdayMonth=0;obBdayYear++;} if(obBdayMonth<0){obBdayMonth=11;obBdayYear--;} obRenderBirthday(); }
@@ -4077,6 +4109,7 @@ function obSyncBirthdaysBtn(){
     if(!d||d.error){ toast('⚠️ 誕生日同期エラー: '+(d?d.error:'不明')); return; }
     toast('✅ 誕生日同期完了: '+d.synced+'件更新（計'+d.total+'件）');
     obLoad(true);
+    obLoadAllBdays(true);
   });
 }
 
