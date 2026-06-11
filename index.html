@@ -3055,8 +3055,8 @@ function showSettingsTab(name){
 
 // ── Supabase settings ──────────────────────────────────────
 function sbSaveAndTest(){
-  var url=(document.getElementById('sb-url')||{}).value||'';
-  var key=(document.getElementById('sb-key')||{}).value||'';
+  var url=(document.getElementById('setSbUrl')||{}).value||'';
+  var key=(document.getElementById('setSbKey')||{}).value||'';
   url=url.trim(); key=key.trim();
   var el=document.getElementById('sb-test-result');
   if(!url||!key){if(el)el.textContent='❌ URLとService Role Keyを入力してください';return;}
