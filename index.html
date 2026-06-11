@@ -420,7 +420,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .online-empty{font-size:.8rem;color:rgba(255,255,255,.35);letter-spacing:.04em}
 
 /* ─────────── モード選択ハブ ─────────── */
-.hub{position:fixed;inset:0;z-index:45;display:none;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.hub{position:fixed;inset:0;z-index:45;display:none;flex-direction:column;align-items:stretch;justify-content:flex-start;overflow:hidden}
 .hub.show{display:flex}
 .hub .lslides{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .hub .lslide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;will-change:opacity,transform;animation:lKen 36s linear infinite}
@@ -871,35 +871,40 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ハブ ダッシュボード（新デザイン）
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-.hub{position:fixed;inset:0;z-index:45;display:none;flex-direction:column;background:linear-gradient(145deg,#0C0D10 0%,#111318 55%,#0D0E13 100%);overflow:hidden}
+/* ═══════════════════════════════════════════════
+   Hub Dashboard — PC全画面対応
+═══════════════════════════════════════════════ */
+.hub{position:fixed;inset:0;z-index:45;display:none;flex-direction:column;align-items:stretch;justify-content:flex-start;background:linear-gradient(145deg,#0C0D10 0%,#111318 55%,#0D0E13 100%);overflow:hidden}
 .hub.show{display:flex}
-/* Hubの背景スライドは廃止して軽量化 */
+/* 旧背景スライドは非表示 */
 .hub .lslides,.hub .lveil{display:none}
 
-.hub-header{flex-shrink:0;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:18px;padding:14px 28px}
-.hub-header .hh-logo{height:26px;filter:brightness(0) invert(1);opacity:.88}
-.hub-header .hh-title{font-family:var(--serif);font-size:.92rem;letter-spacing:.18em;color:rgba(255,255,255,.72);font-weight:600}
+/* ─── ヘッダーバー ─── */
+.hub-header{flex-shrink:0;width:100%;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:18px;padding:14px 32px;box-sizing:border-box}
+.hub-header .hh-logo{height:28px;filter:brightness(0) invert(1);opacity:.88}
+.hub-header .hh-title{font-family:var(--serif);font-size:.96rem;letter-spacing:.18em;color:rgba(255,255,255,.72);font-weight:600}
 .hub-header .hh-sub{font-family:"Playfair Display",serif;font-size:.55rem;letter-spacing:.36em;color:rgba(255,255,255,.28);font-weight:400;display:block;margin-top:2px}
 .hub-header .hh-grow{flex:1}
-.hub-header .hh-notif{display:flex;align-items:center;gap:6px;font-size:.7rem;color:rgba(255,255,255,.45);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:5px 12px;white-space:nowrap;cursor:pointer;transition:all .15s}
-.hub-header .hh-notif:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.75)}
+.hub-header .hh-notif{display:flex;align-items:center;gap:6px;font-size:.72rem;color:rgba(255,255,255,.5);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:6px 14px;white-space:nowrap;cursor:pointer;transition:all .15s}
+.hub-header .hh-notif:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8)}
 .hub-header .hh-clock-wrap{text-align:right;flex-shrink:0}
-.hub-header .hh-clock{font-family:"Playfair Display",serif;font-size:1.3rem;font-weight:600;line-height:1;color:rgba(255,255,255,.78);letter-spacing:.03em}
-.hub-header .hh-date{font-size:.6rem;letter-spacing:.18em;color:rgba(255,255,255,.32);margin-top:3px}
+.hub-header .hh-clock{font-family:"Playfair Display",serif;font-size:1.4rem;font-weight:600;line-height:1;color:rgba(255,255,255,.82);letter-spacing:.03em}
+.hub-header .hh-date{font-size:.6rem;letter-spacing:.18em;color:rgba(255,255,255,.34);margin-top:3px}
 
-.hub-body{flex:1;display:grid;grid-template-columns:240px 1fr;min-height:0;overflow:hidden}
+/* ─── ボディ：サイドバー＋メイン ─── */
+.hub-body{flex:1;width:100%;display:grid;grid-template-columns:280px 1fr;min-height:0;overflow:hidden;box-sizing:border-box}
 
 /* ─── サイドバー ─── */
-.hub-side{background:rgba(255,255,255,.025);border-right:1px solid rgba(255,255,255,.07);overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:14px}
+.hub-side{background:rgba(255,255,255,.025);border-right:1px solid rgba(255,255,255,.07);overflow-y:auto;padding:22px 18px;display:flex;flex-direction:column;gap:16px}
 .hub-kpi-row{display:flex;flex-direction:column;gap:10px}
-.hub-kpi{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:14px 16px;transition:border-color .15s;cursor:default}
+.hub-kpi{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:16px 18px;transition:border-color .15s;cursor:default}
 .hub-kpi:hover{border-color:rgba(154,140,118,.4)}
-.hub-kpi-val{font-family:"Playfair Display",serif;font-size:2.2rem;font-weight:600;line-height:1;color:#fff;letter-spacing:.01em}
-.hub-kpi-lbl{font-size:.62rem;letter-spacing:.16em;color:rgba(255,255,255,.45);font-weight:700;margin-top:7px;text-transform:uppercase}
+.hub-kpi-val{font-family:"Playfair Display",serif;font-size:2.4rem;font-weight:600;line-height:1;color:#fff;letter-spacing:.01em}
+.hub-kpi-lbl{font-size:.62rem;letter-spacing:.16em;color:rgba(255,255,255,.45);font-weight:700;margin-top:8px;text-transform:uppercase}
 .hub-kpi-sub{font-size:.68rem;color:#9A8C76;margin-top:3px;font-weight:600}
 .hub-side-sec{font-size:.58rem;letter-spacing:.22em;color:rgba(255,255,255,.3);font-weight:700;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.06);margin-top:2px}
 .hub-bday-mini{display:flex;flex-direction:column;gap:5px}
-.hub-bday-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,.04);border-radius:6px;border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:background .12s}
+.hub-bday-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:6px;border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:background .12s}
 .hub-bday-row:hover{background:rgba(255,255,255,.08);border-color:rgba(154,140,118,.3)}
 .hub-bday-row.today-bd{border-color:rgba(154,140,118,.6);background:rgba(154,140,118,.08)}
 .hub-bday-date{font-size:.68rem;color:#9A8C76;font-weight:700;min-width:36px}
@@ -908,40 +913,58 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .hub-empty-mini{font-size:.74rem;color:rgba(255,255,255,.25);padding:10px 4px;text-align:center}
 
 /* ─── メインエリア ─── */
-.hub-main{overflow-y:auto;padding:22px 24px;display:flex;flex-direction:column;gap:20px}
-.hub-cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.hub-card{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.13);border-radius:12px;padding:26px 28px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden}
-.hub-card::before{content:'';position:absolute;inset:0;border-radius:12px;background:linear-gradient(140deg,rgba(255,255,255,.04),transparent 55%);pointer-events:none}
-.hub-card:hover{background:rgba(255,255,255,.1);border-color:rgba(199,178,153,.5);transform:translateY(-3px);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.hub-main{overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:22px}
+/* PC幅広: 4カード横並び / 通常: 2×2 */
+.hub-cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:1280px){.hub-cards-grid{grid-template-columns:repeat(2,1fr)}}
+.hub-card{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:28px 30px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden}
+.hub-card::before{content:'';position:absolute;inset:0;border-radius:14px;background:linear-gradient(140deg,rgba(255,255,255,.04),transparent 55%);pointer-events:none}
+.hub-card:hover{background:rgba(255,255,255,.1);border-color:rgba(199,178,153,.5);transform:translateY(-4px);box-shadow:0 20px 56px rgba(0,0,0,.5)}
 .hub-card:active{transform:translateY(-1px) scale(.99)}
-.hub-card .hc-icon{font-size:1.8rem;margin-bottom:10px;display:block}
-.hub-card .hc-title{font-family:var(--serif);font-size:1rem;font-weight:700;color:#fff;letter-spacing:.1em;margin-bottom:5px}
-.hub-card .hc-desc{font-size:.64rem;color:rgba(255,255,255,.38);letter-spacing:.04em;line-height:1.8}
+.hub-card .hc-icon{font-size:2rem;margin-bottom:12px;display:block}
+.hub-card .hc-title{font-family:var(--serif);font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:.1em;margin-bottom:6px}
+.hub-card .hc-desc{font-size:.65rem;color:rgba(255,255,255,.38);letter-spacing:.04em;line-height:1.9}
 .hub-card .hc-badge{position:absolute;top:13px;right:13px;background:rgba(154,140,118,.3);border:1px solid rgba(154,140,118,.55);color:rgba(255,255,255,.88);font-size:.6rem;font-weight:700;letter-spacing:.04em;padding:3px 9px;border-radius:20px}
 
 /* ─── 直近受付プレビュー ─── */
-.hub-recent{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:10px;overflow:hidden}
-.hub-recent-hd{padding:9px 16px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07)}
+.hub-recent{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:10px;overflow:hidden;flex:1;min-height:0;display:flex;flex-direction:column}
+.hub-recent-hd{padding:10px 18px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
 .hub-recent-hd span{font-size:.62rem;letter-spacing:.16em;color:rgba(255,255,255,.48);font-weight:700;text-transform:uppercase}
 .hub-recent-hd .hub-recent-more{font-size:.68rem;color:#9A8C76;cursor:pointer;font-weight:600;letter-spacing:.03em;background:none;border:none;padding:0}
 .hub-recent-hd .hub-recent-more:hover{color:rgba(199,178,153,.9)}
-.hub-recent-list{display:flex;flex-direction:column;max-height:220px;overflow-y:auto}
-.hub-rec-row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .12s}
+.hub-recent-list{display:flex;flex-direction:column;overflow-y:auto;flex:1}
+.hub-rec-row{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .12s}
 .hub-rec-row:last-child{border-bottom:none}
 .hub-rec-row:hover{background:rgba(255,255,255,.05)}
-.hub-rec-date{font-size:.68rem;color:#9A8C76;min-width:50px;font-weight:600;flex-shrink:0}
-.hub-rec-name{flex:1;font-size:.82rem;color:rgba(255,255,255,.82);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub-rec-date{font-size:.7rem;color:#9A8C76;min-width:52px;font-weight:600;flex-shrink:0}
+.hub-rec-name{flex:1;font-size:.84rem;color:rgba(255,255,255,.82);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hub-rec-staff{font-size:.68rem;color:rgba(255,255,255,.38);white-space:nowrap;flex-shrink:0}
-.hub-rec-src{font-size:.62rem;color:rgba(154,140,118,.8);padding:2px 7px;background:rgba(154,140,118,.1);border-radius:20px;white-space:nowrap;border:1px solid rgba(154,140,118,.2);flex-shrink:0}
+.hub-rec-src{font-size:.62rem;color:rgba(154,140,118,.8);padding:2px 8px;background:rgba(154,140,118,.1);border-radius:20px;white-space:nowrap;border:1px solid rgba(154,140,118,.2);flex-shrink:0}
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    スマートフォン / タブレット対応
+   PC(>860px): 全画面サイドバーあり
+   タブレット(≤860px): サイドバー非表示・2列
+   スマホ(≤480px): 1列・コンパクト
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 @media(max-width:860px){
   .hub-body{grid-template-columns:1fr}
   .hub-side{display:none}
-  .hub-cards-grid{grid-template-columns:repeat(2,1fr)}
+  .hub-cards-grid{grid-template-columns:repeat(2,1fr)!important}
   .hub-header{padding:12px 16px}
+  .hub-main{padding:16px}
+}
+@media(max-width:480px){
+  /* スマホ：1列カード＋コンパクト表示 */
+  .hub-cards-grid{grid-template-columns:1fr!important;gap:10px}
+  .hub-card{padding:18px 20px}
+  .hub-card .hc-icon{font-size:1.6rem;margin-bottom:8px}
+  .hub-card .hc-title{font-size:.9rem}
+  .hub-header{padding:10px 14px}
+  .hub-header .hh-clock{font-size:1.1rem}
+  .hub-header .hh-title{font-size:.78rem;letter-spacing:.08em}
+  .hub-main{padding:12px}
+  .hub-recent-list{max-height:200px}
 }
 @media(max-width:640px){
   /* レイアウト */
