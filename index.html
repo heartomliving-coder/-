@@ -1192,6 +1192,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     </div>
     <!-- 履歴 -->
     <div class="ob-det-pane" data-dtab="history" id="ob-det-pane-history">
+      <div class="ob-sec-title" style="margin:0 0 10px">＋ 来場履歴を追加</div>
       <div class="ob-tl-add">
         <input type="date" id="tl-date" style="width:140px">
         <select id="tl-type" style="width:118px" title="種別">
@@ -3382,7 +3383,8 @@ function obStartEdit(el){
   var field=el.getAttribute('data-field');
   var type=el.getAttribute('data-type');
   var r=obRows[row];
-  var val=r?r[field]||'':'';
+  var val='';
+  if(r){ val=(field.indexOf('karte.')===0)?((r.karte&&r.karte[field.slice(6)])||''):(r[field]||''); }
 
   if(type==='date'){
     var isoVal=obNormDate(val); // 日本語/スラッシュ形式をISOに正規化
@@ -3444,7 +3446,10 @@ function obEditStatusInline(el,rowIdx){
 }
 
 function obSaveField(row,field,value){
-  if(obRows[row]) obRows[row][field]=value;
+  if(obRows[row]){
+    if(field.indexOf('karte.')===0){ if(!obRows[row].karte) obRows[row].karte={}; obRows[row].karte[field.slice(6)]=value; }
+    else obRows[row][field]=value;
+  }
   obSetCache(obRows);
   post({action:'obUpdateField',row:row,field:field,value:value});
   if(field==='商談ステータス' && value==='パートナー契約済') kjAutoAddFromOB(obRows[row]);
@@ -3864,7 +3869,16 @@ function obSaveDetBirthday(){
 function obRenderDetInfo(){
   var r=obRows[obDetailRow]; if(!r) return;
   var g=document.getElementById('ob-det-info-grid');
+  var k=r.karte||{};
+  function gv(key){ return key.indexOf('karte.')===0 ? (k[key.slice(6)]||'') : (r[key]||''); }
+  // 顧客情報（連絡先＝カルテ） + 案件情報。全項目クリックで編集可能。
   var fields=[
+    {sec:'顧客情報'},
+    {key:'karte.フリガナ',label:'フリガナ',type:'text'},
+    {key:'karte.電話番号',label:'電話番号',type:'text'},
+    {key:'karte.メールアドレス',label:'メールアドレス',type:'text'},
+    {key:'karte.住所',label:'住所',type:'text',full:true},
+    {sec:'案件情報'},
     {key:'来場日',label:'受付日',type:'date'},
     {key:'来場種別',label:'来場種別',type:'sel',opts:OB_EVENT_TYPES},
     {key:'エリア',label:'エリア',type:'text'},
@@ -3879,13 +3893,14 @@ function obRenderDetInfo(){
     {key:'メモ',label:'メモ',type:'text',full:true}
   ];
   g.innerHTML=fields.map(function(f){
-    var val=r[f.key]||''; var display='';
+    if(f.sec){ return '<div class="ob-info-full" style="margin:6px 0 -4px;font-size:.7rem;font-weight:700;letter-spacing:.12em;color:#9A8C76;border-bottom:1px solid #EEE;padding-bottom:4px">'+esc(f.sec)+'</div>'; }
+    var val=gv(f.key); var display='';
     if(f.type==='date') display=val?obFmtDate(obNormDate(val)):'—';
     else display=val||'—';
     return '<div class="ob-info-card'+(f.full?' ob-info-full':'')+'">'+
       '<div class="ob-info-label">'+f.label+'</div>'+
       '<div class="ob-info-val">'+
-        '<span class="ob-editable" style="display:block;font-size:.9rem;font-weight:600" data-row="'+obDetailRow+'" data-field="'+f.key+'" data-type="'+(f.type==='staff'?'staff':f.opts?'sel':f.type)+'" onclick="obStartEdit(this)">'+display+'</span>'+
+        '<span class="ob-editable" style="display:block;font-size:.9rem;font-weight:600" data-row="'+obDetailRow+'" data-field="'+f.key+'" data-type="'+(f.type==='staff'?'staff':f.opts?'sel':f.type)+'" onclick="obStartEdit(this)">'+esc(display)+'</span>'+
       '</div>'+
     '</div>';
   }).join('');
