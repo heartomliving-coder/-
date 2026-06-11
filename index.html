@@ -813,6 +813,23 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-drive-input input:focus{border-color:var(--charcoal)}
 .ob-drive-frame{width:100%;height:calc(100vh - 280px);border:1px solid #E8E4DE;border-radius:6px;background:#fff}
 .ob-drive-placeholder{padding:60px 20px;text-align:center;color:#BBB;font-size:.9rem;border:2px dashed #E8E4DE;border-radius:6px}
+/* KJ Drive / Chatwork */
+.kj-drive-input{display:flex;gap:8px;margin-bottom:16px}
+.kj-drive-input input{flex:1;padding:10px 14px;border:1px solid #DDD;border-radius:3px;font-size:.86rem;font-family:inherit;outline:none}
+.kj-drive-input input:focus{border-color:var(--charcoal)}
+.kj-drive-frame{width:100%;height:calc(100dvh - 300px);border:1px solid #E8E4DE;border-radius:6px;background:#fff}
+.kj-drive-placeholder{padding:60px 20px;text-align:center;color:#BBB;font-size:.9rem;border:2px dashed #E8E4DE;border-radius:6px}
+.kj-cw-room-sel{display:flex;gap:8px;margin-bottom:14px;align-items:center}
+.kj-cw-room-sel select{flex:1;padding:9px 12px;border:1px solid #DDD;border-radius:3px;font-size:.84rem;font-family:inherit;outline:none}
+.kj-cw-msgs{display:flex;flex-direction:column;gap:10px;max-height:calc(100dvh - 340px);overflow-y:auto;padding:4px 2px}
+.kj-cw-msg{display:flex;gap:10px;align-items:flex-start}
+.kj-cw-msg-icon{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#EEE}
+.kj-cw-msg-body{flex:1;min-width:0}
+.kj-cw-msg-hd{display:flex;gap:8px;align-items:baseline;margin-bottom:4px}
+.kj-cw-msg-name{font-size:.78rem;font-weight:700;color:#333}
+.kj-cw-msg-time{font-size:.7rem;color:#AAA}
+.kj-cw-msg-text{font-size:.82rem;color:#333;white-space:pre-wrap;word-break:break-word;background:#F8F7F5;border-radius:0 8px 8px 8px;padding:8px 12px;line-height:1.5}
+.kj-cw-empty{text-align:center;color:#BBB;padding:48px 20px;font-size:.88rem}
 
 /* 新規追加モーダル */
 .ob-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -1500,6 +1517,11 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <option value="done">生成済み</option>
       <option value="none">未生成</option>
     </select>
+    <select id="tochi-filter-addr" onchange="tochiRenderList()" style="padding:6px 10px;border:1px solid #DDD;border-radius:4px;font-size:.82rem">
+      <option value="">住所: すべて</option>
+      <option value="none">⚠ 住所なし</option>
+      <option value="done">住所あり</option>
+    </select>
     <span id="tochi-count" style="font-size:.8rem;color:#888;margin-left:auto"></span>
   </div>
   <div class="kj-scroll">
@@ -1537,6 +1559,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <button class="kj-det-tab" data-dtab="apply" onclick="kjDetTab('apply')">📄 申請</button>
       <button class="kj-det-tab" data-dtab="construct" onclick="kjDetTab('construct')">🔧 工事</button>
       <button class="kj-det-tab" data-dtab="complete" onclick="kjDetTab('complete')">🎉 竣工</button>
+      <button class="kj-det-tab" data-dtab="drive" onclick="kjDetTab('drive')">📁 ドライブ</button>
+      <button class="kj-det-tab" data-dtab="chatwork" onclick="kjDetTab('chatwork')">💬 Chatwork</button>
     </div>
   </div>
   <div class="kj-det-body">
@@ -1552,6 +1576,23 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     <div class="kj-det-pane" data-dtab="construct" id="kj-pane-construct"></div>
     <!-- 竣工 -->
     <div class="kj-det-pane" data-dtab="complete" id="kj-pane-complete"></div>
+    <!-- ドライブ -->
+    <div class="kj-det-pane" data-dtab="drive" id="kj-pane-drive" style="padding:18px 20px">
+      <div class="kj-drive-input">
+        <input type="url" id="kj-drive-url" placeholder="https://drive.google.com/drive/folders/...">
+        <button class="hbtn primary" onclick="kjSaveDriveUrl()">保存・表示</button>
+      </div>
+      <div id="kj-drive-frame-wrap"></div>
+    </div>
+    <!-- Chatwork -->
+    <div class="kj-det-pane" data-dtab="chatwork" id="kj-pane-chatwork" style="padding:18px 20px">
+      <div class="kj-cw-room-sel">
+        <select id="kj-cw-room-select"><option value="">— ルームを選択 —</option></select>
+        <button class="hbtn" onclick="kjLoadCwRooms()">🔄 更新</button>
+        <button class="hbtn primary" onclick="kjSaveCwRoom()">保存・表示</button>
+      </div>
+      <div id="kj-cw-msgs-wrap"><div class="kj-cw-empty">ルームを選択してメッセージを表示</div></div>
+    </div>
   </div>
 </div>
 
@@ -2886,7 +2927,7 @@ function openBoard(){
 function gasGet(action,cb,timeout){
   var url=sendUrl()+'?action='+action+'&key='+encodeURIComponent(adminKey())+'&_='+Date.now();
   var ms = timeout ||
-    (/^(obGetData|obImportFromNotion|obSyncBirthdays|kjImportFromExcel|tochiGetData|mtgGetData|mtgSyncChatwork)/.test(action) ? 60000 :
+    (/^(obGetData|obImportFromNotion|obSyncBirthdays|kjImportFromExcel|tochiGetData|mtgGetData|mtgSyncChatwork|kjGetCwMessages|mtgListCwRooms)/.test(action) ? 60000 :
      /^(listSessions|listMonitors|listActivityLog)/.test(action) ? 8000 : 45000);
   var controller = window.AbortController ? new AbortController() : null;
   var tid = setTimeout(function(){ if(controller) controller.abort(); }, ms);
@@ -5443,6 +5484,8 @@ function kjCloseDetail(){
 function kjDetTab(tab){
   document.querySelectorAll('.kj-det-tab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-dtab')===tab);});
   document.querySelectorAll('.kj-det-pane').forEach(function(p){p.classList.toggle('show',p.getAttribute('data-dtab')===tab);});
+  if(tab==='drive') kjRenderDetDrive();
+  if(tab==='chatwork') kjRenderDetChatwork();
 }
 
 function kjRenderDetPane(phase){
@@ -5527,6 +5570,106 @@ function kjStartEdit(el){
     inp2.addEventListener('blur',svTxt);
     inp2.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();inp2.blur();} if(e.key==='Escape'){done2=true;kjRenderDetPane(KJ_PHASES.find(function(p){return p.fields.some(function(f){return f.k===field;});})||KJ_PHASES[0]);} });
   }
+}
+
+// ── KJ ドライブタブ ──────────────────────────────────────────
+function kjRenderDetDrive(){
+  var r=kjRows.find(function(x){return x._id===kjDetailId;}); if(!r) return;
+  var url=r['driveUrl']||'';
+  var inp=document.getElementById('kj-drive-url'); if(inp) inp.value=url;
+  kjShowDriveFrame(url);
+}
+
+function kjSaveDriveUrl(){
+  var r=kjRows.find(function(x){return x._id===kjDetailId;}); if(!r) return;
+  var url=document.getElementById('kj-drive-url').value.trim();
+  r['driveUrl']=url; kjSetCache(kjRows);
+  post({action:'kjUpdateField',id:kjDetailId,field:'driveUrl',value:url});
+  kjShowDriveFrame(url);
+  toast('ドライブURLを保存しました');
+}
+
+function kjShowDriveFrame(url){
+  var wrap=document.getElementById('kj-drive-frame-wrap'); if(!wrap) return;
+  if(!url){
+    wrap.innerHTML='<div class="kj-drive-placeholder">Google DriveのフォルダURLを上に入力すると<br>ここに埋め込まれます</div>';
+    return;
+  }
+  var embedUrl=url;
+  var m=url.match(/\/folders\/([^?/]+)/);
+  if(m) embedUrl='https://drive.google.com/embeddedfolderview?id='+m[1]+'#list';
+  wrap.innerHTML='<iframe class="kj-drive-frame" src="'+esc(embedUrl)+'" allowfullscreen></iframe>';
+}
+
+// ── KJ Chatworkタブ ──────────────────────────────────────────
+function kjRenderDetChatwork(){
+  var r=kjRows.find(function(x){return x._id===kjDetailId;}); if(!r) return;
+  var sel=document.getElementById('kj-cw-room-select'); if(!sel) return;
+  // 保存済みルームIDがあれば選択状態にする
+  var savedRoomId=r['cwRoomId']||'';
+  // ルームリストを読み込む（まだ選択肢がなければ取得）
+  if(sel.options.length<=1){
+    kjLoadCwRooms(function(){
+      if(savedRoomId){ sel.value=savedRoomId; kjFetchCwMessages(savedRoomId); }
+    });
+  } else {
+    if(savedRoomId){ sel.value=savedRoomId; kjFetchCwMessages(savedRoomId); }
+  }
+}
+
+function kjLoadCwRooms(cb){
+  var sel=document.getElementById('kj-cw-room-select'); if(!sel) return;
+  sel.innerHTML='<option value="">読み込み中...</option>';
+  gasGet('mtgListCwRooms',function(d){
+    sel.innerHTML='<option value="">— ルームを選択 —</option>';
+    if(d && d.rooms && d.rooms.length){
+      d.rooms.forEach(function(rm){
+        var opt=document.createElement('option');
+        opt.value=rm.id;
+        opt.textContent=rm.name + (rm.unread?' ['+rm.unread+']':'');
+        sel.appendChild(opt);
+      });
+    } else {
+      sel.innerHTML='<option value="">ルームなし（APIトークン要確認）</option>';
+    }
+    if(cb) cb();
+  });
+}
+
+function kjSaveCwRoom(){
+  var r=kjRows.find(function(x){return x._id===kjDetailId;}); if(!r) return;
+  var sel=document.getElementById('kj-cw-room-select'); if(!sel) return;
+  var roomId=sel.value;
+  r['cwRoomId']=roomId; kjSetCache(kjRows);
+  post({action:'kjUpdateField',id:kjDetailId,field:'cwRoomId',value:roomId});
+  if(roomId){ kjFetchCwMessages(roomId); toast('ルームを保存しました'); }
+  else { document.getElementById('kj-cw-msgs-wrap').innerHTML='<div class="kj-cw-empty">ルームを選択してください</div>'; }
+}
+
+function kjFetchCwMessages(roomId){
+  var wrap=document.getElementById('kj-cw-msgs-wrap'); if(!wrap) return;
+  wrap.innerHTML='<div class="kj-cw-empty">読み込み中...</div>';
+  gasGet('kjGetCwMessages&roomId='+encodeURIComponent(roomId), function(d){
+    if(!d || d.error){
+      wrap.innerHTML='<div class="kj-cw-empty" style="color:#E55">'+esc(d?d.error:'取得エラー')+'</div>';
+      return;
+    }
+    var msgs=d.messages||[];
+    if(!msgs.length){
+      wrap.innerHTML='<div class="kj-cw-empty">メッセージがありません</div>';
+      return;
+    }
+    wrap.innerHTML='<div class="kj-cw-msgs">'+msgs.map(function(m){
+      var dt=m.time?new Date(m.time*1000):null;
+      var timeStr=dt?(('0'+(dt.getMonth()+1)).slice(-2)+'/'+('0'+dt.getDate()).slice(-2)+' '+('0'+dt.getHours()).slice(-2)+':'+('0'+dt.getMinutes()).slice(-2)):'';
+      var iconHtml=m.iconUrl?'<img class="kj-cw-msg-icon" src="'+esc(m.iconUrl)+'" loading="lazy">':'<div class="kj-cw-msg-icon"></div>';
+      return '<div class="kj-cw-msg">'+iconHtml+
+        '<div class="kj-cw-msg-body">'+
+          '<div class="kj-cw-msg-hd"><span class="kj-cw-msg-name">'+esc(m.name||'—')+'</span><span class="kj-cw-msg-time">'+esc(timeStr)+'</span></div>'+
+          '<div class="kj-cw-msg-text">'+esc(m.body||'')+'</div>'+
+        '</div></div>';
+    }).join('')+'</div>';
+  });
 }
 
 function kjEditDetName(){
@@ -5695,10 +5838,14 @@ function tochiRenderList(){
   var el=document.getElementById('tochi-list-content'); if(!el) return;
   var fQ=((document.getElementById('tochi-q')||{}).value||'').toLowerCase().trim();
   var fKoji=((document.getElementById('tochi-filter-koji')||{}).value||'');
+  var fAddr=((document.getElementById('tochi-filter-addr')||{}).value||'');
   var rows=tochiRows.filter(function(r){
     if(fQ && (r['顧客名']||'').toLowerCase().indexOf(fQ)<0 && (r['所在地']||'').toLowerCase().indexOf(fQ)<0) return false;
     if(fKoji==='done' && !r['工事案内図']) return false;
     if(fKoji==='none' && r['工事案内図']) return false;
+    var hasAddr = !!(r['所在地']||'').trim();
+    if(fAddr==='none' && hasAddr) return false;
+    if(fAddr==='done' && !hasAddr) return false;
     return true;
   });
   var cntEl=document.getElementById('tochi-count'); if(cntEl) cntEl.textContent=rows.length+'件';
