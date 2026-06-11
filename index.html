@@ -1835,24 +1835,43 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <img src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM" onerror="this.style.display='none'">
       <div class="kj-hd-ti">顧客情報DB<small>CUSTOMER DATABASE</small></div>
     </div>
+    <div class="kj-tabs">
+      <button class="kj-tab on" data-cbtab="list" onclick="custBoardTab('list')">📋 顧客一覧</button>
+      <button class="kj-tab" data-cbtab="partner" onclick="custBoardTab('partner')">🏠 パートナー</button>
+    </div>
     <div class="kj-actions">
       <span id="cust-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
       <button class="hbtn ghost" onclick="custLoad()">🔄 Notion同期</button>
       <button class="hbtn ghost" onclick="showHub()">‹ 戻る</button>
     </div>
   </div>
-  <div class="kj-filter" style="gap:10px;padding:12px 20px">
-    <input id="cust-q" type="text" placeholder="名前・電話・メールで検索..." oninput="custRenderList()" style="padding:6px 12px;border:1px solid #DDD;border-radius:4px;font-size:.84rem;width:280px;outline:none">
-    <select id="cust-filter-status" onchange="custRenderList()" style="padding:6px 10px;border:1px solid #DDD;border-radius:4px;font-size:.82rem">
-      <option value="">ステータス: すべて</option>
-      <option value="パートナー契約済">パートナー契約済</option>
-      <option value="商談中">商談中</option>
-      <option value="見込み">見込み</option>
-    </select>
-    <span id="cust-count" style="font-size:.8rem;color:#888;margin-left:auto"></span>
+
+  <!-- 顧客一覧タブ -->
+  <div class="kj-pane show" data-cbtab="list">
+    <div class="kj-filter" style="gap:10px;padding:12px 20px">
+      <input id="cust-q" type="text" placeholder="名前・電話・メールで検索..." oninput="custRenderList()" style="padding:6px 12px;border:1px solid #DDD;border-radius:4px;font-size:.84rem;width:280px;outline:none">
+      <select id="cust-filter-status" onchange="custRenderList()" style="padding:6px 10px;border:1px solid #DDD;border-radius:4px;font-size:.82rem">
+        <option value="">ステータス: すべて</option>
+        <option value="パートナー契約済">パートナー契約済</option>
+        <option value="商談中">商談中</option>
+        <option value="見込み">見込み</option>
+      </select>
+      <span id="cust-count" style="font-size:.8rem;color:#888;margin-left:auto"></span>
+    </div>
+    <div class="kj-scroll">
+      <div id="cust-list-content"><div class="kj-empty">読み込み中...</div></div>
+    </div>
   </div>
-  <div class="kj-scroll">
-    <div id="cust-list-content"><div class="kj-empty">読み込み中...</div></div>
+
+  <!-- パートナータブ -->
+  <div class="kj-pane" data-cbtab="partner">
+    <div class="kj-filter" style="gap:10px;padding:12px 20px">
+      <input id="partner-q" type="text" placeholder="名前で検索..." oninput="custRenderPartner()" style="padding:6px 12px;border:1px solid #DDD;border-radius:4px;font-size:.84rem;width:280px;outline:none">
+      <span id="partner-count" style="font-size:.8rem;color:#888;margin-left:auto"></span>
+    </div>
+    <div class="kj-scroll">
+      <div id="partner-list-content"><div class="kj-empty">読み込み中...</div></div>
+    </div>
   </div>
 </div>
 
@@ -6425,6 +6444,12 @@ var custRows = [];
 var custDetailId = null;
 var __custLoaded = false;
 
+function custBoardTab(tab){
+  document.querySelectorAll('#custboard .kj-pane').forEach(function(p){ p.classList.toggle('show', p.getAttribute('data-cbtab')===tab); });
+  document.querySelectorAll('#custboard .kj-tab').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-cbtab')===tab); });
+  if(tab==='partner') custRenderPartner();
+}
+
 function enterCustBoard(){
   document.getElementById('hub').classList.remove('show');
   document.getElementById('custboard').classList.add('show');
@@ -6482,6 +6507,49 @@ function custRenderList(){
         '<td style="text-align:center">'+(hasKJ?'<span style="color:#3B82F6">✓</span>':'<span style="color:#EEE">—</span>')+'</td>'+
         '</tr>';
     }).join('')+'</tbody></table>';
+  el.innerHTML=html;
+}
+
+// ── パートナー一覧 ──────────────────────────────────────────
+function custRenderPartner(){
+  var el=document.getElementById('partner-list-content'); if(!el) return;
+  // OBからパートナー契約済を取得
+  var partners=(obRows||[]).filter(function(r){ return (r['商談ステータス']||'').indexOf('パートナー')>=0; });
+  var fQ=((document.getElementById('partner-q')||{}).value||'').toLowerCase().trim();
+  if(fQ) partners=partners.filter(function(r){ return ((r['顧客名']||'')+(r['エリア']||'')).toLowerCase().indexOf(fQ)>=0; });
+  var cntEl=document.getElementById('partner-count'); if(cntEl) cntEl.textContent=partners.length+'名';
+  if(!partners.length){ el.innerHTML='<div class="kj-empty">パートナー契約済の顧客がいません</div>'; return; }
+
+  // KJ名前マッピング
+  var kjMap={};
+  (kjRows||[]).forEach(function(r){ if(r['物件名']){ var k=(r['物件名']||'').replace(/\s/g,'').replace(/様$/,''); kjMap[k]=r; } });
+  function normN(n){ return (n||'').replace(/\s/g,'').replace(/様$/,''); }
+
+  var html='<div style="padding:12px 20px"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px">';
+  partners.forEach(function(r){
+    var nm=normN(r['顧客名']);
+    var kj=kjMap[nm];
+    var lastVisit=(r['最終来場日']||r['来場日']||'').substring(0,10);
+    var tel='';
+    try{ var k=JSON.parse(r._karte||'{}'); tel=k['電話番号']||''; }catch(e){}
+    html+='<div style="background:#fff;border:1px solid #E8E4DE;border-radius:10px;padding:16px;border-left:4px solid #22C55E;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.06)" onclick="obOpenDetail('+r._row+')">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+        '<div style="font-weight:700;font-size:1rem;color:#1A2A4A">'+esc(r['顧客名']||'—')+'</div>' +
+        '<span style="background:#DCFCE7;color:#166534;border-radius:12px;padding:2px 10px;font-size:.72rem;font-weight:700">パートナー契約済</span>' +
+      '</div>' +
+      '<div style="font-size:.8rem;color:#666;display:flex;flex-direction:column;gap:4px">' +
+        (tel?'<span>📞 '+esc(tel)+'</span>':'')+
+        (r['エリア']?'<span>📍 '+esc(r['エリア'])+'</span>':'')+
+        (lastVisit?'<span>📅 最終: '+esc(lastVisit)+'</span>':'')+
+        (kj?'<span style="color:#3B82F6;font-weight:700">🏗 着工管理: '+esc(kj['物件名']||'あり')+'</span>':'<span style="color:#CCC">着工管理: —</span>')+
+      '</div>' +
+      '<div style="margin-top:10px;display:flex;gap:6px">' +
+        '<button onclick="event.stopPropagation();obOpenDetail('+r._row+')" style="flex:1;padding:5px 0;background:#F0F7FF;color:#1A6696;border:1px solid #BFDBFE;border-radius:5px;font-size:.75rem;cursor:pointer">📊 OB詳細</button>'+
+        (kj?'<button onclick="event.stopPropagation();showHub();setTimeout(function(){enterKojiBoard();setTimeout(function(){kjOpenDetail(\''+esc(kj._id||'')+'\');},500);},100)" style="flex:1;padding:5px 0;background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;border-radius:5px;font-size:.75rem;cursor:pointer">🏗 着工詳細</button>':'')+
+      '</div>' +
+    '</div>';
+  });
+  html+='</div></div>';
   el.innerHTML=html;
 }
 
@@ -6708,6 +6776,19 @@ function mtgTempLabel(v){
   return '💛 普通';
 }
 
+// 顧客名クリーニング（CWメッセージ由来のゴミ文字を除去）
+function mtgCleanName(raw){
+  if(!raw) return '—';
+  var s=String(raw);
+  s=s.replace(/^\d+\]\s*/,'');                          // "3999170]黒須様"→"黒須様"
+  s=s.replace(/^[■□●○◆▲△][^\s：:\n]{0,10}[：:]\s*/,''); // "■先方：" "■場所："を除去
+  s=s.replace(/^(?:昨日|今日|先日|本日|当日)の/,'');    // "昨日の小山様"→"小山様"
+  s=s.replace(/^(?:お客様|顧客名?)[：:\s]+/,'');
+  s=s.replace(/[「」『』（()）\[\]]/g,'');
+  s=s.trim();
+  return s||raw;
+}
+
 function mtgRenderList(){
   var el = document.getElementById('mtg-list-content'); if(!el) return;
   var fStaff = (document.getElementById('mtg-filter-staff')||{}).value||'';
@@ -6716,63 +6797,110 @@ function mtgRenderList(){
   var fQ = ((document.getElementById('mtg-filter-q')||{}).value||'').toLowerCase().trim();
 
   var rows = mtgRows.filter(function(r){
+    var cleanedName = mtgCleanName(r['顧客名']||'');
     if(fStaff && r['担当者']!==fStaff) return false;
     if(fStatus && r['商談ステータス']!==fStatus) return false;
     if(fTemp && mtgTempLabel(r['温度感'])!==fTemp) return false;
     if(fQ){
-      var hay = ((r['顧客名']||'')+' '+(r['面談内容']||'')+' '+(r['次回アクション']||'')+' '+(r['担当者']||'')).toLowerCase();
+      var hay = (cleanedName+' '+(r['面談内容']||'')+' '+(r['次回アクション']||'')+' '+(r['担当者']||'')).toLowerCase();
       if(hay.indexOf(fQ)<0) return false;
     }
     return true;
   });
 
-  // 最新面談日順
-  rows.sort(function(a,b){
-    var da=a['面談日']||a['_created']||'', db=b['面談日']||b['_created']||'';
-    return db>da?1:db<da?-1:0;
+  // 同一顧客でグループ化（名前の様を除いた文字列で一致）
+  var groups = [];
+  var groupMap = {};
+  rows.forEach(function(r){
+    var cleaned = mtgCleanName(r['顧客名']||'');
+    var key = cleaned.replace(/\s/g,'').replace(/様$/,'');
+    if(!key) key = '__unknown__';
+    if(!groupMap[key]){
+      groupMap[key] = { name: cleaned, key: key, mtgs: [], latestDate: '', status: '', temp: '', obIdx: -1 };
+      groups.push(groupMap[key]);
+    }
+    groupMap[key].mtgs.push(r);
+    var d = r['面談日']||r['_created']||'';
+    if(d > groupMap[key].latestDate){ groupMap[key].latestDate=d; groupMap[key].status=r['商談ステータス']||''; groupMap[key].temp=r['温度感']||''; }
   });
 
-  var cntEl = document.getElementById('mtg-count');
-  if(cntEl) cntEl.textContent = rows.length+'件';
+  // 最新面談日順ソート
+  groups.sort(function(a,b){ return b.latestDate>a.latestDate?1:b.latestDate<a.latestDate?-1:0; });
 
-  if(!rows.length){
+  // OB紐付け
+  groups.forEach(function(g){ g.obIdx = mtgFindObRow(g.name); });
+
+  var cntEl = document.getElementById('mtg-count');
+  if(cntEl) cntEl.textContent = groups.length+'名 / '+rows.length+'件';
+
+  if(!groups.length){
     el.innerHTML='<div style="text-align:center;padding:60px 20px;color:#999">'+(mtgRows.length?'条件に合うMTGがありません':'まだMTGがありません。「手動追加」または「Chatwork取込」で追加してください')+'</div>';
     return;
   }
 
   var html = '<div class="mtg-card-grid">';
-  rows.forEach(function(r){
-    var tc = mtgTempClass(r['温度感']);
-    var tl = mtgTempLabel(r['温度感']);
-    var isCw = r['_source']==='chatwork';
-    var dateDisp = r['面談日'] ? r['面談日'].replace(/(\d{4})-(\d{2})-(\d{2})/,'$1/$2/$3') : (r['面談時間']||'—');
-    var nextDisp = r['次回予定日'] ? r['次回予定日'].replace(/(\d{4})-(\d{2})-(\d{2})/,'$1/$2/$3') : '';
-    var status = r['商談ステータス']||'';
-    var content = r['面談内容']||'';
-    var obIdx = mtgFindObRow(r['顧客名']);
-    var hasOb = obIdx >= 0;
+  groups.forEach(function(g){
+    var latest = g.mtgs.slice().sort(function(a,b){ var da=a['面談日']||'',db=b['面談日']||''; return db>da?1:-1; })[0];
+    var tc = mtgTempClass(g.temp);
+    var tl = mtgTempLabel(g.temp);
+    var dateDisp = g.latestDate ? g.latestDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1/$2/$3') : '—';
+    var content = latest['面談内容']||'';
+    var nextAct = latest['次回アクション']||'';
+    var isCw = latest['_source']==='chatwork';
+    var count = g.mtgs.length;
 
-    html += '<div class="mtg-card'+(isCw?' cw':'')+'" onclick="mtgOpenDetail(\''+esc(r._id)+'\')">' +
+    html += '<div class="mtg-card'+(isCw?' cw':'')+'" onclick="mtgOpenGroupDetail(\''+esc(g.key)+'\')">' +
       '<div class="mtg-card-top">' +
-        '<span class="mtg-card-name">'+esc(r['顧客名']||'—')+'</span>' +
+        '<span class="mtg-card-name">'+esc(g.name)+'</span>' +
         '<span class="mtg-temp '+tc+'">'+tl+'</span>' +
       '</div>' +
       '<div class="mtg-card-meta">' +
-        '<span>📅 '+esc(dateDisp)+'</span>' +
-        (r['担当者']?'<span>👤 '+esc(r['担当者'])+'</span>':'')+
-        (status?'<span class="mtg-status">'+esc(status)+'</span>':'')+
-        (isCw?'<span style="color:#00B900;font-size:.7rem">💬 CW取込</span>':'')+
-        (hasOb?'<span style="color:#4A90D9;font-size:.7rem" title="OBに顧客あり">📋 OB紐付</span>':'')+
+        '<span>📅 最終: '+esc(dateDisp)+'</span>' +
+        (latest['担当者']?'<span>👤 '+esc(latest['担当者'])+'</span>':'')+
+        (g.status?'<span class="mtg-status">'+esc(g.status)+'</span>':'')+
+        (count>1?'<span style="background:#E8F4FD;color:#1A6696;border-radius:10px;padding:1px 7px;font-size:.7rem;font-weight:700">💬 '+count+'回</span>':'')+
+        (isCw?'<span style="color:#00B900;font-size:.7rem">CW取込</span>':'')+
+        (g.obIdx>=0?'<span style="color:#4A90D9;font-size:.7rem">📋 OB紐付</span>':'')+
       '</div>' +
       (content?'<div class="mtg-card-content">'+esc(content)+'</div>':'')+
       '<div class="mtg-card-footer">' +
-        (r['次回アクション']?'<span>📌 '+esc(r['次回アクション'])+'</span>':'<span></span>')+
-        (nextDisp?'<span>🗓 次回 '+esc(nextDisp)+'</span>':'<span></span>')+
+        (nextAct?'<span>📌 '+esc(nextAct)+'</span>':'<span></span>')+
+        '<span style="color:#BBA">全'+count+'件の面談履歴</span>'+
       '</div>' +
     '</div>';
   });
   html += '</div>';
   el.innerHTML = html;
+}
+
+function mtgOpenGroupDetail(groupKey){
+  // グループ内の最新MTGを開く
+  var rows = mtgRows.filter(function(r){
+    var k = mtgCleanName(r['顧客名']||'').replace(/\s/g,'').replace(/様$/,'');
+    return k === groupKey;
+  });
+  if(!rows.length) return;
+  // 最新の面談を詳細表示
+  rows.sort(function(a,b){ var da=a['面談日']||'',db=b['面談日']||''; return db>da?1:-1; });
+  mtgOpenDetail(rows[0]._id);
+  // 同一顧客の全MTGも詳細に追記
+  setTimeout(function(){
+    var body = document.getElementById('mtg-det-body');
+    if(!body || rows.length<=1) return;
+    var hist = '<div style="margin-top:18px;border-top:2px solid #E8E4DE;padding-top:14px">';
+    hist += '<div style="font-weight:700;font-size:.88rem;color:#555;margin-bottom:10px">📋 面談履歴（全'+rows.length+'件）</div>';
+    rows.forEach(function(r,i){
+      var d=r['面談日']?r['面談日'].replace(/(\d{4})-(\d{2})-(\d{2})/,'$1/$2/$3'):'—';
+      hist += '<div style="padding:10px 12px;background:'+(i===0?'#F0F7FF':'#FAFAFA')+';border-radius:6px;margin-bottom:8px;cursor:pointer;border:1px solid '+(i===0?'#BFDBFE':'#E8E4DE')+'" onclick="mtgOpenDetail(\''+esc(r._id)+'\')">' +
+        '<div style="font-size:.82rem;font-weight:700;color:#555">'+esc(d)+' '+(r['担当者']?'👤'+esc(r['担当者']):'')+(r['_source']==='chatwork'?' 💬CW':'')+
+        (i===0?' <span style="color:#3B82F6;font-size:.7rem">最新</span>':'')+'</div>'+
+        (r['面談内容']?'<div style="font-size:.8rem;color:#444;margin-top:4px;white-space:pre-wrap">'+esc(r['面談内容'].substring(0,100))+(r['面談内容'].length>100?'…':'')+'</div>':'')+
+        (r['次回アクション']?'<div style="font-size:.78rem;color:#888;margin-top:3px">📌 '+esc(r['次回アクション'])+'</div>':'')+
+      '</div>';
+    });
+    hist += '</div>';
+    body.innerHTML += hist;
+  }, 100);
 }
 
 // MTG顧客名からOBのrow indexを探す（姓・名・様の違いを吸収）
