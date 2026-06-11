@@ -1286,8 +1286,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <select id="ob-vis-staff" onchange="obRenderVisitors()" style="width:100px"></select>
       <input type="text" id="ob-vis-q" placeholder="顧客名・電話・反響元で検索..." style="min-width:170px" oninput="obRenderVisitors()">
       <select id="ob-vis-sort" onchange="obRenderVisitors()" style="width:120px" title="並び順">
+        <option value="desc" selected>新しい順</option>
         <option value="asc">古い順</option>
-        <option value="desc">新しい順</option>
       </select>
       <button class="hbtn ghost" onclick="obJumpToLatestMonth()" title="最新月の先頭にスクロール" style="font-size:.72rem;padding:5px 10px;white-space:nowrap">最新月へ ↓</button>
       <span class="ob-filter-count" id="ob-vis-count"></span>
@@ -3676,9 +3676,13 @@ function obRenderActive(){
     if(fStaff && r['担当者']!==fStaff) return false;
     return true;
   }).slice().sort(function(a,b){
-    var da=obNormDate(a['来場日']||'')||'0000-00-00';
-    var db=obNormDate(b['来場日']||'')||'0000-00-00';
-    return db>da?1:db<da?-1:(b._row-a._row); // 新しい順
+    // 最終接触日（最新履歴 or 来場日）で降順ソート → アクティブな案件が上に来る
+    var ha=obDedupHistory(a.history||[]), hb=obDedupHistory(b.history||[]);
+    var da=ha.length?obNormDate(ha[ha.length-1].date||''):'';
+    var db=hb.length?obNormDate(hb[hb.length-1].date||''):'';
+    da=da||obNormDate(a['来場日']||'')||'0000-00-00';
+    db=db||obNormDate(b['来場日']||'')||'0000-00-00';
+    return db>da?1:db<da?-1:(b._row-a._row);
   });
   var cntEl=document.getElementById('ob-active-count'); if(cntEl) cntEl.textContent=rows.length+'件';
   if(!rows.length){ el.innerHTML='<div class="ob-empty-state">該当する案件がありません</div>'; return; }
