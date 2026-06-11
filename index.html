@@ -930,8 +930,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .hub.show{display:flex}
 /* 背景スライドショー（heartom.co.jpの家写真） */
 .hub .lslides{display:block}
-.hub .lveil{display:block;background:linear-gradient(180deg,rgba(4,5,8,.68) 0%,rgba(4,5,8,.44) 45%,rgba(4,5,8,.72) 100%)}
-.hub .lveil::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 100% 70% at 50% 50%,rgba(154,140,118,.07),transparent 70%)}
+.hub .lveil{display:block;background:linear-gradient(180deg,rgba(10,7,3,.76) 0%,rgba(10,7,3,.48) 48%,rgba(10,7,3,.78) 100%)}
+.hub .lveil::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 100% 65% at 50% 55%,rgba(154,140,118,.10),transparent 68%)}
 
 /* ─── ヘッダーバー（グラスモーフィズム） ─── */
 .hub-header{flex-shrink:0;width:100%;background:rgba(5,6,10,.52);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:18px;padding:14px 32px;box-sizing:border-box;position:relative;z-index:2}
@@ -973,16 +973,17 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 @media(max-width:1280px){.hub-cards-grid{grid-template-columns:repeat(2,1fr)}}
 /* カード：グラスモーフィズム */
 /* ── ハブカード再設計 ── */
-.hub-card{background:rgba(8,9,14,.52);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.10);border-left:3px solid rgba(154,140,118,.6);border-radius:0 12px 12px 0;padding:28px 30px 26px;cursor:pointer;transition:all .28s;position:relative;overflow:hidden}
-.hub-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 50%);pointer-events:none}
-.hub-card:hover{background:rgba(255,255,255,.09);border-left-color:rgba(199,178,153,.9);transform:translateX(4px);box-shadow:0 20px 60px rgba(0,0,0,.5)}
-.hub-card:active{transform:translateX(2px) scale(.99)}
-.hub-card.soon{opacity:.35;cursor:not-allowed}
-.hub-card .hc-title{font-family:var(--serif);font-size:1.18rem;font-weight:700;color:#fff;letter-spacing:.06em;margin-bottom:10px}
-.hub-card .hc-desc{font-size:.78rem;color:rgba(255,255,255,.48);letter-spacing:.04em;line-height:1.85}
-.hub-card .hc-icon{display:none}
-.hub-card .hc-badge{position:absolute;top:14px;right:16px;background:rgba(154,140,118,.2);border:1px solid rgba(154,140,118,.4);color:rgba(255,255,255,.7);font-size:.6rem;font-weight:700;letter-spacing:.04em;padding:3px 9px;border-radius:20px}
-.hub-card .hc-num{font-family:"Playfair Display",serif;font-size:2.8rem;font-weight:600;color:rgba(154,140,118,.9);line-height:1;margin-bottom:8px;letter-spacing:.02em}
+.hub-card{background:rgba(12,8,3,.60);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(199,170,130,.18);border-top:2px solid rgba(199,170,130,.45);border-radius:12px;padding:24px 26px 22px;cursor:pointer;transition:transform .28s ease,box-shadow .28s ease,background .28s ease,border-color .28s ease;position:relative;overflow:hidden}
+.hub-card::before{content:'';position:absolute;inset:0;border-radius:12px;background:linear-gradient(145deg,rgba(199,178,130,.07) 0%,transparent 55%);pointer-events:none}
+.hub-card:hover{background:rgba(255,255,255,.10);border-color:rgba(199,170,130,.38);border-top-color:rgba(220,195,155,.85);transform:translateY(-6px);box-shadow:0 28px 64px rgba(0,0,0,.55),0 0 48px rgba(154,140,118,.10)}
+.hub-card:active{transform:translateY(-2px) scale(.99)}
+.hub-card.soon{opacity:.32;cursor:not-allowed}
+.hub-card.soon:hover{transform:none;box-shadow:none}
+.hub-card .hc-icon{font-size:1.9rem;margin-bottom:13px;display:block;line-height:1;filter:drop-shadow(0 2px 8px rgba(154,140,118,.4))}
+.hub-card .hc-title{font-family:var(--serif);font-size:1.16rem;font-weight:700;color:rgba(255,255,255,.94);letter-spacing:.06em;margin-bottom:8px}
+.hub-card .hc-desc{font-size:.76rem;color:rgba(255,255,255,.42);letter-spacing:.04em;line-height:1.9}
+.hub-card .hc-badge{position:absolute;top:13px;right:14px;background:rgba(154,140,118,.22);border:1px solid rgba(154,140,118,.44);color:rgba(255,255,255,.75);font-size:.6rem;font-weight:700;letter-spacing:.04em;padding:3px 9px;border-radius:20px}
+.hub-card .hc-num{display:none}
 
 /* ─── 直近受付プレビュー ─── */
 .hub-recent{background:rgba(8,9,14,.40);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.13);border-radius:14px;overflow:hidden;flex:1;min-height:0;display:flex;flex-direction:column}
@@ -1016,7 +1017,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   /* スマホ：1列カード＋コンパクト表示 */
   .hub-cards-grid{grid-template-columns:1fr!important;gap:10px}
   .hub-card{padding:18px 20px}
-  .hub-card .hc-icon{font-size:1.6rem;margin-bottom:8px}
+  .hub-card .hc-icon{font-size:1.5rem;margin-bottom:8px}
   .hub-card .hc-title{font-size:.9rem}
   .hub-header{padding:10px 14px;gap:8px}
   .hub-header .hh-clock{font-size:1.1rem}
@@ -1165,11 +1166,11 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <div class="hh-date" id="hubClockDate"></div>
     </div>
     <!-- ログインユーザー表示 -->
-    <div id="hubUserInfo" style="display:flex;align-items:center;gap:8px;padding:4px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:all .2s" onclick="showSettings()" title="設定">
+    <div id="hubUserInfo" style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:all .2s" onclick="showSettings()" title="設定を開く" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
       <span style="font-size:1rem">👤</span>
-      <div style="line-height:1.2">
-        <div id="hubUserEmail" style="font-size:.72rem;color:rgba(255,255,255,.85);letter-spacing:.02em;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
-        <div style="font-size:.6rem;color:rgba(255,255,255,.4);letter-spacing:.06em">ログイン中</div>
+      <div style="line-height:1.25">
+        <div id="hubUserName" style="font-size:.8rem;color:rgba(255,255,255,.92);font-weight:700;letter-spacing:.02em;white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis"></div>
+        <div id="hubUserEmail" style="font-size:.6rem;color:rgba(255,255,255,.38);letter-spacing:.01em;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
       </div>
     </div>
     <button onclick="logout()" style="background:rgba(255,80,80,.15);border:1px solid rgba(255,80,80,.3);color:rgba(255,180,180,.9);padding:7px 14px;border-radius:6px;font-size:.74rem;cursor:pointer;letter-spacing:.04em;white-space:nowrap;font-family:inherit;transition:all .2s" onmouseover="this.style.background='rgba(255,80,80,.28)'" onmouseout="this.style.background='rgba(255,80,80,.15)'">ログアウト</button>
@@ -1205,24 +1206,24 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <!-- ナビゲーションカード -->
       <div class="hub-cards-grid">
         <div class="hub-card" onclick="enterReception()">
-          <div class="hc-num">01</div>
+          <div class="hc-icon">🏠</div>
           <div class="hc-title">受付管理</div>
           <div class="hc-desc">お客様受付・セッション管理<br>モニター・遠隔操作</div>
         </div>
         <div class="hub-card" onclick="enterOpenBoard()">
-          <div class="hc-num">02</div>
+          <div class="hc-icon">📋</div>
           <div class="hc-title">オープンボード</div>
           <span class="hc-badge" id="hubObCount">—</span>
           <div class="hc-desc">顧客追客・商談進捗管理<br>月次集計・ハードル管理</div>
         </div>
         <div class="hub-card" onclick="enterKojiBoard()">
-          <div class="hc-num">03</div>
+          <div class="hc-icon">🔨</div>
           <div class="hc-title">着工管理</div>
           <span class="hc-badge" id="hubKjCount">—</span>
           <div class="hc-desc">着工〜竣工・引渡し管理<br>工程スケジュール追跡</div>
         </div>
         <div class="hub-card" onclick="enterTochiBoard()">
-          <div class="hc-num">04</div>
+          <div class="hc-icon">📌</div>
           <div class="hc-title">土地DB</div>
           <span class="hc-badge" id="hubTcCount">—</span>
           <div class="hc-desc">確定土地・物件管理<br>工事案内図・見学会案内図</div>
@@ -2057,6 +2058,15 @@ function handleCredentialResponse(response) {
     console.error('[Login] handleCredentialResponse: credentialが空', response);
     return;
   }
+  // JWTのペイロードから名前・メール情報を事前取得
+  try {
+    var parts = response.credential.split('.');
+    var pad = parts[1].replace(/-/g,'+').replace(/_/g,'/');
+    while(pad.length%4) pad+='=';
+    var payload = JSON.parse(atob(pad));
+    if(payload.name) localStorage.setItem('admin_session_name', payload.name);
+    if(payload.email) localStorage.setItem('admin_session_email', payload.email);
+  } catch(e){ console.warn('[Login] JWT decode error:', e); }
   console.log('[Login] Googleトークン取得。GASで検証中...');
   lerr.textContent = '認証中... （数秒かかります）';
   var url = SEND_URL_DEFAULT + '?action=googleLogin&credential=' + encodeURIComponent(response.credential);
@@ -2108,6 +2118,7 @@ function logout(){
   if(confirm('ログアウトしますか？')){
     localStorage.removeItem('admin_session_token');
     localStorage.removeItem('admin_session_email');
+    localStorage.removeItem('admin_session_name');
     localStorage.removeItem('admin_session_ts');
     location.reload();
   }
@@ -2116,6 +2127,7 @@ function logout(){
 function onAuthFail(){
   localStorage.removeItem('admin_session_token');
   localStorage.removeItem('admin_session_email');
+  localStorage.removeItem('admin_session_name');
   localStorage.removeItem('admin_session_ts');
   // 全パネルを非表示にしてログイン画面に戻す
   document.getElementById('app').classList.remove('show');
@@ -2130,18 +2142,25 @@ function onAuthFail(){
 
 function showApp(){
   document.getElementById('login').classList.add('hide');
-  // ログインユーザーメール表示
+  // ログインユーザー名・メール表示
+  var nameEl = document.getElementById('hubUserName');
   var emailEl = document.getElementById('hubUserEmail');
-  if(emailEl){
-    var em = localStorage.getItem('admin_session_email') || '';
-    emailEl.textContent = em || 'ログイン中';
-    emailEl.title = em;
-  }
+  var nm = localStorage.getItem('admin_session_name') || '';
+  var em = localStorage.getItem('admin_session_email') || '';
+  if(nameEl){ nameEl.textContent = nm || em || 'ログイン中'; nameEl.title = nm || em; }
+  if(emailEl){ emailEl.textContent = nm ? em : ''; }
   if (isBoardView) {
     document.getElementById('board').style.display = 'flex';
     initBoard();
   } else {
     document.getElementById('hub').classList.add('show');
+    // キャッシュから即時描画、続いてバックグラウンドで最新取得
+    var obCached = (function(){ try{var d=localStorage.getItem('ob_v3');return d?JSON.parse(d):[];}catch(e){return[];} })();
+    var kjCached = (function(){ try{var d=localStorage.getItem('kj_v1');return d?JSON.parse(d):[];}catch(e){return[];} })();
+    if(obCached.length){ obRows=obCached; obRows.forEach(function(r,i){r._row=i;}); }
+    if(kjCached.length){ kjRows=kjCached; kjRows.forEach(function(r,i){r._idx=i;}); }
+    hubUpdateBadges();
+    setTimeout(function(){ obLoad(true); kjLoad(true); }, 400);
   }
 }
 
@@ -2177,6 +2196,18 @@ function showHub(){
   document.getElementById('app').classList.remove('show');
   document.getElementById('hub').classList.add('show');
   hubUpdateBadges();
+  // ハブ戻り時：バックグラウンドで最新データを取得（他ユーザーの変更も反映）
+  obLoad(true);
+  kjLoad(true);
+}
+
+// ハブ滞在中でも60秒ごとにデータ自動同期（ログイン中のみ）
+if(!window.__hubPollTimer){
+  window.__hubPollTimer = setInterval(function(){
+    if(!adminKey()) return; // 未ログイン時はスキップ
+    var hubVisible = document.getElementById('hub') && document.getElementById('hub').classList.contains('show');
+    if(hubVisible){ obLoad(true); kjLoad(true); }
+  }, 60000);
 }
 
 function enterKojiBoard(){
@@ -2349,8 +2380,9 @@ function openSettings(tab){
   // アカウント情報
   var tok=adminKey();
   var storedEmail=localStorage.getItem('admin_session_email')||'';
-  var info=storedEmail?'ログイン: '+storedEmail:(tok?'ログイン中（メール不明）':'未ログイン');
-  document.getElementById('stAccountInfo').textContent=info;
+  var storedName=localStorage.getItem('admin_session_name')||'';
+  var info=storedName?(storedName+(storedEmail?' <'+storedEmail+'>':'')):(storedEmail?storedEmail:(tok?'ログイン中（情報不明）':'未ログイン'));
+  document.getElementById('stAccountInfo').textContent='ログイン: '+info;
   // 端末設定
   renderTerminalSeatList();
   var boardUrl = (location.origin + location.pathname).replace(/\/+$/, '') + '?view=board';
@@ -4654,39 +4686,33 @@ var KJ_PHASES = [
   ]},
 ];
 
-// フェーズ判定（日付の埋まり具合から現在フェーズを推定）
-// ★ 引渡し日が過去の場合のみ引渡済に判定（未来日付は「工事中」等を維持）
+// フェーズ判定（常にマイルストーン日付から判定 ─ ストアドステータスは最終フォールバックのみ）
 function kjPhaseOf(r){
-  var stored = r['ステータス'];
-  // 引渡済の場合は引渡し日で再検証（未来日付なら竣工済に訂正）
-  if(stored === '引渡済' || stored === '竣工済') {
-    if(r['引渡し']){
-      var m=String(r['引渡し']).match(/^(\d{4})-(\d{2})-(\d{2})/);
-      if(m){
-        var dd=new Date(m[1]+'-'+m[2]+'-'+m[3]+'T00:00:00');
-        var td=new Date(); td.setHours(0,0,0,0);
-        return (dd<=td)?'引渡済':'竣工済';
-      }
-    }
-    if(stored==='引渡済') return '竣工済'; // 引渡し日なし→竣工済
-    return stored;
-  }
-  if(stored) return stored;
-  // 引渡し日チェック
+  var td=new Date(); td.setHours(0,0,0,0);
+  // ① 引渡し日が設定されている場合は最優先
   if(r['引渡し']){
-    var m2=String(r['引渡し']).match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if(m2){
-      var dd2=new Date(m2[1]+'-'+m2[2]+'-'+m2[3]+'T00:00:00');
-      var td2=new Date(); td2.setHours(0,0,0,0);
-      if(dd2<=td2) return '引渡済';
-      return '竣工済';
+    var m=String(r['引渡し']).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(m){
+      var dd=new Date(m[1]+'-'+m[2]+'-'+m[3]+'T00:00:00');
+      if(dd<=td) return '引渡済';
+      // 引渡し予定日が未来 → 直近完了マイルストーンで判定
+      if(r['竣工立会']||r['社内検査']||r['完了検査']||r['カメラ']) return '竣工済';
+      if(r['基礎着工']||r['上棟']||r['木完検査']) return '工事中';
+      if(r['地鎮祭']||r['着工金']) return '着工前';
+      if(r['建確']||r['長期']||r['開発申請']) return '申請中';
+      if(r['請負契約日']||r['納図']||r['地盤調査']) return '設計中';
+      return '竣工済'; // 引渡し予定があれば最低竣工済
     }
   }
-  if(r['竣工立会']||r['社内検査']||r['完了検査']) return '竣工済';
+  // ② 引渡し日なし → マイルストーン実績から判定（高い方優先）
+  if(r['竣工立会']||r['社内検査']||r['完了検査']||r['カメラ']) return '竣工済';
   if(r['基礎着工']||r['上棟']||r['木完検査']) return '工事中';
   if(r['地鎮祭']||r['着工金']) return '着工前';
   if(r['建確']||r['長期']||r['開発申請']) return '申請中';
   if(r['請負契約日']||r['納図']||r['地盤調査']) return '設計中';
+  // ③ 日付情報なし → ストアドステータスを参考（引渡済/竣工済は日付なしなので無効化）
+  var stored=r['ステータス'];
+  if(stored && stored!=='引渡済' && stored!=='竣工済') return stored;
   return '契約前';
 }
 var KJ_PHASE_CLASS={'契約前':'p0','設計中':'p1','申請中':'p1','着工前':'p2','工事中':'p3','竣工済':'p4','引渡済':'p5'};
