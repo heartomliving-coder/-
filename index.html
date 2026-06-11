@@ -867,6 +867,152 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .tochi-tag{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.02em}
 .tochi-tag.on{background:#F0FDF4;color:#166534;border:1px solid #BBF7D0}
 .tochi-tag.off{background:#F7F5F0;color:#A89C88;border:1px solid #E5DFD4}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ハブ ダッシュボード（新デザイン）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.hub{position:fixed;inset:0;z-index:45;display:none;flex-direction:column;background:linear-gradient(145deg,#0C0D10 0%,#111318 55%,#0D0E13 100%);overflow:hidden}
+.hub.show{display:flex}
+/* Hubの背景スライドは廃止して軽量化 */
+.hub .lslides,.hub .lveil{display:none}
+
+.hub-header{flex-shrink:0;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:18px;padding:14px 28px}
+.hub-header .hh-logo{height:26px;filter:brightness(0) invert(1);opacity:.88}
+.hub-header .hh-title{font-family:var(--serif);font-size:.92rem;letter-spacing:.18em;color:rgba(255,255,255,.72);font-weight:600}
+.hub-header .hh-sub{font-family:"Playfair Display",serif;font-size:.55rem;letter-spacing:.36em;color:rgba(255,255,255,.28);font-weight:400;display:block;margin-top:2px}
+.hub-header .hh-grow{flex:1}
+.hub-header .hh-notif{display:flex;align-items:center;gap:6px;font-size:.7rem;color:rgba(255,255,255,.45);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:5px 12px;white-space:nowrap;cursor:pointer;transition:all .15s}
+.hub-header .hh-notif:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.75)}
+.hub-header .hh-clock-wrap{text-align:right;flex-shrink:0}
+.hub-header .hh-clock{font-family:"Playfair Display",serif;font-size:1.3rem;font-weight:600;line-height:1;color:rgba(255,255,255,.78);letter-spacing:.03em}
+.hub-header .hh-date{font-size:.6rem;letter-spacing:.18em;color:rgba(255,255,255,.32);margin-top:3px}
+
+.hub-body{flex:1;display:grid;grid-template-columns:240px 1fr;min-height:0;overflow:hidden}
+
+/* ─── サイドバー ─── */
+.hub-side{background:rgba(255,255,255,.025);border-right:1px solid rgba(255,255,255,.07);overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:14px}
+.hub-kpi-row{display:flex;flex-direction:column;gap:10px}
+.hub-kpi{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:14px 16px;transition:border-color .15s;cursor:default}
+.hub-kpi:hover{border-color:rgba(154,140,118,.4)}
+.hub-kpi-val{font-family:"Playfair Display",serif;font-size:2.2rem;font-weight:600;line-height:1;color:#fff;letter-spacing:.01em}
+.hub-kpi-lbl{font-size:.62rem;letter-spacing:.16em;color:rgba(255,255,255,.45);font-weight:700;margin-top:7px;text-transform:uppercase}
+.hub-kpi-sub{font-size:.68rem;color:#9A8C76;margin-top:3px;font-weight:600}
+.hub-side-sec{font-size:.58rem;letter-spacing:.22em;color:rgba(255,255,255,.3);font-weight:700;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.06);margin-top:2px}
+.hub-bday-mini{display:flex;flex-direction:column;gap:5px}
+.hub-bday-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,.04);border-radius:6px;border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:background .12s}
+.hub-bday-row:hover{background:rgba(255,255,255,.08);border-color:rgba(154,140,118,.3)}
+.hub-bday-row.today-bd{border-color:rgba(154,140,118,.6);background:rgba(154,140,118,.08)}
+.hub-bday-date{font-size:.68rem;color:#9A8C76;font-weight:700;min-width:36px}
+.hub-bday-name{flex:1;font-size:.76rem;color:rgba(255,255,255,.72);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub-bday-days{font-size:.62rem;color:rgba(255,255,255,.38);white-space:nowrap}
+.hub-empty-mini{font-size:.74rem;color:rgba(255,255,255,.25);padding:10px 4px;text-align:center}
+
+/* ─── メインエリア ─── */
+.hub-main{overflow-y:auto;padding:22px 24px;display:flex;flex-direction:column;gap:20px}
+.hub-cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.hub-card{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.13);border-radius:12px;padding:26px 28px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden}
+.hub-card::before{content:'';position:absolute;inset:0;border-radius:12px;background:linear-gradient(140deg,rgba(255,255,255,.04),transparent 55%);pointer-events:none}
+.hub-card:hover{background:rgba(255,255,255,.1);border-color:rgba(199,178,153,.5);transform:translateY(-3px);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.hub-card:active{transform:translateY(-1px) scale(.99)}
+.hub-card .hc-icon{font-size:1.8rem;margin-bottom:10px;display:block}
+.hub-card .hc-title{font-family:var(--serif);font-size:1rem;font-weight:700;color:#fff;letter-spacing:.1em;margin-bottom:5px}
+.hub-card .hc-desc{font-size:.64rem;color:rgba(255,255,255,.38);letter-spacing:.04em;line-height:1.8}
+.hub-card .hc-badge{position:absolute;top:13px;right:13px;background:rgba(154,140,118,.3);border:1px solid rgba(154,140,118,.55);color:rgba(255,255,255,.88);font-size:.6rem;font-weight:700;letter-spacing:.04em;padding:3px 9px;border-radius:20px}
+
+/* ─── 直近受付プレビュー ─── */
+.hub-recent{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:10px;overflow:hidden}
+.hub-recent-hd{padding:9px 16px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07)}
+.hub-recent-hd span{font-size:.62rem;letter-spacing:.16em;color:rgba(255,255,255,.48);font-weight:700;text-transform:uppercase}
+.hub-recent-hd .hub-recent-more{font-size:.68rem;color:#9A8C76;cursor:pointer;font-weight:600;letter-spacing:.03em;background:none;border:none;padding:0}
+.hub-recent-hd .hub-recent-more:hover{color:rgba(199,178,153,.9)}
+.hub-recent-list{display:flex;flex-direction:column;max-height:220px;overflow-y:auto}
+.hub-rec-row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .12s}
+.hub-rec-row:last-child{border-bottom:none}
+.hub-rec-row:hover{background:rgba(255,255,255,.05)}
+.hub-rec-date{font-size:.68rem;color:#9A8C76;min-width:50px;font-weight:600;flex-shrink:0}
+.hub-rec-name{flex:1;font-size:.82rem;color:rgba(255,255,255,.82);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub-rec-staff{font-size:.68rem;color:rgba(255,255,255,.38);white-space:nowrap;flex-shrink:0}
+.hub-rec-src{font-size:.62rem;color:rgba(154,140,118,.8);padding:2px 7px;background:rgba(154,140,118,.1);border-radius:20px;white-space:nowrap;border:1px solid rgba(154,140,118,.2);flex-shrink:0}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   スマートフォン / タブレット対応
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media(max-width:860px){
+  .hub-body{grid-template-columns:1fr}
+  .hub-side{display:none}
+  .hub-cards-grid{grid-template-columns:repeat(2,1fr)}
+  .hub-header{padding:12px 16px}
+}
+@media(max-width:640px){
+  /* レイアウト */
+  .ws{grid-template-columns:1fr!important}
+  .ws-left{max-height:280px;overflow:auto;border-right:none;border-bottom:1px solid rgba(255,255,255,.1)}
+  /* ヘッダー */
+  .hd{padding:max(12px,env(safe-area-inset-top)) 14px 12px;flex-wrap:wrap;gap:8px}
+  .hd-tools{gap:6px;flex-wrap:wrap}
+  .hd .brand img{height:24px}
+  .hd .ti{font-size:.95rem}
+  .hd .ti small{display:none}
+  .staffbox select{min-width:80px;font-size:.82rem;padding:8px 8px}
+  .fsctl{display:none}
+  /* ヘッダーボタン */
+  .hbtn{padding:9px 11px;font-size:.72rem}
+  .hbtn .ic{display:none}
+  /* OB ヘッダー */
+  .ob-hd{padding:max(12px,env(safe-area-inset-top)) 12px 0;gap:6px}
+  .ob-brand img{height:20px}
+  .ob-hd-ti{font-size:.82rem}
+  .ob-hd-ti small{display:none}
+  .ob-tab{padding:9px 10px;font-size:.7rem;letter-spacing:.04em}
+  .ob-hd-tools{gap:5px;padding:0 0 10px}
+  .ob-hd-tools .hbtn{padding:7px 9px;font-size:.68rem}
+  /* OB フィルター */
+  .ob-filter{padding:8px 12px;gap:6px}
+  .ob-filter select,.ob-filter input[type=text]{font-size:.82rem;padding:5px 8px}
+  /* KJ ヘッダー */
+  .kj-hd{padding:max(12px,env(safe-area-inset-top)) 14px 12px;flex-wrap:wrap;gap:6px}
+  .kj-hd-ti small{display:none}
+  .kj-tab{padding:10px 14px;font-size:.7rem}
+  .kj-hd-tools{flex-wrap:wrap;gap:5px}
+  .kj-hd-tools .hbtn{padding:7px 9px;font-size:.68rem}
+  .kj-filter{padding:8px 14px;gap:6px}
+  /* KJ テーブル：横スクロール */
+  .kj-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .kj-table{min-width:620px}
+  /* OB テーブル */
+  .ob-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .ob-table{min-width:700px}
+  /* OB 詳細パネル */
+  .ob-detail{overflow:auto}
+  .ob-det-pane{padding:16px}
+  .ob-info-grid{grid-template-columns:1fr}
+  .ob-hurdle-grid{grid-template-columns:repeat(3,1fr)}
+  .ob-framing-grid{grid-template-columns:1fr 1fr}
+  .ob-tl-add{flex-wrap:wrap}
+  .ob-tl-add input,.ob-tl-add select,.ob-tl-add .tl-content{width:100%}
+  /* KJ 詳細 */
+  .kj-detail{width:100vw}
+  .kj-phase-grid{grid-template-columns:repeat(2,1fr)}
+  /* ハブ */
+  .hub-header{padding:10px 14px;gap:10px}
+  .hub-header .hh-title{font-size:.8rem;letter-spacing:.1em}
+  .hub-header .hh-notif{display:none}
+  .hub-cards-grid{grid-template-columns:1fr}
+  .hub-card{padding:18px 20px}
+  .hub-main{padding:14px}
+  /* バー */
+  .bar{padding:12px 14px;gap:8px}
+  .bar .newbtn{padding:11px 16px;font-size:.88rem}
+  .bar input{min-width:140px;padding:10px 12px;font-size:.9rem}
+  /* 受付席 */
+  .seats{grid-template-columns:1fr 1fr}
+  .seat{min-height:100px;padding:12px}
+  .seat-who{font-size:1rem}
+}
+@media(max-width:400px){
+  .hub-cards-grid{grid-template-columns:1fr}
+  .ob-hurdle-grid{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
@@ -905,48 +1051,84 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   </div>
 </div>
 
-<!-- ─── モード選択ハブ ─── -->
+<!-- ─── モード選択ハブ（ダッシュボード） ─── -->
 <div id="hub" class="hub">
-  <div class="lslides">
-    <div class="lslide" style="background-image:url('/int1.jpg')"></div>
-    <div class="lslide" style="background-image:url('/int3.jpg')"></div>
-    <div class="lslide" style="background-image:url('/ext1.jpg')"></div>
-    <div class="lslide" style="background-image:url('/int5.jpg')"></div>
+  <!-- ヘッダー -->
+  <div class="hub-header">
+    <img class="hh-logo" src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none'">
+    <div style="line-height:1.2">
+      <div class="hh-title">管理コンソール<span class="hh-sub">HEARTOM LIVING — MANAGEMENT CONSOLE</span></div>
+    </div>
+    <div class="hh-grow"></div>
+    <div id="hubBdayNotif" class="hh-notif" onclick="hubOpenBdayTab()" style="display:none">🎂 <span id="hubBdayNotifTxt"></span></div>
+    <div class="hh-clock-wrap">
+      <div class="hh-clock" id="hubClockTime">--:--:--</div>
+      <div class="hh-date" id="hubClockDate"></div>
+    </div>
   </div>
-  <div class="lveil"></div>
-  <div class="hub-wrap" style="max-width:960px">
-    <div class="hub-datetime" id="hubClock"></div>
-    <img class="hub-logo" src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none'">
-    <div class="hub-appname">管理コンソール</div>
-    <div class="hub-subtitle">HEARTOM LIVING — MANAGEMENT CONSOLE</div>
-    <div class="hub-divider"></div>
-    <div class="hub-cards" style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px;width:100%;max-width:660px">
-      <div class="hub-card" onclick="enterReception()" style="padding:34px 40px">
-        <div class="hub-icon">🏠</div>
-        <div class="hub-title">受付管理</div>
-        <div class="hub-card-sep"></div>
-        <div class="hub-desc">お客様受付・セッション管理<br>モニター・遠隔操作</div>
+  <!-- ボディ -->
+  <div class="hub-body">
+    <!-- サイドバー（デスクトップ） -->
+    <div class="hub-side">
+      <div class="hub-kpi-row">
+        <div class="hub-kpi" id="hub-kpi-today">
+          <div class="hub-kpi-val" id="hubKpiToday">—</div>
+          <div class="hub-kpi-lbl">本日の受付</div>
+          <div class="hub-kpi-sub" id="hubKpiTodaySub"></div>
+        </div>
+        <div class="hub-kpi">
+          <div class="hub-kpi-val" id="hubKpiOB">—</div>
+          <div class="hub-kpi-lbl">追客中（OB）</div>
+          <div class="hub-kpi-sub" id="hubKpiOBSub"></div>
+        </div>
+        <div class="hub-kpi">
+          <div class="hub-kpi-val" id="hubKpiKJ">—</div>
+          <div class="hub-kpi-lbl">着工進行中</div>
+          <div class="hub-kpi-sub" id="hubKpiKJSub"></div>
+        </div>
       </div>
-      <div class="hub-card" onclick="enterOpenBoard()" style="padding:34px 40px">
-        <div class="hub-icon">📋</div>
-        <div class="hub-title">オープンボード</div>
-        <div class="hub-badge" id="hubObCount">—</div>
-        <div class="hub-card-sep"></div>
-        <div class="hub-desc">顧客追客・商談進捗管理<br>月次集計・ハードル管理</div>
+      <div class="hub-side-sec">🎂 今後7日の誕生日</div>
+      <div class="hub-bday-mini" id="hubBdayMini">
+        <div class="hub-empty-mini">読み込み中...</div>
       </div>
-      <div class="hub-card" onclick="enterKojiBoard()" style="padding:34px 40px">
-        <div class="hub-icon">🏗</div>
-        <div class="hub-title">着工管理</div>
-        <div class="hub-badge" id="hubKjCount">—</div>
-        <div class="hub-card-sep"></div>
-        <div class="hub-desc">着工〜竣工・引渡し管理<br>工程スケジュール追跡</div>
+    </div>
+    <!-- メインエリア -->
+    <div class="hub-main">
+      <!-- ナビゲーションカード -->
+      <div class="hub-cards-grid">
+        <div class="hub-card" onclick="enterReception()">
+          <span class="hc-icon">🏠</span>
+          <div class="hc-title">受付管理</div>
+          <div class="hc-desc">お客様受付・セッション管理<br>モニター・遠隔操作</div>
+        </div>
+        <div class="hub-card" onclick="enterOpenBoard()">
+          <span class="hc-icon">📋</span>
+          <div class="hc-title">オープンボード</div>
+          <span class="hc-badge" id="hubObCount">—</span>
+          <div class="hc-desc">顧客追客・商談進捗管理<br>月次集計・ハードル管理</div>
+        </div>
+        <div class="hub-card" onclick="enterKojiBoard()">
+          <span class="hc-icon">🏗</span>
+          <div class="hc-title">着工管理</div>
+          <span class="hc-badge" id="hubKjCount">—</span>
+          <div class="hc-desc">着工〜竣工・引渡し管理<br>工程スケジュール追跡</div>
+        </div>
+        <div class="hub-card" onclick="enterTochiBoard()">
+          <span class="hc-icon">🗺</span>
+          <div class="hc-title">土地DB</div>
+          <span class="hc-badge" id="hubTcCount">—</span>
+          <div class="hc-desc">確定土地・物件管理<br>工事案内図・見学会案内図</div>
+        </div>
       </div>
-      <div class="hub-card" onclick="enterTochiBoard()" style="padding:34px 40px">
-        <div class="hub-icon">🗺</div>
-        <div class="hub-title">土地DB</div>
-        <div class="hub-badge" id="hubTcCount">—</div>
-        <div class="hub-card-sep"></div>
-        <div class="hub-desc">確定土地・物件管理<br>工事案内図・見学会案内図</div>
+      <!-- 直近受付プレビュー -->
+      <div class="hub-recent">
+        <div class="hub-recent-hd">
+          <span>📅 直近の来客（オープンボード）</span>
+          <button class="hub-recent-more" onclick="enterOpenBoard()">すべて見る →</button>
+        </div>
+        <div class="hub-recent-list" id="hubRecentList">
+          <div class="hub-empty-mini">読み込み中...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -989,8 +1171,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <select id="ob-vis-staff" onchange="obRenderVisitors()" style="width:100px"></select>
       <input type="text" id="ob-vis-q" placeholder="顧客名・電話・反響元で検索..." style="min-width:170px" oninput="obRenderVisitors()">
       <select id="ob-vis-sort" onchange="obRenderVisitors()" style="width:120px" title="並び順">
-        <option value="desc">新しい順</option>
         <option value="asc">古い順</option>
+        <option value="desc">新しい順</option>
       </select>
       <span class="ob-filter-count" id="ob-vis-count"></span>
     </div>
@@ -1866,19 +2048,101 @@ function enterKojiBoard(){
 
 // Hub clock + badge updates
 function hubTick(){
-  var el=document.getElementById('hubClock'); if(!el) return;
   var d=new Date(); var w=['日','月','火','水','木','金','土'][d.getDay()];
-  el.textContent=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+w+'）　'+
-    ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
+  var tEl=document.getElementById('hubClockTime');
+  var dEl=document.getElementById('hubClockDate');
+  if(tEl) tEl.textContent=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
+  if(dEl) dEl.textContent=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+w+'）';
+  // 旧ID互換
+  var el=document.getElementById('hubClock'); if(el) el.textContent=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+w+'）';
 }
 function hubUpdateBadges(){
-  var obCnt=obRows.filter(function(r){var s=r['商談ステータス']||''; return ['失注','引渡済'].indexOf(s)<0;}).length;
-  var el=document.getElementById('hubObCount'); if(el) el.textContent=obCnt+'件';
-  var kjCnt=kjRows.filter(function(r){return ['引渡済','完了'].indexOf(kjPhaseOf(r))<0;}).length;
-  var el2=document.getElementById('hubKjCount'); if(el2) el2.textContent=kjCnt+'件';
+  var obActive=obRows.filter(function(r){var s=r['商談ステータス']||''; return ['失注','引渡済'].indexOf(s)<0;}).length;
+  var el=document.getElementById('hubObCount'); if(el) el.textContent=obActive+'件';
+  var el5=document.getElementById('hubKpiOB'); if(el5) el5.textContent=obActive;
+  var el5s=document.getElementById('hubKpiOBSub');
+  if(el5s){ var tot=obRows.length; el5s.textContent=tot?'全'+tot+'件中':''; }
+
+  var kjActive=kjRows.filter(function(r){return ['引渡済','完了'].indexOf(kjPhaseOf(r))<0;}).length;
+  var el2=document.getElementById('hubKjCount'); if(el2) el2.textContent=kjActive+'件';
+  var el6=document.getElementById('hubKpiKJ'); if(el6) el6.textContent=kjActive;
+  var el6s=document.getElementById('hubKpiKJSub');
+  if(el6s){ var kjTot=kjRows.length; el6s.textContent=kjTot?'全'+kjTot+'件中':''; }
+
   var tcCnt=tochiRows.length;
   var el3=document.getElementById('hubTcCount'); if(el3) el3.textContent=tcCnt?tcCnt+'件':'—';
+
+  // 直近受付プレビュー
+  hubRenderRecent();
+  // 誕生日ミニ
+  hubRenderBdayMini();
 }
+
+function hubRenderRecent(){
+  var el=document.getElementById('hubRecentList'); if(!el) return;
+  if(!obRows.length){ el.innerHTML='<div class="hub-empty-mini">データなし（OBを読み込んでください）</div>'; return; }
+  var recent=obRows.slice().sort(function(a,b){
+    var da=obNormDate(a['来場日']||''),db=obNormDate(b['来場日']||'');
+    return db>da?1:db<da?-1:0;
+  }).slice(0,10);
+  el.innerHTML=recent.map(function(r){
+    var d=r['来場日']?obFmtDate(obNormDate(r['来場日'])):'—';
+    var sc=OB_STATUS_CLASS[r['商談ステータス']]||'ob-s0';
+    return '<div class="hub-rec-row" onclick="enterOpenBoard()">'+
+      '<span class="hub-rec-date">'+esc(d)+'</span>'+
+      '<span class="hub-rec-name">'+esc(r['顧客名']||'—')+'</span>'+
+      (r['担当者']?'<span class="hub-rec-staff">'+esc(r['担当者'])+'</span>':'')+
+      (r['来場種別']?'<span class="hub-rec-src">'+esc(r['来場種別'])+'</span>':'')+
+    '</div>';
+  }).join('');
+}
+
+function hubRenderBdayMini(){
+  var el=document.getElementById('hubBdayMini'); if(!el) return;
+  var notifEl=document.getElementById('hubBdayNotif');
+  var notifTxtEl=document.getElementById('hubBdayNotifTxt');
+  if(!obRows.length){ el.innerHTML='<div class="hub-empty-mini">OBデータ未読込</div>'; return; }
+  var today=new Date(); today.setHours(0,0,0,0);
+  var bdays=[];
+  try{ bdays=obGetBdays(); }catch(e){ el.innerHTML='<div class="hub-empty-mini">—</div>'; return; }
+  var soon=[];
+  bdays.forEach(function(b){
+    var thisYear=today.getFullYear();
+    var bdThisYear=new Date(thisYear+'-'+b.mmdd+'T00:00:00');
+    var bdNextYear=new Date((thisYear+1)+'-'+b.mmdd+'T00:00:00');
+    var target=bdThisYear>=today?bdThisYear:bdNextYear;
+    var days=Math.floor((target-today)/(1000*60*60*24));
+    if(days<=7) soon.push({b:b,days:days,date:(target.getMonth()+1)+'月'+target.getDate()+'日'});
+  });
+  soon.sort(function(a,x){return a.days-x.days;});
+  // ヘッダー通知
+  if(soon.length && notifEl && notifTxtEl){
+    var todayBdays=soon.filter(function(s){return s.days===0;});
+    if(todayBdays.length){
+      notifTxtEl.textContent='今日 '+todayBdays.length+'件の誕生日';
+      notifEl.style.display='flex';
+    } else {
+      notifTxtEl.textContent=soon.length+'件（'+soon[0].days+'日後〜）';
+      notifEl.style.display='flex';
+    }
+  } else if(notifEl) { notifEl.style.display='none'; }
+  if(!soon.length){ el.innerHTML='<div class="hub-empty-mini">今後7日の誕生日なし</div>'; return; }
+  el.innerHTML=soon.slice(0,6).map(function(s){
+    var b=s.b; var isToday=s.days===0;
+    var lbl=isToday?'🎉 今日！':s.days===1?'⭐ 明日':s.days+'日後';
+    return '<div class="hub-bday-row'+(isToday?' today-bd':'')+'" onclick="enterOpenBoard()">'+
+      '<span class="hub-bday-date">'+s.date+'</span>'+
+      '<span class="hub-bday-name">'+esc(b.displayName||b.name||'—')+'</span>'+
+      '<span class="hub-bday-days">'+lbl+'</span>'+
+    '</div>';
+  }).join('');
+}
+
+function hubOpenBdayTab(){
+  enterOpenBoard();
+  setTimeout(function(){ obSwitchTab('birthday'); },300);
+}
+
 setInterval(hubTick,1000); hubTick();
 
 // ★ サブ担当の保存機能追加
@@ -3759,6 +4023,9 @@ function obOpenDetail(rowIdx){
   var r=obRows[rowIdx]; if(!r) return;
   obDetailRow=rowIdx;
   obDetailKey={name:r['顧客名']||'',date:r['来場日']||''};
+  // 履歴追加フォームの日付を今日に自動セット
+  var tdInp=document.getElementById('tl-date');
+  if(tdInp){ var t=new Date(); tdInp.value=t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2); }
   document.getElementById('ob-det-name').textContent=r['顧客名']||'—';
   var sub=[];
   if(r['来場日']) sub.push(obFmtDate(obNormDate(r['来場日']))+' 受付');
@@ -4201,14 +4468,25 @@ var KJ_PHASES = [
 ];
 
 // フェーズ判定（日付の埋まり具合から現在フェーズを推定）
+// ★ 引渡し日が過去の場合のみ引渡済に判定（未来日付は「工事中」等を維持）
 function kjPhaseOf(r){
   if(r['ステータス']) return r['ステータス'];
-  if(r['引渡し']) return '引渡済';
-  if(r['竣工立会']) return '竣工済';
-  if(r['基礎着工']) return '工事中';
-  if(r['地鎮祭']) return '着工前';
-  if(r['建確']||r['長期']) return '申請中';
-  if(r['請負契約日']) return '設計中';
+  // 引渡し済：引渡し日が設定されており、かつ今日以前であること
+  if(r['引渡し']){
+    var m=String(r['引渡し']).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(m){
+      var delivDate=new Date(m[1]+'-'+m[2]+'-'+m[3]+'T00:00:00');
+      var today=new Date(); today.setHours(0,0,0,0);
+      if(delivDate<=today) return '引渡済';
+      // 引渡し予定日が未来の場合は竣工済として扱う
+      return '竣工済';
+    }
+  }
+  if(r['竣工立会']||r['社内検査']||r['完了検査']) return '竣工済';
+  if(r['基礎着工']||r['上棟']||r['木完検査']) return '工事中';
+  if(r['地鎮祭']||r['着工金']) return '着工前';
+  if(r['建確']||r['長期']||r['開発申請']) return '申請中';
+  if(r['請負契約日']||r['納図']||r['地盤調査']) return '設計中';
   return '契約前';
 }
 var KJ_PHASE_CLASS={'契約前':'p0','設計中':'p1','申請中':'p1','着工前':'p2','工事中':'p3','竣工済':'p4','引渡済':'p5'};
