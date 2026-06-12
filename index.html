@@ -637,6 +637,14 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-s9{background:#FEF3F2;color:#B91C1C;border:1px solid #FECACA}
 .ob-sP{background:#ECFDF5;color:#166534;border:1px solid #86EFAC}
 .ob-sF{background:#F8F9FB;color:#9CA3AF;border:1px solid #E5E7EB}
+/* 顧客分類バッジ */
+.ob-cls-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.68rem;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+.ob-cls-miKomi{background:#FEF9EC;color:#92400E;border:1px solid #FDE68A}
+.ob-cls-shodan{background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE}
+.ob-cls-keiyaku{background:#ECFDF5;color:#166534;border:1px solid #86EFAC}
+.ob-cls-partner{background:#F5F3FF;color:#5B21B6;border:1px solid #DDD6FE}
+.ob-cls-koji{background:#FFF7ED;color:#9A3412;border:1px solid #FED7AA}
+.ob-cls-hikiwatashi{background:#F0FDFA;color:#0F766E;border:1px solid #99F6E4}
 
 /* インライン編集 */
 .ob-editable{display:inline-block;min-width:18px;cursor:text;border-radius:3px;padding:2px 3px;transition:background .12s;line-height:1.4}
@@ -1216,9 +1224,17 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .hub-kpi-ext-card{background:rgba(4,5,9,.25);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:12px 14px;text-align:center}
 .hub-kpi-ext-val{font-size:1.5rem;font-weight:700;color:#fff}
 .hub-kpi-ext-lbl{font-size:.65rem;color:rgba(255,255,255,.45);margin-top:2px}
+.hub-kpi-ext-hi{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.3)}
+.hub-kpi-ext-hi .hub-kpi-ext-val{color:#93C5FD}
+.hub-kpi-ext-green{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.25)}
+.hub-kpi-ext-green .hub-kpi-ext-val{color:#86EFAC}
+.hub-kpi-ext-teal{background:rgba(20,184,166,.12);border-color:rgba(20,184,166,.25)}
+.hub-kpi-ext-teal .hub-kpi-ext-val{color:#5EEAD4}
+.hub-kpi-ext-warn{background:rgba(234,179,8,.12);border-color:rgba(234,179,8,.3)}
+.hub-kpi-ext-warn .hub-kpi-ext-val{color:#FDE047}
 @media(max-width:640px){
-  .hub-kpi-ext{grid-template-columns:repeat(2,1fr);gap:6px}
-  .hub-kpi-ext-val{font-size:1.2rem}
+  .hub-kpi-ext{grid-template-columns:repeat(3,1fr)!important;gap:6px}
+  .hub-kpi-ext-val{font-size:1.1rem}
 }
 /* クイック登録 */
 .hub-quick{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
@@ -1623,6 +1639,12 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <label class="ob-filter-chk"><input type="checkbox" id="ob-hide-inactive" checked onchange="obRenderActive()"> 失注・中長期を非表示</label>
       <label>担当:</label>
       <select id="ob-filter-staff" onchange="obRenderActive()" style="width:100px"></select>
+      <label>分類:</label>
+      <select id="ob-filter-cls" onchange="obRenderActive()" style="width:90px;padding:4px 6px;border:1px solid #DDD;border-radius:4px;font-size:.8rem">
+        <option value="">全て</option>
+        <option>見込み</option><option>商談中</option><option>契約済</option>
+        <option>パートナー</option><option>着工中</option><option>引渡し済</option>
+      </select>
       <span class="ob-filter-count" id="ob-active-count"></span>
       <button class="ob-btn-sm" onclick="obToggleCalendar()" style="margin-left:auto">📅 カレンダー</button>
     </div>
@@ -4331,6 +4353,21 @@ var OB_STATUS_CLASS = {
   'パートナー検討中':'ob-sP','パートナー契約済':'ob-sP','失注':'ob-sF'
 };
 
+var OB_CLASSIFICATION_CLASS = {
+  '見込み':'ob-cls-miKomi',
+  '商談中':'ob-cls-shodan',
+  '契約済':'ob-cls-keiyaku',
+  'パートナー':'ob-cls-partner',
+  '着工中':'ob-cls-koji',
+  '引渡し済':'ob-cls-hikiwatashi'
+};
+
+function obClsBadge(cls){
+  if(!cls) return '';
+  var c=OB_CLASSIFICATION_CLASS[cls]||'ob-cls-miKomi';
+  return '<span class="ob-cls-badge '+c+'">'+esc(cls)+'</span>';
+}
+
 // ステータス表示正規化（初回接触→問い合わせ）
 function obNormStatus(s){
   if(!s) return '問い合わせ';
@@ -4763,10 +4800,12 @@ function obRenderActive(){
   var fStaff=((document.getElementById('ob-filter-staff')||{}).value||'');
   var INACTIVE=['失注','中長期フォロー','パートナー検討中','パートナー契約済'];
   var today=new Date(); today.setHours(0,0,0,0);
+  var fCls=((document.getElementById('ob-filter-cls')||{}).value||'');
 
   var rows=obRows.filter(function(r){
     if(hideInactive && INACTIVE.indexOf(r['商談ステータス'])>=0) return false;
     if(fStaff && r['担当者']!==fStaff) return false;
+    if(fCls && (r['顧客分類']||'')!==fCls) return false;
     return true;
   }).slice().sort(function(a,b){
     // 最終接触日（最新履歴 or 来場日）で降順ソート → アクティブな案件が上に来る
@@ -4826,10 +4865,14 @@ function obRenderActive(){
     var k=r.karte||{};
     var tel=obSanitizeVal(k['電話番号']||'');
 
+    var clsBadge=obClsBadge(r['顧客分類']||'');
     html+='<div class="ob-card" data-sc="'+sc+'">'+
       '<div class="ob-card-top">'+
         '<span class="ob-card-name" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span>'+
-        '<span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="flex-shrink:0;cursor:pointer">'+esc(dispStatus)+'</span>'+
+        '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0">'+
+          (clsBadge?clsBadge:'')+
+          '<span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="cursor:pointer">'+esc(dispStatus)+'</span>'+
+        '</div>'+
       '</div>'+
       '<div class="ob-card-meta">'+
         '<span class="ob-card-staff">👤 '+esc(staffLbl)+'</span>'+
@@ -5044,6 +5087,8 @@ function obStartEdit(el){
     if(field==='来場種別') opts=OB_EVENT_TYPES;
     else if(field==='反響元') opts=OB_SOURCES;
     else if(field==='商談ステータス') opts=OB_STATUS_LIST;
+    else if(field==='顧客分類') opts=['見込み','商談中','契約済','パートナー','着工中','引渡し済'];
+    else if(el.getAttribute('data-opts')) { try{ opts=JSON.parse(el.getAttribute('data-opts')); }catch(e){} }
   } else if(type==='staff'){
     opts=getStaffList();
   }
@@ -5417,9 +5462,21 @@ function obSaveNew(){
     次回内容:document.getElementById('obNewNextContent').value.trim()||''
   };
   obCloseNewModal();
-  toast('追加中…');
+  // ── 楽観的UI更新（即座に画面に反映） ──
+  var newRec=Object.assign({},data,{
+    _row:obRows.length,
+    id:'tmp_'+Date.now(),
+    karte:{},
+    history: data['来場日']?[{date:data['来場日'],type:'来場',content:data['来場種別']||'初回来場',staff:data['担当者']||''}]:[]
+  });
+  obRows.push(newRec);
+  obRows.forEach(function(r,i){r._row=i;});
+  obSetCache(obRows);
+  obRenderAll();
+  toast('✅ 「'+name+'」を追加しました（GASに保存中…）');
   post(Object.assign({action:'obSaveCustomer'},data));
-  setTimeout(function(){ obLoad(); },1800);
+  // GAS保存完了後に最新データ取得（楽観的UIはそのまま保持）
+  setTimeout(function(){ obLoad(true); },3500);
 }
 
 // ── 顧客詳細画面 ──
@@ -5600,6 +5657,7 @@ function obRenderDetInfo(){
     {key:'担当者',label:'担当者',type:'staff'},
     {key:'サブ担当',label:'サブ担当',type:'staff'},
     {key:'商談ステータス',label:'商談ステータス',type:'sel',opts:OB_STATUS_LIST},
+    {key:'顧客分類',label:'顧客分類',type:'sel',opts:['見込み','商談中','契約済','パートナー','着工中','引渡し済']},
     {key:'次回予定',label:'次回予定日',type:'date'},
     {key:'次回内容',label:'次回内容',type:'text'},
     {key:'アポ確定日',label:'アポ確定日',type:'date'},
@@ -6710,6 +6768,9 @@ function tochiRenderList(){
     var rowIdx=tochiRows.indexOf(r);
     var customerName=r['顧客名']||'—';
     var loc=r['所在地']||'';
+    var zip=obSanitizeVal(r['郵便番号']||'');
+    var chiban=obSanitizeVal(r['地番']||'');
+    var biko=obSanitizeVal(r['備考']||'');
     var kojiUrl=r['工事案内図']||'';
     var hasKoji=!!kojiUrl;
     var kengakuUrls=TOCHI_STAFF.filter(function(s){return !!r[s.prop];}).map(function(s){return {label:s.label||s.prop,url:r[s.prop]};});
@@ -6736,14 +6797,28 @@ function tochiRenderList(){
           '📍 '+(loc?esc(loc):'<span style="color:#C0A070;font-style:italic">所在地をクリックして入力</span>')+
         '</div>'+
         '<div id="tochi-loc-edit-'+rowIdx+'" style="display:none;padding:4px 0">'+
+          '<div style="display:flex;gap:6px;margin-bottom:6px">'+
+            '<input id="tochi-zip-inp-'+rowIdx+'" type="text" value="'+esc(zip)+'" placeholder="〒000-0000" '+
+              'style="width:130px;padding:6px 10px;border:1.5px solid #C0A070;border-radius:5px;font-size:.84rem;outline:none" '+
+              'data-row="'+rowIdx+'" data-nid="'+esc(notionId)+'">'+
+            '<input id="tochi-chiban-inp-'+rowIdx+'" type="text" value="'+esc(chiban)+'" placeholder="地番（例：千葉市123番4）" '+
+              'style="flex:1;padding:6px 10px;border:1.5px solid #C0A070;border-radius:5px;font-size:.84rem;outline:none">'+
+          '</div>'+
           '<input id="tochi-loc-inp-'+rowIdx+'" type="text" value="'+esc(loc)+'" placeholder="例: 千葉市中央区2-1-3" '+
-            'style="width:100%;padding:6px 10px;border:1.5px solid #C0A070;border-radius:5px;font-size:.84rem;outline:none" '+
+            'style="width:100%;padding:6px 10px;border:1.5px solid #C0A070;border-radius:5px;font-size:.84rem;outline:none;margin-bottom:6px" '+
             'data-row="'+rowIdx+'" data-nid="'+esc(notionId)+'">'+
-          '<div style="display:flex;gap:6px;margin-top:6px">'+
+          '<textarea id="tochi-biko-inp-'+rowIdx+'" placeholder="備考（目印・土地情報など）" rows="2" '+
+            'style="width:100%;padding:6px 10px;border:1.5px solid #C0A070;border-radius:5px;font-size:.82rem;outline:none;resize:vertical;box-sizing:border-box;margin-bottom:6px">'+esc(biko)+'</textarea>'+
+          '<div style="display:flex;gap:6px">'+
             '<button onclick="tochiSaveAddress('+rowIdx+')" style="flex:1;background:#C0A070;color:#fff;border:none;border-radius:4px;padding:6px 0;font-size:.78rem;font-weight:700;cursor:pointer">💾 保存・地図生成</button>'+
             '<button onclick="tochiCancelEditAddress('+rowIdx+')" style="background:#EEE;border:none;border-radius:4px;padding:6px 10px;font-size:.78rem;cursor:pointer">✕</button>'+
           '</div>'+
         '</div>'+
+        // ── 郵便番号・地番・備考の表示 ──
+        ((zip||chiban)?'<div style="font-size:.76rem;color:#888;margin:2px 0">'+
+          (zip?'〒 '+esc(zip):'')+(zip&&chiban?' ・ ':'')+(chiban?'地番: '+esc(chiban):'')+
+        '</div>':'')+
+        (biko?'<div style="font-size:.76rem;color:#777;margin:2px 0;line-height:1.5;white-space:pre-line">📝 '+esc(biko)+'</div>':'')+
         (parking?'<div class="tochi-card-park">🅿 '+esc(parking)+'</div>':'')+
         '<div class="tochi-card-actions">'+
           (openUrl?'<a href="'+esc(openUrl)+'" target="_blank" class="tochi-link-btn">🗺 地図を開く</a>':'')+
@@ -6894,16 +6969,27 @@ function tochiSaveAddress(rowIdx){
   var r=tochiRows[rowIdx];
   if(!r){ toast('❌ データが見つかりません'); return; }
   if(!address){ toast('所在地を入力してください'); return; }
+  var zipInp=document.getElementById('tochi-zip-inp-'+rowIdx);
+  var chibanInp=document.getElementById('tochi-chiban-inp-'+rowIdx);
+  var bikoInp=document.getElementById('tochi-biko-inp-'+rowIdx);
+  var zip=zipInp?zipInp.value.trim():'';
+  var chiban=chibanInp?chibanInp.value.trim():'';
+  var biko=bikoInp?bikoInp.value.trim():'';
   // ローカルキャッシュ更新
   r['所在地']=address;
+  if(zip) r['郵便番号']=zip;
+  if(chiban) r['地番']=chiban;
+  if(biko!==undefined) r['備考']=biko;
   tochiSetCache(tochiRows);
   // GASに保存（Notionを更新）
-  toast('所在地を保存中…');
-  gasGet('tochiGetData',function(){},500); // キャッシュ先行
+  toast('土地情報を保存中…');
   post({action:'tochiSaveField',notionId:notionId,field:'所在地',value:address});
+  if(zip) post({action:'tochiSaveField',notionId:notionId,field:'郵便番号',value:zip});
+  if(chiban) post({action:'tochiSaveField',notionId:notionId,field:'地番',value:chiban});
+  if(biko!==undefined) post({action:'tochiSaveField',notionId:notionId,field:'備考',value:biko});
   // 保存後に案内図生成を自動トリガー
   setTimeout(function(){
-    toast('✅ 住所を保存しました。地図・工事案内図・見学会案内図を生成中…（数分かかります）');
+    toast('✅ 土地情報を保存しました。地図・工事案内図を生成中…（数分かかります）');
     post({action:'tochiGenerateAllMaps'});
     setTimeout(function(){ tochiLoad(true); },90000);
   },1200);
@@ -6912,6 +6998,7 @@ function tochiSaveAddress(rowIdx){
   var edit=document.getElementById('tochi-loc-edit-'+rowIdx);
   if(disp){ disp.innerHTML='📍 '+esc(address); disp.style.display=''; }
   if(edit) edit.style.display='none';
+  tochiRenderList();
 }
 
 // 個別案内図生成（所在地が登録済みの1件のみ）
@@ -7971,20 +8058,55 @@ function buildCustomerTimeline(obRow){
 function hubRenderExtKpi(){
   var el=document.getElementById('hubExtKpi'); if(!el) return;
   var today=new Date(); var ym=today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2);
+  var todayStr=today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2);
 
+  // OB統計
   var obTotal=(obRows||[]).length;
   var obPartner=(obRows||[]).filter(function(r){ return (r['商談ステータス']||'').indexOf('パートナー')>=0; }).length;
+  var obShodan=(obRows||[]).filter(function(r){ var s=r['商談ステータス']||''; return ['FP前','LPS前','ヒアリング前','プレゼン前'].indexOf(s)>=0; }).length;
+  // 今月来場数（履歴の種別「来場」が今月のもの）
+  var visitsThisMonth=(obRows||[]).reduce(function(acc,r){
+    return acc + (r.history||[]).filter(function(h){ return (h.type||'').indexOf('来場')>=0 && (h.date||'').indexOf(ym)===0; }).length;
+  },0);
+  // 未対応（30日以上連絡なし・失注・中長期以外）
+  var uncontacted=(obRows||[]).filter(function(r){
+    var st=r['商談ステータス']||'';
+    if(['失注','中長期フォロー','パートナー検討中','パートナー契約済'].indexOf(st)>=0) return false;
+    var hist=r.history||[];
+    if(!hist.length) return true;
+    var last=hist[hist.length-1];
+    var lastDate=new Date(obNormDate(last.date||'')||todayStr);
+    return (today-lastDate)/(1000*60*60*24)>30;
+  }).length;
+
+  // KJ統計
   var kjActive=(kjRows||[]).filter(function(r){ var st=r['ステータス']||''; return st&&st!=='引渡済'&&st!=='完工'; }).length;
+  var kjHikiwatashi=(kjRows||[]).filter(function(r){ var st=r['ステータス']||''; return st==='引渡済'||st==='完工'; }).length;
+  var kjKakoThisMonth=(kjRows||[]).filter(function(r){ return (r['着工日']||'').indexOf(ym)===0; }).length;
+
+  // 今月面談数
   var mtgThisMonth=(mtgRows||[]).filter(function(r){ return (r['面談日']||'').indexOf(ym)===0; }).length;
 
-  el.innerHTML='<div class="hub-kpi-ext">'+[
-    {val:obTotal,    lbl:'追客顧客数'},
-    {val:obPartner,  lbl:'パートナー'},
-    {val:kjActive,   lbl:'着工進行中'},
-    {val:mtgThisMonth,lbl:'今月の面談'}
-  ].map(function(k){
-    return '<div class="hub-kpi-ext-card"><div class="hub-kpi-ext-val">'+k.val+'</div><div class="hub-kpi-ext-lbl">'+k.lbl+'</div></div>';
-  }).join('')+'</div>';
+  var kpis=[
+    {val:obTotal,         lbl:'👤 総顧客数',  cls:''},
+    {val:obShodan,        lbl:'💼 商談中',     cls: obShodan>0?'hub-kpi-ext-hi':''},
+    {val:obPartner,       lbl:'🤝 パートナー', cls:'hub-kpi-ext-green'},
+    {val:visitsThisMonth, lbl:'📅 今月来場',   cls:''},
+    {val:mtgThisMonth,    lbl:'🗣 今月面談',   cls:''},
+    {val:kjActive,        lbl:'🏗 着工中',     cls:''},
+    {val:kjKakoThisMonth, lbl:'🔨 今月着工',   cls:''},
+    {val:kjHikiwatashi,   lbl:'🏠 引渡し済',   cls:'hub-kpi-ext-teal'},
+    {val:uncontacted,     lbl:'⚠ 未対応',      cls: uncontacted>0?'hub-kpi-ext-warn':''}
+  ];
+  var html='<div class="hub-kpi-ext" style="grid-template-columns:repeat(3,1fr)">'+
+    kpis.map(function(k){
+      return '<div class="hub-kpi-ext-card '+(k.cls||'')+'" >'+
+        '<div class="hub-kpi-ext-val">'+k.val+'</div>'+
+        '<div class="hub-kpi-ext-lbl">'+k.lbl+'</div>'+
+      '</div>';
+    }).join('')+
+  '</div>';
+  el.innerHTML=html;
 }
 
 </script>
