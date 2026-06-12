@@ -3140,11 +3140,13 @@ function hubRenderGcal(d){
   }
   el.innerHTML = d.events.map(function(ev){
     var color = ev.color || '#9A8C76';
+    // staffフィールド（新形式）またはcalendar（旧形式）を表示
+    var staffLbl = ev.staff || (ev.calendar||'').replace(/@.*$/,'').replace(/\.heartom$/,'');
     return '<div class="hub-gcal-ev">' +
       '<span class="hub-gcal-dot" style="background:'+esc(color)+'"></span>'+
       '<span class="hub-gcal-time">'+esc(ev.start)+'〜'+esc(ev.end)+'</span>'+
       '<span class="hub-gcal-name" title="'+esc(ev.title)+'">'+esc(ev.title)+'</span>'+
-      '<span class="hub-gcal-cal" title="'+esc(ev.calendar)+'">'+esc(ev.calendar)+'</span>'+
+      '<span class="hub-gcal-cal" title="'+esc(staffLbl)+'">'+esc(staffLbl)+'</span>'+
     '</div>';
   }).join('');
 }
