@@ -3103,17 +3103,35 @@ function hubLoadGcal(force){
       try{ localStorage.setItem('gcal_v1',JSON.stringify(d)); localStorage.setItem('gcal_v1_ts',String(Date.now())); }catch(e){}
     }
     hubRenderGcal(d);
-  }, 20000);
+  }, 30000);
+}
+function hubGcalDiagnose(){
+  var el=document.getElementById('hubGcalList'); if(!el) return;
+  el.innerHTML='<div class="hub-gcal-empty" style="color:rgba(255,255,100,.5)">🔍 診断中…</div>';
+  gasGet('gcalDiagnose',function(d){
+    if(!d){ el.innerHTML='<div class="hub-gcal-empty" style="color:red">タイムアウト — GAS URLを確認してください</div>'; return; }
+    var sumEl=document.getElementById('hubGcalList');
+    if(!sumEl) return;
+    var color = d.ok?'rgba(100,255,150,.7)':'rgba(255,120,80,.8)';
+    sumEl.innerHTML='<div class="hub-gcal-empty" style="color:'+color+';text-align:left;font-size:.72rem;line-height:1.8">'+
+      '<b>📋 診断結果</b><br>'+esc(d.summary||'—')+'<br>'+
+      '<span style="color:rgba(255,255,255,.4)">実行: '+esc(d.executedAt||'')+'</span>'+
+      (d.calendarNames?'<br>カレンダー: '+esc(d.calendarNames.join(' / ')):'')+'<br>'+
+      '<button onclick="hubLoadGcal(true)" style="background:rgba(255,255,255,.1);border:none;color:#aaa;cursor:pointer;padding:3px 8px;border-radius:4px;margin-top:4px;font-size:.7rem">🔄 カレンダー読み込み</button>'+
+    '</div>';
+  }, 25000);
 }
 function hubRenderGcal(d){
   var el=document.getElementById('hubGcalList'); if(!el) return;
   if(!d||d.error){
-    var errMsg = d&&d.error ? d.error : '通信タイムアウト';
-    var isAuth = errMsg.indexOf('権限')+errMsg.indexOf('authorize')+errMsg.indexOf('scope') > -3;
-    el.innerHTML='<div class="hub-gcal-empty" style="color:rgba(255,100,100,.6)">'+
-      (isAuth?'📵 Googleカレンダーの権限がありません（GAS再デプロイ後に認証を実行してください）':'⚠️ カレンダー取得エラー')+
-      '<br><span style="font-size:.65rem;opacity:.6">'+esc(errMsg.substring(0,60))+'</span>'+
-      '<br><button onclick="hubLoadGcal(true)" style="background:rgba(255,255,255,.1);border:none;color:#aaa;cursor:pointer;padding:3px 8px;border-radius:4px;margin-top:4px;font-size:.7rem">🔄 再試行</button></div>';
+    var errMsg = d&&d.error ? d.error : '通信タイムアウト（GAS URLを確認してください）';
+    var isAuth = errMsg.indexOf('権限')>=0 || errMsg.indexOf('authorize')>=0 || errMsg.indexOf('scope')>=0 || errMsg.indexOf('Calendar')>=0;
+    el.innerHTML='<div class="hub-gcal-empty" style="color:rgba(255,100,100,.6);font-size:.72rem;line-height:1.9">'+
+      (isAuth?'📵 <b>Calendar権限未承認</b>':'⚠️ カレンダー取得エラー')+
+      '<br>'+esc(errMsg.substring(0,80))+
+      '<br><button onclick="hubLoadGcal(true)" style="background:rgba(255,255,255,.1);border:none;color:#aaa;cursor:pointer;padding:3px 8px;border-radius:4px;margin-top:2px;font-size:.7rem">🔄 再試行</button>'+
+      ' <button onclick="hubGcalDiagnose()" style="background:rgba(255,200,0,.15);border:none;color:#FFD700;cursor:pointer;padding:3px 8px;border-radius:4px;margin-top:2px;font-size:.7rem">🔍 診断</button>'+
+    '</div>';
     return;
   }
   if(!d.events||!d.events.length){
