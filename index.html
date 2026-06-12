@@ -1118,6 +1118,133 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   .ob-hurdle-grid{grid-template-columns:repeat(2,1fr)}
 }
 
+/* ══════════════════════════════════════
+   スマホ・タブレット完全対応（追加）
+══════════════════════════════════════ */
+/* iPhone safe-area */
+@supports (padding: env(safe-area-inset-bottom)){
+  .hub{padding-bottom:env(safe-area-inset-bottom)}
+  .ob,.kj-board,.mtg,.tochiboard,.custboard{padding-bottom:env(safe-area-inset-bottom)}
+}
+/* タブレット横（768〜1024px）*/
+@media(min-width:768px) and (max-width:1024px){
+  .hub-cards-grid{grid-template-columns:repeat(3,1fr)!important}
+  .hub-body{grid-template-columns:220px 1fr}
+  .ob-info-grid{grid-template-columns:1fr 1fr 1fr}
+  .ob-hurdle-grid{grid-template-columns:repeat(3,1fr)}
+}
+/* スマホ（480px以下）追加改善 */
+@media(max-width:480px){
+  /* ハブ側サイドをミニ表示 */
+  .hub-side{display:flex!important;flex-direction:row;gap:10px;overflow-x:auto;padding:0 0 8px}
+  .hub-kpi-row{flex-direction:row;gap:8px;min-width:max-content}
+  .hub-kpi{min-width:80px;padding:10px 12px}
+  .hub-kpi-val{font-size:1.4rem}
+  .hub-kpi-lbl{font-size:.6rem}
+  .hub-bday-mini{display:none}
+  /* OBボード */
+  .ob-det-pane{padding:12px 14px}
+  .ob-info-grid{grid-template-columns:1fr}
+  .ob-detail{width:100%!important;right:-100%!important}
+  .ob-detail.show{right:0!important}
+  /* KJ詳細 */
+  .kj-detail{width:100vw!important;right:-100vw!important}
+  .kj-detail.show{right:0!important}
+  .kj-phase-grid{grid-template-columns:1fr 1fr}
+  /* フィルタバー */
+  .ob-filter,.kj-filter{flex-wrap:wrap;gap:5px;padding:8px 10px}
+  .ob-filter label,.kj-filter label{display:none}
+  .ob-filter select,.ob-filter input[type=text],.kj-filter select,.kj-filter input[type=text]{
+    min-width:unset;width:calc(50% - 4px);font-size:.82rem
+  }
+  /* 設定モーダル */
+  .st-modal{align-items:flex-end}
+  .st-wrap{border-radius:16px 16px 0 0;max-height:92vh;height:92vh}
+  .st-nav{flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--bd);min-height:unset;padding:8px 4px}
+  .st-tab{min-width:60px;padding:8px 6px;font-size:.65rem;border-radius:8px}
+  .st-body{overflow-y:auto}
+  /* MTGボード */
+  .mtg-card-grid{grid-template-columns:1fr!important}
+  .mtg-detail{width:100%!important;right:-100%!important}
+  .mtg-detail.show{right:0!important}
+  .mtg-hd{flex-wrap:wrap;gap:6px;padding:10px 12px}
+  /* ナビゲーションボタン */
+  .ob-hd-tools>button:not(.primary):nth-child(n+5){display:none}
+  /* タイムライン詳細 */
+  .ob-tl-add{gap:5px}
+  .ob-tl-add>*{flex:1;min-width:0}
+}
+/* 通知センター */
+.notif-panel{position:fixed;top:0;right:-380px;width:360px;max-width:100vw;height:100vh;background:#fff;
+  box-shadow:-4px 0 20px rgba(0,0,0,.12);z-index:9000;transition:right .28s;display:flex;flex-direction:column}
+.notif-panel.show{right:0}
+.notif-hd{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 14px;
+  border-bottom:1px solid #E8E4DC;background:#1A2A4A;color:#fff;flex-shrink:0}
+.notif-hd-title{font-size:.88rem;font-weight:700;letter-spacing:.06em}
+.notif-close{background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:1.2rem;padding:4px}
+.notif-body{flex:1;overflow-y:auto;padding:10px 0}
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:12px 18px;border-bottom:1px solid #F0EDE8;cursor:pointer;transition:background .15s}
+.notif-item:hover{background:#FAF9F7}
+.notif-item.unread{background:#FFF8E8}
+.notif-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+.notif-content{flex:1;min-width:0}
+.notif-title{font-size:.83rem;font-weight:600;color:#1A2A4A;margin-bottom:2px}
+.notif-sub{font-size:.76rem;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notif-time{font-size:.68rem;color:#BBB;white-space:nowrap;flex-shrink:0}
+.notif-badge{background:#EF4444;color:#fff;border-radius:50%;width:18px;height:18px;
+  font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.notif-empty{text-align:center;color:#BBB;padding:40px 20px;font-size:.85rem}
+.notif-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:8999;display:none}
+.notif-overlay.show{display:block}
+/* 横断検索 */
+.gsearch-wrap{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.5);display:none;align-items:flex-start;justify-content:center;padding-top:60px}
+.gsearch-wrap.show{display:flex}
+.gsearch-box{background:#fff;border-radius:14px;width:680px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,.2);overflow:hidden}
+.gsearch-input-row{display:flex;align-items:center;padding:14px 18px;gap:10px;border-bottom:1px solid #E8E4DC}
+.gsearch-input-row input{flex:1;border:none;outline:none;font-size:1rem;color:#1A2A4A}
+.gsearch-input-row span{font-size:1.2rem;color:#999}
+.gsearch-results{max-height:400px;overflow-y:auto}
+.gsearch-group{padding:8px 18px 4px;font-size:.68rem;color:#999;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.gsearch-item{display:flex;align-items:center;gap:10px;padding:10px 18px;cursor:pointer;transition:background .12s}
+.gsearch-item:hover{background:#F8F6F2}
+.gsearch-item-icon{font-size:.9rem;flex-shrink:0;opacity:.7}
+.gsearch-item-name{font-size:.85rem;color:#1A2A4A;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gsearch-item-sub{font-size:.75rem;color:#999;white-space:nowrap}
+.gsearch-empty{text-align:center;color:#CCC;padding:30px;font-size:.85rem}
+/* ダッシュボードKPI */
+.hub-kpi-ext{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.hub-kpi-ext-card{background:rgba(4,5,9,.25);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:12px 14px;text-align:center}
+.hub-kpi-ext-val{font-size:1.5rem;font-weight:700;color:#fff}
+.hub-kpi-ext-lbl{font-size:.65rem;color:rgba(255,255,255,.45);margin-top:2px}
+@media(max-width:640px){
+  .hub-kpi-ext{grid-template-columns:repeat(2,1fr);gap:6px}
+  .hub-kpi-ext-val{font-size:1.2rem}
+}
+/* クイック登録 */
+.hub-quick{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+.hub-quick-btn{flex:1;min-width:100px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  border-radius:8px;color:rgba(255,255,255,.8);padding:10px 12px;font-size:.78rem;cursor:pointer;
+  transition:background .15s;text-align:center;font-family:inherit}
+.hub-quick-btn:hover{background:rgba(255,255,255,.13)}
+/* 顧客タイムライン */
+.cust-tl{margin-top:16px;padding-top:14px;border-top:1px solid #E8E4DC}
+.cust-tl-title{font-size:.8rem;font-weight:700;color:#555;margin-bottom:12px}
+.cust-tl-list{position:relative;padding-left:20px}
+.cust-tl-list::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:2px;background:#E8E4DC}
+.cust-tl-item{position:relative;margin-bottom:14px}
+.cust-tl-dot{position:absolute;left:-17px;top:3px;width:10px;height:10px;border-radius:50%;border:2px solid #fff;background:#C0A070}
+.cust-tl-dot.ob{background:#3B82F6}
+.cust-tl-dot.mtg{background:#8B5CF6}
+.cust-tl-dot.kj{background:#F59E0B}
+.cust-tl-dot.partner{background:#10B981}
+.cust-tl-date{font-size:.72rem;color:#999}
+.cust-tl-label{font-size:.82rem;font-weight:600;color:#333}
+.cust-tl-sub{font-size:.75rem;color:#777;margin-top:1px}
+/* 土地DB追加フィールド */
+.tochi-extra-fields{background:#F9F7F3;border:1px solid #E8E4DC;border-radius:8px;padding:12px 14px;margin-bottom:14px}
+.tochi-extra-fields label{display:block;font-size:.75rem;color:#666;margin-bottom:3px;font-weight:600}
+.tochi-extra-fields input,.tochi-extra-fields textarea{width:100%;border:1px solid #DDD;border-radius:5px;padding:7px 10px;font-size:.84rem;margin-bottom:8px;box-sizing:border-box}
+
 /* ── ハブ Googleカレンダーウィジェット ── */
 .hub-gcal{background:rgba(4,5,9,.35);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:14px 18px;margin-top:4px}
 .hub-gcal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
@@ -1357,6 +1484,17 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
         </div>
       </div>
 
+      <!-- 拡張KPI -->
+      <div id="hubExtKpi"></div>
+
+      <!-- クイック登録ボタン -->
+      <div class="hub-quick">
+        <button class="hub-quick-btn" onclick="enterOpenBoard();setTimeout(obAddCustomer,500)">＋ 顧客登録</button>
+        <button class="hub-quick-btn" onclick="enterMtgBoard();setTimeout(function(){document.querySelector('.mtg-tab[data-tab=manual]')&&document.querySelector('.mtg-tab[data-tab=manual]').click()},400)">＋ MTG追加</button>
+        <button class="hub-quick-btn" onclick="openGlobalSearch()">🔍 横断検索 <kbd style="font-size:.6rem;opacity:.5">⌘K</kbd></button>
+        <button class="hub-quick-btn" onclick="openNotifPanel()">🔔 通知 <span id="notifBadge" style="background:#EF4444;color:#fff;border-radius:50%;width:16px;height:16px;font-size:.6rem;display:none;align-items:center;justify-content:center;margin-left:4px"></span></button>
+      </div>
+
       <!-- Googleカレンダー（本日の予定） -->
       <div class="hub-gcal">
         <div class="hub-gcal-hd">
@@ -1396,6 +1534,30 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ─── 通知センターパネル ─── -->
+<div class="notif-overlay" id="notifOverlay" onclick="closeNotifPanel()"></div>
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-hd">
+    <span class="notif-hd-title">🔔 通知センター</span>
+    <button class="notif-close" onclick="closeNotifPanel()">✕</button>
+  </div>
+  <div class="notif-body" id="notifBody">
+    <div class="notif-empty">読み込み中...</div>
+  </div>
+</div>
+
+<!-- ─── 横断検索 ─── -->
+<div class="gsearch-wrap" id="gsearchWrap" onclick="if(event.target===this)closeGlobalSearch()">
+  <div class="gsearch-box">
+    <div class="gsearch-input-row">
+      <span>🔍</span>
+      <input id="gsearchInput" type="text" placeholder="顧客名・土地・MTG・着工を横断検索... (⌘K)" oninput="gsearchRun()" onkeydown="if(event.key==='Escape')closeGlobalSearch()">
+      <button onclick="closeGlobalSearch()" style="background:none;border:none;color:#CCC;cursor:pointer;font-size:.8rem">✕</button>
+    </div>
+    <div id="gsearchResults"></div>
   </div>
 </div>
 
@@ -1659,6 +1821,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <button class="ob-det-tab" data-dtab="history" onclick="obDetTab('history')">📋 履歴</button>
       <button class="ob-det-tab" data-dtab="karte" onclick="obDetTab('karte')">🗂 カルテ</button>
       <button class="ob-det-tab" data-dtab="birthday" onclick="obDetTab('birthday')">🎂 誕生日</button>
+      <button class="ob-det-tab" data-dtab="timeline" onclick="obDetTab('timeline')">📅 TL</button>
       <button class="ob-det-tab" data-dtab="drive" onclick="obDetTab('drive')">📁 ドライブ</button>
     </div>
   </div>
@@ -1702,6 +1865,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     <!-- 誕生日（個人） -->
     <div class="ob-det-pane" data-dtab="birthday" id="ob-det-pane-birthday">
       <div id="ob-det-bday-content" style="padding:4px 0"></div>
+    </div>
+    <!-- 顧客タイムライン -->
+    <div class="ob-det-pane" data-dtab="timeline" id="ob-det-pane-timeline">
+      <div id="ob-cust-timeline" style="padding:4px 0"></div>
     </div>
     <!-- ドライブ -->
     <div class="ob-det-pane" data-dtab="drive" id="ob-det-pane-drive">
@@ -2085,6 +2252,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
         <button class="st-tab"     id="stab-display"    onclick="showSettingsTab('display')">🖥<br>表示</button>
         <button class="st-tab"     id="stab-datatools"  onclick="showSettingsTab('datatools')">🔧<br>管理</button>
         <button class="st-tab"     id="stab-mtgcw"      onclick="showSettingsTab('mtgcw')">💬<br>MTG</button>
+        <button class="st-tab"     id="stab-auditlog"   onclick="showSettingsTab('auditlog');loadAuditLog()">📜<br>監査ログ</button>
         <button class="st-tab"     id="stab-account"    onclick="showSettingsTab('account')">🔓<br>アカウント</button>
       </nav>
       <div class="st-body">
@@ -2285,11 +2453,36 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
           </div>
           <div id="st-mtgcw-result" style="margin-top:10px;font-size:.82rem;min-height:1.5em"></div>
 
+          <div class="st-row" style="margin-top:12px">
+            <label>パートナー契約通知ルームID（任意）</label>
+            <input id="stMtgCwNotifyRoom" placeholder="例：987654321" style="font-family:monospace;font-size:.82rem">
+            <div class="hint">パートナー契約済になった際に通知を送るChatworkルームID。空欄の場合は面談報告ルームに送信されます。</div>
+          </div>
+
           <div class="st-sec" style="margin-top:20px">🧹 MTGデータ管理</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="hbtn" onclick="mtgLoad(false,true);showSettingsTab('mtgcw')">🔄 MTGデータ再取得</button>
             <button class="hbtn" onclick="if(confirm('MTGキャッシュをクリアしますか？')){localStorage.removeItem(MTG_CACHE_KEY);localStorage.removeItem('mtg_v1_ts');toast('MTGキャッシュをクリアしました');}">🗑 MTGキャッシュクリア</button>
           </div>
+        </div>
+
+        <!-- 監査ログ -->
+        <div class="st-pane" id="tab-auditlog">
+          <div class="st-sec">📜 監査ログ（全操作履歴）</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+            <input id="auditQ" placeholder="顧客名・項目で検索..." style="flex:1;min-width:140px;border:1px solid var(--bd);border-radius:5px;padding:7px 10px;font-size:.82rem;outline:none">
+            <select id="auditResource" onchange="loadAuditLog()" style="border:1px solid var(--bd);border-radius:5px;padding:7px 10px;font-size:.82rem">
+              <option value="">全リソース</option>
+              <option value="ob">OB顧客</option>
+              <option value="kj">着工管理</option>
+              <option value="mtg">営業MTG</option>
+              <option value="tochi">土地DB</option>
+              <option value="reception">受付</option>
+            </select>
+            <button class="hbtn" onclick="loadAuditLog()">🔍 検索</button>
+          </div>
+          <div id="auditLogList" style="font-size:.8rem;color:#555;max-height:400px;overflow-y:auto">読み込み中...</div>
+          <div id="auditLogPager" style="margin-top:8px;font-size:.78rem;color:#888;display:flex;gap:8px;align-items:center"></div>
         </div>
 
         <!-- アカウント -->
@@ -2657,7 +2850,7 @@ function showApp(){
     setTimeout(function(){ obLoad(true); kjLoad(true); }, 400);
     setTimeout(function(){ hubLoadTodayKpi(); }, 1200);
     setTimeout(function(){ hubLoadGcal(); }, 2000); // Googleカレンダー
-    setTimeout(function(){ hubBuildActivityFeed(); }, 500); // 活動ログ（キャッシュから即座に）
+    setTimeout(function(){ hubBuildActivityFeed(); hubRenderExtKpi(); refreshNotifBadge(); }, 500);
     // ★ ログイン直後に誕生日をバックグラウンドで自動同期
     setTimeout(function(){
       if(!adminKey()) return;
@@ -2718,6 +2911,8 @@ function showHub(){
   setTimeout(function(){ hubLoadTodayKpi(); }, 800);
   setTimeout(function(){ hubLoadGcal(); }, 1500);
   hubBuildActivityFeed(); // ハブ戻り時も即座に活動ログ更新
+  hubRenderExtKpi();
+  refreshNotifBadge();
 }
 
 // ★ ログイン後は30分ごとにOB・KJをバックグラウンド同期（キャッシュが古くなったタイミングで更新）
@@ -3090,12 +3285,13 @@ function stSyncMtgCwSettingsToTab(){
   if(tmplEl  && !tmplEl.value ) tmplEl.value  = tmpl;
 }
 function stSaveMtgCwSettings(){
-  var token = (document.getElementById('stMtgCwToken')||{}).value||'';
-  var room  = (document.getElementById('stMtgCwRoom')||{}).value||'';
-  var tmpl  = (document.getElementById('stMtgCwTemplate')||{}).value||'';
+  var token      = (document.getElementById('stMtgCwToken')||{}).value||'';
+  var room       = (document.getElementById('stMtgCwRoom')||{}).value||'';
+  var tmpl       = (document.getElementById('stMtgCwTemplate')||{}).value||'';
+  var notifyRoom = (document.getElementById('stMtgCwNotifyRoom')||{}).value||'';
   var res = document.getElementById('st-mtgcw-result');
   if(res){ res.textContent='保存中...'; res.style.color='#888'; }
-  var payload={action:'saveMtgCwSettings',token:token,roomId:room,template:tmpl};
+  var payload={action:'saveMtgCwSettings',token:token,roomId:room,template:tmpl,cwNotifyRoomId:notifyRoom};
   post(payload,function(d){
     if(d&&d.ok){
       if(res){ res.textContent='✅ 保存しました'; res.style.color='#22C55E'; }
@@ -3133,6 +3329,58 @@ function stLoadCwRooms(){
     });
   });
 }
+// ── 監査ログ ──
+var __auditPage = 0;
+function loadAuditLog(page){
+  __auditPage = page||0;
+  var q  = (document.getElementById('auditQ')||{}).value||'';
+  var rs = (document.getElementById('auditResource')||{}).value||'';
+  var el = document.getElementById('auditLogList');
+  if(el) el.innerHTML='<span style="color:#AAA">読み込み中...</span>';
+  gasGet('listAuditLog&q='+encodeURIComponent(q)+'&resource='+encodeURIComponent(rs)+'&page='+__auditPage+'&limit=50', function(d){
+    if(!d||!d.list){
+      if(el) el.innerHTML='<span style="color:#EF4444">取得失敗</span>'; return;
+    }
+    var ACTION_LABEL = {create:'🟢作成',update:'🔵更新',delete:'🔴削除',partner_contract:'🤝パートナー',login:'🔑ログイン',sync:'🔄同期'};
+    var RESOURCE_LABEL = {ob:'OB',kj:'着工',mtg:'MTG',tochi:'土地DB',reception:'受付',settings:'設定'};
+    if(!d.list.length){
+      if(el) el.innerHTML='<div style="text-align:center;padding:20px;color:#CCC">ログなし</div>'; return;
+    }
+    if(el) el.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:.78rem">' +
+      '<thead><tr style="background:#F9F7F3;border-bottom:2px solid #E8E4DC">'+
+      '<th style="padding:6px 8px;text-align:left;color:#555">日時</th>'+
+      '<th style="padding:6px 8px;text-align:left;color:#555">操作</th>'+
+      '<th style="padding:6px 8px;text-align:left;color:#555">対象</th>'+
+      '<th style="padding:6px 8px;text-align:left;color:#555">名前</th>'+
+      '<th style="padding:6px 8px;text-align:left;color:#555">内容</th>'+
+      '<th style="padding:6px 8px;text-align:left;color:#555">担当</th>'+
+      '</tr></thead><tbody>'+
+      d.list.map(function(e){
+        var al=ACTION_LABEL[e.action]||e.action;
+        var rl=RESOURCE_LABEL[e.resource]||e.resource;
+        var detail = e.field ? (e.field+': '+String(e.before||'').substring(0,15)+'→'+String(e.after||'').substring(0,15)) : (e.note||'');
+        return '<tr style="border-bottom:1px solid #F0EDE8">'+
+          '<td style="padding:5px 8px;color:#888;white-space:nowrap">'+esc(e.at||'')+'</td>'+
+          '<td style="padding:5px 8px">'+al+'</td>'+
+          '<td style="padding:5px 8px;color:#666">'+rl+'</td>'+
+          '<td style="padding:5px 8px;font-weight:600">'+esc(e.name||'')+'</td>'+
+          '<td style="padding:5px 8px;color:#777;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(detail)+'</td>'+
+          '<td style="padding:5px 8px;color:#888">'+esc(e.staff||'')+'</td>'+
+        '</tr>';
+      }).join('') +
+      '</tbody></table>';
+    // ページャー
+    var pager = document.getElementById('auditLogPager');
+    if(pager){
+      var totalPages = Math.ceil((d.total||0)/50);
+      pager.innerHTML = (d.total||0)+'件 / '+
+        (__auditPage>0?'<button onclick="loadAuditLog('+(__auditPage-1)+')" style="padding:3px 8px;cursor:pointer">◀ 前</button>':'') +
+        ' ページ '+((__auditPage)+1)+'/'+Math.max(1,totalPages)+' '+
+        ((__auditPage+1)<totalPages?'<button onclick="loadAuditLog('+(__auditPage+1)+')" style="padding:3px 8px;cursor:pointer">次 ▶</button>':'');
+    }
+  }, 15000);
+}
+
 function stTestChatwork(){
   var res=document.getElementById('st-mtgcw-result');
   if(res){ res.textContent='テスト中...'; res.style.color='#888'; }
@@ -3307,7 +3555,7 @@ function removeAdminEmailFromUI(email) {
 }
 
 function showSettingsTab(name){
-  ['connection','supabase','event','staff','terminal','display','datatools','mtgcw','account'].forEach(function(t){
+  ['connection','supabase','event','staff','terminal','display','datatools','mtgcw','auditlog','account'].forEach(function(t){
     var pane=document.getElementById('tab-'+t); if(pane) pane.classList.toggle('show', t===name);
     var btn=document.getElementById('stab-'+t);
     if(btn) btn.classList.toggle('on', t===name);
@@ -5198,6 +5446,9 @@ function obOpenDetail(rowIdx){
   obRenderDetHistory();
   obRenderDetKarte();
   obRenderDetDrive();
+  // 顧客タイムラインを挿入
+  var tlEl = document.getElementById('ob-cust-timeline');
+  if(tlEl) tlEl.innerHTML = buildCustomerTimeline(r);
   document.getElementById('ob-detail').classList.add('show');
   document.getElementById('ob-detail').scrollTop=0;
 }
@@ -7443,6 +7694,299 @@ function mtgSaveTemplate(){
     else { if(st) st.textContent='⚠️ 失敗'; }
   });
 }
+
+/* eslint-disable */
+// ══════════════════════════════════════
+// 通知センター
+// ══════════════════════════════════════
+var __notifItems = [];
+var __notifRead  = {};
+
+function openNotifPanel(){
+  document.getElementById('notifPanel').classList.add('show');
+  document.getElementById('notifOverlay').classList.add('show');
+  buildNotifPanel();
+}
+function closeNotifPanel(){
+  document.getElementById('notifPanel').classList.remove('show');
+  document.getElementById('notifOverlay').classList.remove('show');
+}
+
+function buildNotifPanel(){
+  var items = generateNotifications();
+  __notifItems = items;
+  var el = document.getElementById('notifBody');
+  if(!el) return;
+  if(!items.length){
+    el.innerHTML='<div class="notif-empty">🎉 アラートはありません</div>'; return;
+  }
+  el.innerHTML = items.map(function(n,i){
+    var read = __notifRead[n.key];
+    return '<div class="notif-item'+(read?'':' unread')+'" onclick="notifClick('+i+')">' +
+      '<span class="notif-icon">'+n.icon+'</span>'+
+      '<div class="notif-content">'+
+        '<div class="notif-title">'+esc(n.title)+'</div>'+
+        '<div class="notif-sub">'+esc(n.sub)+'</div>'+
+      '</div>'+
+      '<span class="notif-time">'+esc(n.time)+'</span>'+
+    '</div>';
+  }).join('');
+  // バッジ更新
+  var unread = items.filter(function(n){ return !__notifRead[n.key]; }).length;
+  updateNotifBadge(unread);
+}
+
+function notifClick(idx){
+  var n = __notifItems[idx];
+  if(!n) return;
+  __notifRead[n.key] = true;
+  buildNotifPanel();
+  closeNotifPanel();
+  // 対象ボードへジャンプ
+  if(n.board === 'ob') enterOpenBoard();
+  else if(n.board === 'kj') enterKojiBoard();
+  else if(n.board === 'mtg') enterMtgBoard();
+}
+
+function generateNotifications(){
+  var items = [];
+  var today = new Date();
+  var todayStr = today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2);
+  var in7 = new Date(today); in7.setDate(in7.getDate()+7);
+  var in7Str = in7.getFullYear()+'-'+('0'+(in7.getMonth()+1)).slice(-2)+'-'+('0'+in7.getDate()).slice(-2);
+  var days30ago = new Date(today); days30ago.setDate(days30ago.getDate()-30);
+  var days30Str = days30ago.getFullYear()+'-'+('0'+(days30ago.getMonth()+1)).slice(-2)+'-'+('0'+days30ago.getDate()).slice(-2);
+
+  // MTG 次回予定日が過去/近々
+  (mtgRows||[]).forEach(function(r){
+    var cn = mtgCleanName(r['顧客名']||''); if(cn==='—') return;
+    var next = r['次回予定日']||'';
+    if(!next) return;
+    var isOverdue = next < todayStr;
+    var isSoon    = next >= todayStr && next <= in7Str;
+    if(isOverdue){
+      items.push({key:'mtg_od_'+r._id, icon:'🔴', title:'MTG次回予定が過ぎています', sub:cn+' · '+next, time:next, board:'mtg'});
+    } else if(isSoon){
+      items.push({key:'mtg_sn_'+r._id, icon:'🟡', title:'MTG予定間近', sub:cn+' · '+next, time:next, board:'mtg'});
+    }
+  });
+
+  // OB 長期未対応（30日間更新なし・活動中ステータス）
+  (obRows||[]).forEach(function(r){
+    var st = r['商談ステータス']||'';
+    if(!st || /失注|中長期|パートナー|引渡/.test(st)) return;
+    var dates = (r.history||[]).map(function(h){return h.date||'';}).sort().reverse();
+    var lastDate = dates[0] || r['来場日']||'';
+    if(lastDate && lastDate < days30Str){
+      items.push({key:'ob_stale_'+r._id, icon:'⚠️', title:'長期未対応顧客', sub:(r['顧客名']||'')+'（最終 '+lastDate+'）', time:lastDate, board:'ob'});
+    }
+  });
+
+  // KJ 着工日が近々（7日以内）
+  (kjRows||[]).forEach(function(r){
+    var ks = r['着工日']||r['工事着工日']||'';
+    if(!ks) return;
+    if(ks >= todayStr && ks <= in7Str){
+      items.push({key:'kj_soon_'+r._id, icon:'🔨', title:'着工間近', sub:(r['物件名']||r['顧客名']||'')+'（'+ks+'）', time:ks, board:'kj'});
+    }
+  });
+
+  // KJ 引渡し予定が過ぎている
+  (kjRows||[]).forEach(function(r){
+    var hd = r['引渡予定日']||'';
+    if(hd && hd < todayStr && (r['ステータス']||'').indexOf('引渡')< 0){
+      items.push({key:'kj_hd_'+r._id, icon:'🔴', title:'引渡予定日超過', sub:(r['物件名']||'')+'（予定 '+hd+'）', time:hd, board:'kj'});
+    }
+  });
+
+  // 新しい順ソート
+  items.sort(function(a,b){ return b.time>a.time?1:b.time<a.time?-1:0; });
+  return items.slice(0, 50);
+}
+
+function updateNotifBadge(count){
+  var badge = document.getElementById('notifBadge');
+  if(!badge) return;
+  badge.style.display = count > 0 ? 'flex' : 'none';
+  badge.textContent = count > 9 ? '9+' : String(count);
+}
+
+function refreshNotifBadge(){
+  var count = generateNotifications().filter(function(n){ return !__notifRead[n.key]; }).length;
+  updateNotifBadge(count);
+}
+
+// ══════════════════════════════════════
+// 横断検索（グローバル検索）
+// ══════════════════════════════════════
+function openGlobalSearch(){
+  var wrap = document.getElementById('gsearchWrap');
+  if(wrap) { wrap.classList.add('show'); document.getElementById('gsearchInput').focus(); }
+}
+function closeGlobalSearch(){
+  var wrap = document.getElementById('gsearchWrap');
+  if(wrap) { wrap.classList.remove('show'); document.getElementById('gsearchInput').value=''; document.getElementById('gsearchResults').innerHTML=''; }
+}
+document.addEventListener('keydown', function(e){
+  if((e.metaKey||e.ctrlKey) && e.key==='k'){ e.preventDefault(); openGlobalSearch(); }
+  if(e.key==='Escape'){ closeGlobalSearch(); closeNotifPanel(); }
+});
+
+function gsearchRun(){
+  var q = ((document.getElementById('gsearchInput')||{}).value||'').trim().toLowerCase();
+  var el = document.getElementById('gsearchResults'); if(!el) return;
+  if(!q || q.length < 1){ el.innerHTML=''; return; }
+  var results = [];
+
+  // OB検索
+  (obRows||[]).slice(0,300).forEach(function(r){
+    var n=(r['顧客名']||'').toLowerCase(); var tel=(r['電話']||'').toLowerCase();
+    var area=(r['エリア']||'').toLowerCase(); var st=(r['商談ステータス']||'');
+    if(n.indexOf(q)>=0||tel.indexOf(q)>=0||area.indexOf(q)>=0){
+      results.push({type:'ob',icon:'🏠',name:r['顧客名']||'',sub:r['来場日']||''+' '+st, row:r._row});
+    }
+  });
+  // MTG検索
+  (mtgRows||[]).forEach(function(r){
+    var cn=mtgCleanName(r['顧客名']||''); if(cn==='—') return;
+    var body=(r['面談内容']||'').toLowerCase();
+    if(cn.toLowerCase().indexOf(q)>=0||body.indexOf(q)>=0){
+      results.push({type:'mtg',icon:'💼',name:cn,sub:r['面談日']||''});
+    }
+  });
+  // KJ検索
+  (kjRows||[]).forEach(function(r){
+    var name=(r['物件名']||r['顧客名']||'').toLowerCase();
+    if(name.indexOf(q)>=0){
+      results.push({type:'kj',icon:'🔨',name:r['物件名']||r['顧客名']||'',sub:r['ステータス']||''});
+    }
+  });
+  // 土地DB検索
+  (tochiRows||[]).forEach(function(r){
+    var name=(r['物件名']||r['顧客名']||'').toLowerCase();
+    var addr=(r['住所']||r['address']||'').toLowerCase();
+    if(name.indexOf(q)>=0||addr.indexOf(q)>=0){
+      results.push({type:'tochi',icon:'📌',name:r['物件名']||'',sub:r['住所']||r['address']||''});
+    }
+  });
+
+  if(!results.length){
+    el.innerHTML='<div class="gsearch-empty">「'+esc(q)+'」に一致するデータが見つかりません</div>'; return;
+  }
+  // グループ別表示
+  var groups = [{key:'ob',label:'オープンボード'},{key:'mtg',label:'営業MTG'},{key:'kj',label:'着工管理'},{key:'tochi',label:'土地DB'}];
+  var html = '';
+  groups.forEach(function(g){
+    var gItems = results.filter(function(x){ return x.type===g.key; }).slice(0,5);
+    if(!gItems.length) return;
+    html += '<div class="gsearch-group">'+g.label+'</div>';
+    gItems.forEach(function(it){
+      html += '<div class="gsearch-item" onclick="gsearchJump(\''+it.type+'\','+JSON.stringify(it._id||it.row||'').replace(/"/g,'&quot;')+')">'+
+        '<span class="gsearch-item-icon">'+it.icon+'</span>'+
+        '<span class="gsearch-item-name">'+esc(it.name)+'</span>'+
+        '<span class="gsearch-item-sub">'+esc(it.sub.substring(0,20))+'</span>'+
+      '</div>';
+    });
+  });
+  el.innerHTML = html;
+}
+
+function gsearchJump(type, id){
+  closeGlobalSearch();
+  if(type==='ob')    { enterOpenBoard(); }
+  else if(type==='mtg')  { enterMtgBoard(); }
+  else if(type==='kj')   { enterKojiBoard(); }
+  else if(type==='tochi'){ enterTochiBoard(); }
+}
+
+// ══════════════════════════════════════
+// 顧客タイムライン（OB詳細で使用）
+// ══════════════════════════════════════
+function buildCustomerTimeline(obRow){
+  if(!obRow) return '';
+  var name = (obRow['顧客名']||'').replace(/様$/,'').trim();
+  var events = [];
+
+  // OB来場履歴
+  var hist = obRow.history || [];
+  hist.forEach(function(h){
+    events.push({date:h.date||'',type:'ob',label:'来場',sub:h.visitType||h.type||'',icon:'🏠'});
+  });
+  // 最初の来場日
+  if(obRow['来場日'] && !hist.length){
+    events.push({date:obRow['来場日'],type:'ob',label:'初回来場',sub:obRow['来場種別']||'',icon:'🏠'});
+  }
+  // パートナー契約
+  if(obRow['P申込目標日']||obRow['パートナー申込日']){
+    var pd = obRow['パートナー申込日']||obRow['P申込目標日']||'';
+    events.push({date:pd,type:'partner',label:'パートナー契約',sub:obRow['担当者']||'',icon:'🤝'});
+  }
+
+  // MTG履歴
+  (mtgRows||[]).forEach(function(r){
+    var cn = mtgCleanName(r['顧客名']||'');
+    var norm = cn.replace(/様$/,'').replace(/\s/g,'');
+    var obNorm = name.replace(/\s/g,'');
+    if(!norm||!obNorm||norm.indexOf(obNorm)<0&&obNorm.indexOf(norm)<0) return;
+    events.push({date:r['面談日']||'',type:'mtg',label:'面談',sub:(r['担当者']||'')+(r['商談ステータス']?' · '+r['商談ステータス']:''),icon:'💼'});
+  });
+
+  // KJ着工
+  (kjRows||[]).forEach(function(r){
+    var kn=(r['物件名']||r['顧客名']||'').replace(/様$/,'').replace(/\s/g,'');
+    if(!kn||!name) return;
+    var obN=name.replace(/\s/g,'');
+    if(kn.indexOf(obN)<0&&obN.indexOf(kn)<0) return;
+    if(r['着工日']||r['工事着工日']){
+      events.push({date:r['着工日']||r['工事着工日']||'',type:'kj',label:'着工',sub:r['ステータス']||'',icon:'🔨'});
+    }
+    if(r['引渡日']||r['完工日']){
+      events.push({date:r['引渡日']||r['完工日']||'',type:'kj',label:'引渡し',sub:'竣工',icon:'🏡'});
+    }
+  });
+
+  // 日付ソート（新→旧）
+  events.sort(function(a,b){ return b.date>a.date?1:b.date<a.date?-1:0; });
+
+  if(!events.length) return '<div class="cust-tl-title">📋 タイムライン</div><div style="color:#CCC;font-size:.8rem;padding:8px 0">記録なし</div>';
+
+  return '<div class="cust-tl">' +
+    '<div class="cust-tl-title">📋 顧客タイムライン（'+events.length+'件）</div>' +
+    '<div class="cust-tl-list">' +
+    events.map(function(ev){
+      var d = ev.date ? ev.date.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1/$2/$3') : '—';
+      return '<div class="cust-tl-item">'+
+        '<div class="cust-tl-dot '+ev.type+'"></div>'+
+        '<div class="cust-tl-date">'+esc(d)+'</div>'+
+        '<div class="cust-tl-label">'+ev.icon+' '+esc(ev.label)+'</div>'+
+        (ev.sub?'<div class="cust-tl-sub">'+esc(ev.sub)+'</div>':'')+
+      '</div>';
+    }).join('') +
+    '</div></div>';
+}
+
+// ══════════════════════════════════════
+// ハブ拡張KPI
+// ══════════════════════════════════════
+function hubRenderExtKpi(){
+  var el=document.getElementById('hubExtKpi'); if(!el) return;
+  var today=new Date(); var ym=today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2);
+
+  var obTotal=(obRows||[]).length;
+  var obPartner=(obRows||[]).filter(function(r){ return (r['商談ステータス']||'').indexOf('パートナー')>=0; }).length;
+  var kjActive=(kjRows||[]).filter(function(r){ var st=r['ステータス']||''; return st&&st!=='引渡済'&&st!=='完工'; }).length;
+  var mtgThisMonth=(mtgRows||[]).filter(function(r){ return (r['面談日']||'').indexOf(ym)===0; }).length;
+
+  el.innerHTML='<div class="hub-kpi-ext">'+[
+    {val:obTotal,    lbl:'追客顧客数'},
+    {val:obPartner,  lbl:'パートナー'},
+    {val:kjActive,   lbl:'着工進行中'},
+    {val:mtgThisMonth,lbl:'今月の面談'}
+  ].map(function(k){
+    return '<div class="hub-kpi-ext-card"><div class="hub-kpi-ext-val">'+k.val+'</div><div class="hub-kpi-ext-lbl">'+k.lbl+'</div></div>';
+  }).join('')+'</div>';
+}
+
 </script>
 </body>
 </html>
