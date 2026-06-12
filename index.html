@@ -1132,6 +1132,21 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .hub-gcal-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:2px}
 .hub-gcal-empty{font-size:.78rem;color:rgba(255,255,255,.3);text-align:center;padding:12px 0}
 
+/* ── ハブ 活動ログ ── */
+.hub-act{background:rgba(4,5,9,.35);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:14px 18px;margin-top:12px}
+.hub-act-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.hub-act-list{display:flex;flex-direction:column;gap:3px;max-height:220px;overflow-y:auto}
+.hub-act-item{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);cursor:default}
+.hub-act-item:last-child{border-bottom:none}
+.hub-act-badge{border-radius:3px;padding:1px 5px;font-size:.65rem;font-weight:700;white-space:nowrap;flex-shrink:0}
+.hub-act-badge.ob{background:rgba(59,130,246,.2);color:#93C5FD}
+.hub-act-badge.mtg{background:rgba(139,92,246,.2);color:#C4B5FD}
+.hub-act-badge.kj{background:rgba(245,158,11,.2);color:#FDE68A}
+.hub-act-badge.form{background:rgba(16,185,129,.2);color:#6EE7B7}
+.hub-act-name{color:rgba(255,255,255,.78);flex:1;font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hub-act-sub{color:rgba(255,255,255,.38);font-size:.68rem;white-space:nowrap}
+.hub-act-date{color:rgba(255,255,255,.3);white-space:nowrap;font-size:.67rem}
+
 /* ── 営業MTGボード ── */
 .mtg{display:none;flex-direction:column;height:100vh;overflow:hidden;background:#F5F3EF}
 .mtg.show{display:flex}
@@ -1346,10 +1361,27 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <div class="hub-gcal">
         <div class="hub-gcal-hd">
           <span class="hub-gcal-title">📅 本日のスケジュール</span>
-          <span class="hub-gcal-date" id="hubGcalDate">—</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="hub-gcal-date" id="hubGcalDate">—</span>
+            <button onclick="hubLoadGcal(true)" title="カレンダーを再読み込み" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.75rem;padding:0">🔄</button>
+          </div>
         </div>
         <div class="hub-gcal-list" id="hubGcalList">
           <div class="hub-gcal-empty">読み込み中...</div>
+        </div>
+      </div>
+
+      <!-- 全活動ログ -->
+      <div class="hub-act">
+        <div class="hub-act-hd">
+          <span class="hub-gcal-title">📋 全活動ログ</span>
+          <button onclick="hubBuildActivityFeed(true)" style="background:none;border:none;color:rgba(255,255,255,.35);cursor:pointer;font-size:.73rem;padding:0">🔄 更新</button>
+        </div>
+        <div class="hub-act-list" id="hubActList">
+          <div class="hub-gcal-empty">読み込み中...</div>
+        </div>
+        <div id="hubActShowMore" style="display:none;text-align:right;margin-top:4px">
+          <button onclick="hubBuildActivityFeed(false,true)" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.68rem">全件表示 →</button>
         </div>
       </div>
 
@@ -2052,6 +2084,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
         <button class="st-tab"     id="stab-terminal"   onclick="showSettingsTab('terminal')">🪑<br>端末</button>
         <button class="st-tab"     id="stab-display"    onclick="showSettingsTab('display')">🖥<br>表示</button>
         <button class="st-tab"     id="stab-datatools"  onclick="showSettingsTab('datatools')">🔧<br>管理</button>
+        <button class="st-tab"     id="stab-mtgcw"      onclick="showSettingsTab('mtgcw')">💬<br>MTG</button>
         <button class="st-tab"     id="stab-account"    onclick="showSettingsTab('account')">🔓<br>アカウント</button>
       </nav>
       <div class="st-body">
@@ -2219,6 +2252,44 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
             <button class="hbtn" onclick="dtTestChatwork()">Chatworkテスト</button>
           </div>
           <div id="dt-test-result" style="margin-top:8px;font-size:.8rem;min-height:3em;white-space:pre-line"></div>
+        </div>
+
+        <!-- 営業MTG / Chatwork設定 -->
+        <div class="st-pane" id="tab-mtgcw">
+          <div class="st-sec">💬 Chatwork 連携設定</div>
+          <div style="font-size:.8rem;color:#666;margin-bottom:12px;line-height:1.6">
+            面談報告チャンネルを指定すると、「Chatwork取込」で自動的に面談データを取り込めます。
+          </div>
+          <div class="st-row">
+            <label>Chatwork APIトークン</label>
+            <input type="password" id="stMtgCwToken" placeholder="Chatwork APIトークンを入力" style="font-family:monospace;font-size:.82rem">
+            <div class="hint">Chatworkの「サービス連携」→「API Token」から取得。GASのScript Propertiesに保存されます。</div>
+          </div>
+          <div class="st-row">
+            <label>面談報告ルームID</label>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input id="stMtgCwRoom" placeholder="例：123456789" style="flex:1;font-family:monospace;font-size:.82rem">
+              <button class="hbtn" onclick="stLoadCwRooms()" style="white-space:nowrap">ルーム一覧取得</button>
+            </div>
+            <div id="stMtgCwRoomList" style="margin-top:8px;max-height:160px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:6px;display:none"></div>
+            <div class="hint">面談報告が投稿されているChatworkのルームIDを入力（URLの room/xxxxx の数字部分）。</div>
+          </div>
+          <div class="st-row">
+            <label>面談テンプレート（任意）</label>
+            <textarea id="stMtgCwTemplate" rows="5" placeholder="例：&#10;○○様の面談報告&#10;■面談日時：&#10;■場所：&#10;■担当者：&#10;■面談内容：&#10;■次回アクション：&#10;■温度感：" style="font-family:monospace;font-size:.8rem;resize:vertical"></textarea>
+            <div class="hint">Chatworkに投稿する際の定型文。パース精度が上がります。</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <button class="st-save" onclick="stSaveMtgCwSettings()">💾 保存する</button>
+            <button class="hbtn" onclick="stTestChatwork()">🔌 接続テスト</button>
+          </div>
+          <div id="st-mtgcw-result" style="margin-top:10px;font-size:.82rem;min-height:1.5em"></div>
+
+          <div class="st-sec" style="margin-top:20px">🧹 MTGデータ管理</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="hbtn" onclick="mtgLoad(false,true);showSettingsTab('mtgcw')">🔄 MTGデータ再取得</button>
+            <button class="hbtn" onclick="if(confirm('MTGキャッシュをクリアしますか？')){localStorage.removeItem(MTG_CACHE_KEY);localStorage.removeItem('mtg_v1_ts');toast('MTGキャッシュをクリアしました');}">🗑 MTGキャッシュクリア</button>
+          </div>
         </div>
 
         <!-- アカウント -->
@@ -2586,6 +2657,7 @@ function showApp(){
     setTimeout(function(){ obLoad(true); kjLoad(true); }, 400);
     setTimeout(function(){ hubLoadTodayKpi(); }, 1200);
     setTimeout(function(){ hubLoadGcal(); }, 2000); // Googleカレンダー
+    setTimeout(function(){ hubBuildActivityFeed(); }, 500); // 活動ログ（キャッシュから即座に）
     // ★ ログイン直後に誕生日をバックグラウンドで自動同期
     setTimeout(function(){
       if(!adminKey()) return;
@@ -2645,6 +2717,7 @@ function showHub(){
   kjLoad(true);
   setTimeout(function(){ hubLoadTodayKpi(); }, 800);
   setTimeout(function(){ hubLoadGcal(); }, 1500);
+  hubBuildActivityFeed(); // ハブ戻り時も即座に活動ログ更新
 }
 
 // ★ ログイン後は30分ごとにOB・KJをバックグラウンド同期（キャッシュが古くなったタイミングで更新）
@@ -2790,35 +2863,133 @@ function hubLoadTodayKpi(){
 }
 
 // ── Google カレンダー（本日の予定）──
-function hubLoadGcal(){
+var GCAL_CACHE_TTL = 5*60*1000; // 5分キャッシュ
+function hubLoadGcal(force){
   if(!adminKey()) return;
   var dateEl=document.getElementById('hubGcalDate');
   if(dateEl){
     var d=new Date(); var w=['日','月','火','水','木','金','土'][d.getDay()];
     dateEl.textContent=d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()+'（'+w+'）';
   }
+  // キャッシュチェック（5分以内はGASを呼ばない）
+  if(!force){
+    try{
+      var cTs=parseInt(localStorage.getItem('gcal_v1_ts')||'0');
+      var cDat=localStorage.getItem('gcal_v1');
+      if(cDat && cTs && (Date.now()-cTs)<GCAL_CACHE_TTL){
+        hubRenderGcal(JSON.parse(cDat)); return;
+      }
+    }catch(e){}
+  }
   gasGet('gcalGetToday',function(d){
-    var el=document.getElementById('hubGcalList'); if(!el) return;
-    if(!d||d.error){
-      el.innerHTML='<div class="hub-gcal-empty" style="color:rgba(255,100,100,.6)">カレンダー取得エラー（GAS再デプロイが必要な場合があります）</div>';
-      return;
+    if(d && !d.error){
+      try{ localStorage.setItem('gcal_v1',JSON.stringify(d)); localStorage.setItem('gcal_v1_ts',String(Date.now())); }catch(e){}
     }
-    if(!d.events||!d.events.length){
-      el.innerHTML='<div class="hub-gcal-empty">本日の予定はありません</div>';
-      return;
-    }
-    el.innerHTML = d.events.map(function(ev){
-      // カレンダー色をドットに
-      var color = ev.color || '#9A8C76';
-      // Calendarカラーコードをhexに変換（GASは#RRGGBB形式）
-      return '<div class="hub-gcal-ev">' +
-        '<span class="hub-gcal-dot" style="background:'+esc(color)+'"></span>'+
-        '<span class="hub-gcal-time">'+esc(ev.start)+'〜'+esc(ev.end)+'</span>'+
-        '<span class="hub-gcal-name" title="'+esc(ev.title)+'">'+esc(ev.title)+'</span>'+
-        '<span class="hub-gcal-cal" title="'+esc(ev.calendar)+'">'+esc(ev.calendar)+'</span>'+
+    hubRenderGcal(d);
+  }, 20000);
+}
+function hubRenderGcal(d){
+  var el=document.getElementById('hubGcalList'); if(!el) return;
+  if(!d||d.error){
+    var errMsg = d&&d.error ? d.error : '通信タイムアウト';
+    var isAuth = errMsg.indexOf('権限')+errMsg.indexOf('authorize')+errMsg.indexOf('scope') > -3;
+    el.innerHTML='<div class="hub-gcal-empty" style="color:rgba(255,100,100,.6)">'+
+      (isAuth?'📵 Googleカレンダーの権限がありません（GAS再デプロイ後に認証を実行してください）':'⚠️ カレンダー取得エラー')+
+      '<br><span style="font-size:.65rem;opacity:.6">'+esc(errMsg.substring(0,60))+'</span>'+
+      '<br><button onclick="hubLoadGcal(true)" style="background:rgba(255,255,255,.1);border:none;color:#aaa;cursor:pointer;padding:3px 8px;border-radius:4px;margin-top:4px;font-size:.7rem">🔄 再試行</button></div>';
+    return;
+  }
+  if(!d.events||!d.events.length){
+    el.innerHTML='<div class="hub-gcal-empty">本日の予定はありません</div>';
+    return;
+  }
+  el.innerHTML = d.events.map(function(ev){
+    var color = ev.color || '#9A8C76';
+    return '<div class="hub-gcal-ev">' +
+      '<span class="hub-gcal-dot" style="background:'+esc(color)+'"></span>'+
+      '<span class="hub-gcal-time">'+esc(ev.start)+'〜'+esc(ev.end)+'</span>'+
+      '<span class="hub-gcal-name" title="'+esc(ev.title)+'">'+esc(ev.title)+'</span>'+
+      '<span class="hub-gcal-cal" title="'+esc(ev.calendar)+'">'+esc(ev.calendar)+'</span>'+
+    '</div>';
+  }).join('');
+}
+
+// ── ハブ 全活動ログ（キャッシュデータ + GAS受付ログを統合）──
+var hubActShowAll = false;
+function hubBuildActivityFeed(force, showAll){
+  var el=document.getElementById('hubActList'); if(!el) return;
+  if(showAll) hubActShowAll=true;
+  var MAX = hubActShowAll ? 200 : 40;
+  var items = [];
+
+  // OBデータ（来場日で追加）
+  (obRows||[]).forEach(function(r){
+    var d=r['来場日']||''; var n=r['顧客名']||'';
+    if(!d||!n) return;
+    items.push({type:'ob',badge:'🏠 OB',cls:'ob',name:n,sub:r['反響元']||r['来場種別']||'',date:d,sort:d});
+  });
+
+  // MTGデータ
+  (mtgRows||[]).forEach(function(r){
+    var cn=mtgCleanName(r['顧客名']||'');
+    if(cn==='—') return;
+    var d=r['面談日']||''; if(!d) d=(r['_created']||'').substring(0,10);
+    items.push({type:'mtg',badge:'💼 MTG',cls:'mtg',name:cn,sub:(r['担当者']||'')+(r['商談ステータス']?' · '+r['商談ステータス']:''),date:d,sort:d});
+  });
+
+  // KJデータ（着工日）
+  (kjRows||[]).forEach(function(r){
+    var d=r['請負契約日']||r['着工日']||r['_updated']||''; var n=r['物件名']||r['顧客名']||'';
+    if(!n) return;
+    items.push({type:'kj',badge:'🔨 KJ',cls:'kj',name:n,sub:r['フェーズ']||r['着工ステータス']||'',date:d,sort:d});
+  });
+
+  // ソート（新しい順）
+  items.sort(function(a,b){ return b.sort>a.sort?1:b.sort<a.sort?-1:0; });
+
+  var shown = items.slice(0,MAX);
+  var moreEl = document.getElementById('hubActShowMore');
+  if(moreEl) moreEl.style.display = (!hubActShowAll && items.length>MAX)?'block':'none';
+
+  if(!shown.length){
+    el.innerHTML='<div class="hub-gcal-empty">データなし（ボードを開いてデータを読み込んでください）</div>';
+  } else {
+    el.innerHTML = shown.map(function(it){
+      var dateDisp = it.date ? it.date.replace(/(\d{4})-(\d{2})-(\d{2})/,'$2/$3') : '';
+      return '<div class="hub-act-item">'+
+        '<span class="hub-act-badge '+it.cls+'">'+it.badge+'</span>'+
+        '<span class="hub-act-name" title="'+esc(it.name)+'">'+esc(it.name)+'</span>'+
+        (it.sub?'<span class="hub-act-sub">'+esc(it.sub.substring(0,12))+'</span>':'')+
+        (dateDisp?'<span class="hub-act-date">'+esc(dateDisp)+'</span>':'')+
       '</div>';
     }).join('');
-  }, 15000);
+  }
+
+  // GASから受付フォームログも非同期で追記
+  if(force || !window.__hubActGasLoaded){
+    window.__hubActGasLoaded = true;
+    gasGet('listActivityLog',function(d){
+      if(!d||!d.list) return;
+      var gasItems = d.list.filter(function(a){ return a.customerName && a.customerName!=='新規来場'; })
+        .map(function(a){
+          return {type:'form',badge:'📝 受付',cls:'form',name:a.customerName,sub:a.staff||'',date:(a.at||'').substring(0,10),sort:a.at||''};
+        });
+      // 既存itemsにmergeして再描画
+      gasItems.forEach(function(gi){ items.push(gi); });
+      items.sort(function(a,b){ return b.sort>a.sort?1:b.sort<a.sort?-1:0; });
+      var shown2=items.slice(0,MAX);
+      el.innerHTML=shown2.map(function(it){
+        var dateDisp=it.date?it.date.replace(/(\d{4})-(\d{2})-(\d{2})/,'$2/$3'):'';
+        return '<div class="hub-act-item">'+
+          '<span class="hub-act-badge '+it.cls+'">'+it.badge+'</span>'+
+          '<span class="hub-act-name" title="'+esc(it.name)+'">'+esc(it.name)+'</span>'+
+          (it.sub?'<span class="hub-act-sub">'+esc(it.sub.substring(0,12))+'</span>':'')+
+          (dateDisp?'<span class="hub-act-date">'+esc(dateDisp)+'</span>':'')+
+        '</div>';
+      }).join('');
+      if(moreEl) moreEl.style.display=(!hubActShowAll&&items.length>MAX)?'block':'none';
+    }, 12000);
+  }
 }
 
 setInterval(hubTick,1000); hubTick();
@@ -2897,11 +3068,82 @@ function openSettings(tab){
   loadAdminEmailList();
   // OB除外スタッフUI
   obRenderExclStaffUI();
+  // MTG設定を設定タブに反映（MTG板と共有）
+  stSyncMtgCwSettingsToTab();
   // 指定タブを開く
   showSettingsTab(tab||'connection');
   document.getElementById('settingsModal').classList.add('show');
 }
 function closeSettings(){ document.getElementById('settingsModal').classList.remove('show'); }
+
+// ─── MTG Chatwork設定（設定タブ内）───
+function stSyncMtgCwSettingsToTab(){
+  // MTG板側のフィールドから値を読み取って設定タブに反映
+  var token = (document.getElementById('mtg-cw-token')||{}).value||'';
+  var room = __mtgSelectedRoomId||'';
+  var tmpl = (document.getElementById('mtg-cw-template')||{}).value||'';
+  var tokenEl = document.getElementById('stMtgCwToken');
+  var roomEl  = document.getElementById('stMtgCwRoom');
+  var tmplEl  = document.getElementById('stMtgCwTemplate');
+  if(tokenEl && !tokenEl.value) tokenEl.value = token;
+  if(roomEl  && !roomEl.value ) roomEl.value  = room;
+  if(tmplEl  && !tmplEl.value ) tmplEl.value  = tmpl;
+}
+function stSaveMtgCwSettings(){
+  var token = (document.getElementById('stMtgCwToken')||{}).value||'';
+  var room  = (document.getElementById('stMtgCwRoom')||{}).value||'';
+  var tmpl  = (document.getElementById('stMtgCwTemplate')||{}).value||'';
+  var res = document.getElementById('st-mtgcw-result');
+  if(res){ res.textContent='保存中...'; res.style.color='#888'; }
+  var payload={action:'saveMtgCwSettings',token:token,roomId:room,template:tmpl};
+  post(payload,function(d){
+    if(d&&d.ok){
+      if(res){ res.textContent='✅ 保存しました'; res.style.color='#22C55E'; }
+      // MTG板側にも反映
+      var te=document.getElementById('mtg-cw-token'); if(te&&token) te.value=token;
+      var re=document.getElementById('mtg-selected-room'); if(re&&room) re.textContent='✅ 設定済みルームID: '+room;
+      var tte=document.getElementById('mtg-cw-template'); if(tte&&tmpl) tte.value=tmpl;
+      __mtgSelectedRoomId = room;
+    } else {
+      if(res){ res.textContent='❌ '+(d&&d.error?d.error:'保存失敗'); res.style.color='#EF4444'; }
+    }
+  });
+}
+function stLoadCwRooms(){
+  var res=document.getElementById('st-mtgcw-result');
+  if(res){ res.textContent='ルーム一覧取得中...'; res.style.color='#888'; }
+  var token=(document.getElementById('stMtgCwToken')||{}).value||'';
+  if(!token){ if(res){ res.textContent='❌ APIトークンを入力してください'; res.style.color='#EF4444'; } return; }
+  // まずトークンを保存してからルーム取得
+  post({action:'saveMtgCwSettings',token:token,roomId:'',template:''},function(){
+    gasGet('mtgListCwRooms',function(d){
+      var listEl=document.getElementById('stMtgCwRoomList');
+      if(!listEl) return;
+      if(!d||d.error||!d.rooms||!d.rooms.length){
+        if(res){ res.textContent='❌ '+(d&&d.error?d.error:'ルーム取得失敗');res.style.color='#EF4444'; }
+        return;
+      }
+      if(res){ res.textContent='✅ '+d.rooms.length+'件取得'; res.style.color='#22C55E'; }
+      listEl.style.display='block';
+      listEl.innerHTML=d.rooms.map(function(rm){
+        return '<div onclick="document.getElementById(\'stMtgCwRoom\').value=\''+rm.id+'\';this.parentNode.querySelectorAll(\'div\').forEach(function(x){x.style.background=\'\'});this.style.background=\'#EBF5FB\';" '+
+          'style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #eee;font-size:.82rem">'+
+          esc(rm.name)+' <span style="color:#888;font-size:.75rem">ID:'+esc(String(rm.id))+'</span></div>';
+      }).join('');
+    });
+  });
+}
+function stTestChatwork(){
+  var res=document.getElementById('st-mtgcw-result');
+  if(res){ res.textContent='テスト中...'; res.style.color='#888'; }
+  gasGet('mtgListCwRooms',function(d){
+    if(d&&d.rooms&&d.rooms.length){
+      if(res){ res.textContent='✅ Chatwork接続OK（'+d.rooms.length+'ルーム）'; res.style.color='#22C55E'; }
+    } else {
+      if(res){ res.textContent='❌ '+(d&&d.error?d.error:'接続失敗'); res.style.color='#EF4444'; }
+    }
+  });
+}
 
 // ─── 受付端末（席）設定 ───
 var DEFAULT_SEATS = [
@@ -3065,7 +3307,7 @@ function removeAdminEmailFromUI(email) {
 }
 
 function showSettingsTab(name){
-  ['connection','supabase','event','staff','terminal','display','datatools','account'].forEach(function(t){
+  ['connection','supabase','event','staff','terminal','display','datatools','mtgcw','account'].forEach(function(t){
     var pane=document.getElementById('tab-'+t); if(pane) pane.classList.toggle('show', t===name);
     var btn=document.getElementById('stab-'+t);
     if(btn) btn.classList.toggle('on', t===name);
@@ -3969,6 +4211,8 @@ function obLoad(silent, force){
     if(!userEditing && obVisible){ obRenderAll(); }
     if(silent && obRows.length>prevLen){ toast('🔔 新規データ '+(obRows.length-prevLen)+'件 を取得しました'); }
     hubUpdateBadges();
+    // ハブが表示中なら活動ログも更新
+    if(document.getElementById('hub').classList.contains('show')) hubBuildActivityFeed();
   });
 }
 
@@ -6744,6 +6988,8 @@ function mtgLoad(silent, force){
     if(tokenStatus) tokenStatus.textContent = d.hasCwToken ? '✅ APIトークン保存済み' : '未設定';
     var tmplEl = document.getElementById('mtg-cw-template');
     if(tmplEl && d.cwTemplate) tmplEl.value = d.cwTemplate;
+    // ハブが表示中なら活動ログも更新
+    if(document.getElementById('hub').classList.contains('show')) hubBuildActivityFeed();
   });
 }
 
@@ -6777,16 +7023,48 @@ function mtgTempLabel(v){
 }
 
 // 顧客名クリーニング（CWメッセージ由来のゴミ文字を除去）
+// 戻り値: クリーンな名前 or '—'（無効な場合）
+var MTG_NAME_BLOCKLIST = [
+  'お疲れ','おつかれ','よろしく','宜しく','ありがとう','お世話','はじめまして','はじめ',
+  'お客様','顧客','不明','お時間','お邪魔','お手数','お願い','よろしく',
+  'ご確認','ご報告','報告','確認','以上','お名前','お名前','先方',
+  'oo','OO','xx','XX','ご参加','テスト','test','Test'
+];
 function mtgCleanName(raw){
   if(!raw) return '—';
-  var s=String(raw);
-  s=s.replace(/^\d+\]\s*/,'');                          // "3999170]黒須様"→"黒須様"
-  s=s.replace(/^[■□●○◆▲△][^\s：:\n]{0,10}[：:]\s*/,''); // "■先方：" "■場所："を除去
-  s=s.replace(/^(?:昨日|今日|先日|本日|当日)の/,'');    // "昨日の小山様"→"小山様"
-  s=s.replace(/^(?:お客様|顧客名?)[：:\s]+/,'');
-  s=s.replace(/[「」『』（()）\[\]]/g,'');
+  var s=String(raw).trim();
+  // Chatwork user ID prefix: "3999170]黒須様"
+  s=s.replace(/^\d+\]\s*/,'');
+  // Bullet with label: "■先方：xxx" "・お客様：xxx" "→名前："
+  s=s.replace(/^[■□●○◆▲△・•‣▶→➡]\s*[^\s：:\n]{0,12}[：:]\s*/,'');
+  // Lone bullet: "・お客様" (bullet without colon)
+  s=s.replace(/^[■□●○◆▲△・•‣▶→➡]\s*/,'');
+  // Time/context prefix: "昨日の" "本日の"
+  s=s.replace(/^(?:昨日|今日|先日|本日|当日)の/,'');
+  // Label prefix: "顧客名："
+  s=s.replace(/^(?:お客様名?|顧客名?)[：:\s]+/,'');
+  // Brackets
+  s=s.replace(/[「」『』（()）\[\]【】〈〉]/g,'');
+  // Full/half-width spaces before 様 ("関口巧　様" → "関口巧様")
+  s=s.replace(/[\s　]+様$/,'様');
   s=s.trim();
-  return s||raw;
+
+  // Placeholder pattern: ○○ ◯◯ etc
+  if(/^[○◯×△□oo]{1,3}様?$/.test(s)) return '—';
+  // Just 様 or empty
+  if(!s||s==='様'||s==='—') return '—';
+
+  // Blocklist check (without 様 suffix)
+  var norm=s.replace(/様$/,'').trim();
+  if(!norm) return '—';
+  if(MTG_NAME_BLOCKLIST.some(function(b){
+    return norm===b || norm.toLowerCase()===b.toLowerCase() || norm.indexOf(b)===0;
+  })) return '—';
+
+  // Too short (1 char) is probably not a name
+  if(norm.length < 2) return '—';
+
+  return s;
 }
 
 function mtgRenderList(){
@@ -6808,13 +7086,14 @@ function mtgRenderList(){
     return true;
   });
 
-  // 同一顧客でグループ化（名前の様を除いた文字列で一致）
+  // 同一顧客でグループ化（名前の様を除いた文字列で一致）無効名は除外
   var groups = [];
   var groupMap = {};
   rows.forEach(function(r){
     var cleaned = mtgCleanName(r['顧客名']||'');
+    if(cleaned === '—') return; // 無効な名前はスキップ
     var key = cleaned.replace(/\s/g,'').replace(/様$/,'');
-    if(!key) key = '__unknown__';
+    if(!key || key === '—') return; // keyも無効ならスキップ
     if(!groupMap[key]){
       groupMap[key] = { name: cleaned, key: key, mtgs: [], latestDate: '', status: '', temp: '', obIdx: -1 };
       groups.push(groupMap[key]);
