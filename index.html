@@ -1736,7 +1736,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
     </div>
     <div class="kj-actions">
       <span id="tc-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
-      <button class="hbtn primary" onclick="tochiGenerateAll()">🗺 地図PDF生成（未処理）</button>
+      <button class="hbtn primary" onclick="tochiOpenAddModal()">＋ 新規追加</button>
+      <button class="hbtn ghost" onclick="tochiGenerateAll()">🗺 地図PDF生成（未処理）</button>
       <button class="hbtn ghost" onclick="tochiLoad(false,true)">🔄 Notion同期</button>
       <button class="hbtn ghost" onclick="showHub()">‹ 戻る</button>
     </div>
@@ -1917,7 +1918,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
           <label>顧客名 *</label>
           <input id="obNewName" placeholder="例）田中 太郎 様" style="font-size:1rem;padding:12px">
         </div>
-        <div class="ob-fld"><label>受付日</label><input type="date" id="obNewDate"></div>
+        <div class="ob-fld"><label>問い合わせ日（受付日）</label><input type="date" id="obNewDate"></div>
+        <div class="ob-fld"><label>来場日 <span style="font-size:.7rem;color:#AAA">（後で入力可）</span></label><input type="date" id="obNewVisitDate"></div>
         <div class="ob-fld"><label>エリア（自由入力）</label><input id="obNewArea" placeholder="例）千葉市緑区"></div>
         <div class="ob-fld">
           <label>来場種別</label>
@@ -1951,6 +1953,26 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
         <div class="ob-fld full"><label>次回内容</label><input id="obNewNextContent" placeholder="例）FP相談、現地見学..."></div>
       </div>
       <button class="save" style="width:100%;margin-top:18px;padding:14px;font-size:.96rem" onclick="obSaveNew()">追加する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 土地DB 新規追加モーダル -->
+<div class="modal" id="tochiNewModal">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-hd">
+      <div class="mt">📌 土地DB 新規追加</div>
+      <button class="x" onclick="tochiCloseAddModal()">&times;</button>
+    </div>
+    <div class="modal-bd">
+      <div class="ob-modal-grid">
+        <div class="ob-fld full"><label>顧客名 *</label><input id="tochiNewName" placeholder="例）田中 太郎 様" style="font-size:1rem;padding:12px"></div>
+        <div class="ob-fld full"><label>所在地 <span style="font-size:.7rem;color:#AAA">（後で入力可）</span></label><input id="tochiNewAddr" placeholder="例）千葉市中央区2-1-3"></div>
+        <div class="ob-fld"><label>郵便番号</label><input id="tochiNewZip" placeholder="〒000-0000"></div>
+        <div class="ob-fld"><label>地番</label><input id="tochiNewChiban" placeholder="例：千葉市123番4"></div>
+        <div class="ob-fld full"><label>備考</label><textarea id="tochiNewBiko" rows="2" placeholder="目印・土地情報など" style="width:100%;padding:8px;border:1px solid #DDD;border-radius:4px;font-size:.85rem;resize:vertical;box-sizing:border-box"></textarea></div>
+      </div>
+      <button class="save" style="width:100%;margin-top:18px;padding:14px;font-size:.96rem" onclick="tochiSaveNew()">📌 追加する</button>
     </div>
   </div>
 </div>
@@ -4696,8 +4718,8 @@ function obRenderVisitors(){
   var COL=12; // colspan（ステータス列追加）
   var html=aggHtml+'<table class="ob-table ob-vis-table"><thead><tr>'+
     '<th class="ob-rn">No</th>'+
-    '<th>受付日</th><th>種別</th><th>顧客名</th><th>ステータス</th><th>担当</th><th>エリア</th>'+
-    '<th>反響元</th><th>来店履歴</th><th>アポ確定日</th><th>次回予定</th><th></th>'+
+    '<th>問い合わせ日</th><th>来場日</th><th>種別</th><th>顧客名</th><th>ステータス</th><th>担当</th><th>エリア</th>'+
+    '<th>反響元</th><th>来場履歴</th><th>アポ確定日</th><th>次回予定</th><th></th>'+
     '</tr></thead><tbody>';
 
   mOrder.forEach(function(ym){
@@ -4756,21 +4778,32 @@ function obRenderVisitors(){
       if(kana) subInfo.push(esc(kana));
       if(tel) subInfo.push('<span style="color:#7A6E5C">📞'+esc(tel)+'</span>');
       var nameSub=subInfo.length?'<div class="ob-name-sub">'+subInfo.join('　')+'</div>':'';
+      // 問い合わせ日（受付）と来場日（実際の来場）を分離表示
+      var inquiryDate = obSanitizeVal(r['問い合わせ日']||r['来場日']||'');
+      var visitDate   = obSanitizeVal(r['来場日']||'');
+      // 問い合わせ日と来場日が同じ場合は問い合わせ日のみに来場日を自動付き
+      var visitDisp = (visitDate && visitDate!==inquiryDate)
+        ? '<span style="color:#166534;font-weight:600">'+obFmtDate(obNormDate(visitDate))+'</span>'
+        : '<span class="ob-editable" style="display:block;min-height:20px;color:#C0A070;font-size:.78rem;font-style:italic" data-row="'+r._row+'" data-field="来場日" data-type="date" onclick="obStartEdit(this)">来場日を入力</span>';
+      if(visitDate && visitDate!==inquiryDate){
+        visitDisp='<span class="ob-editable" style="display:block;min-height:20px;color:#166534;font-weight:600" data-row="'+r._row+'" data-field="来場日" data-type="date" onclick="obStartEdit(this)">'+obFmtDate(obNormDate(visitDate))+'</span>';
+      }
       html+='<tr data-sc="'+sc+'" data-row="'+r._row+'">'+
         '<td class="ob-rn">'+monthN+'</td>'+
-        '<td style="white-space:nowrap">'+obCell(r,'来場日')+'</td>'+
+        '<td style="white-space:nowrap;font-size:.82rem;color:#666">'+(inquiryDate?obFmtDate(obNormDate(inquiryDate)):'—')+'</td>'+
+        '<td style="white-space:nowrap">'+visitDisp+'</td>'+
         '<td style="font-size:.82rem;color:#444">'+obCell(r,'来場種別')+'</td>'+
         '<td><span class="ob-name-link" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span>'+nameSub+'</td>'+
         '<td><span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="font-size:.68rem;padding:3px 8px;cursor:pointer">'+esc(dispStatus)+'</span></td>'+
         '<td style="white-space:nowrap">'+
           '<div>'+obCell(r,'担当者')+'</div>'+
-          (r['サブ担当']||true ? '<div style="margin-top:2px;opacity:.7;font-size:.78rem">'+obCell(r,'サブ担当')+'</div>' : '')+
+          (obSanitizeVal(r['サブ担当']) ? '<div style="margin-top:2px;opacity:.7;font-size:.78rem">'+obCell(r,'サブ担当')+'</div>' : '')+
         '</td>'+
         '<td>'+obCell(r,'エリア')+'</td>'+
         '<td style="font-size:.82rem;color:#444">'+obCell(r,'反響元')+'</td>'+
         '<td><div class="ob-hist-chips">'+obHistChips(r)+'</div></td>'+
-        '<td style="white-space:nowrap;font-size:.84rem">'+(appo?'<span style="color:#2563EB;font-weight:600">'+esc(appo)+'</span>':'<span style="color:#CCC">—</span>')+'</td>'+
-        '<td style="min-width:80px;font-size:.82rem">'+(nextLbl?nextLbl:'<span style="color:#CCC">—</span>')+'</td>'+
+        '<td style="white-space:nowrap;font-size:.84rem">'+obCell(r,'アポ確定日')+'</td>'+
+        '<td style="min-width:80px;font-size:.82rem">'+obCell(r,'次回予定')+'</td>'+
         '<td style="white-space:nowrap">'+
           '<button class="ob-btn-sm" onclick="obOpenDetailTab('+r._row+',\'history\')" title="来場履歴を追加" style="margin-right:4px;padding:3px 8px;font-size:.72rem">＋履歴</button>'+
           '<button class="ob-del" onclick="obConfirmDel('+r._row+')">✕</button>'+
@@ -5070,8 +5103,17 @@ function obCell(r,field){
   var isSel=(field==='来場種別'||field==='反響元'||field==='商談ステータス');
   var isStaff=(field==='担当者'||field==='サブ担当');
   var display='';
-  if(isDate) display=val?obFmtDate(obNormDate(val)):'<span style="color:#CCC;font-size:.72rem">—</span>';
-  else display=val?esc(val):'<span style="color:#CCC;font-size:.72rem;font-style:italic">—</span>';
+  if(isDate){
+    if(val){
+      var colorStyle=(field==='アポ確定日')?'color:#2563EB;font-weight:600':(field==='次回予定'?'color:#166534;font-weight:600':'');
+      display=colorStyle?'<span style="'+colorStyle+'">'+obFmtDate(obNormDate(val))+'</span>':obFmtDate(obNormDate(val));
+    } else {
+      var phText=(field==='アポ確定日')?'アポ日入力':(field==='次回予定'?'次回日入力':'—');
+      display='<span style="color:#CCC;font-size:.72rem">'+phText+'</span>';
+    }
+  } else {
+    display=val?esc(val):'<span style="color:#CCC;font-size:.72rem;font-style:italic">—</span>';
+  }
   var type=isDate?'date':isSel?'sel':isStaff?'staff':'text';
   // display:block + min-height でクリック領域を確保（空欄でもタップ可能）
   return '<span class="ob-editable" style="display:block;min-height:20px;width:100%" data-row="'+r._row+'" data-field="'+field+'" data-type="'+type+'" onclick="obStartEdit(this)">'+display+'</span>';
@@ -5470,8 +5512,13 @@ function obCloseNewModal(){ document.getElementById('obNewModal').classList.remo
 function obSaveNew(){
   var name=document.getElementById('obNewName').value.trim();
   if(!name){ toast('顧客名を入力してください'); return; }
+  var inquiryDate=document.getElementById('obNewDate').value||'';
+  var visitDateEl=document.getElementById('obNewVisitDate');
+  var visitDate=visitDateEl?visitDateEl.value||'':'';
+  // 来場日は問い合わせ日と別に入力された場合のみ使う（問い合わせ日=受付日として保存）
   var data={
-    来場日:document.getElementById('obNewDate').value||'',
+    問い合わせ日: inquiryDate,
+    来場日: visitDate || inquiryDate, // 来場日未入力なら問い合わせ日をセット（グループ表示用）
     顧客名:name, 来場種別:document.getElementById('obNewType').value||'',
     エリア:document.getElementById('obNewArea').value.trim(),
     反響元:document.getElementById('obNewSource').value||'',
@@ -5487,7 +5534,8 @@ function obSaveNew(){
     _row:obRows.length,
     id:'tmp_'+Date.now(),
     karte:{},
-    history: data['来場日']?[{date:data['来場日'],type:'来場',content:data['来場種別']||'初回来場',staff:data['担当者']||''}]:[]
+    history: visitDate?[{date:visitDate,type:'来場',content:data['来場種別']||'初回来場',staff:data['担当者']||''}]:
+             (inquiryDate?[{date:inquiryDate,type:'問い合わせ',content:data['来場種別']||'',staff:data['担当者']||''}]:[])
   });
   obRows.push(newRec);
   obRows.forEach(function(r,i){r._row=i;});
@@ -5495,7 +5543,6 @@ function obSaveNew(){
   obRenderAll();
   toast('✅ 「'+name+'」を追加しました（GASに保存中…）');
   post(Object.assign({action:'obSaveCustomer'},data));
-  // GAS保存完了後に最新データ取得（楽観的UIはそのまま保持）
   setTimeout(function(){ obLoad(true); },3500);
 }
 
@@ -6000,9 +6047,10 @@ function kjPhaseOf(r){
   if(r['建確']||r['長期']||r['開発申請']) return '申請中';
   if(r['請負契約日']||r['納図']||r['地盤調査']) return '設計中';
 
-  // ③ 日付情報なし → ストアドステータスを参考（引渡済/竣工済は上で除外済み）
+  // ③ 日付情報なし → ストアドステータスを参考（標準フェーズのみ使用）
+  var VALID_KJ_PHASES={'契約前':1,'設計中':1,'申請中':1,'着工前':1,'工事中':1,'竣工済':1,'引渡済':1};
   var stored=r['ステータス'];
-  if(stored && stored!=='引渡済' && stored!=='竣工済') return stored;
+  if(stored && VALID_KJ_PHASES[stored]) return stored;
   return '契約前';
 }
 var KJ_PHASE_CLASS={'契約前':'p0','設計中':'p1','申請中':'p1','着工前':'p2','工事中':'p3','竣工済':'p4','引渡済':'p5'};
@@ -7019,6 +7067,45 @@ function tochiSaveAddress(rowIdx){
   if(disp){ disp.innerHTML='📍 '+esc(address); disp.style.display=''; }
   if(edit) edit.style.display='none';
   tochiRenderList();
+}
+
+// 土地DB 新規追加モーダル
+function tochiOpenAddModal(){
+  var el=document.getElementById('tochiNewModal'); if(!el) return;
+  document.getElementById('tochiNewName').value='';
+  document.getElementById('tochiNewAddr').value='';
+  document.getElementById('tochiNewZip').value='';
+  document.getElementById('tochiNewChiban').value='';
+  document.getElementById('tochiNewBiko').value='';
+  el.classList.add('show');
+  setTimeout(function(){ document.getElementById('tochiNewName').focus(); },80);
+}
+function tochiCloseAddModal(){ var el=document.getElementById('tochiNewModal'); if(el) el.classList.remove('show'); }
+function tochiSaveNew(){
+  var name=(document.getElementById('tochiNewName').value||'').trim();
+  if(!name){ toast('顧客名を入力してください'); return; }
+  var addr=(document.getElementById('tochiNewAddr').value||'').trim();
+  var zip=(document.getElementById('tochiNewZip').value||'').trim();
+  var chiban=(document.getElementById('tochiNewChiban').value||'').trim();
+  var biko=(document.getElementById('tochiNewBiko').value||'').trim();
+  // 重複チェック
+  if(tochiRows.some(function(r){ return r['顧客名']===name; })){
+    toast('⚠ 「'+name+'」は既に土地DBに登録済みです'); return;
+  }
+  tochiCloseAddModal();
+  // 楽観的UI更新
+  var tmpRec={ _notionId:'', 顧客名:name, 所在地:addr, 郵便番号:zip, 地番:chiban, 備考:biko,
+               工事案内図:'', 駐車場場所:'', Googleマップ:'' };
+  tochiRows.unshift(tmpRec);
+  tochiSetCache(tochiRows);
+  tochiRenderList();
+  toast('✅ 「'+name+'」を土地DBに追加中…');
+  // GASに保存
+  post({action:'tochiAddEntry',name:name,address:addr,zip:zip,chiban:chiban,biko:biko});
+  setTimeout(function(){
+    tochiLoad(true);
+    if(addr) setTimeout(function(){ post({action:'tochiGenerateAllMaps'}); },2000);
+  },3000);
 }
 
 // 個別案内図生成（所在地が登録済みの1件のみ）
