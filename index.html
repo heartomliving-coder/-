@@ -4779,14 +4779,17 @@ function obRenderVisitors(){
       if(tel) subInfo.push('<span style="color:#7A6E5C">📞'+esc(tel)+'</span>');
       var nameSub=subInfo.length?'<div class="ob-name-sub">'+subInfo.join('　')+'</div>':'';
       // 問い合わせ日（受付）と来場日（実際の来場）を分離表示
+      // 問い合わせ日 = r['問い合わせ日'] があればそちら、なければ来場日にフォールバック（旧データ互換）
       var inquiryDate = obSanitizeVal(r['問い合わせ日']||r['来場日']||'');
       var visitDate   = obSanitizeVal(r['来場日']||'');
-      // 問い合わせ日と来場日が同じ場合は問い合わせ日のみに来場日を自動付き
-      var visitDisp = (visitDate && visitDate!==inquiryDate)
-        ? '<span style="color:#166534;font-weight:600">'+obFmtDate(obNormDate(visitDate))+'</span>'
-        : '<span class="ob-editable" style="display:block;min-height:20px;color:#C0A070;font-size:.78rem;font-style:italic" data-row="'+r._row+'" data-field="来場日" data-type="date" onclick="obStartEdit(this)">来場日を入力</span>';
-      if(visitDate && visitDate!==inquiryDate){
+      // 来場日が空のときのみ「来場日を入力」を表示（来場日に値があれば既存訪問とみなす）
+      var visitDisp;
+      if(visitDate){
+        // 来場日が設定済み → 編集可能な緑テキストで表示
         visitDisp='<span class="ob-editable" style="display:block;min-height:20px;color:#166534;font-weight:600" data-row="'+r._row+'" data-field="来場日" data-type="date" onclick="obStartEdit(this)">'+obFmtDate(obNormDate(visitDate))+'</span>';
+      } else {
+        // 来場日が未設定（メール問い合わせなど） → 入力促進プレースホルダー
+        visitDisp='<span class="ob-editable" style="display:block;min-height:20px;color:#C0A070;font-size:.78rem;font-style:italic" data-row="'+r._row+'" data-field="来場日" data-type="date" onclick="obStartEdit(this)">来場日を入力</span>';
       }
       html+='<tr data-sc="'+sc+'" data-row="'+r._row+'">'+
         '<td class="ob-rn">'+monthN+'</td>'+
@@ -4803,7 +4806,7 @@ function obRenderVisitors(){
         '<td style="font-size:.82rem;color:#444">'+obCell(r,'反響元')+'</td>'+
         '<td><div class="ob-hist-chips">'+obHistChips(r)+'</div></td>'+
         '<td style="white-space:nowrap;font-size:.84rem">'+obCell(r,'アポ確定日')+'</td>'+
-        '<td style="min-width:80px;font-size:.82rem">'+obCell(r,'次回予定')+'</td>'+
+        '<td style="min-width:80px;font-size:.82rem">'+obCell(r,'次回予定')+(r['次回内容']?'<div style="font-size:.72rem;color:#888;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px">'+esc(r['次回内容'])+'</div>':'')+'</td>'+
         '<td style="white-space:nowrap">'+
           '<button class="ob-btn-sm" onclick="obOpenDetailTab('+r._row+',\'history\')" title="来場履歴を追加" style="margin-right:4px;padding:3px 8px;font-size:.72rem">＋履歴</button>'+
           '<button class="ob-del" onclick="obConfirmDel('+r._row+')">✕</button>'+
@@ -5139,9 +5142,14 @@ function obStartEdit(el){
     var inp=document.createElement('input'); inp.type='date'; inp.value=isoVal; inp.className='ob-cell-input';
     el.innerHTML=''; el.appendChild(inp); inp.focus();
     var done=false;
-    function saveDate(){ if(done)return; done=true; var v=inp.value; el.innerHTML=v?obFmtDate(v):'<span style="color:#CCC;font-size:.72rem">—</span>'; obSaveField(row,field,v); }
+    function _obDateDisplay(v,f){
+      if(!v) return '<span style="color:#CCC;font-size:.72rem">'+(f==='アポ確定日'?'アポ日入力':f==='次回予定'?'次回日入力':'—')+'</span>';
+      var colorStyle=(f==='アポ確定日')?'color:#2563EB;font-weight:600':(f==='次回予定'?'color:#166534;font-weight:600':'');
+      return colorStyle?'<span style="'+colorStyle+'">'+obFmtDate(v)+'</span>':obFmtDate(v);
+    }
+    function saveDate(){ if(done)return; done=true; var v=inp.value; el.innerHTML=_obDateDisplay(v,field); obSaveField(row,field,v); }
     inp.addEventListener('change',saveDate); inp.addEventListener('blur',saveDate);
-    inp.addEventListener('keydown',function(e){if(e.key==='Escape'){el.innerHTML=val?obFmtDate(obNormDate(val)):'<span style="color:#CCC;font-size:.72rem">—</span>';}});
+    inp.addEventListener('keydown',function(e){if(e.key==='Escape'){el.innerHTML=_obDateDisplay(obNormDate(val),field);}});
     return;
   }
   var opts=[];
