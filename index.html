@@ -996,7 +996,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .hub-ev-row:hover{background:rgba(255,255,255,.08)}
 .hub-ev-row.ev-ongoing{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.07)}
 .hub-ev-row.ev-soon{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.05)}
-.hub-ev-name{flex:1;font-size:.75rem;color:rgba(255,255,255,.78);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub-ev-name{flex:1;font-size:.75rem;color:rgba(255,255,255,.78);font-weight:600;white-space:nowrap;overflow:hidden;min-width:0}
 .hub-ev-date{font-size:.62rem;color:#9A8C76;white-space:nowrap}
 .hub-ev-badge{font-size:.58rem;font-weight:700;padding:1px 6px;border-radius:8px;white-space:nowrap}
 .hub-ev-badge.ev-b-on{background:rgba(34,197,94,.18);color:#86EFAC}
@@ -3120,8 +3120,10 @@ function hubRenderEvMini(){
               isSoon?'<span class="hub-ev-badge ev-b-soon">あと'+daysUntil+'日</span>':'';
     var dateFmt=function(s){if(!s)return'';var p=s.match(/^(\d{4})-(\d{2})-(\d{2})/);return p?parseInt(p[2])+'月'+parseInt(p[3])+'日':s;};
     var dateDisp=e.startDate?(e.endDate&&e.endDate!==e.startDate?dateFmt(e.startDate)+'〜'+dateFmt(e.endDate):dateFmt(e.startDate)):'日付未定';
+    var nLen=e.name.length;
+    var nFs=nLen>16?'.52rem':nLen>11?'.62rem':nLen>8?'.68rem':'.75rem';
     return '<div class="hub-ev-row '+cls+'">'+
-      '<span class="hub-ev-name">'+esc(e.name)+'</span>'+
+      '<span class="hub-ev-name" style="font-size:'+nFs+'">'+esc(e.name)+'</span>'+
       badge+
       '<span class="hub-ev-date">'+esc(dateDisp)+'</span>'+
     '</div>';
