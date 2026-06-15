@@ -2917,6 +2917,11 @@ function showApp(){
   var nameEl = document.getElementById('hubUserName');
   var emailEl = document.getElementById('hubUserEmail');
   var nm = localStorage.getItem('admin_session_name') || '';
+  // 文字化け検出: Latin-1補助文字を含みCJK文字がない場合は旧キャッシュとしてクリア
+  if(nm && /[\x80-˿]/.test(nm) && !/[　-鿿]/.test(nm)) {
+    localStorage.removeItem('admin_session_name');
+    nm = '';
+  }
   var em = localStorage.getItem('admin_session_email') || '';
   if(nameEl){ nameEl.textContent = nm || em || 'ログイン中'; nameEl.title = nm || em; }
   if(emailEl){ emailEl.textContent = nm ? em : ''; }
@@ -2931,6 +2936,7 @@ function showApp(){
     if(obCached.length){ obRows=obCached; obRows.forEach(function(r,i){r._row=i;}); }
     if(kjCached.length){ kjRows=kjCached; kjRows.forEach(function(r,i){r._idx=i;}); }
     hubUpdateBadges();
+    scheduleEvSyncFromGAS(); // 初回ログイン時もGASからイベントを即時取得
     setTimeout(function(){ obLoad(true); kjLoad(true); }, 400);
     setTimeout(function(){ initSyncPoll(); }, 6000);
     setTimeout(function(){ hubLoadTodayKpi(); }, 1200);
