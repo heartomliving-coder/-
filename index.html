@@ -990,6 +990,17 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .hub-bday-name{flex:1;font-size:.76rem;color:rgba(255,255,255,.72);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hub-bday-days{font-size:.62rem;color:rgba(255,255,255,.38);white-space:nowrap}
 .hub-empty-mini{font-size:.74rem;color:rgba(255,255,255,.25);padding:10px 4px;text-align:center}
+/* ─── イベントミニセクション ─── */
+.hub-ev-mini{display:flex;flex-direction:column;gap:4px;margin-bottom:2px}
+.hub-ev-row{display:flex;align-items:center;gap:7px;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:6px;border:1px solid rgba(255,255,255,.07);transition:background .12s}
+.hub-ev-row:hover{background:rgba(255,255,255,.08)}
+.hub-ev-row.ev-ongoing{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.07)}
+.hub-ev-row.ev-soon{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.05)}
+.hub-ev-name{flex:1;font-size:.75rem;color:rgba(255,255,255,.78);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub-ev-date{font-size:.62rem;color:#9A8C76;white-space:nowrap}
+.hub-ev-badge{font-size:.58rem;font-weight:700;padding:1px 6px;border-radius:8px;white-space:nowrap}
+.hub-ev-badge.ev-b-on{background:rgba(34,197,94,.18);color:#86EFAC}
+.hub-ev-badge.ev-b-soon{background:rgba(251,191,36,.18);color:#FDE68A}
 
 /* ─── メインエリア ─── */
 .hub-main{overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:22px}
@@ -1454,7 +1465,11 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
           <div class="hub-kpi-sub" id="hubKpiKJSub"></div>
         </div>
       </div>
-      <div class="hub-side-sec">🎂 今後7日の誕生日</div>
+      <div class="hub-side-sec" style="margin-top:14px">📅 直近イベント</div>
+      <div class="hub-ev-mini" id="hubEvMini">
+        <div class="hub-empty-mini">イベント未登録</div>
+      </div>
+      <div class="hub-side-sec" style="margin-top:14px">🎂 今後7日の誕生日</div>
       <div class="hub-bday-mini" id="hubBdayMini">
         <div class="hub-empty-mini">読み込み中...</div>
       </div>
@@ -2353,13 +2368,32 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 
         <!-- イベント設定 -->
         <div class="st-pane" id="tab-event">
-          <div class="st-sec">イベント設定</div>
+          <div class="st-sec">受付フォーム イベント名</div>
           <div class="st-row">
             <label>見学会・イベント名</label>
             <input id="setEvent" class="nm-input" placeholder="例）〇〇邸 完成見学会">
             <div class="hint">送信時にお客様画面へ渡されます。空欄でも問題ありません。</div>
           </div>
           <button class="st-save" onclick="saveEventSettings()">保存する</button>
+
+          <div class="st-sec" style="margin-top:24px">📅 ハブ表示スケジュール管理</div>
+          <div style="font-size:.78rem;color:#888;margin-bottom:12px">ハブ画面の「直近イベント」に表示されます。見学会・セミナー・社内行事などを登録してください。</div>
+          <div id="scheduleEventList" style="margin-bottom:14px"></div>
+          <div style="display:grid;grid-template-columns:1fr 130px 130px;gap:8px;align-items:end">
+            <div>
+              <label style="font-size:.75rem;color:#666;display:block;margin-bottom:4px">イベント名 <span style="color:#E55">*</span></label>
+              <input id="newEvName" class="nm-input" placeholder="例）〇〇邸 完成見学会" onkeydown="if(event.key==='Enter')scheduleEvAdd()">
+            </div>
+            <div>
+              <label style="font-size:.75rem;color:#666;display:block;margin-bottom:4px">開始日</label>
+              <input id="newEvStart" type="date" class="nm-input">
+            </div>
+            <div>
+              <label style="font-size:.75rem;color:#666;display:block;margin-bottom:4px">終了日</label>
+              <input id="newEvEnd" type="date" class="nm-input">
+            </div>
+          </div>
+          <button class="st-save" style="margin-top:12px" onclick="scheduleEvAdd()">＋ イベントを追加</button>
         </div>
 
         <!-- 担当者管理 -->
@@ -3021,6 +3055,77 @@ function hubUpdateBadges(){
   hubRenderRecent();
   // 誕生日ミニ
   hubRenderBdayMini();
+  hubRenderEvMini();
+}
+
+// ── ハブ スケジュールイベント管理 ──
+var HUB_EVENTS_KEY='hub_schedule_events_v1';
+function scheduleEvLoad(){try{return JSON.parse(localStorage.getItem(HUB_EVENTS_KEY)||'[]');}catch(e){return[];}}
+function scheduleEvSave(evs){localStorage.setItem(HUB_EVENTS_KEY,JSON.stringify(evs));}
+
+function scheduleEvAdd(){
+  var name=(document.getElementById('newEvName').value||'').trim();
+  if(!name){toast('イベント名を入力してください');return;}
+  var start=document.getElementById('newEvStart').value||'';
+  var end=document.getElementById('newEvEnd').value||start;
+  var evs=scheduleEvLoad();
+  evs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),name:name,startDate:start,endDate:end});
+  evs.sort(function(a,b){return (a.startDate||'zzz').localeCompare(b.startDate||'zzz');});
+  scheduleEvSave(evs);
+  document.getElementById('newEvName').value='';
+  document.getElementById('newEvStart').value='';
+  document.getElementById('newEvEnd').value='';
+  renderScheduleEvSettings();
+  hubRenderEvMini();
+  toast('✅ イベントを追加しました');
+}
+
+function scheduleEvDel(id){
+  if(!confirm('このイベントを削除しますか？')) return;
+  scheduleEvSave(scheduleEvLoad().filter(function(e){return e.id!==id;}));
+  renderScheduleEvSettings();
+  hubRenderEvMini();
+}
+
+function renderScheduleEvSettings(){
+  var el=document.getElementById('scheduleEventList'); if(!el) return;
+  var evs=scheduleEvLoad();
+  if(!evs.length){el.innerHTML='<div style="font-size:.8rem;color:#AAA;padding:6px 0">登録済みイベントなし</div>';return;}
+  var today=new Date().toISOString().substring(0,10);
+  el.innerHTML=evs.map(function(e){
+    var isPast=e.endDate&&e.endDate<today;
+    var dateStr=(e.startDate||'日付未設定')+(e.endDate&&e.endDate!==e.startDate?' 〜 '+e.endDate:'');
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:'+(isPast?'#F5F5F5':'#EFF6FF')+';border:1px solid '+(isPast?'#E5E7EB':'#BFDBFE')+';border-radius:8px;margin-bottom:6px;opacity:'+(isPast?0.55:1)+'">'+
+      '<div style="flex:1"><div style="font-size:.84rem;font-weight:700;color:'+(isPast?'#9CA3AF':'#1D4ED8')+'">'+esc(e.name)+'</div>'+
+      '<div style="font-size:.72rem;color:#6B7280;margin-top:1px">'+esc(dateStr)+'</div></div>'+
+      (isPast?'<span style="font-size:.65rem;color:#9CA3AF;border:1px solid #E5E7EB;border-radius:6px;padding:1px 6px">終了</span>':'')+
+      '<button onclick="scheduleEvDel(\''+e.id+'\')" style="background:none;border:1px solid #FCA5A5;border-radius:6px;color:#EF4444;cursor:pointer;font-size:.75rem;padding:2px 8px" title="削除">削除</button>'+
+    '</div>';
+  }).join('');
+}
+
+function hubRenderEvMini(){
+  var el=document.getElementById('hubEvMini'); if(!el) return;
+  var today=new Date().toISOString().substring(0,10);
+  var evs=scheduleEvLoad().filter(function(e){
+    return !e.endDate||e.endDate>=today;
+  }).slice(0,5);
+  if(!evs.length){el.innerHTML='<div class="hub-empty-mini">イベント未登録</div>';return;}
+  el.innerHTML=evs.map(function(e){
+    var isOngoing=(!e.startDate||e.startDate<=today)&&(!e.endDate||e.endDate>=today);
+    var daysUntil=e.startDate?(Math.ceil((new Date(e.startDate)-new Date())/(864e5))):null;
+    var isSoon=!isOngoing&&daysUntil!==null&&daysUntil<=7&&daysUntil>0;
+    var cls=isOngoing?'ev-ongoing':isSoon?'ev-soon':'';
+    var badge=isOngoing?'<span class="hub-ev-badge ev-b-on">開催中</span>':
+              isSoon?'<span class="hub-ev-badge ev-b-soon">あと'+daysUntil+'日</span>':'';
+    var dateFmt=function(s){if(!s)return'';var p=s.match(/^(\d{4})-(\d{2})-(\d{2})/);return p?parseInt(p[2])+'月'+parseInt(p[3])+'日':s;};
+    var dateDisp=e.startDate?(e.endDate&&e.endDate!==e.startDate?dateFmt(e.startDate)+'〜'+dateFmt(e.endDate):dateFmt(e.startDate)):'日付未定';
+    return '<div class="hub-ev-row '+cls+'">'+
+      '<span class="hub-ev-name">'+esc(e.name)+'</span>'+
+      badge+
+      '<span class="hub-ev-date">'+esc(dateDisp)+'</span>'+
+    '</div>';
+  }).join('');
 }
 
 function hubRenderRecent(){
@@ -3327,6 +3432,8 @@ function openSettings(tab){
   loadAdminEmailList();
   // OB除外スタッフUI
   obRenderExclStaffUI();
+  // スケジュールイベント一覧を反映
+  renderScheduleEvSettings();
   // MTG設定を設定タブに反映（MTG板と共有）
   stSyncMtgCwSettingsToTab();
   // 指定タブを開く
