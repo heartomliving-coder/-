@@ -666,9 +666,29 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-empty-state{padding:80px 20px;text-align:center;color:#BBB;font-size:.9rem;line-height:2.2}
 
 /* 履歴チップ（一覧表示 — 全件） */
-.ob-hist-chips{display:flex;gap:4px;flex-wrap:wrap;max-width:340px}
-.ob-hist-chip{font-size:.68rem;padding:3px 9px;border-radius:20px;white-space:nowrap;font-weight:600;flex-shrink:0;background:#F0EDE8;color:#666;border:1px solid #E0DAD0;cursor:default}
+.ob-hist-chips{display:flex;gap:4px;flex-wrap:wrap;max-width:340px;align-items:center;cursor:pointer}
+.ob-hist-chips:hover .ob-hist-add-btn{opacity:1}
+.ob-hist-chip{font-size:.68rem;padding:3px 9px;border-radius:20px;white-space:nowrap;font-weight:600;flex-shrink:0;background:#F0EDE8;color:#666;border:1px solid #E0DAD0;cursor:pointer}
 .ob-hist-chip.new{background:#2B2B2B;color:#fff;border-color:#2B2B2B}
+.ob-hist-add-btn{font-size:.7rem;padding:2px 8px;border-radius:20px;border:1px dashed #C0A070;color:#C0A070;background:none;cursor:pointer;font-weight:700;opacity:0;transition:opacity .15s;white-space:nowrap;flex-shrink:0}
+.ob-hist-add-btn:hover{background:#C0A070;color:#fff}
+/* 来場履歴インラインポップオーバー */
+#ob-hist-pop{position:fixed;z-index:9999;background:#fff;border:1px solid #DDD;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:16px;min-width:320px;display:none}
+#ob-hist-pop.show{display:block}
+.ob-hist-pop-title{font-weight:700;font-size:.9rem;color:#2B2B2B;margin-bottom:12px;border-bottom:1px solid #F0EDE8;padding-bottom:8px}
+.ob-hist-pop-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.ob-hist-pop-row input,.ob-hist-pop-row select{border:1px solid #DDD;border-radius:6px;padding:6px 10px;font-size:.82rem;font-family:inherit;background:#FAFAFA}
+.ob-hist-pop-row input[type=date]{width:135px}
+.ob-hist-pop-row select{width:110px}
+.ob-hist-pop-row .pop-content{flex:1;min-width:140px}
+.ob-hist-pop-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.ob-hist-pop-save{background:#2B2B2B;color:#fff;border:none;border-radius:6px;padding:7px 18px;font-size:.82rem;cursor:pointer;font-family:inherit}
+.ob-hist-pop-cancel{background:none;border:1px solid #DDD;border-radius:6px;padding:7px 14px;font-size:.82rem;cursor:pointer;font-family:inherit;color:#666}
+/* 履歴一覧（ポップオーバー内） */
+.ob-hist-pop-list{max-height:160px;overflow-y:auto;margin:10px 0;border-top:1px solid #F0EDE8;padding-top:8px}
+.ob-hist-pop-item{display:flex;align-items:center;gap:6px;font-size:.78rem;padding:3px 0;border-bottom:1px solid #F9F6F2;color:#444}
+.ob-hist-pop-item .ob-tl-del{margin-left:auto;background:none;border:none;color:#CCC;cursor:pointer;font-size:.8rem;padding:0 2px}
+.ob-hist-pop-item .ob-tl-del:hover{color:#EF4444}
 
 /* 月ヘッダー ＋追加ボタン */
 .ob-month-add{margin-left:auto;float:right;background:none;border:1px solid rgba(0,0,0,.18);color:#555;border-radius:3px;padding:2px 10px;font-size:.68rem;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:all .15s}
@@ -1922,6 +1942,28 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 </div>
 
 <!-- ─── 新規顧客追加モーダル ─── -->
+<!-- 来場履歴インラインポップオーバー -->
+<div id="ob-hist-pop">
+  <div class="ob-hist-pop-title">📅 来場履歴 <span id="ob-hist-pop-name" style="font-weight:400;font-size:.82rem;color:#888"></span></div>
+  <div class="ob-hist-pop-list" id="ob-hist-pop-list"></div>
+  <div style="font-size:.74rem;color:#9A8C76;font-weight:600;margin-bottom:6px">＋ 履歴を追加</div>
+  <div class="ob-hist-pop-row">
+    <input type="date" id="ob-hist-pop-date">
+    <select id="ob-hist-pop-type">
+      <option>来場</option><option>電話</option><option>オンライン</option>
+      <option>打ち合わせ</option><option>現地見学</option><option>プレゼン</option><option>その他</option>
+    </select>
+  </div>
+  <div class="ob-hist-pop-row">
+    <input type="text" class="pop-content" id="ob-hist-pop-content" placeholder="内容（任意）" onkeydown="if(event.key==='Enter')obHistPopSave()">
+    <select id="ob-hist-pop-staff" style="width:100px"></select>
+  </div>
+  <div class="ob-hist-pop-btns">
+    <button class="ob-hist-pop-cancel" onclick="obHistPopClose()">閉じる</button>
+    <button class="ob-hist-pop-save" onclick="obHistPopSave()">追加</button>
+  </div>
+</div>
+
 <div class="modal" id="obNewModal">
   <div class="modal-box" style="max-width:520px">
     <div class="modal-hd">
@@ -5127,7 +5169,7 @@ function obRenderVisitors(){
         '</td>'+
         '<td>'+obCell(r,'エリア')+'</td>'+
         '<td style="font-size:.82rem;color:#444">'+obCell(r,'反響元')+'</td>'+
-        '<td><div class="ob-hist-chips">'+obHistChips(r)+'</div></td>'+
+        '<td onclick="obHistPopOpen(event,'+r._row+')" style="cursor:pointer" title="クリックして来場履歴を追加・編集"><div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div></td>'+
         '<td style="white-space:nowrap;font-size:.84rem">'+obCell(r,'アポ確定日')+'</td>'+
         '<td style="min-width:80px;font-size:.82rem">'+obCell(r,'次回予定')+(r['次回内容']?'<div style="font-size:.72rem;color:#888;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px">'+esc(r['次回内容'])+'</div>':'')+'</td>'+
         '<td style="white-space:nowrap">'+
@@ -6180,6 +6222,107 @@ function obAddHistoryItem(){
   document.getElementById('tl-content').value='';
   post({action:'obAddHistory',row:obDetailRow,date:date,type:type,content:content,staff:staff});
   toast('履歴を追加しました');
+}
+
+// ── 来場履歴インラインポップオーバー ──────────────────────────
+var _obHistPopRow = -1;
+
+function obHistPopOpen(e, rowIdx){
+  e.stopPropagation();
+  _obHistPopRow = rowIdx;
+  var r = obRows[rowIdx]; if(!r) return;
+  var pop = document.getElementById('ob-hist-pop');
+  // 名前表示
+  var nameEl = document.getElementById('ob-hist-pop-name');
+  if(nameEl) nameEl.textContent = r['顧客名'] || '';
+  // 日付デフォルト
+  var today = new Date(); var dd = today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2);
+  var dateEl = document.getElementById('ob-hist-pop-date'); if(dateEl) dateEl.value = dd;
+  var contentEl = document.getElementById('ob-hist-pop-content'); if(contentEl) contentEl.value = '';
+  // 担当者リスト
+  var staffEl = document.getElementById('ob-hist-pop-staff');
+  if(staffEl){ var allS=getStaffList(); staffEl.innerHTML='<option value="">—</option>'+allS.map(function(s){return '<option>'+esc(s)+'</option>';}).join(''); }
+  // 既存履歴リスト
+  obHistPopRenderList(r);
+  // 位置計算（クリック位置に表示）
+  var rect = e.currentTarget ? e.currentTarget.getBoundingClientRect() : {left:e.clientX,bottom:e.clientY,top:e.clientY};
+  pop.style.left = Math.min(rect.left, window.innerWidth - 360) + 'px';
+  var top = rect.bottom + 6;
+  if(top + 340 > window.innerHeight) top = rect.top - 340;
+  pop.style.top = Math.max(8, top) + 'px';
+  pop.classList.add('show');
+  setTimeout(function(){ document.addEventListener('click', _obHistPopOutside, {once:true}); }, 0);
+}
+
+function _obHistPopOutside(e){
+  var pop = document.getElementById('ob-hist-pop');
+  if(pop && !pop.contains(e.target)){ pop.classList.remove('show'); _obHistPopRow=-1; }
+}
+
+function obHistPopClose(){
+  document.getElementById('ob-hist-pop').classList.remove('show');
+  _obHistPopRow = -1;
+}
+
+function obHistPopRenderList(r){
+  var listEl = document.getElementById('ob-hist-pop-list'); if(!listEl) return;
+  var deduped = obDedupHistory(r.history||[]).slice().sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+  if(!deduped.length){ listEl.innerHTML='<div style="color:#CCC;font-size:.78rem;padding:4px 0">履歴なし</div>'; return; }
+  listEl.innerHTML = deduped.map(function(item){
+    var d = item.date ? (function(){ var p=(item.date||'').substring(0,10).split('-'); return p.length===3?(parseInt(p[1])+'月'+parseInt(p[2])+'日'):''; })() : '—';
+    var key = obNormDate(item.date||'')+'|'+(item.type||'');
+    return '<div class="ob-hist-pop-item">'+
+      '<span style="color:#9A8C76;min-width:54px">'+esc(d)+'</span>'+
+      '<span style="background:#E8E4DC;border-radius:10px;padding:1px 8px;font-size:.7rem;font-weight:600">'+esc(item.type||'')+'</span>'+
+      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(item.content||'')+'</span>'+
+      '<button class="ob-tl-del" onclick="obHistPopDel(\''+esc(key).replace(/'/g,"\\'")+'\')" title="削除">✕</button>'+
+    '</div>';
+  }).join('');
+}
+
+function obHistPopSave(){
+  var rowIdx = _obHistPopRow; if(rowIdx < 0) return;
+  var r = obRows[rowIdx]; if(!r) return;
+  var date = (document.getElementById('ob-hist-pop-date')||{}).value || '';
+  var type = (document.getElementById('ob-hist-pop-type')||{}).value || '来場';
+  var content = ((document.getElementById('ob-hist-pop-content')||{}).value||'').trim();
+  var staff = (document.getElementById('ob-hist-pop-staff')||{}).value || '';
+  if(!date){ var t=new Date(); date=t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2); }
+  if(!r.history) r.history = [];
+  r.history.push({date:date,type:type,content:content,staff:staff});
+  r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+  obSetCache(obRows);
+  obHistPopRenderList(r);
+  // テーブルの履歴チップを即時更新
+  var tds = document.querySelectorAll('tr[data-row="'+rowIdx+'"] td');
+  tds.forEach(function(td){ if(td.querySelector('.ob-hist-chips')){
+    td.innerHTML='<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+rowIdx+');event.stopPropagation()">＋</button></div>';
+  }});
+  post({action:'obAddHistory',row:rowIdx,date:date,type:type,content:content,staff:staff});
+  document.getElementById('ob-hist-pop-content').value='';
+  toast('履歴を追加しました');
+}
+
+function obHistPopDel(key){
+  var rowIdx = _obHistPopRow; if(rowIdx < 0) return;
+  var r = obRows[rowIdx]; if(!r||!r.history) return;
+  if(!confirm('この履歴を削除しますか？')) return;
+  var toDel = [];
+  for(var i=0;i<r.history.length;i++){
+    var h=r.history[i];
+    if((obNormDate(h.date||'')+'|'+(h.type||''))===key) toDel.push(i);
+  }
+  for(var j=toDel.length-1;j>=0;j--){
+    r.history.splice(toDel[j],1);
+    post({action:'obDeleteHistory',row:rowIdx,histIndex:toDel[j]});
+  }
+  obSetCache(obRows);
+  obHistPopRenderList(r);
+  var tds2 = document.querySelectorAll('tr[data-row="'+rowIdx+'"] td');
+  tds2.forEach(function(td){ if(td.querySelector('.ob-hist-chips')){
+    td.innerHTML='<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+rowIdx+');event.stopPropagation()">＋</button></div>';
+  }});
+  toast('削除しました');
 }
 
 function obDelHistory(histIdx){
