@@ -992,12 +992,14 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .hub-empty-mini{font-size:.74rem;color:rgba(255,255,255,.25);padding:10px 4px;text-align:center}
 /* ─── イベントミニセクション ─── */
 .hub-ev-mini{display:flex;flex-direction:column;gap:4px;margin-bottom:2px}
-.hub-ev-row{display:flex;align-items:center;gap:7px;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:6px;border:1px solid rgba(255,255,255,.07);transition:background .12s}
+.hub-ev-row{display:flex;flex-direction:column;gap:3px;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:6px;border:1px solid rgba(255,255,255,.07);transition:background .12s}
 .hub-ev-row:hover{background:rgba(255,255,255,.08)}
 .hub-ev-row.ev-ongoing{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.07)}
 .hub-ev-row.ev-soon{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.05)}
-.hub-ev-name{flex:1;font-size:.75rem;color:rgba(255,255,255,.78);font-weight:600;white-space:nowrap;overflow:hidden;min-width:0}
-.hub-ev-date{font-size:.62rem;color:#9A8C76;white-space:nowrap}
+.hub-ev-name{font-size:.73rem;color:rgba(255,255,255,.85);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub-ev-meta{display:flex;align-items:center;gap:5px}
+.hub-ev-date{font-size:.6rem;color:#9A8C76;white-space:nowrap;flex:1}
+.hub-ev-days{font-size:.6rem;color:#9A8C76;white-space:nowrap}
 .hub-ev-badge{font-size:.58rem;font-weight:700;padding:1px 6px;border-radius:8px;white-space:nowrap}
 .hub-ev-badge.ev-b-on{background:rgba(34,197,94,.18);color:#86EFAC}
 .hub-ev-badge.ev-b-soon{background:rgba(251,191,36,.18);color:#FDE68A}
@@ -3087,6 +3089,38 @@ function scheduleEvDel(id){
   hubRenderEvMini();
 }
 
+function scheduleEvEdit(id){
+  var e=scheduleEvLoad().find(function(x){return x.id===id;});
+  if(!e) return;
+  var row=document.getElementById('ev-row-'+id); if(!row) return;
+  row.innerHTML=
+    '<div style="display:flex;flex-direction:column;gap:7px">'+
+      '<input id="ev-en-'+id+'" class="nm-input" value="'+esc(e.name)+'" placeholder="イベント名" style="font-size:.82rem">'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
+        '<div><div style="font-size:.68rem;color:#6B7280;margin-bottom:2px">開始日</div><input id="ev-es-'+id+'" type="date" class="nm-input" value="'+(e.startDate||'')+'" style="font-size:.75rem;width:100%"></div>'+
+        '<div><div style="font-size:.68rem;color:#6B7280;margin-bottom:2px">終了日</div><input id="ev-ee-'+id+'" type="date" class="nm-input" value="'+(e.endDate||'')+'" style="font-size:.75rem;width:100%"></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:6px">'+
+        '<button onclick="scheduleEvSaveEdit(\''+id+'\')" style="flex:1;background:#1D4ED8;color:#FFF;border:none;border-radius:6px;cursor:pointer;font-size:.78rem;padding:5px 8px;font-weight:600">保存</button>'+
+        '<button onclick="renderScheduleEvSettings()" style="background:none;border:1px solid #D1D5DB;border-radius:6px;color:#6B7280;cursor:pointer;font-size:.78rem;padding:5px 10px">キャンセル</button>'+
+        '<button onclick="scheduleEvDel(\''+id+'\')" style="background:none;border:1px solid #FCA5A5;border-radius:6px;color:#EF4444;cursor:pointer;font-size:.78rem;padding:5px 10px">削除</button>'+
+      '</div>'+
+    '</div>';
+}
+
+function scheduleEvSaveEdit(id){
+  var name=(document.getElementById('ev-en-'+id).value||'').trim();
+  if(!name){toast('イベント名を入力してください');return;}
+  var start=document.getElementById('ev-es-'+id).value||'';
+  var end=document.getElementById('ev-ee-'+id).value||start;
+  var evs=scheduleEvLoad().map(function(e){return e.id===id?{id:id,name:name,startDate:start,endDate:end}:e;});
+  evs.sort(function(a,b){return (a.startDate||'zzz').localeCompare(b.startDate||'zzz');});
+  scheduleEvSave(evs);
+  renderScheduleEvSettings();
+  hubRenderEvMini();
+  toast('✅ イベントを更新しました');
+}
+
 function renderScheduleEvSettings(){
   var el=document.getElementById('scheduleEventList'); if(!el) return;
   var evs=scheduleEvLoad();
@@ -3095,11 +3129,14 @@ function renderScheduleEvSettings(){
   el.innerHTML=evs.map(function(e){
     var isPast=e.endDate&&e.endDate<today;
     var dateStr=(e.startDate||'日付未設定')+(e.endDate&&e.endDate!==e.startDate?' 〜 '+e.endDate:'');
-    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:'+(isPast?'#F5F5F5':'#EFF6FF')+';border:1px solid '+(isPast?'#E5E7EB':'#BFDBFE')+';border-radius:8px;margin-bottom:6px;opacity:'+(isPast?0.55:1)+'">'+
-      '<div style="flex:1"><div style="font-size:.84rem;font-weight:700;color:'+(isPast?'#9CA3AF':'#1D4ED8')+'">'+esc(e.name)+'</div>'+
-      '<div style="font-size:.72rem;color:#6B7280;margin-top:1px">'+esc(dateStr)+'</div></div>'+
-      (isPast?'<span style="font-size:.65rem;color:#9CA3AF;border:1px solid #E5E7EB;border-radius:6px;padding:1px 6px">終了</span>':'')+
-      '<button onclick="scheduleEvDel(\''+e.id+'\')" style="background:none;border:1px solid #FCA5A5;border-radius:6px;color:#EF4444;cursor:pointer;font-size:.75rem;padding:2px 8px" title="削除">削除</button>'+
+    return '<div id="ev-row-'+e.id+'" style="padding:8px 12px;background:'+(isPast?'#F5F5F5':'#EFF6FF')+';border:1px solid '+(isPast?'#E5E7EB':'#BFDBFE')+';border-radius:8px;margin-bottom:6px;opacity:'+(isPast?0.55:1)+'">'+
+      '<div style="display:flex;align-items:center;gap:8px">'+
+        '<div style="flex:1"><div style="font-size:.84rem;font-weight:700;color:'+(isPast?'#9CA3AF':'#1D4ED8')+'">'+esc(e.name)+'</div>'+
+        '<div style="font-size:.72rem;color:#6B7280;margin-top:1px">'+esc(dateStr)+'</div></div>'+
+        (isPast?'<span style="font-size:.65rem;color:#9CA3AF;border:1px solid #E5E7EB;border-radius:6px;padding:1px 6px">終了</span>':'')+
+        '<button onclick="scheduleEvEdit(\''+e.id+'\')" style="background:none;border:1px solid #93C5FD;border-radius:6px;color:#2563EB;cursor:pointer;font-size:.75rem;padding:2px 8px">編集</button>'+
+        '<button onclick="scheduleEvDel(\''+e.id+'\')" style="background:none;border:1px solid #FCA5A5;border-radius:6px;color:#EF4444;cursor:pointer;font-size:.75rem;padding:2px 8px">削除</button>'+
+      '</div>'+
     '</div>';
   }).join('');
 }
@@ -3107,25 +3144,26 @@ function renderScheduleEvSettings(){
 function hubRenderEvMini(){
   var el=document.getElementById('hubEvMini'); if(!el) return;
   var today=new Date().toISOString().substring(0,10);
-  var evs=scheduleEvLoad().filter(function(e){
-    return !e.endDate||e.endDate>=today;
-  }).slice(0,5);
+  var todayMs=new Date(today+'T00:00:00').getTime();
+  var evs=scheduleEvLoad().filter(function(e){return !e.endDate||e.endDate>=today;}).slice(0,5);
   if(!evs.length){el.innerHTML='<div class="hub-empty-mini">イベント未登録</div>';return;}
+  var dateFmt=function(s){if(!s)return'';var p=s.match(/^(\d{4})-(\d{2})-(\d{2})/);return p?parseInt(p[2])+'月'+parseInt(p[3])+'日':s;};
   el.innerHTML=evs.map(function(e){
     var isOngoing=(!e.startDate||e.startDate<=today)&&(!e.endDate||e.endDate>=today);
-    var daysUntil=e.startDate?(Math.ceil((new Date(e.startDate)-new Date())/(864e5))):null;
-    var isSoon=!isOngoing&&daysUntil!==null&&daysUntil<=7&&daysUntil>0;
+    var startMs=e.startDate?new Date(e.startDate+'T00:00:00').getTime():null;
+    var endMs=e.endDate?new Date(e.endDate+'T00:00:00').getTime():null;
+    var daysUntilStart=startMs?Math.ceil((startMs-todayMs)/864e5):null;
+    var daysLeft=endMs?Math.floor((endMs-todayMs)/864e5)+1:null;
+    var isSoon=!isOngoing&&daysUntilStart!==null&&daysUntilStart<=7&&daysUntilStart>0;
     var cls=isOngoing?'ev-ongoing':isSoon?'ev-soon':'';
     var badge=isOngoing?'<span class="hub-ev-badge ev-b-on">開催中</span>':
-              isSoon?'<span class="hub-ev-badge ev-b-soon">あと'+daysUntil+'日</span>':'';
-    var dateFmt=function(s){if(!s)return'';var p=s.match(/^(\d{4})-(\d{2})-(\d{2})/);return p?parseInt(p[2])+'月'+parseInt(p[3])+'日':s;};
+              isSoon?'<span class="hub-ev-badge ev-b-soon">あと'+daysUntilStart+'日</span>':'';
+    var daysLabel=isOngoing?(daysLeft!==null?'<span class="hub-ev-days">残り'+daysLeft+'日</span>':''):
+                  (daysUntilStart!==null?'<span class="hub-ev-days">'+(isSoon?'':'')+(daysUntilStart>0?daysUntilStart+'日後':'')+'</span>':'');
     var dateDisp=e.startDate?(e.endDate&&e.endDate!==e.startDate?dateFmt(e.startDate)+'〜'+dateFmt(e.endDate):dateFmt(e.startDate)):'日付未定';
-    var nLen=e.name.length;
-    var nFs=nLen>16?'.52rem':nLen>11?'.62rem':nLen>8?'.68rem':'.75rem';
     return '<div class="hub-ev-row '+cls+'">'+
-      '<span class="hub-ev-name" style="font-size:'+nFs+'">'+esc(e.name)+'</span>'+
-      badge+
-      '<span class="hub-ev-date">'+esc(dateDisp)+'</span>'+
+      '<span class="hub-ev-name">'+esc(e.name)+'</span>'+
+      '<div class="hub-ev-meta">'+badge+'<span class="hub-ev-date">'+esc(dateDisp)+'</span>'+daysLabel+'</div>'+
     '</div>';
   }).join('');
 }
