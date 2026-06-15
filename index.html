@@ -2395,6 +2395,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
               <input id="newEvEnd" type="date" class="nm-input">
             </div>
           </div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+            <input type="checkbox" id="newEvUndef" onchange="toggleNewEvUndef()" style="cursor:pointer">
+            <label for="newEvUndef" style="font-size:.78rem;color:#666;cursor:pointer">日程未定</label>
+          </div>
           <button class="st-save" style="margin-top:12px" onclick="scheduleEvAdd()">＋ イベントを追加</button>
         </div>
 
@@ -3062,24 +3066,59 @@ function hubUpdateBadges(){
 
 // ── ハブ スケジュールイベント管理 ──
 var HUB_EVENTS_KEY='hub_schedule_events_v1';
-function scheduleEvLoad(){try{return JSON.parse(localStorage.getItem(HUB_EVENTS_KEY)||'[]');}catch(e){return[];}}
+function scheduleEvLoad(){
+  try{
+    var evs=JSON.parse(localStorage.getItem(HUB_EVENTS_KEY)||'[]');
+    var today=new Date().toISOString().substring(0,10);
+    var filtered=evs.filter(function(e){return !e.endDate||e.endDate>=today;});
+    if(filtered.length!==evs.length) localStorage.setItem(HUB_EVENTS_KEY,JSON.stringify(filtered));
+    return filtered;
+  }catch(e){return[];}
+}
 function scheduleEvSave(evs){localStorage.setItem(HUB_EVENTS_KEY,JSON.stringify(evs));}
+
+function toggleNewEvUndef(){
+  var u=document.getElementById('newEvUndef').checked;
+  document.getElementById('newEvStart').disabled=u;
+  document.getElementById('newEvEnd').disabled=u;
+  if(u){document.getElementById('newEvStart').value='';document.getElementById('newEvEnd').value='';}
+}
 
 function scheduleEvAdd(){
   var name=(document.getElementById('newEvName').value||'').trim();
   if(!name){toast('イベント名を入力してください');return;}
-  var start=document.getElementById('newEvStart').value||'';
-  var end=document.getElementById('newEvEnd').value||start;
+  var isUndef=document.getElementById('newEvUndef').checked;
+  var start=isUndef?'':(document.getElementById('newEvStart').value||'');
+  var end=isUndef?'':(document.getElementById('newEvEnd').value||start);
   var evs=scheduleEvLoad();
   evs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),name:name,startDate:start,endDate:end});
-  evs.sort(function(a,b){return (a.startDate||'zzz').localeCompare(b.startDate||'zzz');});
   scheduleEvSave(evs);
   document.getElementById('newEvName').value='';
   document.getElementById('newEvStart').value='';
   document.getElementById('newEvEnd').value='';
+  document.getElementById('newEvUndef').checked=false;
+  toggleNewEvUndef();
   renderScheduleEvSettings();
   hubRenderEvMini();
   toast('✅ イベントを追加しました');
+}
+
+var _evDragSrc=null;
+function _evDragStart(e,id){_evDragSrc=id;e.dataTransfer.effectAllowed='move';e.currentTarget.style.opacity='.35';}
+function _evDragEnd(e){e.currentTarget.style.opacity='1';}
+function _evDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';}
+function _evDrop(e,targetId){
+  e.stopPropagation();
+  if(!_evDragSrc||_evDragSrc===targetId){return;}
+  var evs=scheduleEvLoad();
+  var si=evs.findIndex(function(x){return x.id===_evDragSrc;});
+  var ti=evs.findIndex(function(x){return x.id===targetId;});
+  if(si<0||ti<0) return;
+  var item=evs.splice(si,1)[0];
+  evs.splice(ti,0,item);
+  scheduleEvSave(evs);
+  renderScheduleEvSettings();
+  hubRenderEvMini();
 }
 
 function scheduleEvDel(id){
@@ -3093,12 +3132,17 @@ function scheduleEvEdit(id){
   var e=scheduleEvLoad().find(function(x){return x.id===id;});
   if(!e) return;
   var row=document.getElementById('ev-row-'+id); if(!row) return;
+  var isUndef=!e.startDate&&!e.endDate;
   row.innerHTML=
     '<div style="display:flex;flex-direction:column;gap:7px">'+
       '<input id="ev-en-'+id+'" class="nm-input" value="'+esc(e.name)+'" placeholder="イベント名" style="font-size:.82rem">'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
-        '<div><div style="font-size:.68rem;color:#6B7280;margin-bottom:2px">開始日</div><input id="ev-es-'+id+'" type="date" class="nm-input" value="'+(e.startDate||'')+'" style="font-size:.75rem;width:100%"></div>'+
-        '<div><div style="font-size:.68rem;color:#6B7280;margin-bottom:2px">終了日</div><input id="ev-ee-'+id+'" type="date" class="nm-input" value="'+(e.endDate||'')+'" style="font-size:.75rem;width:100%"></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="ev-dates-'+id+'"'+( isUndef?' style="opacity:.4;pointer-events:none"':'')+'>'+
+        '<div><div style="font-size:.68rem;color:#6B7280;margin-bottom:2px">開始日</div><input id="ev-es-'+id+'" type="date" class="nm-input" value="'+(e.startDate||'')+'" style="font-size:.75rem;width:100%"'+(isUndef?' disabled':'')+' ></div>'+
+        '<div><div style="font-size:.68rem;color:#6B7280;margin-bottom:2px">終了日</div><input id="ev-ee-'+id+'" type="date" class="nm-input" value="'+(e.endDate||'')+'" style="font-size:.75rem;width:100%"'+(isUndef?' disabled':'')+' ></div>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:6px">'+
+        '<input type="checkbox" id="ev-eu-'+id+'" onchange="toggleEditEvUndef(\''+id+'\')"'+(isUndef?' checked':'')+' style="cursor:pointer">'+
+        '<label for="ev-eu-'+id+'" style="font-size:.78rem;color:#6B7280;cursor:pointer">日程未定</label>'+
       '</div>'+
       '<div style="display:flex;gap:6px">'+
         '<button onclick="scheduleEvSaveEdit(\''+id+'\')" style="flex:1;background:#1D4ED8;color:#FFF;border:none;border-radius:6px;cursor:pointer;font-size:.78rem;padding:5px 8px;font-weight:600">保存</button>'+
@@ -3108,13 +3152,22 @@ function scheduleEvEdit(id){
     '</div>';
 }
 
+function toggleEditEvUndef(id){
+  var u=document.getElementById('ev-eu-'+id).checked;
+  var d=document.getElementById('ev-dates-'+id);
+  if(d){d.style.opacity=u?'.4':'1';d.style.pointerEvents=u?'none':'auto';}
+  var es=document.getElementById('ev-es-'+id);var ee=document.getElementById('ev-ee-'+id);
+  if(es)es.disabled=u;if(ee)ee.disabled=u;
+  if(u&&es)es.value='';if(u&&ee)ee.value='';
+}
+
 function scheduleEvSaveEdit(id){
   var name=(document.getElementById('ev-en-'+id).value||'').trim();
   if(!name){toast('イベント名を入力してください');return;}
-  var start=document.getElementById('ev-es-'+id).value||'';
-  var end=document.getElementById('ev-ee-'+id).value||start;
+  var isUndef=document.getElementById('ev-eu-'+id).checked;
+  var start=isUndef?'':(document.getElementById('ev-es-'+id).value||'');
+  var end=isUndef?'':(document.getElementById('ev-ee-'+id).value||start);
   var evs=scheduleEvLoad().map(function(e){return e.id===id?{id:id,name:name,startDate:start,endDate:end}:e;});
-  evs.sort(function(a,b){return (a.startDate||'zzz').localeCompare(b.startDate||'zzz');});
   scheduleEvSave(evs);
   renderScheduleEvSettings();
   hubRenderEvMini();
@@ -3128,12 +3181,22 @@ function renderScheduleEvSettings(){
   var today=new Date().toISOString().substring(0,10);
   el.innerHTML=evs.map(function(e){
     var isPast=e.endDate&&e.endDate<today;
-    var dateStr=(e.startDate||'日付未設定')+(e.endDate&&e.endDate!==e.startDate?' 〜 '+e.endDate:'');
-    return '<div id="ev-row-'+e.id+'" style="padding:8px 12px;background:'+(isPast?'#F5F5F5':'#EFF6FF')+';border:1px solid '+(isPast?'#E5E7EB':'#BFDBFE')+';border-radius:8px;margin-bottom:6px;opacity:'+(isPast?0.55:1)+'">'+
+    var isUndef=!e.startDate&&!e.endDate;
+    var dateStr=isUndef?'日程未定':(e.startDate||'日付未設定')+(e.endDate&&e.endDate!==e.startDate?' 〜 '+e.endDate:'');
+    var nameColor=isPast?'#9CA3AF':isUndef?'#6B7280':'#1D4ED8';
+    return '<div id="ev-row-'+e.id+'" draggable="true"'+
+      ' ondragstart="_evDragStart(event,\''+e.id+'\')"'+
+      ' ondragend="_evDragEnd(event)"'+
+      ' ondragover="_evDragOver(event)"'+
+      ' ondrop="_evDrop(event,\''+e.id+'\')"'+
+      ' style="padding:8px 12px;background:'+(isPast?'#F5F5F5':'#EFF6FF')+';border:1px solid '+(isPast?'#E5E7EB':'#BFDBFE')+';border-radius:8px;margin-bottom:6px;opacity:'+(isPast?0.55:1)+';cursor:grab">'+
       '<div style="display:flex;align-items:center;gap:8px">'+
-        '<div style="flex:1"><div style="font-size:.84rem;font-weight:700;color:'+(isPast?'#9CA3AF':'#1D4ED8')+'">'+esc(e.name)+'</div>'+
-        '<div style="font-size:.72rem;color:#6B7280;margin-top:1px">'+esc(dateStr)+'</div></div>'+
-        (isPast?'<span style="font-size:.65rem;color:#9CA3AF;border:1px solid #E5E7EB;border-radius:6px;padding:1px 6px">終了</span>':'')+
+        '<span style="font-size:1rem;color:#9CA3AF;user-select:none;cursor:grab">⠿</span>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:.84rem;font-weight:700;color:'+nameColor+'">'+esc(e.name)+'</div>'+
+          '<div style="font-size:.72rem;color:#6B7280;margin-top:1px">'+esc(dateStr)+'</div>'+
+        '</div>'+
+        (isUndef?'<span style="font-size:.65rem;color:#6B7280;border:1px solid #D1D5DB;border-radius:6px;padding:1px 6px">未定</span>':'')+
         '<button onclick="scheduleEvEdit(\''+e.id+'\')" style="background:none;border:1px solid #93C5FD;border-radius:6px;color:#2563EB;cursor:pointer;font-size:.75rem;padding:2px 8px">編集</button>'+
         '<button onclick="scheduleEvDel(\''+e.id+'\')" style="background:none;border:1px solid #FCA5A5;border-radius:6px;color:#EF4444;cursor:pointer;font-size:.75rem;padding:2px 8px">削除</button>'+
       '</div>'+
@@ -3149,6 +3212,13 @@ function hubRenderEvMini(){
   if(!evs.length){el.innerHTML='<div class="hub-empty-mini">イベント未登録</div>';return;}
   var dateFmt=function(s){if(!s)return'';var p=s.match(/^(\d{4})-(\d{2})-(\d{2})/);return p?parseInt(p[2])+'月'+parseInt(p[3])+'日':s;};
   el.innerHTML=evs.map(function(e){
+    var isUndef=!e.startDate&&!e.endDate;
+    if(isUndef){
+      return '<div class="hub-ev-row">'+
+        '<span class="hub-ev-name">'+esc(e.name)+'</span>'+
+        '<div class="hub-ev-meta"><span class="hub-ev-date" style="color:#6B7280;font-style:italic">日程未定</span></div>'+
+      '</div>';
+    }
     var isOngoing=(!e.startDate||e.startDate<=today)&&(!e.endDate||e.endDate>=today);
     var startMs=e.startDate?new Date(e.startDate+'T00:00:00').getTime():null;
     var endMs=e.endDate?new Date(e.endDate+'T00:00:00').getTime():null;
@@ -3159,8 +3229,8 @@ function hubRenderEvMini(){
     var badge=isOngoing?'<span class="hub-ev-badge ev-b-on">開催中</span>':
               isSoon?'<span class="hub-ev-badge ev-b-soon">あと'+daysUntilStart+'日</span>':'';
     var daysLabel=isOngoing?(daysLeft!==null?'<span class="hub-ev-days">残り'+daysLeft+'日</span>':''):
-                  (daysUntilStart!==null?'<span class="hub-ev-days">'+(isSoon?'':'')+(daysUntilStart>0?daysUntilStart+'日後':'')+'</span>':'');
-    var dateDisp=e.startDate?(e.endDate&&e.endDate!==e.startDate?dateFmt(e.startDate)+'〜'+dateFmt(e.endDate):dateFmt(e.startDate)):'日付未定';
+                  (daysUntilStart!==null&&daysUntilStart>0?'<span class="hub-ev-days">'+daysUntilStart+'日後</span>':'');
+    var dateDisp=e.startDate?(e.endDate&&e.endDate!==e.startDate?dateFmt(e.startDate)+'〜'+dateFmt(e.endDate):dateFmt(e.startDate)):'';
     return '<div class="hub-ev-row '+cls+'">'+
       '<span class="hub-ev-name">'+esc(e.name)+'</span>'+
       '<div class="hub-ev-meta">'+badge+'<span class="hub-ev-date">'+esc(dateDisp)+'</span>'+daysLabel+'</div>'+
