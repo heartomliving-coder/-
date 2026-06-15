@@ -3116,18 +3116,14 @@ function scheduleEvSyncFromGAS(){
     if(!r||!r.ok||!Array.isArray(r.events)) return;
     var today=new Date().toISOString().substring(0,10);
     var fresh=r.events.filter(function(e){return !e.endDate||e.endDate>=today;});
-    // GASが空でローカルにデータがある場合 → ローカルをGASへ押し出す（初回デプロイ後の移行）
     if(!fresh.length){
       var local=scheduleEvLoad();
       if(local.length){ post({action:'saveHubEvents',events:local}); return; }
     }
-    var localStr=localStorage.getItem(HUB_EVENTS_KEY)||'[]';
-    if(JSON.stringify(fresh)!==localStr){
-      localStorage.setItem(HUB_EVENTS_KEY,JSON.stringify(fresh));
-      hubRenderEvMini();
-      var sl=document.getElementById('scheduleEventList');
-      if(sl&&sl.offsetParent!==null) renderScheduleEvSettings();
-    }
+    localStorage.setItem(HUB_EVENTS_KEY,JSON.stringify(fresh));
+    hubRenderEvMini();
+    var sl=document.getElementById('scheduleEventList');
+    if(sl&&sl.offsetParent!==null) renderScheduleEvSettings();
   });
 }
 
@@ -5418,6 +5414,14 @@ function obFmtDate(s){
   return parseInt(p[1])+'年'+parseInt(p[2])+'月'+parseInt(p[3])+'日';
 }
 
+function _obMoveToNextCell(currentEl, dir){
+  var cells = Array.from(document.querySelectorAll('#ob-visitors-content .ob-editable, #ob-active-content .ob-editable'));
+  var idx = cells.indexOf(currentEl);
+  if(idx < 0) return;
+  var next = cells[idx + dir];
+  if(next) { next.click(); }
+}
+
 function obStartEdit(el){
   if(el.querySelector('input,select')) return;
   var row=parseInt(el.getAttribute('data-row'));
@@ -5439,7 +5443,15 @@ function obStartEdit(el){
     }
     function saveDate(){ if(done)return; done=true; var v=inp.value; el.innerHTML=_obDateDisplay(v,field); obSaveField(row,field,v); }
     inp.addEventListener('change',saveDate); inp.addEventListener('blur',saveDate);
-    inp.addEventListener('keydown',function(e){if(e.key==='Escape'){el.innerHTML=_obDateDisplay(obNormDate(val),field);}});
+    inp.addEventListener('keydown',function(e){
+      if(e.key==='Tab'){
+        e.preventDefault();
+        inp.blur();
+        var dir=e.shiftKey?-1:1;
+        _obMoveToNextCell(el,dir);
+      }
+      if(e.key==='Escape'){el.innerHTML=_obDateDisplay(obNormDate(val),field);}
+    });
     return;
   }
   var opts=[];
@@ -5467,6 +5479,14 @@ function obStartEdit(el){
       }
     }
     sel.addEventListener('change',saveSel); sel.addEventListener('blur',saveSel);
+    sel.addEventListener('keydown',function(e){
+      if(e.key==='Tab'){
+        e.preventDefault();
+        saveSel();
+        var dir=e.shiftKey?-1:1;
+        _obMoveToNextCell(el,dir);
+      }
+    });
     return;
   }
   var inp2=document.createElement('input'); inp2.type='text'; inp2.value=val; inp2.className='ob-cell-input';
@@ -5475,7 +5495,15 @@ function obStartEdit(el){
   var done3=false;
   function saveTxt(){ if(done3)return; done3=true; var v=inp2.value; el.textContent=v||''; obSaveField(row,field,v); }
   inp2.addEventListener('blur',saveTxt);
-  inp2.addEventListener('keydown',function(e){if(e.key==='Enter')inp2.blur(); if(e.key==='Escape'){el.textContent=val||'';}});
+  inp2.addEventListener('keydown',function(e){
+    if(e.key==='Enter'||e.key==='Tab'){
+      e.preventDefault();
+      inp2.blur();
+      var dir=(e.shiftKey&&e.key==='Tab')?-1:1;
+      _obMoveToNextCell(el,dir);
+    }
+    if(e.key==='Escape'){el.textContent=val||'';}
+  });
 }
 
 function obEditStatusInline(el,rowIdx){
@@ -6372,7 +6400,12 @@ function kjLoad(silent, force){
     return;
   }
   __kjLoading = true;
-  if(cached.length){ kjRows=cached; kjRows.forEach(function(r,i){r._idx=i;}); kjRenderList(); }
+  if(cached.length){
+    kjRows=cached; kjRows.forEach(function(r,i){r._idx=i;});
+    var _ae=document.activeElement;
+    var _kjEditing=_ae&&(_ae.tagName==='INPUT'||_ae.tagName==='TEXTAREA'||_ae.tagName==='SELECT')&&document.getElementById('kj-list-content').contains(_ae);
+    if(!_kjEditing){ kjRenderList(); }
+  }
   if(!cached.length){
     document.getElementById('kj-list-content').innerHTML='<div class="kj-empty" style="color:#888"><div style="font-size:2rem;margin-bottom:12px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div><br>データ読み込み中...</div>';
   }
