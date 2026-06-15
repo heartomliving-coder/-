@@ -314,12 +314,12 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,1
 .ob-filter-chk{font-size:.84rem;gap:7px}
 .ob-filter-chk input{width:16px;height:16px}
 /* --- テーブル --- */
-.ob-table{font-size:.92rem}
-.ob-table thead th{font-size:.74rem;padding:10px 12px}
-.ob-table td{padding:9px 12px}
-.ob-name-link{font-size:1.02rem}
+.ob-table{font-size:.93rem}
+.ob-table thead th{font-size:.76rem;padding:10px 14px}
+.ob-table td{padding:10px 14px}
+.ob-name-link{font-size:1.02rem;font-weight:600}
 .ob-name-sub{font-size:.76rem}
-.ob-badge{font-size:.80rem;padding:4px 12px}
+.ob-badge{font-size:.82rem;padding:5px 12px}
 .ob-month-hd td{font-size:.84rem;padding:10px 18px}
 .ob-month-label{font-size:1.08rem}
 .ob-sc .sl{font-size:.68rem}
@@ -601,15 +601,16 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 
 /* テーブル共通 */
 .ob-scroll{flex:1;overflow:auto}
-.ob-table{width:100%;border-collapse:collapse;font-size:.86rem;white-space:nowrap}
-.ob-table thead th{background:#2B2B2B;color:rgba(255,255,255,.85);font-size:.68rem;font-weight:700;letter-spacing:.08em;padding:8px 10px;text-align:left;position:sticky;top:0;z-index:3;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08)}
+.ob-table{width:100%;border-collapse:collapse;font-size:.93rem;white-space:nowrap}
+.ob-table thead th{background:#2B2B2B;color:rgba(255,255,255,.85);font-size:.76rem;font-weight:700;letter-spacing:.08em;padding:10px 14px;text-align:left;position:sticky;top:0;z-index:3;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08)}
 .ob-table thead th.cb-th{text-align:center;padding:6px 5px;font-size:.62rem;letter-spacing:.03em;line-height:1.4}
-.ob-table td{padding:7px 10px;border-bottom:1px solid #E8E4DC;color:#222;vertical-align:middle;background:#fff;border-right:1px solid #EDE9E2;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+.ob-table td{padding:10px 14px;border-bottom:1px solid #E8E4DC;color:#222;vertical-align:middle;background:#fff;border-right:1px solid #EDE9E2;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+.ob-table tbody tr:nth-child(even) td{background:rgba(0,0,0,.03)}
 .ob-table tr:hover td{background:#FDFCF8}
 .ob-table tr.ob-sel td{background:#FFF8EE !important}
 
 /* 顧客名リンク */
-.ob-name-link{font-family:var(--serif);font-weight:700;color:var(--charcoal);cursor:pointer;border-bottom:1px solid transparent;transition:all .15s;font-size:.96rem}
+.ob-name-link{font-family:var(--serif);font-weight:600;color:var(--charcoal);cursor:pointer;border-bottom:1px solid transparent;transition:all .15s;font-size:1.02rem}
 .ob-name-link:hover{color:var(--gold-d,#9A7B4B);border-bottom-color:var(--gold)}
 .ob-name-sub{font-size:.68rem;color:#9A8C76;margin-top:2px;line-height:1.3;letter-spacing:.02em}
 
@@ -623,7 +624,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-sc .sp{font-size:.62rem;color:#AAA}
 
 /* ステータスバッジ */
-.ob-badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:.76rem;font-weight:700;letter-spacing:.04em;white-space:nowrap;cursor:pointer;transition:opacity .15s}
+.ob-badge{display:inline-block;padding:5px 12px;border-radius:20px;font-size:.82rem;font-weight:700;letter-spacing:.04em;white-space:nowrap;cursor:pointer;transition:opacity .15s}
 .ob-badge:hover{opacity:.8}
 .ob-s0{background:#FEF9EC;color:#92600E;border:1px solid #F5DFA0}
 .ob-s1{background:#F0EEFF;color:#5B21B6;border:1px solid #D4C8F8}
@@ -732,8 +733,6 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-table tr[data-sc="ob-s9"] td:first-child{border-left-color:#FECACA}
 .ob-table tr[data-sc="ob-sP"] td:first-child{border-left-color:#86EFAC}
 .ob-table tr[data-sc="ob-sF"] td:first-child{border-left-color:#E5E7EB}
-/* 行の高さを少し増して可読性UP */
-.ob-table td{padding:7px 9px}
 /* パイプラインフロー */
 .ob-pipeline{flex-shrink:0;display:flex;padding:6px 16px;background:#FAFAF8;border-bottom:1px solid #E8E4DE;overflow-x:auto;gap:0;align-items:center}
 .ob-pipe-s{display:flex;align-items:center;gap:0;font-size:.64rem;font-weight:700;color:#CCC;white-space:nowrap;cursor:pointer;transition:color .15s}
@@ -3087,11 +3086,13 @@ function initSyncPoll(){
 function checkRemoteChanges(){
   gasGet('getChangeTimes',function(r){
     if(!r||!r.ok) return;
-    var editing=document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
-    if(r.ob!==_syncState.ob){_syncState.ob=r.ob;if(!editing){localStorage.removeItem('ob_v3_ts');obLoad(true,true);}}
-    if(r.kj!==_syncState.kj){_syncState.kj=r.kj;if(!editing){localStorage.removeItem('kj_v1_ts');kjLoad(true,true);}}
-    if(r.tochi!==_syncState.tochi){_syncState.tochi=r.tochi;if(!editing){localStorage.removeItem('tc_v1_ts');tochiLoad(true,true);}}
-    if(r.mtg!==_syncState.mtg){_syncState.mtg=r.mtg;if(!editing){localStorage.removeItem('mtg_v1_ts');mtgLoad(true,true);}}
+    var _ae=document.activeElement;
+    var _inInput=_ae&&/INPUT|TEXTAREA|SELECT/.test(_ae.tagName);
+    function _editing(id){return _inInput&&!!(document.getElementById(id)||{contains:function(){return false;}}).contains(_ae);}
+    if(r.ob!==_syncState.ob){_syncState.ob=r.ob;if(!_editing('ob-visitors-content')&&!_editing('ob-active-content')&&!_editing('ob-detail')){localStorage.removeItem('ob_v3_ts');obLoad(true,true);}}
+    if(r.kj!==_syncState.kj){_syncState.kj=r.kj;if(!_editing('kj-list-content')&&!_editing('kj-detail-content')){localStorage.removeItem('kj_v1_ts');kjLoad(true,true);}}
+    if(r.tochi!==_syncState.tochi){_syncState.tochi=r.tochi;if(!_editing('tochi-content')){localStorage.removeItem('tc_v1_ts');tochiLoad(true,true);}}
+    if(r.mtg!==_syncState.mtg){_syncState.mtg=r.mtg;if(!_editing('mtgboard')){localStorage.removeItem('mtg_v1_ts');mtgLoad(true,true);}}
     if(r.events!==_syncState.events){_syncState.events=r.events;scheduleEvSyncFromGAS();}
   });
 }
@@ -3598,6 +3599,42 @@ function openSettings(tab){
   stSyncMtgCwSettingsToTab();
   // 指定タブを開く
   showSettingsTab(tab||'connection');
+  // GASから設定を読み込んで各フィールドを自動補完
+  gasGet('getSettingsAll', function(d){
+    if(!d||!d.ok) return;
+    // Supabase設定
+    var sbUrlEl = document.getElementById('setSbUrl');
+    var sbKeyEl = document.getElementById('setSbKey');
+    if(sbUrlEl && d.sbUrl && !sbUrlEl.value) sbUrlEl.value = d.sbUrl;
+    if(sbKeyEl && d.sbKey && !sbKeyEl.value) sbKeyEl.value = d.sbKey;
+    var sbBanner = document.getElementById('sb-status-banner');
+    if(sbBanner){
+      if(d.hasSbUrl && d.hasSbKey){
+        sbBanner.textContent='✅ Supabase設定済み（'+d.sbUrlPreview+')';
+        sbBanner.style.background='#F0FDF4'; sbBanner.style.color='#15803D'; sbBanner.style.display='block';
+      } else {
+        sbBanner.textContent='⚠️ Supabase未設定 — URL・Keyを入力して保存してください';
+        sbBanner.style.background='#FFFBEB'; sbBanner.style.color='#92400E'; sbBanner.style.display='block';
+      }
+    }
+    // Chatwork設定
+    var cwRoomEl  = document.getElementById('stMtgCwRoom');
+    var cwTmplEl  = document.getElementById('stMtgCwTemplate');
+    var cwNotifyEl= document.getElementById('stMtgCwNotifyRoom');
+    // token はセキュリティ上マスク（設定済みかどうかだけ表示）
+    var cwStatus  = document.getElementById('st-mtgcw-result');
+    if(cwStatus && !cwStatus.textContent){
+      cwStatus.textContent = d.hasCwToken ? '✅ Chatwork APIトークン設定済み' : '⚠️ Chatwork APIトークン未設定';
+      cwStatus.style.color = d.hasCwToken ? '#22C55E' : '#F59E0B';
+    }
+    if(cwRoomEl  && d.cwRoom   && !cwRoomEl.value)  cwRoomEl.value  = d.cwRoom;
+    if(cwTmplEl  && d.cwTemplate && !cwTmplEl.value) cwTmplEl.value = d.cwTemplate;
+    if(cwNotifyEl && d.cwNotifyRoom && !cwNotifyEl.value) cwNotifyEl.value = d.cwNotifyRoom;
+    // 設定タブの担当者側にも反映
+    __mtgSelectedRoomId = d.cwRoom || __mtgSelectedRoomId;
+    var roomStatus = document.getElementById('mtg-selected-room');
+    if(roomStatus && d.cwRoom) roomStatus.textContent = '✅ 設定済みルームID: '+d.cwRoom;
+  });
   document.getElementById('settingsModal').classList.add('show');
 }
 function closeSettings(){ document.getElementById('settingsModal').classList.remove('show'); }
@@ -3622,7 +3659,7 @@ function stSaveMtgCwSettings(){
   var notifyRoom = (document.getElementById('stMtgCwNotifyRoom')||{}).value||'';
   var res = document.getElementById('st-mtgcw-result');
   if(res){ res.textContent='保存中...'; res.style.color='#888'; }
-  var payload={action:'saveMtgCwSettings',token:token,roomId:room,template:tmpl,cwNotifyRoomId:notifyRoom};
+  var payload={action:'mtgSaveCwSettings',cwToken:token,roomId:room,template:tmpl,cwNotifyRoomId:notifyRoom};
   post(payload,function(d){
     if(d&&d.ok){
       if(res){ res.textContent='✅ 保存しました'; res.style.color='#22C55E'; }
@@ -7745,7 +7782,11 @@ function mtgLoad(silent, force){
     return;
   }
   __mtgLoading = true;
-  if(cached.length){ mtgRows=cached; mtgRows.forEach(function(r,i){r._idx=i;}); mtgPopulateStaffFilter(); mtgRenderList(); }
+  if(cached.length){
+    mtgRows=cached; mtgRows.forEach(function(r,i){r._idx=i;}); mtgPopulateStaffFilter();
+    var _mtgAe=document.activeElement;
+    if(!(_mtgAe&&/INPUT|TEXTAREA|SELECT/.test(_mtgAe.tagName)&&(document.getElementById('mtgboard')||{contains:function(){return false;}}).contains(_mtgAe))) mtgRenderList();
+  }
   gasGet('mtgGetData', function(d){
     __mtgLoading = false;
     if(!d||d.error){ if(!silent) toast('⚠️ MTGデータ取得エラー: '+(d?d.error:'通信エラー')); return; }
@@ -7753,7 +7794,11 @@ function mtgLoad(silent, force){
     mtgRows.forEach(function(r,i){r._idx=i;});
     mtgSetCache(mtgRows);
     mtgPopulateStaffFilter();
-    mtgRenderList();
+    var _mtgEd=document.activeElement;
+    var _mtgVisible=document.getElementById('mtgboard')&&document.getElementById('mtgboard').classList.contains('show');
+    if(!(_mtgEd&&/INPUT|TEXTAREA|SELECT/.test(_mtgEd.tagName)&&document.getElementById('mtgboard').contains(_mtgEd))){
+      if(_mtgVisible||!silent) mtgRenderList();
+    }
     // ハブバッジ更新
     var badge = document.getElementById('hubMtgCount');
     if(badge) badge.textContent = mtgRows.length ? mtgRows.length+'件' : '—';
