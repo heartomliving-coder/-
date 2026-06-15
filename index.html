@@ -4758,18 +4758,25 @@ var _obLastSaveTs = 0; // obSaveField が呼ばれた最終時刻
 
 function obLoad(silent, force){
   if(__obLoading && silent) return; // サイレント更新は同時実行しない
+  // 編集中チェック（どのパスでも再描画前に確認）
+  function _isObEditing(){
+    var ae=document.activeElement;
+    return ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
+      (document.getElementById('ob-detail').contains(ae)||document.getElementById('ob-visitors-content').contains(ae)||document.getElementById('ob-active-content').contains(ae));
+  }
   var cached=obGetCache();
   // キャッシュが新鮮 かつ 強制更新でない場合はGASを叩かず即表示
   if(cached.length && !force && isCacheFresh('ob_v3_ts')){
     obRows=cached; obRows.forEach(function(r,i){r._row=i;});
-    obPopulateFilters(); obRenderAll();
+    obPopulateFilters();
+    if(!_isObEditing()) obRenderAll();
     obUpdateLastUpdatedLabel();
     hubUpdateBadges();
     return;
   }
   __obLoading = true;
   var _saveTsAtFetchStart = _obLastSaveTs; // フェッチ開始時点の保存タイムスタンプ記録
-  if(cached.length){ obRows=cached; obRows.forEach(function(r,i){r._row=i;}); obPopulateFilters(); obRenderAll(); }
+  if(cached.length){ obRows=cached; obRows.forEach(function(r,i){r._row=i;}); obPopulateFilters(); if(!_isObEditing()) obRenderAll(); }
   // キャッシュがない初回ロード時はローディングアニメーション表示
   if(!cached.length){
     document.getElementById('ob-visitors-content').innerHTML='<div class="ob-empty-state" style="color:#888"><div style="font-size:2rem;margin-bottom:16px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div><br>データ読み込み中...<br><small style="color:#BBB;font-size:.78rem">初回は30〜60秒かかる場合があります</small></div>';
