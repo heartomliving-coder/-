@@ -4754,6 +4754,7 @@ function obSetCache(r){try{localStorage.setItem(OB_CACHE_KEY,JSON.stringify(r));
 // ── ロード ──
 var __obLastUpdated = 0;
 var __obLoading = false;
+var _obLastSaveTs = 0; // obSaveField が呼ばれた最終時刻
 
 function obLoad(silent, force){
   if(__obLoading && silent) return; // サイレント更新は同時実行しない
@@ -4767,6 +4768,7 @@ function obLoad(silent, force){
     return;
   }
   __obLoading = true;
+  var _saveTsAtFetchStart = _obLastSaveTs; // フェッチ開始時点の保存タイムスタンプ記録
   if(cached.length){ obRows=cached; obRows.forEach(function(r,i){r._row=i;}); obPopulateFilters(); obRenderAll(); }
   // キャッシュがない初回ロード時はローディングアニメーション表示
   if(!cached.length){
@@ -4789,6 +4791,16 @@ function obLoad(silent, force){
     var ae=document.activeElement;
     var userEditing = ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
       (document.getElementById('ob-detail').contains(ae) || document.getElementById('ob-visitors-content').contains(ae) || document.getElementById('ob-active-content').contains(ae));
+    // フェッチ中にユーザーが保存した場合は古いGASデータで上書きしない（レースコンディション対策）
+    if(_obLastSaveTs !== _saveTsAtFetchStart){
+      obSetCache(obRows);
+      __obLastUpdated=Date.now();
+      obUpdateLastUpdatedLabel();
+      var obVisible2=document.getElementById('openboard').classList.contains('show');
+      if(!userEditing && obVisible2) obRenderAll();
+      hubUpdateBadges();
+      return;
+    }
     obRows=newRows;
     obRows.forEach(function(r,i){r._row=i;});
     obSetCache(obRows);
@@ -5475,6 +5487,7 @@ function obEditStatusInline(el,rowIdx){
 }
 
 function obSaveField(row,field,value){
+  _obLastSaveTs = Date.now(); // フェッチ中の上書き防止用タイムスタンプ
   if(obRows[row]){
     if(field.indexOf('karte.')===0){ if(!obRows[row].karte) obRows[row].karte={}; obRows[row].karte[field.slice(6)]=value; }
     else obRows[row][field]=value;
