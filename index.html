@@ -2833,7 +2833,7 @@ function handleCredentialResponse(response) {
     var parts = response.credential.split('.');
     var pad = parts[1].replace(/-/g,'+').replace(/_/g,'/');
     while(pad.length%4) pad+='=';
-    var payload = JSON.parse(atob(pad));
+    var payload = JSON.parse(decodeURIComponent(atob(pad).split('').map(function(c){return '%'+('00'+c.charCodeAt(0).toString(16)).slice(-2);}).join('')));
     if(payload.name) localStorage.setItem('admin_session_name', payload.name);
     if(payload.email) localStorage.setItem('admin_session_email', payload.email);
   } catch(e){ console.warn('[Login] JWT decode error:', e); }
