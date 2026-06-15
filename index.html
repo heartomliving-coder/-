@@ -3110,6 +3110,11 @@ function scheduleEvSyncFromGAS(){
     if(!r||!r.ok||!Array.isArray(r.events)) return;
     var today=new Date().toISOString().substring(0,10);
     var fresh=r.events.filter(function(e){return !e.endDate||e.endDate>=today;});
+    // GASが空でローカルにデータがある場合 → ローカルをGASへ押し出す（初回デプロイ後の移行）
+    if(!fresh.length){
+      var local=scheduleEvLoad();
+      if(local.length){ post({action:'saveHubEvents',events:local}); return; }
+    }
     var localStr=localStorage.getItem(HUB_EVENTS_KEY)||'[]';
     if(JSON.stringify(fresh)!==localStr){
       localStorage.setItem(HUB_EVENTS_KEY,JSON.stringify(fresh));
