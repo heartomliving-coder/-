@@ -2997,6 +2997,7 @@ function showHub(){
   hubBuildActivityFeed(); // ハブ戻り時も即座に活動ログ更新
   hubRenderExtKpi();
   refreshNotifBadge();
+  scheduleEvSyncFromGAS();
 }
 
 // ★ ログイン後は30分ごとにOB・KJをバックグラウンド同期（キャッシュが古くなったタイミングで更新）
@@ -3075,7 +3076,25 @@ function scheduleEvLoad(){
     return filtered;
   }catch(e){return[];}
 }
-function scheduleEvSave(evs){localStorage.setItem(HUB_EVENTS_KEY,JSON.stringify(evs));}
+function scheduleEvSave(evs){
+  localStorage.setItem(HUB_EVENTS_KEY,JSON.stringify(evs));
+  post({action:'saveHubEvents',events:evs});
+}
+
+function scheduleEvSyncFromGAS(){
+  gasGet('getHubEvents',function(r){
+    if(!r||!r.ok||!Array.isArray(r.events)) return;
+    var today=new Date().toISOString().substring(0,10);
+    var fresh=r.events.filter(function(e){return !e.endDate||e.endDate>=today;});
+    var localStr=localStorage.getItem(HUB_EVENTS_KEY)||'[]';
+    if(JSON.stringify(fresh)!==localStr){
+      localStorage.setItem(HUB_EVENTS_KEY,JSON.stringify(fresh));
+      hubRenderEvMini();
+      var sl=document.getElementById('scheduleEventList');
+      if(sl&&sl.offsetParent!==null) renderScheduleEvSettings();
+    }
+  });
+}
 
 function toggleNewEvUndef(){
   var u=document.getElementById('newEvUndef').checked;
