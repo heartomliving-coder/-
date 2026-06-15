@@ -2932,6 +2932,7 @@ function showApp(){
     if(kjCached.length){ kjRows=kjCached; kjRows.forEach(function(r,i){r._idx=i;}); }
     hubUpdateBadges();
     setTimeout(function(){ obLoad(true); kjLoad(true); }, 400);
+    setTimeout(function(){ initSyncPoll(); }, 6000);
     setTimeout(function(){ hubLoadTodayKpi(); }, 1200);
     setTimeout(function(){ hubLoadGcal(); }, 2000); // Googleカレンダー
     setTimeout(function(){ hubBuildActivityFeed(); hubRenderExtKpi(); refreshNotifBadge(); }, 500);
@@ -3066,6 +3067,29 @@ function hubUpdateBadges(){
 }
 
 // ── ハブ スケジュールイベント管理 ──
+// ═══════════════════════════════════════════
+// 全アカウント リアルタイム同期 (20秒ポーリング)
+// ═══════════════════════════════════════════
+var _syncState={ob:'0',kj:'0',tochi:'0',mtg:'0',events:'0'};
+function initSyncPoll(){
+  if(window.__syncPollTimer) return;
+  gasGet('getChangeTimes',function(r){
+    if(r&&r.ok){_syncState.ob=r.ob;_syncState.kj=r.kj;_syncState.tochi=r.tochi;_syncState.mtg=r.mtg;_syncState.events=r.events;}
+    window.__syncPollTimer=setInterval(checkRemoteChanges,20000);
+  });
+}
+function checkRemoteChanges(){
+  gasGet('getChangeTimes',function(r){
+    if(!r||!r.ok) return;
+    var editing=document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+    if(r.ob!==_syncState.ob){_syncState.ob=r.ob;if(!editing){localStorage.removeItem('ob_v3_ts');obLoad(true,true);}}
+    if(r.kj!==_syncState.kj){_syncState.kj=r.kj;if(!editing){localStorage.removeItem('kj_v1_ts');kjLoad(true,true);}}
+    if(r.tochi!==_syncState.tochi){_syncState.tochi=r.tochi;if(!editing){localStorage.removeItem('tc_v1_ts');tochiLoad(true,true);}}
+    if(r.mtg!==_syncState.mtg){_syncState.mtg=r.mtg;if(!editing){localStorage.removeItem('mtg_v1_ts');mtgLoad(true,true);}}
+    if(r.events!==_syncState.events){_syncState.events=r.events;scheduleEvSyncFromGAS();}
+  });
+}
+
 var HUB_EVENTS_KEY='hub_schedule_events_v1';
 function scheduleEvLoad(){
   try{
