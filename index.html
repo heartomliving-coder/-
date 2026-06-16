@@ -3134,6 +3134,7 @@ function enterOpenBoard(){
   obLoad();
   obUpdateLastUpdatedLabel();
   if(!window.__obPollTimer) window.__obPollTimer=setInterval(function(){ obLoad(true,true); },CACHE_TTL_MS);
+  obStartAutoSync();
 }
 
 function enterMtgBoard(){
@@ -5324,14 +5325,15 @@ function obRenderVisitors(){
     });
   });
 
-  var COL=12;
+  var COL=13;
   var html=aggHtml+'<table class="ob-table ob-vis-table"><thead><tr>'+
     '<th class="ob-rn" style="width:28px">#</th>'+
     '<th style="min-width:84px">問合せ日</th>'+
     '<th style="min-width:72px">種別</th>'+
     '<th style="min-width:160px">顧客名 / 電話番号</th>'+
     '<th style="min-width:90px">ステータス</th>'+
-    '<th style="min-width:76px">担当</th>'+
+    '<th style="min-width:64px">担当</th>'+
+    '<th style="min-width:64px">サブ担当</th>'+
     '<th style="min-width:62px">エリア</th>'+
     '<th style="min-width:66px">反響元</th>'+
     '<th style="min-width:200px">来場履歴</th>'+
@@ -5406,7 +5408,7 @@ function obRenderVisitors(){
           '</span>'+
         '</td>'+
         '<td onclick="event.stopPropagation()">'+
-          '<span class="ob-editable ob-tipo-chip" data-row="'+r._row+'" data-field="来場種別" onclick="obStartEdit(this);event.stopPropagation()">'+esc(r['来場種別']||'—')+'</span>'+
+          '<span class="ob-editable ob-tipo-chip" data-row="'+r._row+'" data-field="来場種別" data-type="sel" onclick="obStartEdit(this);event.stopPropagation()">'+esc(r['来場種別']||'—')+'</span>'+
         '</td>'+
         '<td class="ob-td-name">'+
           '<span class="ob-name-link" onclick="obOpenDetail('+r._row+');event.stopPropagation()">'+esc(r['顧客名']||'—')+'</span>'+
@@ -5418,7 +5420,9 @@ function obRenderVisitors(){
         '</td>'+
         '<td onclick="event.stopPropagation()" style="white-space:nowrap">'+
           '<div style="font-size:.8rem;font-weight:700;color:#2B2B2B">'+obCell(r,'担当者')+'</div>'+
-          (obSanitizeVal(r['サブ担当'])?'<div style="font-size:.68rem;color:#AAA;margin-top:1px">'+obCell(r,'サブ担当')+'</div>':'')+
+        '</td>'+
+        '<td onclick="event.stopPropagation()" style="white-space:nowrap;font-size:.76rem;color:#888">'+
+          obCell(r,'サブ担当')+
         '</td>'+
         '<td onclick="event.stopPropagation()" style="font-size:.76rem">'+obCell(r,'エリア')+'</td>'+
         '<td onclick="event.stopPropagation()" style="font-size:.76rem">'+obCell(r,'反響元')+'</td>'+
@@ -6695,7 +6699,7 @@ function obSyncBirthdaysBtn(){
   });
 }
 
-// Notion同期
+// Notion同期（手動）
 function obImportFromNotion(){
   if(!confirm('Notionの顧客マスタDB・見学会カルテDB・MTG DBから完全同期します。\n新規追加＋既存ステータス更新＋来場履歴を取得します。\n30〜60秒かかります。続けますか？')) return;
   toast('Notion同期中… しばらくお待ちください');
@@ -6704,6 +6708,24 @@ function obImportFromNotion(){
     var bdMsg=(d.birthdays&&d.birthdays.ok)?(' / 誕生日'+d.birthdays.synced+'件'):''
     toast('✅ 同期完了：新規'+d.imported+'件追加、既存'+d.updated+'件更新（計'+d.total+'件）'+bdMsg);
     obLoad();
+  });
+}
+
+// Notion自動サイレント同期（5分ごと）新規問い合わせを自動反映
+var __obAutoSyncTimer = null;
+function obStartAutoSync(){
+  if(__obAutoSyncTimer) return;
+  // 初回は30秒後に実行（画面ロード直後の負荷を避ける）
+  setTimeout(function(){ obSilentNotionSync(); }, 30000);
+  __obAutoSyncTimer = setInterval(function(){ obSilentNotionSync(); }, 5 * 60 * 1000);
+}
+function obSilentNotionSync(){
+  gasGet('obImportFromNotion',function(d){
+    if(!d||d.error) return;
+    if(d.imported > 0){
+      toast('🔔 新規顧客 '+d.imported+'件 を自動取込みました');
+      obLoad(true, true);
+    }
   });
 }
 
