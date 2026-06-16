@@ -663,8 +663,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 
 /* 行番号・削除 */
 .ob-rn{color:#AAA;font-size:.72rem;text-align:right;padding-right:6px !important;min-width:28px;font-weight:600}
-.ob-del{background:none;border:1px solid #DDD;color:#CCC;border-radius:3px;padding:3px 7px;font-size:.66rem;cursor:pointer;transition:all .15s}
-.ob-del:hover{background:#C0392B;border-color:#C0392B;color:#fff}
+.ob-del{background:none;border:1px solid #E0DAD4;color:#BBB;border-radius:4px;padding:4px 9px;font-size:.7rem;cursor:pointer;transition:all .15s;opacity:0}
+tr:hover .ob-del{opacity:1}
+.ob-del:hover{background:#DC2626;border-color:#DC2626;color:#fff;opacity:1}
 
 /* 空状態 */
 .ob-empty-state{padding:80px 20px;text-align:center;color:#BBB;font-size:.9rem;line-height:2.2}
@@ -1625,8 +1626,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
       <div class="ob-hd-ti">オープンボード<small>OPEN BOARD</small></div>
     </div>
     <div class="ob-tabs">
-      <button class="ob-tab on" data-tab="active" onclick="obSwitchTab('active')">🔥 直近案件</button>
-      <button class="ob-tab" data-tab="visitors" onclick="obSwitchTab('visitors')">📅 来客状況</button>
+      <button class="ob-tab on" data-tab="visitors" onclick="obSwitchTab('visitors')">📅 来客状況</button>
+      <button class="ob-tab" data-tab="active" onclick="obSwitchTab('active')">🔥 直近案件</button>
       <button class="ob-tab" data-tab="agg" onclick="obSwitchTab('agg')">📊 集計</button>
       <button class="ob-tab" data-tab="birthday" onclick="obSwitchTab('birthday')">🎂 誕生日</button>
     </div>
@@ -1642,7 +1643,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   </div>
 
   <!-- 来客状況 -->
-  <div class="ob-pane" data-tab="visitors">
+  <div class="ob-pane show" data-tab="visitors">
     <!-- パイプラインフロー -->
     <div class="ob-pipeline" id="ob-pipeline-bar"></div>
     <div class="ob-filter">
@@ -1674,7 +1675,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   </div>
 
   <!-- 直近案件 -->
-  <div class="ob-pane show" data-tab="active">
+  <div class="ob-pane" data-tab="active">
     <div class="ob-filter">
       <label class="ob-filter-chk"><input type="checkbox" id="ob-hide-inactive" checked onchange="obRenderActive()"> 失注・中長期を非表示</label>
       <label>担当:</label>
@@ -4709,7 +4710,7 @@ function openOnlineFsMonitor(){
 //  オープンボード JS  — 全面再設計版
 // ════════════════════════════════════════════════
 var obRows = [];
-var obCurrentTab = 'active';
+var obCurrentTab = 'visitors';
 var obDetailRow  = -1;
 var obDetailKey  = null; // {name,date} — ポーリング後の行インデックス再同期用
 var obStatusFilter = '';
@@ -5161,6 +5162,16 @@ function obRenderVisitors(){
       var nextDate=r['次回予定']?obFmtDate(obNormDate(r['次回予定'])):'';
       var nextContent=r['次回内容']||'';
       var nextLbl=nextDate?(nextDate+(nextContent?' <small>'+nextContent+'</small>':'')):nextContent||'';
+      // 次回予定の近さで色分け（直近案件タブと同じロジック）
+      var nextRaw=r['次回予定']?obNormDate(r['次回予定']):'';
+      var nextCls='none'; var nextAlarm='';
+      if(nextRaw&&nextRaw.length>=10){
+        var _nd=new Date(nextRaw+'T00:00:00'); var _today=new Date(); _today.setHours(0,0,0,0);
+        var _diff=Math.floor((_nd-_today)/(1000*60*60*24));
+        if(_diff<0){nextCls='over';nextAlarm='⚠️ ';}
+        else if(_diff<=3){nextCls='warn';nextAlarm='🔔 ';}
+        else{nextCls='ok';}
+      }
       var appo=r['アポ確定日']?obFmtDate(obNormDate(r['アポ確定日'])):'';
       var tipo=obSanitizeVal(r['来場種別']);
       var genki=obSanitizeVal(r['反響元']);
@@ -5181,7 +5192,7 @@ function obRenderVisitors(){
           (kana?'<div class="ob-name-sub" style="letter-spacing:.02em">'+esc(kana)+'</div>':'')+
           (tel?'<div class="ob-name-sub" style="color:#6B5E4E;margin-top:1px">📞&nbsp;<span style="font-family:monospace;letter-spacing:.04em">'+esc(tel)+'</span></div>':'')+
         '</td>'+
-        '<td><span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="font-size:.68rem;padding:3px 8px;cursor:pointer">'+esc(dispStatus)+'</span></td>'+
+        '<td><span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="cursor:pointer">'+esc(dispStatus)+'</span></td>'+
         '<td style="font-size:.82rem;min-width:76px">'+
           '<div style="font-weight:600;color:#2B2B2B">'+obCell(r,'担当者')+'</div>'+
           (obSanitizeVal(r['サブ担当'])?'<div style="margin-top:2px;opacity:.65;font-size:.74rem">'+obCell(r,'サブ担当')+'</div>':'')+
@@ -5190,9 +5201,8 @@ function obRenderVisitors(){
         '<td style="font-size:.78rem;color:#777">'+obCell(r,'反響元')+'</td>'+
         '<td class="ob-td-hist" onclick="obHistPopOpen(event,'+r._row+')" title="クリックして来場履歴を追加・編集"><div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div></td>'+
         '<td style="font-size:.8rem;color:#555;min-width:78px">'+obCell(r,'アポ確定日')+'</td>'+
-        '<td style="font-size:.8rem;min-width:96px">'+
-          '<div style="color:#444">'+obCell(r,'次回予定')+'</div>'+
-          (r['次回内容']?'<div style="font-size:.72rem;color:#888;margin-top:2px;max-width:120px;white-space:normal;line-height:1.3">'+esc(r['次回内容'])+'</div>':'')+
+        '<td style="font-size:.8rem;min-width:96px'+(nextCls==='over'?';background:#FEF2F2':nextCls==='warn'?';background:#FFFBEB':'')+'">'+
+          (nextLbl?'<div class="ob-card-next '+nextCls+'" style="font-size:.74rem;padding:2px 7px;display:inline-block;margin-bottom:2px">'+nextAlarm+obCell(r,'次回予定')+(r['次回内容']?' <small>'+esc(r['次回内容'])+'</small>':'')+'</div>':'<div style="color:#CCC;font-size:.76rem">—</div>')+
         '</td>'+
         '<td style="white-space:nowrap;padding:6px 8px">'+
           '<button class="ob-del" onclick="obConfirmDel('+r._row+')" title="削除">✕</button>'+
@@ -5341,7 +5351,7 @@ function obTogglePill(el,field,rowIdx){
   r[field]=newVal;
   obSetCache(obRows);
   el.classList.toggle('on',newVal==='1');
-  post({action:'obUpdateField',row:rowIdx,field:field,value:newVal});
+  post({action:'obUpdateField',id:r.id,row:rowIdx,field:field,value:newVal});
 }
 
 // ── 月間カレンダー（直近案件タブ） ──
@@ -5628,7 +5638,7 @@ function obSaveField(row,field,value){
     else obRows[row][field]=value;
   }
   obSetCache(obRows);
-  post({action:'obUpdateField',row:row,field:field,value:value});
+  post({action:'obUpdateField',id:(obRows[row]?obRows[row].id:''),row:row,field:field,value:value});
   if(field==='商談ステータス' && value==='パートナー契約済'){
     kjAutoAddFromOB(obRows[row]);
     tochiAutoAddFromOB(obRows[row]); // 土地DBにも自動追加
@@ -5910,14 +5920,21 @@ function obCleanData(){
 
 // ── 削除 ──
 function obConfirmDel(rowIdx){
-  var r=obRows[rowIdx]; var name=r?r['顧客名']:'';
+  var r=obRows[rowIdx]; var name=r?r['顧客名']:''; var rid=r?r.id:'';
   if(!confirm((name||'この顧客')+'を削除しますか？\n元に戻せません。')) return;
-  post({action:'obDeleteCustomer',row:rowIdx});
+  // UIから即時削除（楽観的更新）
   obRows.splice(rowIdx,1);
   obRows.forEach(function(r,i){r._row=i;});
   obSetCache(obRows);
+  // 詳細パネルのobDetailRowを補正（削除行より後ろは1つずれる）
+  if(obDetailRow===rowIdx){ obCloseDetail(); }
+  else if(obDetailRow>rowIdx){ obDetailRow--; }
   obRenderVisitors(); obRenderActive();
   toast('削除しました');
+  // IDで確実に削除（Supabase順序変動による誤削除防止）
+  post({action:'obDeleteCustomer',id:rid,row:rowIdx}, function(d){
+    if(d&&d.error){ toast('❌ 削除エラー: '+d.error); obLoad(false,true); }
+  });
 }
 
 // ── 新規追加 ──
@@ -6125,7 +6142,7 @@ function obSaveDetBirthday(){
     if(el) r.karte[bd.key]=el.value||'';
   });
   obSetCache(obRows);
-  post({action:'obSaveKarte',row:obDetailRow,karte:r.karte});
+  post({action:'obSaveKarte',id:(obRows[obDetailRow]?obRows[obDetailRow].id:''),row:obDetailRow,karte:r.karte});
   toast('誕生日を保存しました');
   obRenderDetBirthday();
 }
@@ -6196,7 +6213,7 @@ function obToggleDet(el,field,rowIdx){
   var nv=cur?'0':'1';
   r[field]=nv; obSetCache(obRows);
   el.classList.toggle('done',nv==='1');
-  post({action:'obUpdateField',row:rowIdx,field:field,value:nv});
+  post({action:'obUpdateField',id:(r?r.id:''),row:rowIdx,field:field,value:nv});
 }
 
 // 履歴タイムライン
@@ -6241,7 +6258,8 @@ function obAddHistoryItem(){
   obRenderDetHistory();
   obRenderVisitors();
   document.getElementById('tl-content').value='';
-  post({action:'obAddHistory',row:obDetailRow,date:date,type:type,content:content,staff:staff});
+  var _drid=obRows[obDetailRow]?obRows[obDetailRow].id:'';
+  post({action:'obAddHistory',id:_drid,row:obDetailRow,date:date,type:type,content:content,staff:staff});
   toast('履歴を追加しました');
 }
 
@@ -6319,7 +6337,8 @@ function obHistPopSave(){
   tds.forEach(function(td){ if(td.querySelector('.ob-hist-chips')){
     td.innerHTML='<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+rowIdx+');event.stopPropagation()">＋</button></div>';
   }});
-  post({action:'obAddHistory',row:rowIdx,date:date,type:type,content:content,staff:staff});
+  var _hprid=obRows[rowIdx]?obRows[rowIdx].id:'';
+  post({action:'obAddHistory',id:_hprid,row:rowIdx,date:date,type:type,content:content,staff:staff});
   document.getElementById('ob-hist-pop-content').value='';
   toast('履歴を追加しました');
 }
@@ -6335,7 +6354,7 @@ function obHistPopDel(key){
   }
   for(var j=toDel.length-1;j>=0;j--){
     r.history.splice(toDel[j],1);
-    post({action:'obDeleteHistory',row:rowIdx,histIndex:toDel[j]});
+    post({action:'obDeleteHistory',id:(r?r.id:''),row:rowIdx,histIndex:toDel[j]});
   }
   obSetCache(obRows);
   obHistPopRenderList(r);
@@ -6353,7 +6372,8 @@ function obDelHistory(histIdx){
   obSetCache(obRows);
   obRenderDetHistory();
   obRenderVisitors();
-  post({action:'obDeleteHistory',row:obDetailRow,histIndex:histIdx});
+  var _drid2=obRows[obDetailRow]?obRows[obDetailRow].id:'';
+  post({action:'obDeleteHistory',id:_drid2,row:obDetailRow,histIndex:histIdx});
   toast('削除しました');
 }
 
@@ -6367,9 +6387,10 @@ function obDelHistoryByKey(key){
     var h=r.history[i];
     if((obNormDate(h.date||'')+'|'+(h.type||''))===key) toDel.push(i);
   }
+  var _drid3=r.id||'';
   for(var j=toDel.length-1;j>=0;j--){
     r.history.splice(toDel[j],1);
-    post({action:'obDeleteHistory',row:obDetailRow,histIndex:toDel[j]});
+    post({action:'obDeleteHistory',id:_drid3,row:obDetailRow,histIndex:toDel[j]});
   }
   obSetCache(obRows);
   obRenderDetHistory();
@@ -6406,7 +6427,7 @@ function obSaveKarteForm(){
     karte[f.key]=el?el.value:'';
   });
   r.karte=karte; obSetCache(obRows);
-  post({action:'obSaveKarte',row:obDetailRow,karte:karte});
+  post({action:'obSaveKarte',id:(obRows[obDetailRow]?obRows[obDetailRow].id:''),row:obDetailRow,karte:karte});
   toast('カルテを保存しました');
 }
 
