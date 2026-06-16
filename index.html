@@ -601,12 +601,16 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 
 /* テーブル共通 */
 .ob-scroll{flex:1;overflow:auto}
-.ob-table{width:100%;border-collapse:collapse;font-size:.93rem;white-space:nowrap}
-.ob-table thead th{background:#2B2B2B;color:rgba(255,255,255,.85);font-size:.76rem;font-weight:700;letter-spacing:.08em;padding:10px 14px;text-align:left;position:sticky;top:0;z-index:3;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08)}
+.ob-table{width:100%;border-collapse:collapse;font-size:.93rem}
+.ob-table thead th{background:linear-gradient(135deg,#2B2B2B 0%,#3D3530 100%);color:rgba(255,255,255,.88);font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:11px 13px;text-align:left;position:sticky;top:0;z-index:3;white-space:nowrap;border-right:1px solid rgba(255,255,255,.1);text-transform:uppercase}
+.ob-table thead th:first-child{border-radius:0}
 .ob-table thead th.cb-th{text-align:center;padding:6px 5px;font-size:.62rem;letter-spacing:.03em;line-height:1.4}
-.ob-table td{padding:10px 14px;border-bottom:1px solid #E8E4DC;color:#222;vertical-align:middle;background:#fff;border-right:1px solid #EDE9E2;max-width:160px;overflow:hidden;text-overflow:ellipsis}
-.ob-table tbody tr:nth-child(even) td{background:rgba(0,0,0,.03)}
-.ob-table tr:hover td{background:#FDFCF8}
+.ob-table td{padding:9px 13px;border-bottom:1px solid #EDE9E2;color:#2B2B2B;vertical-align:middle;background:#fff;border-right:1px solid #F0EDE8;white-space:nowrap}
+.ob-table td.ob-td-hist{white-space:normal;min-width:200px}
+.ob-table td.ob-td-name{min-width:140px;max-width:200px}
+.ob-table td.ob-td-tel{min-width:130px;white-space:nowrap}
+.ob-table tbody tr:nth-child(even) td{background:#FAFAF8}
+.ob-table tbody tr:hover td{background:#F7F4EE;transition:background .12s}
 .ob-table tr.ob-sel td{background:#FFF8EE !important}
 
 /* 顧客名リンク */
@@ -666,7 +670,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-empty-state{padding:80px 20px;text-align:center;color:#BBB;font-size:.9rem;line-height:2.2}
 
 /* 履歴チップ（一覧表示 — 全件） */
-.ob-hist-chips{display:flex;gap:4px;flex-wrap:wrap;max-width:340px;align-items:center;cursor:pointer}
+.ob-hist-chips{display:flex;gap:4px;flex-wrap:wrap;min-width:180px;max-width:420px;align-items:center;cursor:pointer}
 .ob-hist-chips:hover .ob-hist-add-btn{opacity:1}
 .ob-hist-chip{font-size:.68rem;padding:3px 9px;border-radius:20px;white-space:nowrap;font-weight:600;flex-shrink:0;background:#F0EDE8;color:#666;border:1px solid #E0DAD0;cursor:pointer}
 .ob-hist-chip.new{background:#2B2B2B;color:#fff;border-color:#2B2B2B}
@@ -4977,7 +4981,7 @@ function obFilterByStatus(s){
 function obPopulateFilters(){
   var years={},months={},staffs={};
   obRows.forEach(function(r){
-    var d=obNormDate(r['来場日']||'');
+    var d=obNormDate(r['問い合わせ日']||r['来場日']||'');
     if(d.length>=7){ years[d.substring(0,4)]=true; }
     if(r['担当者']) staffs[r['担当者']]=true;
     if(r['サブ担当']) staffs[r['サブ担当']]=true;
@@ -5022,7 +5026,7 @@ function obRenderVisitors(){
   var sortAsc=((document.getElementById('ob-vis-sort')||{}).value||'desc')==='asc';
 
   var rows=obRows.filter(function(r){
-    var d=obNormDate(r['来場日']||'');
+    var d=obNormDate(r['問い合わせ日']||r['来場日']||'');
     if(fYear && d.substring(0,4)!==fYear) return false;
     if(fMonth && d.substring(5,7)!==fMonth) return false;
     if(fStaff && r['担当者']!==fStaff && r['サブ担当']!==fStaff) return false;
@@ -5040,7 +5044,7 @@ function obRenderVisitors(){
   // 月ごとにグループ化（正規化後のYM使用でNaN月バグ防止）
   var groups={},mOrder=[];
   rows.forEach(function(r){
-    var ym=obDateToYM(r['来場日']);
+    var ym=obDateToYM(r['問い合わせ日']||r['来場日']);
     if(!groups[ym]){groups[ym]=[];mOrder.push(ym);}
     groups[ym].push(r);
   });
@@ -5052,7 +5056,7 @@ function obRenderVisitors(){
   // 月内の行を日付順ソート
   mOrder.forEach(function(ym){
     groups[ym].sort(function(a,b){
-      var da=obNormDate(a['来場日']||''), db=obNormDate(b['来場日']||'');
+      var da=obNormDate(a['問い合わせ日']||a['来場日']||''), db=obNormDate(b['問い合わせ日']||b['来場日']||'');
       return sortAsc ? (da>db?1:da<db?-1:0) : (db>da?1:db<da?-1:0);
     });
   });
@@ -5105,18 +5109,21 @@ function obRenderVisitors(){
     }).join('')+'</tr>';
   aggHtml+='</tbody></table></div></div>';
 
-  var COL=12; // colspan（ステータス列追加）
+  var COL=11; // colspan
   var html=aggHtml+'<table class="ob-table ob-vis-table"><thead><tr>'+
-    '<th class="ob-rn">No</th>'+
-    '<th>問い合わせ日</th><th>来場日</th><th>種別</th><th>顧客名</th><th>ステータス</th><th>担当</th><th>エリア</th>'+
-    '<th>反響元</th><th>来場履歴</th><th>アポ確定日</th><th>次回予定</th><th></th>'+
+    '<th class="ob-rn" style="width:32px">No</th>'+
+    '<th style="min-width:90px">問合せ日</th><th style="min-width:70px">種別</th>'+
+    '<th style="min-width:160px">顧客名 / 電話番号</th><th style="min-width:90px">ステータス</th>'+
+    '<th style="min-width:80px">担当</th><th style="min-width:70px">エリア</th>'+
+    '<th style="min-width:70px">反響元</th><th style="min-width:200px">来場履歴</th>'+
+    '<th style="min-width:80px">アポ確定日</th><th style="min-width:100px">次回予定</th><th style="width:50px"></th>'+
     '</tr></thead><tbody>';
 
   mOrder.forEach(function(ym){
     var mr=groups[ym];
     // 月内の並び順（選択した方向に従う）。同日は元の順序を維持
     mr.sort(function(a,b){
-      var da=obNormDate(a['来場日']||''), db=obNormDate(b['来場日']||'');
+      var da=obNormDate(a['問い合わせ日']||a['来場日']||''), db=obNormDate(b['問い合わせ日']||b['来場日']||'');
       if(da===db) return 0;
       return sortAsc ? (da>db?1:-1) : (da>db?-1:1);
     });
@@ -5164,42 +5171,31 @@ function obRenderVisitors(){
       var k=r.karte||{};
       var kana=obSanitizeVal(k['フリガナ']||'');
       var tel=obSanitizeVal(k['電話番号']||'');
-      var subInfo=[];
-      if(kana) subInfo.push(esc(kana));
-      if(tel) subInfo.push('<span style="color:#7A6E5C">📞'+esc(tel)+'</span>');
-      var nameSub=subInfo.length?'<div class="ob-name-sub">'+subInfo.join('　')+'</div>':'';
-      // 問い合わせ日（受付）と来場日（実際の来場）を分離表示
-      // 問い合わせ日 = r['問い合わせ日'] があればそちら、なければ来場日にフォールバック（旧データ互換）
       var inquiryDate = obSanitizeVal(r['問い合わせ日']||r['来場日']||'');
-      var visitDate   = obSanitizeVal(r['来場日']||'');
-      // 来場日が空のときのみ「来場日を入力」を表示（来場日に値があれば既存訪問とみなす）
-      var visitDisp;
-      if(visitDate){
-        // 来場日が設定済み → 編集可能な緑テキストで表示
-        visitDisp='<span class="ob-editable" style="display:block;min-height:20px;color:#166534;font-weight:600" data-row="'+r._row+'" data-field="来場日" data-type="date" onclick="obStartEdit(this)">'+obFmtDate(obNormDate(visitDate))+'</span>';
-      } else {
-        // 来場日が未設定（メール問い合わせなど） → 入力促進プレースホルダー
-        visitDisp='<span class="ob-editable" style="display:block;min-height:20px;color:#C0A070;font-size:.78rem;font-style:italic" data-row="'+r._row+'" data-field="来場日" data-type="date" onclick="obStartEdit(this)">来場日を入力</span>';
-      }
       html+='<tr data-sc="'+sc+'" data-row="'+r._row+'">'+
         '<td class="ob-rn">'+monthN+'</td>'+
-        '<td style="white-space:nowrap;font-size:.82rem;color:#666">'+(inquiryDate?obFmtDate(obNormDate(inquiryDate)):'—')+'</td>'+
-        '<td style="white-space:nowrap">'+visitDisp+'</td>'+
-        '<td style="font-size:.82rem;color:#444">'+obCell(r,'来場種別')+'</td>'+
-        '<td><span class="ob-name-link" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span>'+nameSub+'</td>'+
-        '<td><span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="font-size:.68rem;padding:3px 8px;cursor:pointer">'+esc(dispStatus)+'</span></td>'+
-        '<td style="white-space:nowrap">'+
-          '<div>'+obCell(r,'担当者')+'</div>'+
-          (obSanitizeVal(r['サブ担当']) ? '<div style="margin-top:2px;opacity:.7;font-size:.78rem">'+obCell(r,'サブ担当')+'</div>' : '')+
+        '<td style="font-size:.8rem;color:#777;min-width:88px">'+(inquiryDate?obFmtDate(obNormDate(inquiryDate)):'—')+'</td>'+
+        '<td style="font-size:.8rem;color:#555;min-width:68px"><span class="ob-editable" data-row="'+r._row+'" data-field="来場種別" onclick="obStartEdit(this)">'+esc(r['来場種別']||'—')+'</span></td>'+
+        '<td class="ob-td-name">'+
+          '<span class="ob-name-link" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span>'+
+          (kana?'<div class="ob-name-sub" style="letter-spacing:.02em">'+esc(kana)+'</div>':'')+
+          (tel?'<div class="ob-name-sub" style="color:#6B5E4E;margin-top:1px">📞&nbsp;<span style="font-family:monospace;letter-spacing:.04em">'+esc(tel)+'</span></div>':'')+
         '</td>'+
-        '<td>'+obCell(r,'エリア')+'</td>'+
-        '<td style="font-size:.82rem;color:#444">'+obCell(r,'反響元')+'</td>'+
-        '<td onclick="obHistPopOpen(event,'+r._row+')" style="cursor:pointer" title="クリックして来場履歴を追加・編集"><div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div></td>'+
-        '<td style="white-space:nowrap;font-size:.84rem">'+obCell(r,'アポ確定日')+'</td>'+
-        '<td style="min-width:80px;font-size:.82rem">'+obCell(r,'次回予定')+(r['次回内容']?'<div style="font-size:.72rem;color:#888;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px">'+esc(r['次回内容'])+'</div>':'')+'</td>'+
-        '<td style="white-space:nowrap">'+
-          '<button class="ob-btn-sm" onclick="obOpenDetailTab('+r._row+',\'history\')" title="来場履歴を追加" style="margin-right:4px;padding:3px 8px;font-size:.72rem">＋履歴</button>'+
-          '<button class="ob-del" onclick="obConfirmDel('+r._row+')">✕</button>'+
+        '<td><span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="font-size:.68rem;padding:3px 8px;cursor:pointer">'+esc(dispStatus)+'</span></td>'+
+        '<td style="font-size:.82rem;min-width:76px">'+
+          '<div style="font-weight:600;color:#2B2B2B">'+obCell(r,'担当者')+'</div>'+
+          (obSanitizeVal(r['サブ担当'])?'<div style="margin-top:2px;opacity:.65;font-size:.74rem">'+obCell(r,'サブ担当')+'</div>':'')+
+        '</td>'+
+        '<td style="font-size:.8rem;color:#555">'+obCell(r,'エリア')+'</td>'+
+        '<td style="font-size:.78rem;color:#777">'+obCell(r,'反響元')+'</td>'+
+        '<td class="ob-td-hist" onclick="obHistPopOpen(event,'+r._row+')" title="クリックして来場履歴を追加・編集"><div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div></td>'+
+        '<td style="font-size:.8rem;color:#555;min-width:78px">'+obCell(r,'アポ確定日')+'</td>'+
+        '<td style="font-size:.8rem;min-width:96px">'+
+          '<div style="color:#444">'+obCell(r,'次回予定')+'</div>'+
+          (r['次回内容']?'<div style="font-size:.72rem;color:#888;margin-top:2px;max-width:120px;white-space:normal;line-height:1.3">'+esc(r['次回内容'])+'</div>':'')+
+        '</td>'+
+        '<td style="white-space:nowrap;padding:6px 8px">'+
+          '<button class="ob-del" onclick="obConfirmDel('+r._row+')" title="削除">✕</button>'+
         '</td>'+
       '</tr>';
     });
