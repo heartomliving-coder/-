@@ -732,8 +732,14 @@ tr:hover .ob-del{opacity:1}
 .ob-vis-agg-wrap.open .ob-vis-agg-body{display:block}
 .ob-vis-agg-tbl{margin:0}
 
-/* 次回予定 */
+/* 次回予定セル */
 .ob-next-plan{font-size:.75rem;color:#4A6FA5;font-weight:600}
+.ob-td-next{min-width:90px;white-space:nowrap}
+.ob-td-next .ob-editable{font-size:.76rem;font-weight:600;color:#166534;display:block;min-height:18px}
+.ob-td-next .ob-editable:not([style*="color"]):empty::before,.ob-td-next .ob-editable.empty::before{content:'—';color:#DDD;font-weight:400}
+/* 種別チップ */
+.ob-tipo-chip{font-size:.68rem;font-weight:700;background:#F0EDE8;color:#6B5E4E;padding:2px 8px;border-radius:20px;white-space:nowrap;letter-spacing:.02em;cursor:pointer}
+.ob-tipo-chip:hover{background:#E0DAD4}
 
 /* 小ボタン */
 .ob-btn-sm{background:#fff;border:1px solid #D0C8BC;color:#555;border-radius:3px;padding:3px 10px;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .12s}
@@ -5305,28 +5311,37 @@ function obRenderVisitors(){
     return;
   }
 
-  // ── テーブル表示（従来） ──
-  var COL=10;
+  // ── テーブル表示 ──
+  // 月は常に新しい順、月内は常に古い順（1日→末日）
+  mOrder.sort(function(a,b){
+    if(a==='未設定') return 1; if(b==='未設定') return -1;
+    return b>a?1:b<a?-1:0; // 月は降順固定
+  });
+  mOrder.forEach(function(ym){
+    groups[ym].sort(function(a,b){
+      var da=obNormDate(a['問い合わせ日']||a['来場日']||''), db=obNormDate(b['問い合わせ日']||b['来場日']||'');
+      return da>db?1:da<db?-1:0; // 月内は昇順固定
+    });
+  });
+
+  var COL=12;
   var html=aggHtml+'<table class="ob-table ob-vis-table"><thead><tr>'+
     '<th class="ob-rn" style="width:28px">#</th>'+
-    '<th style="min-width:86px">問合せ日</th>'+
-    '<th style="min-width:68px">種別</th>'+
-    '<th style="min-width:170px">顧客名 / 電話番号</th>'+
-    '<th style="min-width:96px">ステータス</th>'+
-    '<th style="min-width:80px">担当</th>'+
-    '<th style="min-width:68px">エリア・反響</th>'+
-    '<th style="min-width:210px">来場履歴</th>'+
-    '<th style="min-width:108px">次回予定</th>'+
-    '<th style="width:44px"></th>'+
+    '<th style="min-width:84px">問合せ日</th>'+
+    '<th style="min-width:72px">種別</th>'+
+    '<th style="min-width:160px">顧客名 / 電話番号</th>'+
+    '<th style="min-width:90px">ステータス</th>'+
+    '<th style="min-width:76px">担当</th>'+
+    '<th style="min-width:62px">エリア</th>'+
+    '<th style="min-width:66px">反響元</th>'+
+    '<th style="min-width:200px">来場履歴</th>'+
+    '<th style="min-width:92px">次回予定日</th>'+
+    '<th style="min-width:90px">次回内容</th>'+
+    '<th style="width:40px"></th>'+
     '</tr></thead><tbody>';
 
   mOrder.forEach(function(ym){
     var mr=groups[ym];
-    mr.sort(function(a,b){
-      var da=obNormDate(a['問い合わせ日']||a['来場日']||''), db=obNormDate(b['問い合わせ日']||b['来場日']||'');
-      if(da===db) return 0;
-      return sortAsc ? (da>db?1:-1) : (da>db?-1:1);
-    });
     var lbl=ym==='未設定'?'日付未設定':(function(){var p=ym.split('-');return parseInt(p[0])+'年'+parseInt(p[1])+'月';})();
 
     // KPI集計
@@ -5340,18 +5355,17 @@ function obRenderVisitors(){
     });
     var pRate=mr.length?Math.round(pCnt/mr.length*100):0;
 
-    // KPIタイル生成
+    // KPIタイル
     var kpiTiles='<div class="ob-mkpi-kpi"><span class="ob-mkpi-kval">'+mr.length+'</span><span class="ob-mkpi-klbl">来場計</span></div>';
+    var evShort={'完成見学会':'完成見学','オンライン見学会':'オンライン','無料相談会':'無料相談','勉強会':'勉強会','来場':'来場','その他':'その他'};
     Object.keys(evCnt).forEach(function(t){
-      var short={'完成見学会':'完成見学','オンライン見学会':'オンライン','無料相談会':'無料相談','勉強会':'勉強会','来場':'来場','その他':'その他'};
-      kpiTiles+='<div class="ob-mkpi-kpi"><span class="ob-mkpi-kval">'+evCnt[t]+'</span><span class="ob-mkpi-klbl">'+(short[t]||t)+'</span></div>';
+      kpiTiles+='<div class="ob-mkpi-kpi"><span class="ob-mkpi-kval">'+evCnt[t]+'</span><span class="ob-mkpi-klbl">'+(evShort[t]||t)+'</span></div>';
     });
-    kpiTiles+='<div class="ob-mkpi-kpi gold"><span class="ob-mkpi-kval">'+pCnt+'<small style="font-size:.68em;opacity:.8"> '+pRate+'%</small></span><span class="ob-mkpi-klbl">P申込</span></div>';
+    kpiTiles+='<div class="ob-mkpi-kpi gold"><span class="ob-mkpi-kval">'+pCnt+'<small style="font-size:.66em;opacity:.8"> '+pRate+'%</small></span><span class="ob-mkpi-klbl">P申込</span></div>';
     kpiTiles+='<div class="ob-mkpi-kpi '+(nextCnt>0?'green':'')+'"><span class="ob-mkpi-kval">'+nextCnt+'</span><span class="ob-mkpi-klbl">次回予定</span></div>';
 
-    // 担当チップ
     var staffChipsHtml=Object.keys(staffCnt).sort().map(function(s){
-      return '<span class="ob-mkpi-staff-chip">'+esc(s)+' '+staffCnt[s]+'</span>';
+      return '<span class="ob-mkpi-staff-chip">'+esc(s)+' <b>'+staffCnt[s]+'</b></span>';
     }).join('');
 
     html+='<tr class="ob-month-hd"><td colspan="'+COL+'">'+
@@ -5359,7 +5373,7 @@ function obRenderVisitors(){
         '<div class="ob-mkpi-top">'+
           '<span class="ob-mkpi-month">'+lbl+'</span>'+
           '<span class="ob-mkpi-total">'+mr.length+'件</span>'+
-          '<button class="ob-mkpi-add" onclick="obQuickAddVisitor(\''+ym+'\')">＋ 追加</button>'+
+          '<button class="ob-mkpi-add" onclick="obQuickAddVisitor(\''+ym+'\');event.stopPropagation()">＋ 追加</button>'+
         '</div>'+
         '<div class="ob-mkpi-kpis">'+kpiTiles+'</div>'+
         (staffChipsHtml?'<div class="ob-mkpi-staff-row"><span class="ob-mkpi-staff-lbl">担当</span>'+staffChipsHtml+'</div>':'')+
@@ -5384,36 +5398,39 @@ function obRenderVisitors(){
       var kana=obSanitizeVal(k['フリガナ']||'');
       var tel=obSanitizeVal(k['電話番号']||'');
       var inquiryDate=obSanitizeVal(r['問い合わせ日']||r['来場日']||'');
-      var area=obSanitizeVal(r['エリア']||'');
-      var genki=obSanitizeVal(r['反響元']||'');
       html+='<tr data-sc="'+sc+'" data-row="'+r._row+'" onclick="obOpenDetail('+r._row+')" style="cursor:pointer">'+
-        '<td class="ob-rn" style="font-size:.72rem;color:#AAA">'+monthN+'</td>'+
-        '<td style="font-size:.78rem;color:#888;white-space:nowrap;min-width:84px">'+(inquiryDate?obFmtDate(obNormDate(inquiryDate)):'—')+'</td>'+
-        '<td style="min-width:66px">'+
-          '<span class="ob-editable" data-row="'+r._row+'" data-field="来場種別" onclick="obStartEdit(this);event.stopPropagation()" style="font-size:.74rem;background:#F5F2EE;border-radius:3px;padding:2px 7px;cursor:pointer;white-space:nowrap">'+esc(r['来場種別']||'—')+'</span>'+
-        '</td>'+
-        '<td class="ob-td-name" onclick="obOpenDetail('+r._row+');event.stopPropagation()">'+
-          '<div class="ob-name-link">'+esc(r['顧客名']||'—')+'</div>'+
-          (kana?'<div class="ob-name-sub">'+esc(kana)+'</div>':'')+
-          (tel?'<div class="ob-name-sub" style="color:#7B6248;font-family:monospace;letter-spacing:.03em">📞 '+esc(tel)+'</div>':'')+
+        '<td class="ob-rn" onclick="event.stopPropagation()">'+monthN+'</td>'+
+        '<td style="font-size:.76rem;color:#999;white-space:nowrap" onclick="obStartEdit(document.querySelector(\'[data-row=\\\\"'+r._row+'\\\\"]\'));event.stopPropagation()">'+
+          '<span class="ob-editable" data-row="'+r._row+'" data-field="問い合わせ日" onclick="obStartEdit(this);event.stopPropagation()" style="font-size:.76rem;color:#777">'+
+            (inquiryDate?obFmtDate(obNormDate(inquiryDate)):'<span style="color:#DDD">—</span>')+
+          '</span>'+
         '</td>'+
         '<td onclick="event.stopPropagation()">'+
-          '<span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="cursor:pointer;font-size:.72rem;padding:4px 10px">'+esc(dispStatus)+'</span>'+
+          '<span class="ob-editable ob-tipo-chip" data-row="'+r._row+'" data-field="来場種別" onclick="obStartEdit(this);event.stopPropagation()">'+esc(r['来場種別']||'—')+'</span>'+
         '</td>'+
-        '<td style="font-size:.8rem;white-space:nowrap" onclick="event.stopPropagation()">'+
-          '<div style="font-weight:700;color:#2B2B2B">'+obCell(r,'担当者')+'</div>'+
-          (obSanitizeVal(r['サブ担当'])?'<div style="font-size:.7rem;color:#AAA;margin-top:1px">'+obCell(r,'サブ担当')+'</div>':'')+
+        '<td class="ob-td-name">'+
+          '<span class="ob-name-link" onclick="obOpenDetail('+r._row+');event.stopPropagation()">'+esc(r['顧客名']||'—')+'</span>'+
+          (kana?'<div class="ob-name-sub">'+esc(kana)+'</div>':'')+
+          (tel?'<div class="ob-name-sub" style="color:#7B6248;font-family:monospace;letter-spacing:.03em;margin-top:2px">📞 '+esc(tel)+'</div>':'')+
         '</td>'+
-        '<td style="font-size:.74rem;color:#777">'+
-          (area?'<div>'+esc(area)+'</div>':'')+
-          (genki?'<div style="color:#AAA;margin-top:1px">'+esc(genki)+'</div>':'')+
+        '<td onclick="event.stopPropagation()" style="white-space:nowrap">'+
+          '<span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="cursor:pointer;font-size:.7rem;padding:3px 9px">'+esc(dispStatus)+'</span>'+
         '</td>'+
+        '<td onclick="event.stopPropagation()" style="white-space:nowrap">'+
+          '<div style="font-size:.8rem;font-weight:700;color:#2B2B2B">'+obCell(r,'担当者')+'</div>'+
+          (obSanitizeVal(r['サブ担当'])?'<div style="font-size:.68rem;color:#AAA;margin-top:1px">'+obCell(r,'サブ担当')+'</div>':'')+
+        '</td>'+
+        '<td onclick="event.stopPropagation()" style="font-size:.76rem">'+obCell(r,'エリア')+'</td>'+
+        '<td onclick="event.stopPropagation()" style="font-size:.76rem">'+obCell(r,'反響元')+'</td>'+
         '<td class="ob-td-hist" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()" title="クリックして来場履歴を追加・編集">'+
           '<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div>'+
         '</td>'+
-        '<td style="min-width:106px" onclick="event.stopPropagation()">'+
-          (nextRaw?'<div class="ob-card-next '+nextCls+'">'+nextAlarm+obFmtDate(nextRaw)+(r['次回内容']?'<br><small style="font-weight:400;opacity:.75">'+esc(r['次回内容'])+'</small>':'')+'</div>':'<div style="color:#DDD;font-size:.72rem;text-align:center">—</div>')+
+        '<td onclick="event.stopPropagation()" class="ob-td-next">'+
+          '<div class="'+(nextCls!=='none'?'ob-card-next '+nextCls:'')+'">'+
+            obCell(r,'次回予定')+
+          '</div>'+
         '</td>'+
+        '<td onclick="event.stopPropagation()" style="font-size:.76rem;color:#666;min-width:88px">'+obCell(r,'次回内容')+'</td>'+
         '<td style="padding:4px 6px;text-align:center" onclick="event.stopPropagation()">'+
           '<button class="ob-del" onclick="obConfirmDel('+r._row+')" title="削除">✕</button>'+
         '</td>'+
