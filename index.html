@@ -2554,9 +2554,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
             面談報告チャンネルを指定すると、「Chatwork取込」で自動的に面談データを取り込めます。
           </div>
           <div class="st-row">
-            <label>Chatwork APIトークン</label>
-            <input type="password" id="stMtgCwToken" placeholder="Chatwork APIトークンを入力" style="font-family:monospace;font-size:.82rem">
-            <div class="hint">Chatworkの「サービス連携」→「API Token」から取得。GASのScript Propertiesに保存されます。</div>
+            <label>Chatwork APIトークン <span id="cw-token-badge" style="font-size:.75rem;padding:2px 8px;border-radius:99px;background:#F3F4F6;color:#6B7280;margin-left:6px">確認中…</span></label>
+            <input type="password" id="stMtgCwToken" placeholder="Chatwork APIトークンを入力（未設定の場合は入力して保存）" style="font-family:monospace;font-size:.82rem">
+            <div class="hint">Chatworkの「サービス連携」→「API Token」から取得。一度保存するとGASに記憶されます。</div>
           </div>
           <div class="st-row">
             <label>面談報告ルームID</label>
@@ -3677,6 +3677,14 @@ function openSettings(tab){
       cwStatus.textContent = d.hasCwToken ? '✅ Chatwork APIトークン設定済み' : '⚠️ Chatwork APIトークン未設定';
       cwStatus.style.color = d.hasCwToken ? '#22C55E' : '#F59E0B';
     }
+    var cwBadge = document.getElementById('cw-token-badge');
+    if(cwBadge){
+      if(d.hasCwToken){
+        cwBadge.textContent = '✅ 設定済み'; cwBadge.style.background='#D1FAE5'; cwBadge.style.color='#065F46';
+      } else {
+        cwBadge.textContent = '⚠️ 未設定'; cwBadge.style.background='#FEF3C7'; cwBadge.style.color='#92400E';
+      }
+    }
     if(cwRoomEl  && d.cwRoom   && !cwRoomEl.value)  cwRoomEl.value  = d.cwRoom;
     if(cwTmplEl  && d.cwTemplate && !cwTmplEl.value) cwTmplEl.value = d.cwTemplate;
     if(cwNotifyEl && d.cwNotifyRoom && !cwNotifyEl.value) cwNotifyEl.value = d.cwNotifyRoom;
@@ -3713,13 +3721,16 @@ function stSaveMtgCwSettings(){
   post(payload,function(d){
     if(d&&d.ok){
       if(res){ res.textContent='✅ 保存しました'; res.style.color='#22C55E'; }
+      // バッジ更新
+      var cwBadge = document.getElementById('cw-token-badge');
+      if(cwBadge && token){ cwBadge.textContent='✅ 設定済み'; cwBadge.style.background='#D1FAE5'; cwBadge.style.color='#065F46'; }
       // MTG板側にも反映
       var te=document.getElementById('mtg-cw-token'); if(te&&token) te.value=token;
       var re=document.getElementById('mtg-selected-room'); if(re&&room) re.textContent='✅ 設定済みルームID: '+room;
       var tte=document.getElementById('mtg-cw-template'); if(tte&&tmpl) tte.value=tmpl;
       __mtgSelectedRoomId = room;
     } else {
-      if(res){ res.textContent='❌ '+(d&&d.error?d.error:'保存失敗'); res.style.color='#EF4444'; }
+      if(res){ res.textContent='❌ '+(d&&d.error?d.error:'保存失敗（GASを再デプロイして再試行）'); res.style.color='#EF4444'; }
     }
   });
 }
