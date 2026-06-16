@@ -758,6 +758,74 @@ tr:hover .ob-del{opacity:1}
 .ob-table tr[data-sc="ob-s9"] td:first-child{border-left-color:#FECACA}
 .ob-table tr[data-sc="ob-sP"] td:first-child{border-left-color:#86EFAC}
 .ob-table tr[data-sc="ob-sF"] td:first-child{border-left-color:#E5E7EB}
+
+/* ─── 来客状況カード表示 ─── */
+.ob-vis-toolbar{display:flex;align-items:center;gap:8px;padding:5px 14px;background:#F0EDE8;border-bottom:1px solid #E0DAD4;flex-shrink:0;flex-wrap:wrap}
+.ob-vis-view-toggle{display:flex;background:#E0DAD4;border-radius:4px;overflow:hidden;gap:0}
+.ob-vis-view-btn{background:none;border:none;padding:4px 11px;font-size:.68rem;font-weight:700;color:#888;cursor:pointer;transition:all .12s;letter-spacing:.04em}
+.ob-vis-view-btn.on{background:#2B2B2B;color:#fff;border-radius:3px}
+.ob-vis-section{margin-bottom:20px}
+.ob-vis-month-hd{display:flex;align-items:center;gap:8px;padding:9px 16px;background:linear-gradient(135deg,#2B2B2B 0%,#3D3530 100%);color:#fff;border-radius:6px 6px 0 0;flex-wrap:wrap}
+.ob-vis-month-label{font-size:.88rem;font-weight:700;letter-spacing:.06em;color:#fff;white-space:nowrap}
+.ob-vis-month-stats{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto;align-items:center}
+.ob-vis-month-stat{background:rgba(255,255,255,.14);color:rgba(255,255,255,.9);font-size:.66rem;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.ob-vis-month-stat.gold{background:rgba(199,163,99,.35);color:#F5DFA0}
+.ob-vis-month-add{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.8);padding:3px 10px;border-radius:3px;font-size:.66rem;cursor:pointer;transition:all .12s;white-space:nowrap;margin-left:4px}
+.ob-vis-month-add:hover{background:rgba(255,255,255,.25);color:#fff}
+/* カードグリッド */
+.ob-vis-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:11px;padding:12px 14px;background:#F5F2EE;border:1px solid #E0DAD4;border-top:none;border-radius:0 0 6px 6px}
+.ob-vis-card{background:#fff;border-radius:5px;border:1px solid #E8E4DE;box-shadow:0 1px 4px rgba(0,0,0,.06);transition:box-shadow .15s,transform .15s;cursor:pointer;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.ob-vis-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.12);transform:translateY(-2px)}
+/* ステータスカラーバー（上端） */
+.ob-vis-card-bar{height:4px;flex-shrink:0}
+.ob-vis-card[data-sc="ob-s0"] .ob-vis-card-bar{background:#F5DFA0}
+.ob-vis-card[data-sc="ob-s1"] .ob-vis-card-bar{background:#D4C8F8}
+.ob-vis-card[data-sc="ob-s2"] .ob-vis-card-bar{background:#A7DFBE}
+.ob-vis-card[data-sc="ob-s3"] .ob-vis-card-bar{background:#BFDBFE}
+.ob-vis-card[data-sc="ob-s4"] .ob-vis-card-bar{background:#FEC9C9}
+.ob-vis-card[data-sc="ob-s5"] .ob-vis-card-bar{background:#F9C2DC}
+.ob-vis-card[data-sc="ob-s6"] .ob-vis-card-bar{background:#FDC9A0}
+.ob-vis-card[data-sc="ob-s7"] .ob-vis-card-bar{background:#6EE7B7}
+.ob-vis-card[data-sc="ob-s8"] .ob-vis-card-bar{background:#D1D5DB}
+.ob-vis-card[data-sc="ob-s9"] .ob-vis-card-bar{background:#FECACA}
+.ob-vis-card[data-sc="ob-sP"] .ob-vis-card-bar{background:#86EFAC}
+.ob-vis-card[data-sc="ob-sF"] .ob-vis-card-bar{background:#E5E7EB}
+/* カード内レイアウト */
+.ob-vis-card-hd{display:flex;align-items:center;gap:7px;padding:8px 12px 6px;border-bottom:1px solid #F2EEE9}
+.ob-vis-card-date{font-size:.66rem;color:#AAA;white-space:nowrap;font-family:monospace}
+.ob-vis-card-type{font-size:.62rem;font-weight:700;background:#F0EDE8;color:#7B6F65;padding:2px 7px;border-radius:20px;white-space:nowrap}
+.ob-vis-card-badge{margin-left:auto}
+.ob-vis-card-body{padding:9px 12px 6px}
+.ob-vis-card-name{font-size:1.02rem;font-weight:700;color:#1A1A1A;letter-spacing:.02em;line-height:1.3;margin-bottom:1px}
+.ob-vis-card-kana{font-size:.64rem;color:#BBB;margin-bottom:3px}
+.ob-vis-card-tel{font-size:.73rem;color:#6B5E4E;font-family:monospace;letter-spacing:.04em}
+.ob-vis-card-meta{display:flex;align-items:center;gap:8px;padding:6px 12px;background:#FAFAF8;border-top:1px solid #F2EEE9;border-bottom:1px solid #F2EEE9}
+.ob-vis-card-staff{font-size:.70rem;color:#555;font-weight:600}
+.ob-vis-card-area{font-size:.65rem;color:#AAA;margin-left:auto;white-space:nowrap}
+.ob-vis-card-foot{padding:7px 12px 9px;flex:1;display:flex;flex-direction:column;gap:5px}
+.ob-vis-card-next{display:flex;align-items:center;gap:5px;font-size:.73rem;font-weight:600;padding:4px 8px;border-radius:3px;background:#F5F3EF}
+.ob-vis-card-next.none{color:#BBB;font-weight:400;font-size:.68rem}
+.ob-vis-card-next.over{background:#FEF2F2;color:#DC2626}
+.ob-vis-card-next.warn{background:#FFFBEB;color:#D97706}
+.ob-vis-card-next.ok{background:#F0FDF4;color:#059669}
+.ob-vis-card-hist{font-size:.66rem;color:#AAA;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-left:2px}
+/* ホバーアクション */
+.ob-vis-card-acts{position:absolute;top:10px;right:10px;display:flex;gap:3px;opacity:0;transition:opacity .12s;pointer-events:none}
+.ob-vis-card:hover .ob-vis-card-acts{opacity:1;pointer-events:auto}
+.ob-vis-card-act{background:rgba(255,255,255,.92);border:1px solid #DDD;color:#666;border-radius:3px;padding:3px 7px;font-size:.62rem;cursor:pointer;transition:all .12s;backdrop-filter:blur(2px)}
+.ob-vis-card-act:hover{background:#2B2B2B;color:#fff;border-color:#2B2B2B}
+.ob-vis-card-act.del:hover{background:#DC2626;border-color:#DC2626}
+/* 月別集計（来客状況タブ内） */
+.ob-vis-agg-wrap{margin-bottom:16px;background:#fff;border:1px solid #E0DAD4;border-radius:6px;overflow:hidden}
+.ob-vis-agg-title{padding:9px 16px;font-size:.72rem;font-weight:700;letter-spacing:.1em;color:#888;cursor:pointer;display:flex;align-items:center;gap:6px;background:#FAFAF8;border-bottom:1px solid #F0EDE8;user-select:none}
+.ob-vis-agg-title:hover{background:#F5F2EE}
+.ob-vis-agg-toggle{margin-left:auto;transition:transform .15s;display:inline-block}
+.ob-vis-agg-wrap.open .ob-vis-agg-toggle{transform:rotate(180deg)}
+.ob-vis-agg-body{display:none;overflow-x:auto}
+.ob-vis-agg-wrap.open .ob-vis-agg-body{display:block}
+.ob-vis-agg-tbl{font-size:.76rem}
+/* テーブルビュー時の表示切り替え */
+.ob-vis-table-wrap{border:1px solid #E0DAD4;border-radius:0 0 6px 6px;overflow-x:auto;background:#F5F2EE;padding:8px 12px}
 /* パイプラインフロー */
 .ob-pipeline{flex-shrink:0;display:flex;padding:6px 16px;background:#FAFAF8;border-bottom:1px solid #E8E4DE;overflow-x:auto;gap:0;align-items:center}
 .ob-pipe-s{display:flex;align-items:center;gap:0;font-size:.64rem;font-weight:700;color:#CCC;white-space:nowrap;cursor:pointer;transition:color .15s}
@@ -1646,23 +1714,29 @@ tr:hover .ob-del{opacity:1}
   <div class="ob-pane show" data-tab="visitors">
     <!-- パイプラインフロー -->
     <div class="ob-pipeline" id="ob-pipeline-bar"></div>
-    <div class="ob-filter">
-      <label>年:</label>
-      <select id="ob-filter-year" onchange="obRenderVisitors()" style="width:80px"></select>
-      <label>月:</label>
-      <select id="ob-filter-month" onchange="obRenderVisitors()" style="width:80px"></select>
-      <label>担当:</label>
-      <select id="ob-vis-staff" onchange="obRenderVisitors()" style="width:100px"></select>
-      <input type="text" id="ob-vis-q" placeholder="顧客名・電話・反響元で検索..." style="min-width:170px" oninput="obRenderVisitors()">
-      <select id="ob-vis-sort" onchange="obRenderVisitors()" style="width:120px" title="並び順">
+    <!-- フィルター -->
+    <div class="ob-filter" style="flex-wrap:wrap;gap:6px 10px">
+      <label style="font-size:.7rem;color:#888;font-weight:700;letter-spacing:.06em">年</label>
+      <select id="ob-filter-year" onchange="obRenderVisitors()" style="width:72px"></select>
+      <label style="font-size:.7rem;color:#888;font-weight:700;letter-spacing:.06em">月</label>
+      <select id="ob-filter-month" onchange="obRenderVisitors()" style="width:72px"></select>
+      <label style="font-size:.7rem;color:#888;font-weight:700;letter-spacing:.06em">担当</label>
+      <select id="ob-vis-staff" onchange="obRenderVisitors()" style="width:96px"></select>
+      <input type="text" id="ob-vis-q" placeholder="🔍 顧客名 / 電話 / 反響元..." style="min-width:180px;flex:1" oninput="obRenderVisitors()">
+      <select id="ob-vis-sort" onchange="obRenderVisitors()" style="width:100px" title="並び順">
         <option value="desc" selected>新しい順</option>
         <option value="asc">古い順</option>
       </select>
-      <button class="hbtn ghost" onclick="obJumpToLatestMonth()" title="最新月の先頭にスクロール" style="font-size:.72rem;padding:5px 10px;white-space:nowrap">最新月へ ↓</button>
-      <span class="ob-filter-count" id="ob-vis-count"></span>
+      <button class="hbtn ghost" onclick="obJumpToLatestMonth()" title="最新月の先頭にスクロール" style="font-size:.7rem;padding:5px 9px;white-space:nowrap">最新月↓</button>
+      <span class="ob-filter-count" id="ob-vis-count" style="font-size:.78rem"></span>
+      <!-- 表示切り替え -->
+      <div class="ob-vis-view-toggle" style="margin-left:auto">
+        <button class="ob-vis-view-btn on" id="ob-vis-btn-card" onclick="obSetVisView('card')" title="カード表示">⊞ カード</button>
+        <button class="ob-vis-view-btn" id="ob-vis-btn-table" onclick="obSetVisView('table')" title="テーブル表示">☰ リスト</button>
+      </div>
     </div>
     <div class="ob-scroll" id="ob-vis-scroll">
-      <div id="ob-visitors-content"><div class="ob-empty-state">読み込み中...</div></div>
+      <div id="ob-visitors-content" style="padding:14px 16px"><div class="ob-empty-state">読み込み中...</div></div>
     </div>
   </div>
 
@@ -4710,6 +4784,7 @@ function openOnlineFsMonitor(){
 //  オープンボード JS  — 全面再設計版
 // ════════════════════════════════════════════════
 var obRows = [];
+var obVisView = 'card'; // 'card' | 'table'
 var obCurrentTab = 'visitors';
 var obDetailRow  = -1;
 var obDetailKey  = null; // {name,date} — ポーリング後の行インデックス再同期用
@@ -5018,6 +5093,15 @@ function obPopulateFilters(){
 }
 
 // ── 来客状況タブ ──
+function obSetVisView(v){
+  obVisView=v;
+  var bc=document.getElementById('ob-vis-btn-card');
+  var bt=document.getElementById('ob-vis-btn-table');
+  if(bc) bc.classList.toggle('on', v==='card');
+  if(bt) bt.classList.toggle('on', v==='table');
+  obRenderVisitors();
+}
+
 function obRenderVisitors(){
   var el=document.getElementById('ob-visitors-content'); if(!el) return;
   var fYear=((document.getElementById('ob-filter-year')||{}).value||'');
@@ -5042,19 +5126,17 @@ function obRenderVisitors(){
   var cntEl=document.getElementById('ob-vis-count'); if(cntEl) cntEl.textContent=rows.length+'件';
   if(!rows.length){ el.innerHTML='<div class="ob-empty-state">該当するデータがありません</div>'; return; }
 
-  // 月ごとにグループ化（正規化後のYM使用でNaN月バグ防止）
+  // 月ごとにグループ化
   var groups={},mOrder=[];
   rows.forEach(function(r){
     var ym=obDateToYM(r['問い合わせ日']||r['来場日']);
     if(!groups[ym]){groups[ym]=[];mOrder.push(ym);}
     groups[ym].push(r);
   });
-  // 月の並び順（デフォルト：新しい月が上）。未設定は常に最後
   mOrder.sort(function(a,b){
     if(a==='未設定') return 1; if(b==='未設定') return -1;
     return sortAsc ? (a>b?1:a<b?-1:0) : (b>a?1:b<a?-1:0);
   });
-  // 月内の行を日付順ソート
   mOrder.forEach(function(ym){
     groups[ym].sort(function(a,b){
       var da=obNormDate(a['問い合わせ日']||a['来場日']||''), db=obNormDate(b['問い合わせ日']||b['来場日']||'');
@@ -5062,7 +5144,7 @@ function obRenderVisitors(){
     });
   });
 
-  // ── 月別集計サマリーテーブル（スプレッドシート形式）──
+  // ── 月別集計サマリーテーブル ──
   var AGG_TYPES=[
     {key:'来場',label:'来場計'},
     {key:'完成見学会',label:'完成見学'},
@@ -5098,7 +5180,6 @@ function obRenderVisitors(){
         return '<td>'+(v||'—')+'</td>';
       }).join('')+'</tr>';
   });
-  // 合計行
   var tot={来場:0,完成見学会:0,'オンライン見学会':0,'無料相談会':0,'勉強会':0,'その他':0,_P:0};
   ymLabels.forEach(function(ym){ Object.keys(tot).forEach(function(k){ tot[k]+=(aggData[ym][k]||0); }); });
   var totRate=tot['来場']?Math.round(tot._P/tot['来場']*100)+'%':'—';
@@ -5110,7 +5191,99 @@ function obRenderVisitors(){
     }).join('')+'</tr>';
   aggHtml+='</tbody></table></div></div>';
 
-  var COL=11; // colspan
+  // ── カード表示 ──
+  if(obVisView==='card'){
+    var html=aggHtml;
+    mOrder.forEach(function(ym){
+      var mr=groups[ym];
+      var lbl=ym==='未設定'?'日付未設定':(function(){var p=ym.split('-');return parseInt(p[0])+'年'+parseInt(p[1])+'月';})();
+      var pCnt=0; var evCnt={};
+      mr.forEach(function(r){
+        var t=r['来場種別']||'その他'; evCnt[t]=(evCnt[t]||0)+1;
+        if(r['P申込目標日']) pCnt++;
+      });
+      var pRate=mr.length?Math.round(pCnt/mr.length*100)+'%':'0%';
+      var statChips=Object.keys(evCnt).map(function(t){
+        return '<span class="ob-vis-month-stat">'+esc(t)+' '+evCnt[t]+'</span>';
+      }).join('');
+      var pChip=pCnt?'<span class="ob-vis-month-stat gold">P申込 '+pCnt+' ('+pRate+')</span>':'';
+
+      html+='<div class="ob-vis-section">'+
+        '<div class="ob-vis-month-hd">'+
+          '<span class="ob-vis-month-label">'+lbl+'</span>'+
+          '<div class="ob-vis-month-stats">'+
+            '<span class="ob-vis-month-stat">合計 '+mr.length+'</span>'+statChips+pChip+
+          '</div>'+
+          '<button class="ob-vis-month-add" onclick="obQuickAddVisitor(\''+ym+'\')">＋ 追加</button>'+
+        '</div>'+
+        '<div class="ob-vis-card-grid">';
+
+      mr.forEach(function(r){
+        var rawStatus=r['商談ステータス']||'問い合わせ';
+        var dispStatus=obNormStatus(rawStatus);
+        var sc=OB_STATUS_CLASS[rawStatus]||OB_STATUS_CLASS[dispStatus]||'ob-s0';
+        var k=r.karte||{};
+        var kana=obSanitizeVal(k['フリガナ']||'');
+        var tel=obSanitizeVal(k['電話番号']||'');
+        var mainStaff=obSanitizeVal(r['担当者']);
+        var subStaff=obSanitizeVal(r['サブ担当']);
+        var staffLbl=mainStaff||(subStaff?'':'—');
+        if(subStaff) staffLbl+=(mainStaff?' / ':'')+subStaff;
+        var area=obSanitizeVal(r['エリア']||'');
+        var tipo=obSanitizeVal(r['来場種別']||'');
+        var inquiryDate=obNormDate(r['問い合わせ日']||r['来場日']||'');
+        var dateLbl=inquiryDate?obFmtDate(inquiryDate):'—';
+        // 次回予定
+        var nextRaw=r['次回予定']?obNormDate(r['次回予定']):'';
+        var nextCls='none'; var nextAlarm='';
+        if(nextRaw&&nextRaw.length>=10){
+          var _nd=new Date(nextRaw+'T00:00:00'); var _today=new Date(); _today.setHours(0,0,0,0);
+          var _diff=Math.floor((_nd-_today)/(1000*60*60*24));
+          if(_diff<0){nextCls='over';nextAlarm='⚠ ';}
+          else if(_diff<=3){nextCls='warn';nextAlarm='🔔 ';}
+          else{nextCls='ok';}
+        }
+        var nextLbl=nextRaw?(nextAlarm+obFmtDate(nextRaw)+(r['次回内容']?' '+esc(r['次回内容']):'')):'次回予定なし';
+        // 最新履歴
+        var histArr=Array.isArray(r.history)?r.history:[];
+        var latestHist=histArr.length?esc(histArr[histArr.length-1]['内容']||histArr[histArr.length-1]['date']||''):'';
+
+        html+=
+          '<div class="ob-vis-card" data-sc="'+sc+'" data-row="'+r._row+'" onclick="obOpenDetail('+r._row+')">'+
+            '<div class="ob-vis-card-bar"></div>'+
+            '<div class="ob-vis-card-hd">'+
+              '<span class="ob-vis-card-date">'+dateLbl+'</span>'+
+              (tipo?'<span class="ob-vis-card-type">'+esc(tipo)+'</span>':'')+
+              '<span class="ob-vis-card-badge"><span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+');event.stopPropagation()" style="cursor:pointer">'+esc(dispStatus)+'</span></span>'+
+            '</div>'+
+            '<div class="ob-vis-card-body">'+
+              '<div class="ob-vis-card-name">'+esc(r['顧客名']||'—')+'</div>'+
+              (kana?'<div class="ob-vis-card-kana">'+esc(kana)+'</div>':'')+
+              (tel?'<div class="ob-vis-card-tel">📞 '+esc(tel)+'</div>':'')+
+            '</div>'+
+            '<div class="ob-vis-card-meta">'+
+              '<span class="ob-vis-card-staff">'+esc(staffLbl)+'</span>'+
+              (area?'<span class="ob-vis-card-area">'+esc(area)+'</span>':'')+
+            '</div>'+
+            '<div class="ob-vis-card-foot">'+
+              '<div class="ob-vis-card-next '+nextCls+'">'+nextLbl+'</div>'+
+              (latestHist?'<div class="ob-vis-card-hist">'+latestHist+'</div>':'')+
+            '</div>'+
+            '<div class="ob-vis-card-acts">'+
+              '<button class="ob-vis-card-act" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">履歴</button>'+
+              '<button class="ob-vis-card-act del" onclick="obConfirmDel('+r._row+');event.stopPropagation()">削除</button>'+
+            '</div>'+
+          '</div>';
+      });
+
+      html+='</div></div>'; // card-grid / vis-section
+    });
+    el.innerHTML=html;
+    return;
+  }
+
+  // ── テーブル表示（従来） ──
+  var COL=11;
   var html=aggHtml+'<table class="ob-table ob-vis-table"><thead><tr>'+
     '<th class="ob-rn" style="width:32px">No</th>'+
     '<th style="min-width:90px">問合せ日</th><th style="min-width:70px">種別</th>'+
@@ -5122,15 +5295,13 @@ function obRenderVisitors(){
 
   mOrder.forEach(function(ym){
     var mr=groups[ym];
-    // 月内の並び順（選択した方向に従う）。同日は元の順序を維持
     mr.sort(function(a,b){
       var da=obNormDate(a['問い合わせ日']||a['来場日']||''), db=obNormDate(b['問い合わせ日']||b['来場日']||'');
       if(da===db) return 0;
       return sortAsc ? (da>db?1:-1) : (da>db?-1:1);
     });
     var lbl=ym==='未設定'?'日付未設定':(function(){var p=ym.split('-');return parseInt(p[0])+'年'+parseInt(p[1])+'月';})();
-    var pCnt=0; var evCnt={};
-    var staffCnt={};
+    var pCnt=0; var evCnt={}; var staffCnt={};
     mr.forEach(function(r){
       var t=r['来場種別']||'その他'; evCnt[t]=(evCnt[t]||0)+1;
       if(r['P申込目標日']) pCnt++;
@@ -5141,28 +5312,21 @@ function obRenderVisitors(){
     var evChips=Object.keys(evCnt).map(function(t){return obSC(t,evCnt[t]);}).join('');
     var staffChips=Object.keys(staffCnt).sort().map(function(s){return obSC(s,staffCnt[s]);}).join('');
 
-    // ── 月ヘッダー行 ──
     html+='<tr class="ob-month-hd"><td colspan="'+COL+'">'+
       '<span class="ob-month-label">'+lbl+'</span>'+
       '<span class="ob-sum-chips">'+obSC('合計',mr.length)+evChips+obSC('P申込',pCnt,'('+pRate+')')+'</span>'+
       '<button class="ob-month-add" onclick="obQuickAddVisitor(\''+ym+'\')">＋ 追加</button>'+
       '</td></tr>';
-
     if(staffChips){
       html+='<tr class="ob-agg-inline-row"><td colspan="'+COL+'">'+
         '<span class="ob-agg-inline-lbl">👤 担当別</span>'+staffChips+'</td></tr>';
     }
 
-    // 月内連番（毎月1から）
     var monthN=0;
     mr.forEach(function(r){ monthN++;
       var rawStatus=r['商談ステータス']||'問い合わせ';
       var dispStatus=obNormStatus(rawStatus);
       var sc=OB_STATUS_CLASS[rawStatus]||OB_STATUS_CLASS[dispStatus]||'ob-s0';
-      var nextDate=r['次回予定']?obFmtDate(obNormDate(r['次回予定'])):'';
-      var nextContent=r['次回内容']||'';
-      var nextLbl=nextDate?(nextDate+(nextContent?' <small>'+nextContent+'</small>':'')):nextContent||'';
-      // 次回予定の近さで色分け（直近案件タブと同じロジック）
       var nextRaw=r['次回予定']?obNormDate(r['次回予定']):'';
       var nextCls='none'; var nextAlarm='';
       if(nextRaw&&nextRaw.length>=10){
@@ -5172,17 +5336,10 @@ function obRenderVisitors(){
         else if(_diff<=3){nextCls='warn';nextAlarm='🔔 ';}
         else{nextCls='ok';}
       }
-      var appo=r['アポ確定日']?obFmtDate(obNormDate(r['アポ確定日'])):'';
-      var tipo=obSanitizeVal(r['来場種別']);
-      var genki=obSanitizeVal(r['反響元']);
-      var mainStaff=obSanitizeVal(r['担当者']);
-      var subStaff=obSanitizeVal(r['サブ担当']);
-      var staffLbl=mainStaff||(subStaff?'':'—');
-      if(subStaff) staffLbl+=(mainStaff?' / ':'')+subStaff;
       var k=r.karte||{};
       var kana=obSanitizeVal(k['フリガナ']||'');
       var tel=obSanitizeVal(k['電話番号']||'');
-      var inquiryDate = obSanitizeVal(r['問い合わせ日']||r['来場日']||'');
+      var inquiryDate=obSanitizeVal(r['問い合わせ日']||r['来場日']||'');
       html+='<tr data-sc="'+sc+'" data-row="'+r._row+'">'+
         '<td class="ob-rn">'+monthN+'</td>'+
         '<td style="font-size:.8rem;color:#777;min-width:88px">'+(inquiryDate?obFmtDate(obNormDate(inquiryDate)):'—')+'</td>'+
@@ -5202,7 +5359,7 @@ function obRenderVisitors(){
         '<td class="ob-td-hist" onclick="obHistPopOpen(event,'+r._row+')" title="クリックして来場履歴を追加・編集"><div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div></td>'+
         '<td style="font-size:.8rem;color:#555;min-width:78px">'+obCell(r,'アポ確定日')+'</td>'+
         '<td style="font-size:.8rem;min-width:96px'+(nextCls==='over'?';background:#FEF2F2':nextCls==='warn'?';background:#FFFBEB':'')+'">'+
-          (nextLbl?'<div class="ob-card-next '+nextCls+'" style="font-size:.74rem;padding:2px 7px;display:inline-block;margin-bottom:2px">'+nextAlarm+obCell(r,'次回予定')+(r['次回内容']?' <small>'+esc(r['次回内容'])+'</small>':'')+'</div>':'<div style="color:#CCC;font-size:.76rem">—</div>')+
+          (nextRaw?'<div class="ob-card-next '+nextCls+'" style="font-size:.74rem;padding:2px 7px;display:inline-block;margin-bottom:2px">'+nextAlarm+obFmtDate(nextRaw)+(r['次回内容']?' <small>'+esc(r['次回内容'])+'</small>':'')+'</div>':'<div style="color:#CCC;font-size:.76rem">—</div>')+
         '</td>'+
         '<td style="white-space:nowrap;padding:6px 8px">'+
           '<button class="ob-del" onclick="obConfirmDel('+r._row+')" title="削除">✕</button>'+
