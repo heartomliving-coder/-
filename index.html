@@ -5400,9 +5400,9 @@ function obRenderVisitors(){
       var kana=obSanitizeVal(k['フリガナ']||'');
       var tel=obSanitizeVal(k['電話番号']||'');
       var inquiryDate=obSanitizeVal(r['問い合わせ日']||r['来場日']||'');
-      html+='<tr data-sc="'+sc+'" data-row="'+r._row+'" onclick="obOpenDetail('+r._row+')" style="cursor:pointer">'+
-        '<td class="ob-rn" onclick="event.stopPropagation()">'+monthN+'</td>'+
-        '<td style="font-size:.76rem;color:#999;white-space:nowrap" onclick="obStartEdit(document.querySelector(\'[data-row=\\\\"'+r._row+'\\\\"]\'));event.stopPropagation()">'+
+      html+='<tr data-sc="'+sc+'" data-row="'+r._row+'">'+
+        '<td class="ob-rn">'+monthN+'</td>'+
+        '<td style="font-size:.76rem;color:#999;white-space:nowrap">'+
           '<span class="ob-editable" data-row="'+r._row+'" data-field="問い合わせ日" onclick="obStartEdit(this);event.stopPropagation()" style="font-size:.76rem;color:#777">'+
             (inquiryDate?obFmtDate(obNormDate(inquiryDate)):'<span style="color:#DDD">—</span>')+
           '</span>'+
@@ -6720,10 +6720,10 @@ function obStartAutoSync(){
   __obAutoSyncTimer = setInterval(function(){ obSilentNotionSync(); }, 5 * 60 * 1000);
 }
 function obSilentNotionSync(){
-  gasGet('obImportFromNotion',function(d){
-    if(!d||d.error) return;
+  gasGet('processNewInquiries',function(d){
+    if(!d||!d.ok) return;
     if(d.imported > 0){
-      toast('🔔 新規顧客 '+d.imported+'件 を自動取込みました');
+      toast('🔔 新規問い合わせ '+d.imported+'件 を自動取込みました');
       obLoad(true, true);
     }
   });
