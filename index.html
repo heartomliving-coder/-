@@ -2859,7 +2859,15 @@ window.addEventListener('load', function() {
 
 // 戻るボタン対応：bfcache から復帰時にセッションを復元
 window.addEventListener('pageshow', function(e) {
-  if (adminKey()) { showApp(); }
+  if (adminKey()) {
+    // すでにボードが表示中なら showApp() を呼ばない（hub を強制表示してしまうため）
+    var boards = ['hub','openboard','kojiboard','tochiboard','custboard','mtgboard'];
+    var anyVisible = boards.some(function(id){
+      var el = document.getElementById(id);
+      return el && el.classList.contains('show');
+    });
+    if (!anyVisible) showApp();
+  }
 });
 
 function handleCredentialResponse(response) {
@@ -4177,9 +4185,15 @@ function renderList(){
   }).join('');
 }
 
-function post(payload){
+function post(payload, cb){
   payload=payload||{}; payload.key=adminKey();
-  return fetch(sendUrl(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+  if(typeof cb === 'function'){
+    // コールバックありの場合は cors モードで結果を受け取る
+    fetch(sendUrl(),{method:'POST',mode:'cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+      .then(function(res){return res.json();}).then(cb).catch(function(e){console.warn('[post] callback error',e);cb(null);});
+  } else {
+    return fetch(sendUrl(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+  }
 }
 
 // ★ 送信時に担当者＋サブ担当者を文字列結合する関数
