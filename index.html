@@ -5245,8 +5245,9 @@ function obRenderVisitors(){
         }
         var nextLbl=nextRaw?(nextAlarm+obFmtDate(nextRaw)+(r['次回内容']?' '+esc(r['次回内容']):'')):'次回予定なし';
         // 最新履歴
-        var histArr=Array.isArray(r.history)?r.history:[];
-        var latestHist=histArr.length?esc(histArr[histArr.length-1]['内容']||histArr[histArr.length-1]['date']||''):'';
+        var histArr=Array.isArray(r.history)?r.history.slice().sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;}):[];
+        var latestH=histArr.length?histArr[histArr.length-1]:{};
+        var latestHist=latestH.content||latestH['内容']||latestH.date?esc((latestH.content||latestH['内容']||'')+(latestH.date?' ('+obFmtDate(obNormDate(latestH.date))+')':'')):'' ;
 
         html+=
           '<div class="ob-vis-card" data-sc="'+sc+'" data-row="'+r._row+'" onclick="obOpenDetail('+r._row+')">'+
@@ -6053,14 +6054,13 @@ function obJumpToLatestMonth(){
   var scroll=document.getElementById('ob-vis-scroll');
   if(!scroll) return;
   var sortAsc=((document.getElementById('ob-vis-sort')||{}).value||'desc')==='asc';
-  var hdRows=scroll.querySelectorAll('tr.ob-month-hd');
+  var hdRows=scroll.querySelectorAll('tr.ob-month-hd,.ob-vis-month-hd');
   if(!hdRows.length){ toast('データがありません'); return; }
-  // 古い順(asc)なら最後の月ヘッダ、新しい順(desc)なら最初の月ヘッダ
   var target=sortAsc ? hdRows[hdRows.length-1] : hdRows[0];
   if(target){
-    var tableTop=scroll.getBoundingClientRect().top;
+    var scrollTop=scroll.getBoundingClientRect().top;
     var rowTop=target.getBoundingClientRect().top;
-    scroll.scrollTop += (rowTop - tableTop) - 10;
+    scroll.scrollTop += (rowTop - scrollTop) - 10;
   }
 }
 
