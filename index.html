@@ -970,16 +970,17 @@ tr:hover .ob-del{opacity:1}
 .ob-pipe-s.pipe-active{outline:2px solid var(--gold);outline-offset:2px;border-radius:3px}
 
 /* ─── 直近案件 カードグリッド ─── */
-.ob-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;padding:18px 20px}
-.ob-card{background:#fff;border:1px solid #E8E4DE;border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.04);border-left:4px solid #EEE;transition:box-shadow .15s}
-.ob-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.09)}
+.ob-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding:0}
+.ob-card{background:#fff;border:1px solid #E8E4DE;border-radius:10px;padding:0;display:flex;flex-direction:column;box-shadow:0 1px 4px rgba(0,0,0,.05);border-left:4px solid #EEE;transition:box-shadow .15s;overflow:hidden}
+.ob-card:hover{box-shadow:0 4px 18px rgba(0,0,0,.1)}
+.ob-card-body{padding:14px 16px;display:flex;flex-direction:column;gap:9px;flex:1}
 .ob-card-top{display:flex;align-items:flex-start;gap:10px}
-.ob-card-name{font-family:var(--serif);font-size:1.04rem;font-weight:700;color:#2B2B2B;flex:1;cursor:pointer;line-height:1.3}
+.ob-card-name{font-family:var(--serif);font-size:1.08rem;font-weight:700;color:#2B2B2B;flex:1;cursor:pointer;line-height:1.3}
 .ob-card-name:hover{text-decoration:underline;color:#9A8C76}
 .ob-card-meta{display:flex;align-items:center;gap:8px;font-size:.72rem;color:#888;flex-wrap:wrap}
 .ob-card-staff{font-weight:700;color:#555}
 .ob-card-last{font-size:.72rem;color:#9A8C76;font-weight:600}
-.ob-card-next{font-size:.76rem;font-weight:700;padding:3px 9px;border-radius:20px;white-space:normal;line-height:1.5}
+.ob-card-next{font-size:.76rem;font-weight:700;padding:5px 11px;border-radius:7px;white-space:normal;line-height:1.5}
 .ob-card-next.ok{background:#F0FDF4;color:#166534;border:1px solid #BBF7D0}
 .ob-card-next.warn{background:#FFF7ED;color:#92500A;border:1px solid #FDE68A}
 .ob-card-next.over{background:#FEF2F2;color:#991B1B;border:1px solid #FECACA}
@@ -1002,6 +1003,35 @@ tr:hover .ob-del{opacity:1}
 .ob-card[data-sc="ob-s9"]{border-left-color:#FECACA}
 .ob-card[data-sc="ob-sP"]{border-left-color:#86EFAC}
 .ob-card[data-sc="ob-sF"]{border-left-color:#E5E7EB;opacity:.7}
+/* ── 直近案件セクションヘッダー ── */
+.ob-act-section{padding:16px 0 8px}
+.ob-act-section-hd{display:flex;align-items:center;gap:10px;padding:0 20px 10px;border-bottom:1px solid #EDEAE4;margin-bottom:14px}
+.ob-act-section-lbl{font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 12px;border-radius:20px}
+.ob-act-section-lbl.red{background:#FEF2F2;color:#991B1B}
+.ob-act-section-lbl.orange{background:#FFF7ED;color:#92500A}
+.ob-act-section-lbl.green{background:#F0FDF4;color:#166534}
+.ob-act-section-lbl.gray{background:#F3F4F6;color:#6B7280}
+.ob-act-section-cnt{font-size:.72rem;color:#BBB;margin-left:auto}
+.ob-act-wrap{padding:0 20px 6px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+/* ミニタイムライン */
+.ob-card-timeline{display:flex;align-items:center;gap:0;padding:0 16px 12px;overflow-x:auto;min-height:36px}
+.ob-tl-line{flex:1;height:2px;background:#E8E4DE;min-width:8px}
+.ob-tl-dot{flex-shrink:0;width:10px;height:10px;border-radius:50%;background:#9A8C76;border:2px solid #fff;box-shadow:0 0 0 1px #9A8C76;cursor:pointer;position:relative}
+.ob-tl-dot.first{background:#4B9EFF;box-shadow:0 0 0 1px #4B9EFF}
+.ob-tl-dot.pgoal{background:#5E9E5E;width:12px;height:12px;box-shadow:0 0 0 2px #5E9E5E}
+.ob-tl-dot.next{background:#F59E0B;box-shadow:0 0 0 2px #F59E0B;animation:ob-tl-pulse 1.5s infinite}
+.ob-tl-dot.over{background:#EF4444;box-shadow:0 0 0 2px #EF4444;animation:ob-tl-pulse 1s infinite}
+@keyframes ob-tl-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ob-tl-label{font-size:.58rem;color:#AAA;white-space:nowrap;position:absolute;top:14px;left:50%;transform:translateX(-50%)}
+/* カードアクションフッター */
+.ob-card-foot{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid #F0EDE8;background:#FAFAF9}
+.ob-card-foot-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer;border:1px solid transparent;transition:all .14s;white-space:nowrap}
+.ob-card-foot-btn.primary{background:#2B2B2B;color:#fff;border-color:#2B2B2B}
+.ob-card-foot-btn.primary:hover{background:#444}
+.ob-card-foot-btn.ghost{background:#fff;color:#666;border-color:#DDD}
+.ob-card-foot-btn.ghost:hover{border-color:#9A8C76;color:#2B2B2B}
+.ob-card-foot-btn.tel{background:#EBF4FF;color:#1E40AF;border-color:#BFDBFE}
+.ob-card-foot-btn.tel:hover{background:#1E40AF;color:#fff}
 
 /* ─── 着工管理 フェーズサマリーバー ─── */
 .kj-phase-bar{background:#fff;border-bottom:1px solid #E8E4DE;padding:10px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -5487,90 +5517,129 @@ function obRenderActive(){
 
   var rows=obRows.filter(function(r){
     if(hideInactive && INACTIVE.indexOf(r['商談ステータス'])>=0) return false;
-    if(fStaff && r['担当者']!==fStaff) return false;
+    if(fStaff && r['担当者']!==fStaff && r['サブ担当']!==fStaff) return false;
     if(fCls && (r['顧客分類']||'')!==fCls) return false;
     return true;
-  }).slice().sort(function(a,b){
-    // 最終接触日（最新履歴 or 来場日）で降順ソート → アクティブな案件が上に来る
-    var ha=obDedupHistory(a.history||[]), hb=obDedupHistory(b.history||[]);
-    var da=ha.length?obNormDate(ha[ha.length-1].date||''):'';
-    var db=hb.length?obNormDate(hb[hb.length-1].date||''):'';
-    da=da||obNormDate(a['来場日']||'')||'0000-00-00';
-    db=db||obNormDate(b['来場日']||'')||'0000-00-00';
-    return db>da?1:db<da?-1:(b._row-a._row);
   });
+
   var cntEl=document.getElementById('ob-active-count'); if(cntEl) cntEl.textContent=rows.length+'件';
   if(!rows.length){ el.innerHTML='<div class="ob-empty-state">該当する案件がありません</div>'; return; }
 
-  var html='<div class="ob-card-grid">';
+  // 緊急度分類
+  var grpOver=[],grpSoon=[],grpOk=[],grpNoNext=[];
   rows.forEach(function(r){
+    var nextRaw=r['次回予定']?obNormDate(r['次回予定']):'';
+    if(nextRaw && nextRaw.length>=10){
+      var nd=new Date(nextRaw+'T00:00:00');
+      var diff=Math.floor((nd-today)/(1000*60*60*24));
+      if(diff<0)       grpOver.push(r);
+      else if(diff<=7) grpSoon.push(r);
+      else             grpOk.push(r);
+    } else {
+      grpNoNext.push(r);
+    }
+  });
+  // 各グループ内は問い合わせ日降順
+  function sortDesc(arr){ return arr.slice().sort(function(a,b){ var da=obNormDate(a['問い合わせ日']||a['来場日']||''),db=obNormDate(b['問い合わせ日']||b['来場日']||''); return db>da?1:db<da?-1:0; }); }
+  grpOver=sortDesc(grpOver); grpSoon=sortDesc(grpSoon); grpOk=sortDesc(grpOk); grpNoNext=sortDesc(grpNoNext);
+
+  function buildCard(r){
     var rawStatus=r['商談ステータス']||'問い合わせ';
     var dispStatus=obNormStatus(rawStatus);
     var sc=OB_STATUS_CLASS[rawStatus]||OB_STATUS_CLASS[dispStatus]||'ob-s0';
-
-    // 担当者
     var mainStaff=obSanitizeVal(r['担当者']);
     var subStaff=obSanitizeVal(r['サブ担当']);
     var staffLbl=mainStaff||(subStaff?'':'—');
     if(subStaff) staffLbl+=(mainStaff?' / ':'')+subStaff;
-
-    // 次回予定日 色分け
     var nextRaw=r['次回予定']?obNormDate(r['次回予定']):'';
     var nextLbl=''; var nextCls='none';
     if(nextRaw && nextRaw.length>=10){
       var nd=new Date(nextRaw+'T00:00:00');
       var diff=Math.floor((nd-today)/(1000*60*60*24));
-      nextLbl='📅 '+obFmtDate(nextRaw)+(r['次回内容']?' <small>'+esc(r['次回内容'])+'</small>':'');
+      var diffLbl=diff<0?('⚠ '+Math.abs(diff)+'日超過'):diff===0?'本日':diff+'日後';
+      nextLbl='📅 '+obFmtDate(nextRaw)+' <small>('+diffLbl+')</small>'+(r['次回内容']?' — '+esc(r['次回内容']):'');
       if(diff<0) nextCls='over';
       else if(diff<=3) nextCls='warn';
       else nextCls='ok';
     } else if(r['次回内容']){
-      nextLbl='📅 '+esc(r['次回内容']); nextCls='none';
+      nextLbl='📅 次回内容: '+esc(r['次回内容']); nextCls='none';
     }
-
-    // ハードル・フレーミングピル
-    var pills='';
-    OB_HURDLES.forEach(function(h){
-      var on=(r[h.key]==='1'||r[h.key]==='TRUE'||r[h.key]===true||r[h.key]===1);
-      pills+='<span class="ob-pill'+(on?' on':'')+'" onclick="obTogglePill(this,\''+h.key+'\','+r._row+')" title="'+esc(h.label)+'">'+h.icon+' '+esc(h.label)+'</span>';
-    });
-    OB_FRAMINGS.forEach(function(f){
-      var on=(r[f.key]==='1'||r[f.key]==='TRUE'||r[f.key]===true||r[f.key]===1);
-      pills+='<span class="ob-pill'+(on?' on':'')+'" onclick="obTogglePill(this,\''+f.key+'\','+r._row+')" title="'+esc(f.label)+'">'+f.icon+' '+esc(f.label)+'</span>';
-    });
-
-    var pGoal=r['P申込目標日']?obFmtDate(obNormDate(r['P申込目標日'])):'';
-
-    // 最終接触日（重複除去後の最新履歴）と連絡先
     var hist=obDedupHistory(r.history||[]);
     var lastH=hist.length?hist[hist.length-1]:null;
-    var lastLbl=lastH?('🕐 最終 '+obFmtDate(obNormDate(lastH.date))+(lastH.type?'・'+esc(lastH.type):'')):'';
+    var lastLbl=lastH?('🕐 最終接触: '+obFmtDate(obNormDate(lastH.date||''))+(lastH.type?'・'+esc(lastH.type):'')):'';
     var k=r.karte||{};
     var tel=obSanitizeVal(k['電話番号']||'');
-
+    var pGoalRaw=r['P申込目標日']?obNormDate(r['P申込目標日']):'';
     var clsBadge=obClsBadge(r['顧客分類']||'');
-    html+='<div class="ob-card" data-sc="'+sc+'">'+
-      '<div class="ob-card-top">'+
-        '<span class="ob-card-name" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span>'+
-        '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0">'+
-          (clsBadge?clsBadge:'')+
-          '<span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="cursor:pointer">'+esc(dispStatus)+'</span>'+
+    var inquiryDate=obSanitizeVal(r['問い合わせ日']||r['来場日']||'');
+
+    // ミニタイムライン
+    var tlHtml='';
+    var tlPoints=[];
+    hist.forEach(function(h){ if(h.date) tlPoints.push({date:obNormDate(h.date),type:'visit',label:(h.type||'来場')}); });
+    if(pGoalRaw) tlPoints.push({date:pGoalRaw,type:'pgoal',label:'P申込目標'});
+    if(nextRaw) tlPoints.push({date:nextRaw,type:nextCls==='over'?'over':'next',label:'次回予定'});
+    tlPoints.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+    if(tlPoints.length){
+      tlHtml='<div class="ob-card-timeline">';
+      tlPoints.forEach(function(pt,i){
+        if(i>0) tlHtml+='<div class="ob-tl-line"></div>';
+        var cls=i===0?'first':pt.type==='pgoal'?'pgoal':pt.type==='next'||pt.type==='over'?pt.type:'';
+        tlHtml+='<div class="ob-tl-dot '+cls+'" title="'+esc(pt.label+': '+obFmtDate(pt.date))+'"><span class="ob-tl-label">'+esc(pt.label)+'</span></div>';
+      });
+      tlHtml+='</div>';
+    }
+
+    return '<div class="ob-card" data-sc="'+sc+'">'+
+      '<div class="ob-card-body">'+
+        '<div class="ob-card-top">'+
+          '<div style="flex:1;min-width:0">'+
+            '<span class="ob-card-name" onclick="obOpenDetail('+r._row+')">'+esc(r['顧客名']||'—')+'</span>'+
+            (inquiryDate?'<div style="font-size:.68rem;color:#BBB;margin-top:1px">'+obFmtDate(obNormDate(inquiryDate))+' 受付</div>':'')+
+          '</div>'+
+          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">'+
+            (clsBadge?clsBadge:'')+
+            '<span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="cursor:pointer;font-size:.68rem">'+esc(dispStatus)+'</span>'+
+          '</div>'+
         '</div>'+
+        '<div class="ob-card-meta">'+
+          '<span class="ob-card-staff">👤 '+esc(staffLbl)+'</span>'+
+          (obSanitizeVal(r['エリア'])?'<span>📍 '+esc(r['エリア'])+'</span>':'')+
+          (obSanitizeVal(r['反響元'])?'<span style="color:#B8A88A">'+esc(r['反響元'])+'</span>':'')+
+        '</div>'+
+        (lastLbl?'<div class="ob-card-last">'+lastLbl+'</div>':'')+
+        (nextLbl?'<div class="ob-card-next '+nextCls+'">'+nextLbl+'</div>':
+          '<div class="ob-card-next none" style="font-size:.72rem">📋 次回予定なし — クリックして設定</div>')+
+        (pGoalRaw?'<div><span class="ob-card-p">🎯 P申込目標: '+obFmtDate(pGoalRaw)+'</span></div>':'')+
       '</div>'+
-      '<div class="ob-card-meta">'+
-        '<span class="ob-card-staff">👤 '+esc(staffLbl)+'</span>'+
-        (obSanitizeVal(r['エリア'])?'<span>📍 '+esc(r['エリア'])+'</span>':'')+
-        (tel?'<span>📞 '+esc(tel)+'</span>':'')+
+      (tlHtml?tlHtml:'')+
+      '<div class="ob-card-foot">'+
+        (tel?'<a class="ob-card-foot-btn tel" href="tel:'+esc(tel)+'">📞 電話する</a>':'')+
+        '<button class="ob-card-foot-btn primary" onclick="obOpenDetail('+r._row+')">詳細を見る →</button>'+
+        '<button class="ob-card-foot-btn ghost" onclick="obHistPopOpen(event,'+r._row+')" style="margin-left:auto">＋ 接触記録</button>'+
       '</div>'+
-      (lastLbl?'<div class="ob-card-last">'+lastLbl+'</div>':'')+
-      (nextLbl?'<div class="ob-card-next '+nextCls+'">'+nextLbl+'</div>':'')+
-      '<div class="ob-card-pills">'+pills+'</div>'+
-      (pGoal?'<div><span class="ob-card-p">🎯 P目標: '+esc(pGoal)+'</span></div>':'')+
     '</div>';
-  });
+  }
+
+  function buildSection(title,cls,arr){
+    if(!arr.length) return '';
+    return '<div class="ob-act-section">'+
+      '<div class="ob-act-section-hd">'+
+        '<span class="ob-act-section-lbl '+cls+'">'+title+'</span>'+
+        '<span class="ob-act-section-cnt">'+arr.length+'件</span>'+
+      '</div>'+
+      '<div class="ob-act-wrap">'+arr.map(buildCard).join('')+'</div>'+
+    '</div>';
+  }
+
+  var html='<div style="padding:4px 0">';
+  html+=buildSection('⚠ 期限切れ・要対応','red',grpOver);
+  html+=buildSection('📅 今週の予定','orange',grpSoon);
+  html+=buildSection('✅ 予定あり','green',grpOk);
+  html+=buildSection('📋 次回予定なし','gray',grpNoNext);
   html+='</div>';
   el.innerHTML=html;
-  // カレンダーが開いていれば更新
+
   var calWrap=document.getElementById('ob-cal-wrap');
   if(calWrap && calWrap.style.display!=='none') obRenderCal();
 }
