@@ -2135,15 +2135,11 @@ tr:hover .ob-del{opacity:1}
 <!-- 次回予定ポップオーバー -->
 <div id="ob-next-pop">
   <div class="ob-hist-pop-title">🗓 次回予定 <span id="ob-next-pop-name" style="font-weight:400;font-size:.82rem;color:#888"></span></div>
-  <div class="ob-hist-pop-row" style="margin-bottom:8px">
-    <label style="font-size:.72rem;color:#9A8C76;font-weight:700;display:block;margin-bottom:4px">日付</label>
-    <input type="date" id="ob-next-pop-date" style="width:100%;border:1px solid #DDD;border-radius:6px;padding:8px 10px;font-size:.88rem;font-family:inherit;background:#FAFAFA;box-sizing:border-box">
+  <div class="ob-hist-pop-row">
+    <input type="date" id="ob-next-pop-date">
+    <input type="text" class="pop-content" id="ob-next-pop-content" placeholder="内容（任意）" onkeydown="if(event.key==='Enter')obNextPopSave()">
   </div>
-  <div class="ob-hist-pop-row" style="margin-bottom:4px">
-    <label style="font-size:.72rem;color:#9A8C76;font-weight:700;display:block;margin-bottom:4px">内容</label>
-    <input type="text" id="ob-next-pop-content" placeholder="例）FP相談・現地見学・打ち合わせ..." style="width:100%;border:1px solid #DDD;border-radius:6px;padding:8px 10px;font-size:.86rem;font-family:inherit;background:#FAFAFA;box-sizing:border-box" onkeydown="if(event.key==='Enter')obNextPopSave()">
-  </div>
-  <div class="ob-hist-pop-btns" style="margin-top:10px">
+  <div class="ob-hist-pop-btns">
     <button class="ob-hist-pop-cancel" onclick="obNextPopClear()">クリア</button>
     <button class="ob-hist-pop-cancel" onclick="obNextPopClose()">閉じる</button>
     <button class="ob-hist-pop-save" onclick="obNextPopSave()">保存</button>
