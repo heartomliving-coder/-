@@ -3035,50 +3035,67 @@ function handleCredentialResponse(response) {
     if(payload.email) localStorage.setItem('admin_session_email', payload.email);
   } catch(e){ console.warn('[Login] JWT decode error:', e); }
   console.log('[Login] Googleトークン取得。GASで検証中...');
-  lerr.textContent = '認証中... （数秒かかります）';
-  var url = SEND_URL_DEFAULT + '?action=googleLogin&credential=' + encodeURIComponent(response.credential);
-  var controller = window.AbortController ? new AbortController() : null;
-  var tid = setTimeout(function() { if (controller) controller.abort(); }, 25000);
-  fetch(url, {
-    method: 'GET',
-    credentials: 'omit',
-    redirect: 'follow',
-    signal: controller ? controller.signal : undefined
-  })
-    .then(function(r) {
-      console.log('[Login] GAS応答:', r.status, r.url);
-      if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + r.statusText);
-      return r.json();
+  lerr.style.color = '';
+  lerr.textContent = '認証中... サーバー起動に最大50秒かかる場合があります';
+  var __loginCredential = response.credential;
+  var __loginAttempt = 0;
+  window.__loginRetry = null;
+  window.__loginRetry = function doLoginFetch() {
+    __loginAttempt++;
+    var url = SEND_URL_DEFAULT + '?action=googleLogin&credential=' + encodeURIComponent(__loginCredential) + '&_=' + Date.now();
+    var controller = window.AbortController ? new AbortController() : null;
+    var tid = setTimeout(function() { if (controller) controller.abort(); }, 50000);
+    fetch(url, {
+      method: 'GET',
+      credentials: 'omit',
+      redirect: 'follow',
+      signal: controller ? controller.signal : undefined
     })
-    .then(function(d) {
-      clearTimeout(tid);
-      console.log('[Login] GASレスポンス:', JSON.stringify(d).slice(0, 200));
-      if (d && d.token) {
-        localStorage.setItem('admin_session_token', d.token);
-        localStorage.setItem('admin_session_ts', String(Date.now()));
-        if (d.email) localStorage.setItem('admin_session_email', d.email);
-        lerr.textContent = '';
-        console.log('[Login] ✅ ログイン成功: ' + d.email);
-        showApp();
-      } else if (d && d.error) {
-        lerr.textContent = '❌ ' + d.error;
-        console.error('[Login] GASエラー:', d.error);
-      } else {
-        lerr.textContent = 'ログインに失敗しました。管理者として登録されているか確認してください。';
-        console.error('[Login] 不明なレスポンス:', d);
-      }
-    })
-    .catch(function(e) {
-      clearTimeout(tid);
-      var msg = e && e.message ? e.message : String(e);
-      if (msg.indexOf('abort') >= 0 || msg.indexOf('Abort') >= 0) {
-        msg = 'タイムアウト（25秒）。GASサーバーが応答しませんでした。ページを再読込してお試しください。';
-      } else if (msg.indexOf('Failed to fetch') >= 0 || msg.indexOf('NetworkError') >= 0) {
-        msg = 'ネットワークエラー。インターネット接続を確認してください。';
-      }
-      lerr.textContent = '❌ ' + msg;
-      console.error('[Login] GAS fetch error:', e);
-    });
+      .then(function(r) {
+        console.log('[Login] GAS応答:', r.status, r.url);
+        if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + r.statusText);
+        return r.json();
+      })
+      .then(function(d) {
+        clearTimeout(tid);
+        console.log('[Login] GASレスポンス:', JSON.stringify(d).slice(0, 200));
+        if (d && d.token) {
+          localStorage.setItem('admin_session_token', d.token);
+          localStorage.setItem('admin_session_ts', String(Date.now()));
+          if (d.email) localStorage.setItem('admin_session_email', d.email);
+          lerr.textContent = '';
+          console.log('[Login] ✅ ログイン成功: ' + d.email);
+          showApp();
+        } else if (d && d.error) {
+          lerr.style.color = '#C0392B';
+          lerr.textContent = '❌ ' + d.error;
+          console.error('[Login] GASエラー:', d.error);
+        } else {
+          lerr.style.color = '#C0392B';
+          lerr.textContent = 'ログインに失敗しました。管理者として登録されているか確認してください。';
+          console.error('[Login] 不明なレスポンス:', d);
+        }
+      })
+      .catch(function(e) {
+        clearTimeout(tid);
+        var msg = e && e.message ? e.message : String(e);
+        if (msg.indexOf('abort') >= 0 || msg.indexOf('Abort') >= 0) {
+          if (__loginAttempt < 2) {
+            lerr.style.color = '#B07A00';
+            lerr.textContent = '⏳ サーバー起動中です。自動で再試行しています...';
+            setTimeout(window.__loginRetry, 2000);
+            return;
+          }
+          msg = 'サーバーが応答しませんでした。ページを再読込してもう一度お試しください。';
+        } else if (msg.indexOf('Failed to fetch') >= 0 || msg.indexOf('NetworkError') >= 0) {
+          msg = 'ネットワークエラー。インターネット接続を確認してください。';
+        }
+        lerr.style.color = '#C0392B';
+        lerr.innerHTML = '❌ ' + msg + '<br><button onclick="window.__loginRetry&&window.__loginRetry()" style="margin-top:8px;background:#444;color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:.8rem">🔄 再試行</button>';
+        console.error('[Login] GAS fetch error:', e);
+      });
+  };
+  window.__loginRetry();
 }
 
 function logout(){
@@ -4303,11 +4320,15 @@ function sbDirectRead(table, cb) {
   var url = localStorage.getItem('sb_url');
   var key = localStorage.getItem('sb_key');
   if (!url || !key) { cb(null); return; }
+  var ctrl = window.AbortController ? new AbortController() : null;
+  var tid = setTimeout(function(){ if(ctrl) ctrl.abort(); }, 8000);
   fetch(url + '/rest/v1/' + table + '?select=data&order=updated_at.desc&limit=2000', {
-    headers: { 'apikey': key, 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
+    headers: { 'apikey': key, 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' },
+    signal: ctrl ? ctrl.signal : undefined
   })
   .then(function(r){ return r.json(); })
   .then(function(rows){
+    clearTimeout(tid);
     if (!Array.isArray(rows)) { cb(null); return; }
     cb(rows.map(function(r){
       var d = r.data;
@@ -4315,7 +4336,7 @@ function sbDirectRead(table, cb) {
       return d || {};
     }));
   })
-  .catch(function(){ cb(null); });
+  .catch(function(){ clearTimeout(tid); cb(null); });
 }
 
 // timeout: ms (poll系は8秒, 大量データは60秒, それ以外は45秒)
@@ -5558,7 +5579,7 @@ function obHistChips(r){
     if((item.type==='来場'||item.type==='問い合わせ')&&content&&!isGeneric){
       lbl=(shortD?shortD+' ':'')+content; // 「6/3 見学会」
     } else {
-      lbl=(shortD?shortD+' ')+(item.type||'')+((content&&!isGeneric)?'・'+content:'');
+      lbl=(shortD?shortD+' ':'')+String(item.type||'')+((content&&!isGeneric)?'・'+content:'');
     }
     var title=(shortD?shortD+' ':'')+(item.type||'')+(content?'：'+content:'')+(item.staff?'（'+item.staff+'）':'');
     return '<span class="ob-hist-chip'+(i===last?' new':'')+'" title="'+esc(title)+'">'+esc(lbl)+'</span>';
@@ -6432,7 +6453,6 @@ function obRenderDetTimeline(){
   if(!mtgRows||!mtgRows.length){
     tlEl.innerHTML='<div style="color:#AAA;font-size:.8rem;padding:8px">⏳ 面談データ読み込み中...</div>';
     mtgLoad(true,false);
-    setTimeout(function(){ tlEl.innerHTML=buildCustomerTimeline(obRows[obDetailRow]); },3000);
     return;
   }
   tlEl.innerHTML=buildCustomerTimeline(r);
@@ -8396,6 +8416,9 @@ function mtgLoad(silent, force){
     if(tmplEl && d.cwTemplate) tmplEl.value = d.cwTemplate;
     // ハブが表示中なら活動ログも更新
     if(document.getElementById('hub').classList.contains('show')) hubBuildActivityFeed();
+    // OB詳細タイムラインがローディング中なら再描画
+    var tlEl=document.getElementById('ob-cust-timeline');
+    if(tlEl && tlEl.textContent.indexOf('面談データ読み込み中')>=0) obRenderDetTimeline();
   });
 }
 
