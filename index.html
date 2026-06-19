@@ -2114,7 +2114,7 @@ tr:hover .ob-del{opacity:1}
 <div id="ob-hist-pop">
   <div class="ob-hist-pop-title">📅 来場履歴 <span id="ob-hist-pop-name" style="font-weight:400;font-size:.82rem;color:#888"></span></div>
   <div class="ob-hist-pop-list" id="ob-hist-pop-list"></div>
-  <div style="font-size:.74rem;color:#9A8C76;font-weight:600;margin-bottom:6px">＋ 履歴を追加</div>
+  <div id="ob-hist-pop-section-title" style="font-size:.74rem;color:#9A8C76;font-weight:600;margin-bottom:6px">＋ 履歴を追加</div>
   <div class="ob-hist-pop-row">
     <input type="date" id="ob-hist-pop-date">
     <select id="ob-hist-pop-type">
@@ -5538,8 +5538,7 @@ function obRenderVisitors(){
     '<th style="min-width:64px">サブ担当</th>'+
     '<th style="min-width:62px">エリア</th>'+
     '<th style="min-width:200px">来場履歴</th>'+
-    '<th style="min-width:92px">次回予定日</th>'+
-    '<th style="min-width:90px">次回内容</th>'+
+    '<th style="min-width:140px" colspan="2">次回予定日 / 内容</th>'+
     '<th style="width:40px"></th>'+
     '</tr></thead><tbody>';
 
@@ -5635,13 +5634,12 @@ function obRenderVisitors(){
         '<td class="ob-td-hist" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()" title="クリックして来場履歴を追加・編集">'+
           '<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div>'+
         '</td>'+
-        '<td onclick="event.stopPropagation()" class="ob-td-next">'+
+        '<td onclick="event.stopPropagation()" class="ob-td-next" colspan="2">'+
           '<div class="'+(nextCls!=='none'?'ob-card-next '+nextCls:'')+'">'+
             obCell(r,'次回予定')+
-            (nextRaw&&r['次回内容']?'<div style="font-size:.68rem;font-weight:500;opacity:.75;margin-top:1px;white-space:nowrap">'+esc(r['次回内容'])+'</div>':'')+
+            '<span class="ob-editable" style="display:block;font-size:.72rem;color:#666;margin-top:3px;font-weight:500" data-row="'+r._row+'" data-field="次回内容" data-type="text" onclick="obStartEdit(this);event.stopPropagation()">'+(r['次回内容']?esc(r['次回内容']):'<span style="color:#CCC;font-style:italic">内容を入力...</span>')+'</span>'+
           '</div>'+
         '</td>'+
-        '<td onclick="event.stopPropagation()" style="font-size:.76rem;color:#666;min-width:88px">'+obCell(r,'次回内容')+'</td>'+
         '<td style="padding:4px 6px;text-align:center" onclick="event.stopPropagation()">'+
           '<button class="ob-del" onclick="obConfirmDel('+r._row+')" title="削除">✕</button>'+
         '</td>'+
@@ -6103,8 +6101,12 @@ function obStartEdit(el){
   }
   if(type==='area-multi'){
     obAreaPickerOpen(el,val,function(newVal){
-      el.innerHTML=newVal?newVal.split(',').filter(Boolean).map(function(m){return '<span class="ob-area-tag">'+esc(m.trim())+'</span>';}).join(' '):'<span style="color:#CCC;font-size:.72rem;font-style:italic">—</span>';
+      var areaHtml=newVal?newVal.split(',').filter(Boolean).map(function(m){return '<span class="ob-area-tag">'+esc(m.trim())+'</span>';}).join(' '):'<span style="color:#CCC;font-size:.72rem;font-style:italic">—</span>';
+      el.innerHTML=areaHtml;
       obSaveField(row,field,newVal);
+      // バックグラウンド更新でelが差し替えられた場合もライブセルを更新
+      var live=document.querySelector('.ob-editable[data-row="'+row+'"][data-field="エリア"]');
+      if(live&&live!==el) live.innerHTML=areaHtml;
     });
     return;
   }
@@ -6831,10 +6833,14 @@ function obAddHistoryItem(){
 
 // ── 来場履歴インラインポップオーバー ──────────────────────────
 var _obHistPopRow = -1;
+var _obHistPopEditKey = null;
 
 function obHistPopOpen(e, rowIdx){
   e.stopPropagation();
   _obHistPopRow = rowIdx;
+  _obHistPopEditKey = null;
+  var st=document.getElementById('ob-hist-pop-section-title'); if(st) st.textContent='＋ 履歴を追加';
+  var sb=document.getElementById('ob-hist-pop-save'); if(sb) sb.textContent='追加';
   var r = obRows[rowIdx]; if(!r) return;
   var pop = document.getElementById('ob-hist-pop');
   // 名前表示
@@ -6861,12 +6867,15 @@ function obHistPopOpen(e, rowIdx){
 
 function _obHistPopOutside(e){
   var pop = document.getElementById('ob-hist-pop');
-  if(pop && !pop.contains(e.target)){ pop.classList.remove('show'); _obHistPopRow=-1; }
+  if(pop && !pop.contains(e.target)){ pop.classList.remove('show'); _obHistPopRow=-1; _obHistPopEditKey=null; }
 }
 
 function obHistPopClose(){
   document.getElementById('ob-hist-pop').classList.remove('show');
   _obHistPopRow = -1;
+  _obHistPopEditKey = null;
+  var st=document.getElementById('ob-hist-pop-section-title'); if(st) st.textContent='＋ 履歴を追加';
+  var sb=document.getElementById('ob-hist-pop-save'); if(sb) sb.textContent='追加';
 }
 
 function obHistPopRenderList(r){
@@ -6876,11 +6885,13 @@ function obHistPopRenderList(r){
   listEl.innerHTML = deduped.map(function(item){
     var d = item.date ? (function(){ var p=(item.date||'').substring(0,10).split('-'); return p.length===3?(parseInt(p[1])+'月'+parseInt(p[2])+'日'):''; })() : '—';
     var key = obNormDate(item.date||'')+'|'+(item.type||'');
+    var safeKey = esc(key).replace(/'/g,"\\'");
     return '<div class="ob-hist-pop-item">'+
       '<span style="color:#9A8C76;min-width:54px">'+esc(d)+'</span>'+
       '<span style="background:#E8E4DC;border-radius:10px;padding:1px 8px;font-size:.7rem;font-weight:600">'+esc(item.type||'')+'</span>'+
       (function(){var c=item.content||'';var isG=OB_GENERIC_HIST.indexOf(c.toLowerCase())>=0||c===item.type;return c&&!isG?'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666">'+esc(c)+'</span>':'<span style="flex:1"></span>';})()+
-      '<button class="ob-tl-del" onclick="obHistPopDel(\''+esc(key).replace(/'/g,"\\'")+'\')" title="削除">✕</button>'+
+      '<button class="ob-tl-del" onclick="obHistPopEdit(\''+safeKey+'\')" title="編集" style="color:#9A8C76">✏️</button>'+
+      '<button class="ob-tl-del" onclick="obHistPopDel(\''+safeKey+'\')" title="削除">✕</button>'+
     '</div>';
   }).join('');
 }
@@ -6894,19 +6905,55 @@ function obHistPopSave(){
   var staff = (document.getElementById('ob-hist-pop-staff')||{}).value || '';
   if(!date){ var t=new Date(); date=t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2); }
   if(!r.history) r.history = [];
+  if(_obHistPopEditKey){
+    // 編集モード：古いアイテムを削除して新しいアイテムで置換
+    var kparts=_obHistPopEditKey.split('|'); var kdate=kparts[0]; var ktype=kparts.slice(1).join('|');
+    var editIdx=-1;
+    for(var i=0;i<r.history.length;i++){
+      if(obNormDate(r.history[i].date||'')===kdate&&(r.history[i].type||'')===ktype){editIdx=i;break;}
+    }
+    if(editIdx>=0){
+      r.history.splice(editIdx,1);
+      post({action:'obDeleteHistory',id:r.id,row:rowIdx,histIndex:editIdx});
+    }
+    _obHistPopEditKey=null;
+    var st=document.getElementById('ob-hist-pop-section-title'); if(st) st.textContent='＋ 履歴を追加';
+    var sb=document.getElementById('ob-hist-pop-save'); if(sb) sb.textContent='追加';
+    toast('履歴を更新しました');
+  } else {
+    toast('履歴を追加しました');
+  }
   r.history.push({date:date,type:type,content:content,staff:staff});
   r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
   obSetCache(obRows);
   obHistPopRenderList(r);
-  // テーブルの履歴チップを即時更新
   var tds = document.querySelectorAll('tr[data-row="'+rowIdx+'"] td');
   tds.forEach(function(td){ if(td.querySelector('.ob-hist-chips')){
     td.innerHTML='<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+rowIdx+');event.stopPropagation()">＋</button></div>';
   }});
-  var _hprid=obRows[rowIdx]?obRows[rowIdx].id:'';
-  post({action:'obAddHistory',id:_hprid,row:rowIdx,date:date,type:type,content:content,staff:staff});
+  post({action:'obAddHistory',id:r.id,row:rowIdx,date:date,type:type,content:content,staff:staff});
   document.getElementById('ob-hist-pop-content').value='';
-  toast('履歴を追加しました');
+}
+
+function obHistPopEdit(key){
+  var rowIdx=_obHistPopRow; if(rowIdx<0) return;
+  var r=obRows[rowIdx]; if(!r||!r.history) return;
+  var kparts=key.split('|'); var kdate=kparts[0]; var ktype=kparts.slice(1).join('|');
+  var item=null;
+  for(var i=0;i<r.history.length;i++){
+    var h=r.history[i];
+    if(obNormDate(h.date||'')===kdate&&(h.type||'')===ktype){item=h;break;}
+  }
+  if(!item) return;
+  _obHistPopEditKey=key;
+  document.getElementById('ob-hist-pop-date').value=kdate;
+  document.getElementById('ob-hist-pop-type').value=item.type||'来場';
+  document.getElementById('ob-hist-pop-content').value=item.content||'';
+  var staffEl=document.getElementById('ob-hist-pop-staff');
+  if(staffEl) staffEl.value=item.staff||'';
+  var st=document.getElementById('ob-hist-pop-section-title'); if(st) st.textContent='✏️ 履歴を編集';
+  var sb=document.getElementById('ob-hist-pop-save'); if(sb) sb.textContent='更新';
+  document.getElementById('ob-hist-pop-content').focus();
 }
 
 function obHistPopDel(key){
