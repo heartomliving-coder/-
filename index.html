@@ -2134,9 +2134,14 @@ tr:hover .ob-del{opacity:1}
 
 <!-- 次回予定ポップオーバー -->
 <div id="ob-next-pop">
-  <div class="ob-hist-pop-title">🗓 次回予定日 <span id="ob-next-pop-name" style="font-weight:400;font-size:.82rem;color:#888"></span></div>
+  <div class="ob-hist-pop-title">🗓 次回予定 <span id="ob-next-pop-name" style="font-weight:400;font-size:.82rem;color:#888"></span></div>
   <div class="ob-hist-pop-row">
     <input type="date" id="ob-next-pop-date" onkeydown="if(event.key==='Enter')obNextPopSave()">
+    <select id="ob-next-pop-type">
+      <option>来場</option><option>FP相談</option><option>現地見学</option>
+      <option>打ち合わせ</option><option>面談</option><option>プレゼン</option>
+      <option>電話</option><option>その他</option>
+    </select>
   </div>
   <div class="ob-hist-pop-btns">
     <button class="ob-hist-pop-cancel" onclick="obNextPopClear()">クリア</button>
@@ -5649,9 +5654,11 @@ function obRenderVisitors(){
         '<td class="ob-td-hist" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()" title="クリックして来場履歴を追加・編集">'+
           '<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div>'+
         '</td>'+
-        '<td onclick="obNextPopOpen(event,'+r._row+');event.stopPropagation()" class="ob-td-next" style="cursor:pointer" title="クリックして次回予定日を設定">'+
+        '<td onclick="obNextPopOpen(event,'+r._row+');event.stopPropagation()" class="ob-td-next" style="cursor:pointer" title="クリックして次回予定を設定">'+
           '<div class="'+(nextCls!=='none'?'ob-card-next '+nextCls:'')+'">'+
-            (nextRaw?'<span style="color:#166534;font-weight:700">'+nextAlarm+obFmtDate(nextRaw)+'</span>':'<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>')+
+            (nextRaw?(r['次回種別']?'<span class="ob-hist-chip" style="font-size:.68rem;padding:2px 7px;margin-right:4px">'+esc(r['次回種別'])+'</span>':'')+
+              '<span style="color:#166534;font-weight:700">'+nextAlarm+obFmtDate(nextRaw)+'</span>':
+              '<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>')+
           '</div>'+
         '</td>'+
         '<td onclick="event.stopPropagation()" style="padding:4px 8px">'+
@@ -5769,7 +5776,8 @@ function obRenderActive(){
       var nd=new Date(nextRaw+'T00:00:00');
       var diff=Math.floor((nd-today)/(1000*60*60*24));
       var diffLbl=diff<0?('⚠ '+Math.abs(diff)+'日超過'):diff===0?'本日':diff+'日後';
-      nextLbl='📅 '+obFmtDate(nextRaw)+' <small>('+diffLbl+')</small>'+(r['次回内容']?' — '+esc(r['次回内容']):'');
+      nextLbl=(r['次回種別']?'<span class="ob-hist-chip" style="font-size:.65rem;padding:1px 6px;margin-right:4px;vertical-align:middle">'+esc(r['次回種別'])+'</span>':'')+
+        '📅 '+obFmtDate(nextRaw)+' <small>('+diffLbl+')</small>'+(r['次回内容']?' — '+esc(r['次回内容']):'');
       if(diff<0) nextCls='over';
       else if(diff<=3) nextCls='warn';
       else nextCls='ok';
@@ -6991,6 +6999,7 @@ function obNextPopOpen(e, rowIdx){
   var pop = document.getElementById('ob-next-pop');
   document.getElementById('ob-next-pop-name').textContent = r['顧客名']||'';
   document.getElementById('ob-next-pop-date').value = obNormDate(r['次回予定']||'')||'';
+  var typeEl=document.getElementById('ob-next-pop-type'); if(typeEl) typeEl.value=r['次回種別']||'来場';
   var rect = e.currentTarget ? e.currentTarget.getBoundingClientRect() : {left:e.clientX,bottom:e.clientY,top:e.clientY};
   pop.style.left = Math.min(rect.left, window.innerWidth-300)+'px';
   var top = rect.bottom+6; if(top+230>window.innerHeight) top=Math.max(8,rect.top-230);
@@ -7011,7 +7020,9 @@ function obNextPopSave(){
   var rowIdx=_obNextPopRow; if(rowIdx<0) return;
   var r=obRows[rowIdx]; if(!r) return;
   var date=(document.getElementById('ob-next-pop-date').value||'');
+  var type=((document.getElementById('ob-next-pop-type')||{}).value||'来場');
   obSaveField(rowIdx,'次回予定',date);
+  obSaveField(rowIdx,'次回種別',type);
   _obNextPopUpdateCell(rowIdx);
   obNextPopClose();
   toast('次回予定を保存しました');
@@ -7020,6 +7031,7 @@ function obNextPopClear(){
   var rowIdx=_obNextPopRow; if(rowIdx<0) return;
   var r=obRows[rowIdx]; if(!r) return;
   obSaveField(rowIdx,'次回予定','');
+  obSaveField(rowIdx,'次回種別','');
   _obNextPopUpdateCell(rowIdx);
   obNextPopClose();
   toast('次回予定をクリアしました');
@@ -7034,13 +7046,14 @@ function _obNextPopUpdateCell(rowIdx){
     nextCls=diff<0?'over':diff<=3?'warn':'ok';
   }
   var alarm=nextCls==='over'?'⚠ ':nextCls==='warn'?'🔔 ':'';
-  var dateDisp=nextRaw?'<span style="color:#166534;font-weight:700">'+alarm+obFmtDate(nextRaw)+'</span>':'<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>';
+  var typeTag=r['次回種別']?'<span class="ob-hist-chip" style="font-size:.68rem;padding:2px 7px;margin-right:4px">'+esc(r['次回種別'])+'</span>':'';
+  var dateDisp=nextRaw?typeTag+'<span style="color:#166534;font-weight:700">'+alarm+obFmtDate(nextRaw)+'</span>':'<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>';
   var tableHtml='<div class="'+(nextCls!=='none'?'ob-card-next '+nextCls:'')+'">'+dateDisp+'</div>';
   // テーブルビュー更新
   var cell=document.querySelector('tr[data-row="'+rowIdx+'"] .ob-td-next');
   if(cell) cell.innerHTML=tableHtml;
   // カードビュー更新
-  var nextLbl=nextRaw?('📅 '+obFmtDate(nextRaw)+(r['次回内容']?' — '+esc(r['次回内容']):'')):'';
+  var nextLbl=nextRaw?((r['次回種別']?'<span class="ob-hist-chip" style="font-size:.65rem;padding:1px 6px;margin-right:4px;vertical-align:middle">'+esc(r['次回種別'])+'</span>':'')+'📅 '+obFmtDate(nextRaw)+(r['次回内容']?' — '+esc(r['次回内容']):'')):'';
   var cardNext=document.querySelector('[data-row="'+rowIdx+'"] .ob-card-next');
   if(cardNext){
     if(nextLbl){cardNext.className='ob-card-next '+nextCls;cardNext.innerHTML=nextLbl;}
