@@ -785,7 +785,9 @@ tr:hover .ob-del{opacity:1}
 .ob-table tr[data-sc="ob-s8"] td:first-child{border-left-color:#D1D5DB}
 .ob-table tr[data-sc="ob-s9"] td:first-child{border-left-color:#FECACA}
 .ob-table tr[data-sc="ob-sP"] td:first-child{border-left-color:#86EFAC}
-.ob-table tr[data-sc="ob-sF"] td:first-child{border-left-color:#E5E7EB}
+.ob-table tr[data-sc="ob-sF"] td:first-child{border-left-color:#D1D5DB}
+.ob-table tr[data-sc="ob-sF"] td{background:#F4F4F4;color:#AAA}
+.ob-table tr[data-sc="ob-sF"] .ob-hist-chip{opacity:.5}
 
 /* ─── 来客状況カード表示 ─── */
 .ob-vis-toolbar{display:flex;align-items:center;gap:8px;padding:5px 14px;background:#F0EDE8;border-bottom:1px solid #E0DAD4;flex-shrink:0;flex-wrap:wrap}
@@ -5547,10 +5549,15 @@ function obHistChips(r){
   var chips=h.map(function(item,i){
     var d=item.date?obNormDate(item.date):'';
     var shortD=d?(function(){var p=d.match(/^(\d{4})-(\d{2})-(\d{2})/);return p?parseInt(p[2])+'月'+parseInt(p[3])+'日':'';}()):'';
-    // 内容（反響元・見学会名など）も表示。汎用ラベルは種別と重複するため省略
     var content=String(item.content||'').trim();
     var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0||OB_SOURCES.indexOf(content)>=0;
-    var lbl=(shortD?shortD+' ':'')+(item.type||'')+((content&&!isGeneric)?'・'+content:'');
+    // 来場typeで具体的な種別がある場合は種別名を前面に出す（「見学会」「無料相談会」など）
+    var lbl;
+    if((item.type==='来場'||item.type==='問い合わせ')&&content&&!isGeneric){
+      lbl=(shortD?shortD+' ':'')+content; // 「6/3 見学会」
+    } else {
+      lbl=(shortD?shortD+' ')+(item.type||'')+((content&&!isGeneric)?'・'+content:'');
+    }
     var title=(shortD?shortD+' ':'')+(item.type||'')+(content?'：'+content:'')+(item.staff?'（'+item.staff+'）':'');
     return '<span class="ob-hist-chip'+(i===last?' new':'')+'" title="'+esc(title)+'">'+esc(lbl)+'</span>';
   });
@@ -6412,6 +6419,20 @@ function obDetTab(tab){
   document.querySelectorAll('.ob-det-pane').forEach(function(p){p.classList.toggle('show',p.getAttribute('data-dtab')===tab);});
   if(tab==='birthday') obRenderDetBirthday();
   if(tab==='drive') obRenderDetDrive();
+  if(tab==='timeline') obRenderDetTimeline();
+}
+
+function obRenderDetTimeline(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  var tlEl=document.getElementById('ob-cust-timeline'); if(!tlEl) return;
+  // MTGデータ未ロードなら先に取得してから再描画
+  if(!mtgRows||!mtgRows.length){
+    tlEl.innerHTML='<div style="color:#AAA;font-size:.8rem;padding:8px">⏳ 面談データ読み込み中...</div>';
+    mtgLoad(true,false);
+    setTimeout(function(){ tlEl.innerHTML=buildCustomerTimeline(obRows[obDetailRow]); },3000);
+    return;
+  }
+  tlEl.innerHTML=buildCustomerTimeline(r);
 }
 
 // 個人詳細の誕生日タブ
@@ -6514,7 +6535,8 @@ function obRenderDetInfo(){
     {key:'karte.メールアドレス',label:'メールアドレス',type:'text'},
     {key:'karte.住所',label:'住所',type:'text',full:true},
     {sec:'案件情報'},
-    {key:'来場日',label:'受付日',type:'date'},
+    {key:'問い合わせ日',label:'問い合わせ日',type:'date'},
+    {key:'来場日',label:'初回来場日',type:'date'},
     {key:'来場種別',label:'来場種別',type:'sel',opts:OB_EVENT_TYPES},
     {key:'エリア',label:'エリア',type:'text'},
     {key:'反響元',label:'反響元',type:'sel',opts:OB_SOURCES},
@@ -6666,7 +6688,7 @@ function obHistPopRenderList(r){
     return '<div class="ob-hist-pop-item">'+
       '<span style="color:#9A8C76;min-width:54px">'+esc(d)+'</span>'+
       '<span style="background:#E8E4DC;border-radius:10px;padding:1px 8px;font-size:.7rem;font-weight:600">'+esc(item.type||'')+'</span>'+
-      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(item.content||'')+'</span>'+
+      (function(){var c=item.content||'';var isG=OB_GENERIC_HIST.indexOf(c.toLowerCase())>=0||c===item.type;return c&&!isG?'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666">'+esc(c)+'</span>':'<span style="flex:1"></span>';})()+'
       '<button class="ob-tl-del" onclick="obHistPopDel(\''+esc(key).replace(/'/g,"\\'")+'\')" title="削除">✕</button>'+
     '</div>';
   }).join('');
