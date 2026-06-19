@@ -5332,6 +5332,7 @@ function obRenderVisitors(){
         var rawStatus=r['商談ステータス']||'問い合わせ';
         var dispStatus=obNormStatus(rawStatus);
         var sc=OB_STATUS_CLASS[rawStatus]||OB_STATUS_CLASS[dispStatus]||'ob-s0';
+        if(sc!=='ob-sF'&&(r.history||[]).some(function(h){return /他決/.test(h.content||'');})) sc='ob-sF';
         var k=r.karte||{};
         var kana=obSanitizeVal(k['フリガナ']||'');
         var tel=obSanitizeVal(k['電話番号']||'');
@@ -5468,6 +5469,7 @@ function obRenderVisitors(){
       var rawStatus=r['商談ステータス']||'問い合わせ';
       var dispStatus=obNormStatus(rawStatus);
       var sc=OB_STATUS_CLASS[rawStatus]||OB_STATUS_CLASS[dispStatus]||'ob-s0';
+      if(sc!=='ob-sF'&&(r.history||[]).some(function(h){return /他決/.test(h.content||'');})) sc='ob-sF';
       var nextRaw=r['次回予定']?obNormDate(r['次回予定']):'';
       var nextCls='none'; var nextAlarm='';
       if(nextRaw&&nextRaw.length>=10){
@@ -5608,6 +5610,7 @@ function obRenderActive(){
     var rawStatus=r['商談ステータス']||'問い合わせ';
     var dispStatus=obNormStatus(rawStatus);
     var sc=OB_STATUS_CLASS[rawStatus]||OB_STATUS_CLASS[dispStatus]||'ob-s0';
+    if(sc!=='ob-sF'&&(r.history||[]).some(function(h){return /他決/.test(h.content||'');})) sc='ob-sF';
     var mainStaff=obSanitizeVal(r['担当者']);
     var subStaff=obSanitizeVal(r['サブ担当']);
     var staffLbl=mainStaff||(subStaff?'':'—');
