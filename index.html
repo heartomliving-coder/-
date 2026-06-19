@@ -1761,9 +1761,6 @@ tr:hover .ob-del{opacity:1}
       <span id="ob-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
       <button class="hbtn primary" onclick="obAddCustomer()">＋ 新規追加</button>
       <button class="hbtn ghost" onclick="obLoad(false,true)" title="手動で最新データを取得">🔄 更新</button>
-      <button class="hbtn ghost" onclick="obImportFromNotion()">📥 Notion同期</button>
-      <button class="hbtn ghost" onclick="obSyncBirthdaysBtn()" title="NotionバースデーDBをオープンボードに同期">🎂 誕生日同期</button>
-      <button class="hbtn ghost" onclick="obCleanData()" title="データ修正（FALSE除去・ステータス正規化）">🧹 修正</button>
       <button class="hbtn" onclick="showHub()">‹ 戻る</button>
     </div>
   </div>
@@ -2657,6 +2654,14 @@ tr:hover .ob-del{opacity:1}
               <div style="font-size:.88rem;font-weight:700">🎂 誕生日同期</div>
               <div style="font-size:.72rem;color:#888;margin-top:2px">Notionから誕生日を再取込</div>
             </button>
+            <button class="hbtn" onclick="obImportFromNotion()" style="padding:10px;text-align:left">
+              <div style="font-size:.88rem;font-weight:700">📥 Notion完全同期</div>
+              <div style="font-size:.72rem;color:#888;margin-top:2px">OBデータをNotionから一括更新</div>
+            </button>
+            <button class="hbtn" onclick="obCleanData()" style="padding:10px;text-align:left">
+              <div style="font-size:.88rem;font-weight:700">🧹 データ修正</div>
+              <div style="font-size:.72rem;color:#888;margin-top:2px">FALSE除去・ステータス正規化</div>
+            </button>
           </div>
 
           <div class="st-sec">🗄 Supabaseへのデータ移行</div>
@@ -3172,6 +3177,15 @@ function enterMtgBoard(){
   document.getElementById('mtgboard').classList.add('show');
   mtgLoad();
   if(!window.__mtgPollTimer) window.__mtgPollTimer = setInterval(function(){ mtgLoad(true,true); }, CACHE_TTL_MS);
+  if(!window.__mtgCwAutoTimer) window.__mtgCwAutoTimer = setInterval(function(){
+    gasGet('mtgGetData', function(cfg){
+      if(cfg && cfg.hasCwToken && cfg.cwRoomId){
+        gasGet('mtgSyncChatwork', function(d){
+          if(d && d.added > 0){ toast('💬 面談報告 '+d.added+'件を自動取込'); mtgLoad(true); }
+        });
+      }
+    });
+  }, 10 * 60 * 1000);
 }
 
 function showHub(){
@@ -5358,7 +5372,7 @@ function obRenderVisitors(){
   var COL=13;
   var html=aggHtml+'<table class="ob-table ob-vis-table"><thead><tr>'+
     '<th class="ob-rn" style="width:28px">#</th>'+
-    '<th style="min-width:84px">問合せ日</th>'+
+    '<th style="min-width:84px">来場日</th>'+
     '<th style="min-width:72px">種別</th>'+
     '<th style="min-width:160px">顧客名 / 電話番号</th>'+
     '<th style="min-width:90px">ステータス</th>'+
@@ -5429,12 +5443,17 @@ function obRenderVisitors(){
       var k=r.karte||{};
       var kana=obSanitizeVal(k['フリガナ']||'');
       var tel=obSanitizeVal(k['電話番号']||'');
+      // 来場日: 履歴の最初の「来場」type優先、なければ来場日フィールド、なければ問い合わせ日
+      var histForDate=obDedupHistory(r.history||[]);
+      var firstVisitH=null;
+      for(var hi=0;hi<histForDate.length;hi++){if(histForDate[hi].type==='来場'){firstVisitH=histForDate[hi];break;}}
+      var visitDateDisp=firstVisitH?obNormDate(firstVisitH.date||''):(obSanitizeVal(r['来場日']||r['問い合わせ日']||''));
       var inquiryDate=obSanitizeVal(r['問い合わせ日']||r['来場日']||'');
       html+='<tr data-sc="'+sc+'" data-row="'+r._row+'">'+
         '<td class="ob-rn">'+monthN+'</td>'+
         '<td style="font-size:.76rem;color:#999;white-space:nowrap">'+
-          '<span class="ob-editable" data-row="'+r._row+'" data-field="問い合わせ日" onclick="obStartEdit(this);event.stopPropagation()" style="font-size:.76rem;color:#777">'+
-            (inquiryDate?obFmtDate(obNormDate(inquiryDate)):'<span style="color:#DDD">—</span>')+
+          '<span class="ob-editable" data-row="'+r._row+'" data-field="来場日" data-type="date" onclick="obStartEdit(this);event.stopPropagation()" style="font-size:.76rem;color:#777">'+
+            (visitDateDisp?obFmtDate(visitDateDisp):'<span style="color:#DDD">—</span>')+
           '</span>'+
         '</td>'+
         '<td onclick="event.stopPropagation()">'+
