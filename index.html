@@ -3809,6 +3809,8 @@ function openSettings(tab){
     var sbKeyEl = document.getElementById('setSbKey');
     if(sbUrlEl && d.sbUrl && !sbUrlEl.value) sbUrlEl.value = d.sbUrl;
     if(sbKeyEl && d.sbKey && !sbKeyEl.value) sbKeyEl.value = d.sbKey;
+    if(d.sbUrl) localStorage.setItem('sb_url', d.sbUrl);
+    if(d.sbKey) localStorage.setItem('sb_key', d.sbKey);
     var sbBanner = document.getElementById('sb-status-banner');
     if(sbBanner){
       if(d.hasSbUrl && d.hasSbKey){
@@ -4288,6 +4290,26 @@ function openDemo(){
 }
 function openBoard(){
   window.location.href = '?view=board';
+}
+
+// Supabaseから直接読み込み（GASより高速: ~200ms vs 15-30sec）
+function sbDirectRead(table, cb) {
+  var url = localStorage.getItem('sb_url');
+  var key = localStorage.getItem('sb_key');
+  if (!url || !key) { cb(null); return; }
+  fetch(url + '/rest/v1/' + table + '?select=data&order=updated_at.desc&limit=2000', {
+    headers: { 'apikey': key, 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(rows){
+    if (!Array.isArray(rows)) { cb(null); return; }
+    cb(rows.map(function(r){
+      var d = r.data;
+      if (typeof d === 'string') { try { d = JSON.parse(d); } catch(e){} }
+      return d || {};
+    }));
+  })
+  .catch(function(){ cb(null); });
 }
 
 // timeout: ms (poll系は8秒, 大量データは60秒, それ以外は45秒)
@@ -5032,20 +5054,10 @@ function obLoad(silent, force){
   if(cached.length){ obRows=cached; obRows.forEach(function(r,i){r._row=i;}); obPopulateFilters(); if(!_isObEditing()) obRenderAll(); }
   // キャッシュがない初回ロード時はローディングアニメーション表示
   if(!cached.length){
-    document.getElementById('ob-visitors-content').innerHTML='<div class="ob-empty-state" style="color:#888"><div style="font-size:2rem;margin-bottom:16px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div><br>データ読み込み中...<br><small style="color:#BBB;font-size:.78rem">初回は30〜60秒かかる場合があります</small></div>';
+    document.getElementById('ob-visitors-content').innerHTML='<div class="ob-empty-state" style="color:#888"><div style="font-size:2rem;margin-bottom:16px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div><br>データ読み込み中...</div>';
   }
-  gasGet('obGetData',function(d){
-    __obLoading = false;
-    if(!d||d.error){
-      var errMsg=(d&&d.error)?d.error:'通信エラー';
-      if(!cached.length){
-        document.getElementById('ob-visitors-content').innerHTML='<div class="ob-empty-state">❌ データ取得エラー: '+errMsg+'<br><small style="color:#BBB">GASサーバーへの接続に失敗しました</small><br><button class="hbtn" style="margin-top:14px" onclick="obLoad()">🔄 再読み込み</button></div>';
-      } else if(!silent){
-        toast('⚠️ データ取得エラー。キャッシュを表示中。');
-      }
-      return;
-    }
-    var newRows=d.rows||[];
+  // Supabase直接読み込み優先（高速: ~300ms）、未設定ならGAS経由
+  function _applyObRows(newRows) {
     var prevLen=obRows.length;
     // ユーザーが入力中の場合は再描画をスキップ
     var ae=document.activeElement;
@@ -5083,6 +5095,25 @@ function obLoad(silent, force){
     hubUpdateBadges();
     // ハブが表示中なら活動ログも更新
     if(document.getElementById('hub').classList.contains('show')) hubBuildActivityFeed();
+  }
+  // Supabase優先→失敗時GASフォールバック
+  sbDirectRead('ob_customers', function(sbRows) {
+    if (sbRows && sbRows.length) {
+      __obLoading = false;
+      _applyObRows(sbRows);
+    } else {
+      gasGet('obGetData', function(d) {
+        __obLoading = false;
+        if (!d || d.error) {
+          var errMsg = (d && d.error) ? d.error : '通信エラー';
+          if (!cached.length) {
+            document.getElementById('ob-visitors-content').innerHTML = '<div class="ob-empty-state">❌ データ取得エラー: ' + errMsg + '<br><button class="hbtn" style="margin-top:14px" onclick="obLoad()">🔄 再読み込み</button></div>';
+          } else if (!silent) { toast('⚠️ データ取得エラー。キャッシュを表示中。'); }
+          return;
+        }
+        _applyObRows(d.rows || []);
+      });
+    }
   });
 }
 
@@ -6967,21 +6998,8 @@ function kjLoad(silent, force){
   if(!cached.length){
     document.getElementById('kj-list-content').innerHTML='<div class="kj-empty" style="color:#888"><div style="font-size:2rem;margin-bottom:12px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div><br>データ読み込み中...</div>';
   }
-  gasGet('kjGetData',function(d){
-    if(!d||d.error){
-      __kjLoading = false;
-      var errMsg=(d&&d.error)?d.error:'通信エラー';
-      if(!cached.length){
-        document.getElementById('kj-list-content').innerHTML=
-          '<div class="kj-empty">❌ データ取得エラー: '+errMsg+
-          '<br><button class="hbtn" style="margin-top:12px" onclick="kjLoad()">🔄 再読み込み</button></div>';
-      } else if(!silent){
-        toast('⚠️ 着工管理データ取得エラー。キャッシュを表示中。');
-      }
-      return;
-    }
+  function _applyKjRows(newRows) {
     __kjLoading = false;
-    var newRows=d.rows||[];
     var prevLen=kjRows.length;
     kjRows=newRows;
     kjRows.forEach(function(r,i){r._idx=i;});
@@ -6991,11 +7009,27 @@ function kjLoad(silent, force){
     var ae=document.activeElement;
     var userEditing = ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
       document.getElementById('kj-list-content').contains(ae);
-    // KJボードが表示中のときだけ再描画
     var kjVisible = document.getElementById('kojiboard').classList.contains('show');
     if(!userEditing && kjVisible){ kjRenderList(); }
     if(silent && kjRows.length>prevLen) toast('🔔 着工管理 新規 '+(kjRows.length-prevLen)+'件');
     hubUpdateBadges();
+  }
+  sbDirectRead('kj_projects', function(sbRows) {
+    if (sbRows && sbRows.length) {
+      _applyKjRows(sbRows);
+    } else {
+      gasGet('kjGetData', function(d) {
+        if (!d || d.error) {
+          __kjLoading = false;
+          var errMsg=(d&&d.error)?d.error:'通信エラー';
+          if(!cached.length){
+            document.getElementById('kj-list-content').innerHTML='<div class="kj-empty">❌ データ取得エラー: '+errMsg+'<br><button class="hbtn" style="margin-top:12px" onclick="kjLoad()">🔄 再読み込み</button></div>';
+          } else if(!silent){ toast('⚠️ 着工管理データ取得エラー。キャッシュを表示中。'); }
+          return;
+        }
+        _applyKjRows(d.rows || []);
+      });
+    }
   });
 }
 
