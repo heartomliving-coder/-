@@ -712,8 +712,8 @@ tr:hover .ob-del{opacity:1}
 .ob-appt-yes{background:#166534;color:#fff;border:none;border-radius:8px;padding:11px 22px;font-size:.88rem;cursor:pointer;font-weight:700;font-family:inherit}
 .ob-appt-no{background:#991B1B;color:#fff;border:none;border-radius:8px;padding:11px 22px;font-size:.88rem;cursor:pointer;font-weight:700;font-family:inherit}
 .ob-appt-skip{background:none;border:none;color:#BBB;cursor:pointer;font-size:.78rem;font-family:inherit;text-decoration:underline}
-#ob-hist-pop{position:fixed;z-index:9999;background:#fff;border:1px solid #DDD;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:16px;min-width:320px;display:none}
-#ob-hist-pop.show{display:block}
+#ob-hist-pop,#ob-next-pop{position:fixed;z-index:9999;background:#fff;border:1px solid #DDD;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:16px;min-width:280px;display:none}
+#ob-hist-pop.show,#ob-next-pop.show{display:block}
 .ob-hist-pop-title{font-weight:700;font-size:.9rem;color:#2B2B2B;margin-bottom:12px;border-bottom:1px solid #F0EDE8;padding-bottom:8px}
 .ob-hist-pop-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .ob-hist-pop-row input,.ob-hist-pop-row select{border:1px solid #DDD;border-radius:6px;padding:6px 10px;font-size:.82rem;font-family:inherit;background:#FAFAFA}
@@ -2129,6 +2129,24 @@ tr:hover .ob-del{opacity:1}
   <div class="ob-hist-pop-btns">
     <button class="ob-hist-pop-cancel" onclick="obHistPopClose()">閉じる</button>
     <button class="ob-hist-pop-save" onclick="obHistPopSave()">追加</button>
+  </div>
+</div>
+
+<!-- 次回予定ポップオーバー -->
+<div id="ob-next-pop">
+  <div class="ob-hist-pop-title">🗓 次回予定 <span id="ob-next-pop-name" style="font-weight:400;font-size:.82rem;color:#888"></span></div>
+  <div class="ob-hist-pop-row" style="margin-bottom:8px">
+    <label style="font-size:.72rem;color:#9A8C76;font-weight:700;display:block;margin-bottom:4px">日付</label>
+    <input type="date" id="ob-next-pop-date" style="width:100%;border:1px solid #DDD;border-radius:6px;padding:8px 10px;font-size:.88rem;font-family:inherit;background:#FAFAFA;box-sizing:border-box">
+  </div>
+  <div class="ob-hist-pop-row" style="margin-bottom:4px">
+    <label style="font-size:.72rem;color:#9A8C76;font-weight:700;display:block;margin-bottom:4px">内容</label>
+    <input type="text" id="ob-next-pop-content" placeholder="例）FP相談・現地見学・打ち合わせ..." style="width:100%;border:1px solid #DDD;border-radius:6px;padding:8px 10px;font-size:.86rem;font-family:inherit;background:#FAFAFA;box-sizing:border-box" onkeydown="if(event.key==='Enter')obNextPopSave()">
+  </div>
+  <div class="ob-hist-pop-btns" style="margin-top:10px">
+    <button class="ob-hist-pop-cancel" onclick="obNextPopClear()">クリア</button>
+    <button class="ob-hist-pop-cancel" onclick="obNextPopClose()">閉じる</button>
+    <button class="ob-hist-pop-save" onclick="obNextPopSave()">保存</button>
   </div>
 </div>
 
@@ -5111,6 +5129,7 @@ function obSetCache(r){try{localStorage.setItem(OB_CACHE_KEY,JSON.stringify(r));
 var __obLastUpdated = 0;
 var __obLoading = false;
 var _obLastSaveTs = 0; // obSaveField が呼ばれた最終時刻
+var _obAreaPickerOpen = false; // エリアピッカー表示中フラグ（再描画ブロック用）
 
 function obLoad(silent, force){
   if(__obLoading && silent) return; // サイレント更新は同時実行しない
@@ -5142,8 +5161,8 @@ function obLoad(silent, force){
     var prevLen=obRows.length;
     // ユーザーが入力中の場合は再描画をスキップ
     var ae=document.activeElement;
-    var userEditing = ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
-      (document.getElementById('ob-detail').contains(ae) || document.getElementById('ob-visitors-content').contains(ae) || document.getElementById('ob-active-content').contains(ae));
+    var userEditing = _obAreaPickerOpen || (ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
+      (document.getElementById('ob-detail').contains(ae) || document.getElementById('ob-visitors-content').contains(ae) || document.getElementById('ob-active-content').contains(ae)));
     // フェッチ中にユーザーが保存した場合は古いGASデータで上書きしない（レースコンディション対策）
     if(_obLastSaveTs !== _saveTsAtFetchStart){
       obSetCache(obRows);
@@ -5634,10 +5653,10 @@ function obRenderVisitors(){
         '<td class="ob-td-hist" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()" title="クリックして来場履歴を追加・編集">'+
           '<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div>'+
         '</td>'+
-        '<td onclick="event.stopPropagation()" class="ob-td-next" colspan="2">'+
+        '<td onclick="obNextPopOpen(event,'+r._row+');event.stopPropagation()" class="ob-td-next" colspan="2" style="cursor:pointer" title="クリックして次回予定を設定">'+
           '<div class="'+(nextCls!=='none'?'ob-card-next '+nextCls:'')+'">'+
-            obCell(r,'次回予定')+
-            '<span class="ob-editable" style="display:block;font-size:.72rem;color:#666;margin-top:3px;font-weight:500" data-row="'+r._row+'" data-field="次回内容" data-type="text" onclick="obStartEdit(this);event.stopPropagation()">'+(r['次回内容']?esc(r['次回内容']):'<span style="color:#CCC;font-style:italic">内容を入力...</span>')+'</span>'+
+            (nextRaw?'<span style="color:#166534;font-weight:700">'+nextAlarm+obFmtDate(nextRaw)+'</span>':'<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>')+
+            (r['次回内容']?'<div style="font-size:.72rem;color:#555;margin-top:3px;font-weight:500">'+esc(r['次回内容'])+'</div>':'<div style="font-size:.72rem;color:#CCC;font-style:italic;margin-top:2px">内容を入力...</div>')+
           '</div>'+
         '</td>'+
         '<td style="padding:4px 6px;text-align:center" onclick="event.stopPropagation()">'+
@@ -6148,6 +6167,7 @@ function obUpdateNewAreaDisplay(){
   el.innerHTML=val?val.split(',').filter(Boolean).map(function(m){return '<span class="ob-area-tag">'+esc(m.trim())+'</span>';}).join(''):'<span class="ob-area-placeholder">タップして選択...</span>';
 }
 function obAreaPickerOpen(anchor, currentVal, onSave){
+  _obAreaPickerOpen = true;
   var selected=(currentVal||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
   var activePref=Object.keys(OB_AREA_DATA)[0];
   var searchQ='';
@@ -6155,7 +6175,7 @@ function obAreaPickerOpen(anchor, currentVal, onSave){
   var oldBd=document.getElementById('ob-area-bd'); if(oldBd) oldBd.remove();
   var bd=document.createElement('div'); bd.id='ob-area-bd';
   bd.style.cssText='position:fixed;inset:0;z-index:9999';
-  bd.addEventListener('click',function(){ onSave(selected.join(',')); bd.remove(); var p=document.getElementById('ob-area-picker'); if(p) p.remove(); });
+  bd.addEventListener('click',function(){ _obAreaPickerOpen=false; onSave(selected.join(',')); bd.remove(); var p=document.getElementById('ob-area-picker'); if(p) p.remove(); });
   document.body.appendChild(bd);
   var rect=anchor.getBoundingClientRect();
   var top=rect.bottom+4; var left=rect.left;
@@ -6180,7 +6200,7 @@ function obAreaPickerOpen(anchor, currentVal, onSave){
   window.__obAreaSearch=function(q){ searchQ=q; renderPicker(); };
   window.__obAreaToggle=function(cb){ var m=cb.closest('label').querySelector('span').textContent; var idx=selected.indexOf(m); if(idx>=0) selected.splice(idx,1); else selected.push(m); renderPicker(); };
   window.__obAreaClear=function(){ selected=[]; renderPicker(); };
-  window.__obAreaApply=function(){ var v=selected.join(','); onSave(v); bd.remove(); var p=document.getElementById('ob-area-picker'); if(p) p.remove(); };
+  window.__obAreaApply=function(){ _obAreaPickerOpen=false; var v=selected.join(','); onSave(v); bd.remove(); var p=document.getElementById('ob-area-picker'); if(p) p.remove(); };
   renderPicker();
 }
 
@@ -6954,6 +6974,69 @@ function obHistPopEdit(key){
   var st=document.getElementById('ob-hist-pop-section-title'); if(st) st.textContent='✏️ 履歴を編集';
   var sb=document.getElementById('ob-hist-pop-save'); if(sb) sb.textContent='更新';
   document.getElementById('ob-hist-pop-content').focus();
+}
+
+// ── 次回予定ポップオーバー ──
+var _obNextPopRow = -1;
+function obNextPopOpen(e, rowIdx){
+  e.stopPropagation();
+  _obNextPopRow = rowIdx;
+  var r = obRows[rowIdx]; if(!r) return;
+  var pop = document.getElementById('ob-next-pop');
+  document.getElementById('ob-next-pop-name').textContent = r['顧客名']||'';
+  document.getElementById('ob-next-pop-date').value = obNormDate(r['次回予定']||'')||'';
+  document.getElementById('ob-next-pop-content').value = r['次回内容']||'';
+  var rect = e.currentTarget ? e.currentTarget.getBoundingClientRect() : {left:e.clientX,bottom:e.clientY,top:e.clientY};
+  pop.style.left = Math.min(rect.left, window.innerWidth-300)+'px';
+  var top = rect.bottom+6; if(top+230>window.innerHeight) top=Math.max(8,rect.top-230);
+  pop.style.top = top+'px';
+  pop.classList.add('show');
+  setTimeout(function(){ document.addEventListener('click',_obNextPopOutside,{once:true}); },0);
+  setTimeout(function(){ document.getElementById('ob-next-pop-date').focus(); },50);
+}
+function _obNextPopOutside(e){
+  var pop=document.getElementById('ob-next-pop');
+  if(pop&&!pop.contains(e.target)){ pop.classList.remove('show'); _obNextPopRow=-1; }
+}
+function obNextPopClose(){
+  document.getElementById('ob-next-pop').classList.remove('show');
+  _obNextPopRow=-1;
+}
+function obNextPopSave(){
+  var rowIdx=_obNextPopRow; if(rowIdx<0) return;
+  var r=obRows[rowIdx]; if(!r) return;
+  var date=(document.getElementById('ob-next-pop-date').value||'');
+  var content=((document.getElementById('ob-next-pop-content').value||'').trim());
+  obSaveField(rowIdx,'次回予定',date);
+  obSaveField(rowIdx,'次回内容',content);
+  _obNextPopUpdateCell(rowIdx);
+  obNextPopClose();
+  toast('次回予定を保存しました');
+}
+function obNextPopClear(){
+  var rowIdx=_obNextPopRow; if(rowIdx<0) return;
+  var r=obRows[rowIdx]; if(!r) return;
+  obSaveField(rowIdx,'次回予定','');
+  obSaveField(rowIdx,'次回内容','');
+  _obNextPopUpdateCell(rowIdx);
+  obNextPopClose();
+  toast('次回予定をクリアしました');
+}
+function _obNextPopUpdateCell(rowIdx){
+  var r=obRows[rowIdx]; if(!r) return;
+  var nextRaw=r['次回予定']?obNormDate(r['次回予定']):'';
+  var nextCls='none';
+  if(nextRaw&&nextRaw.length>=10){
+    var nd=new Date(nextRaw+'T00:00:00'); var td=new Date(); td.setHours(0,0,0,0);
+    var diff=Math.floor((nd-td)/(1000*60*60*24));
+    nextCls=diff<0?'over':diff<=3?'warn':'ok';
+  }
+  var alarm=nextCls==='over'?'⚠ ':nextCls==='warn'?'🔔 ':'';
+  var dateDisp=nextRaw?'<span style="color:#166534;font-weight:700">'+alarm+obFmtDate(nextRaw)+'</span>':'<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>';
+  var contentDisp=r['次回内容']?'<div style="font-size:.72rem;color:#555;margin-top:3px;font-weight:500">'+esc(r['次回内容'])+'</div>':'<div style="font-size:.72rem;color:#CCC;font-style:italic;margin-top:2px">内容を入力...</div>';
+  var html='<div class="'+(nextCls!=='none'?'ob-card-next '+nextCls:'')+'">'+dateDisp+contentDisp+'</div>';
+  var cell=document.querySelector('tr[data-row="'+rowIdx+'"] .ob-td-next');
+  if(cell) cell.innerHTML=html;
 }
 
 function obHistPopDel(key){
