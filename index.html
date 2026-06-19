@@ -6711,7 +6711,7 @@ function obHistPopRenderList(r){
     return '<div class="ob-hist-pop-item">'+
       '<span style="color:#9A8C76;min-width:54px">'+esc(d)+'</span>'+
       '<span style="background:#E8E4DC;border-radius:10px;padding:1px 8px;font-size:.7rem;font-weight:600">'+esc(item.type||'')+'</span>'+
-      (function(){var c=item.content||'';var isG=OB_GENERIC_HIST.indexOf(c.toLowerCase())>=0||c===item.type;return c&&!isG?'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666">'+esc(c)+'</span>':'<span style="flex:1"></span>';})()+'
+      (function(){var c=item.content||'';var isG=OB_GENERIC_HIST.indexOf(c.toLowerCase())>=0||c===item.type;return c&&!isG?'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666">'+esc(c)+'</span>':'<span style="flex:1"></span>';})()+
       '<button class="ob-tl-del" onclick="obHistPopDel(\''+esc(key).replace(/'/g,"\\'")+'\')" title="削除">✕</button>'+
     '</div>';
   }).join('');
