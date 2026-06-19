@@ -315,7 +315,7 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,1
 .ob-filter-chk input{width:16px;height:16px}
 /* --- テーブル --- */
 .ob-table{font-size:.93rem}
-.ob-table thead th{font-size:.76rem;padding:10px 14px}
+.ob-table thead th{font-size:.82rem;padding:10px 14px}
 .ob-table td{padding:10px 14px}
 .ob-name-link{font-size:1.02rem;font-weight:600}
 .ob-name-sub{font-size:.76rem}
@@ -674,7 +674,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-cls-hikiwatashi{background:#F0FDFA;color:#0F766E;border:1px solid #99F6E4}
 
 /* インライン編集 */
-.ob-editable{display:inline-block;min-width:18px;cursor:text;border-radius:3px;padding:2px 3px;transition:background .12s;line-height:1.4}
+.ob-editable{display:inline-block;min-width:18px;cursor:text;border-radius:3px;padding:4px 5px;transition:background .12s;line-height:1.4}
 .ob-editable:hover{background:rgba(154,140,118,.14)}
 .ob-editable.empty{color:#CCC;font-style:italic}
 .ob-cell-input{border:none;border-bottom:2px solid var(--gold);background:rgba(255,248,230,.6);font-size:.82rem;font-family:inherit;color:var(--tx);padding:2px 4px;outline:none;min-width:60px;max-width:200px;border-radius:2px}
@@ -695,7 +695,7 @@ tr:hover .ob-del{opacity:1}
 /* 履歴チップ（一覧表示 — 全件） */
 .ob-hist-chips{display:flex;gap:4px;flex-wrap:wrap;min-width:180px;max-width:420px;align-items:center;cursor:pointer}
 .ob-hist-chips:hover .ob-hist-add-btn{opacity:1}
-.ob-hist-chip{font-size:.68rem;padding:3px 9px;border-radius:20px;white-space:nowrap;font-weight:600;flex-shrink:0;background:#F0EDE8;color:#666;border:1px solid #E0DAD0;cursor:pointer}
+.ob-hist-chip{font-size:.76rem;padding:5px 10px;border-radius:20px;white-space:nowrap;font-weight:600;flex-shrink:0;background:#F0EDE8;color:#666;border:1px solid #E0DAD0;cursor:pointer}
 .ob-hist-chip.new{background:#2B2B2B;color:#fff;border-color:#2B2B2B}
 .ob-hist-add-btn{font-size:.7rem;padding:2px 8px;border-radius:20px;border:1px dashed #C0A070;color:#C0A070;background:none;cursor:pointer;font-weight:700;opacity:0;transition:opacity .15s;white-space:nowrap;flex-shrink:0}
 .ob-hist-add-btn:hover{background:#C0A070;color:#fff}
@@ -747,10 +747,10 @@ tr:hover .ob-del{opacity:1}
 /* 次回予定セル */
 .ob-next-plan{font-size:.75rem;color:#4A6FA5;font-weight:600}
 .ob-td-next{min-width:90px;white-space:nowrap}
-.ob-td-next .ob-editable{font-size:.76rem;font-weight:600;color:#166534;display:block;min-height:18px}
+.ob-td-next .ob-editable{font-size:.82rem;font-weight:600;color:#166534;display:block;min-height:22px}
 .ob-td-next .ob-editable:not([style*="color"]):empty::before,.ob-td-next .ob-editable.empty::before{content:'—';color:#DDD;font-weight:400}
 /* 種別チップ */
-.ob-tipo-chip{font-size:.68rem;font-weight:700;background:#F0EDE8;color:#6B5E4E;padding:2px 8px;border-radius:20px;white-space:nowrap;letter-spacing:.02em;cursor:pointer}
+.ob-tipo-chip{font-size:.76rem;font-weight:700;background:#F0EDE8;color:#6B5E4E;padding:4px 10px;border-radius:20px;white-space:nowrap;letter-spacing:.02em;cursor:pointer}
 .ob-tipo-chip:hover{background:#E0DAD4}
 
 /* 小ボタン */
@@ -5230,12 +5230,14 @@ function _obShowApptConfirm(rowIdx,dateStr,content){
   document.getElementById('ob-appt-name').textContent=r['顧客名']||'—';
   document.getElementById('ob-appt-date').textContent=obFmtDate(dateStr);
   document.getElementById('ob-appt-sub').textContent=content?'（'+content+'）':'';
-  m._rowIdx=rowIdx; m._dateStr=dateStr;
+  m._rowId=r.id; m._dateStr=dateStr;
   m.classList.add('show');
 }
 function obApptConfirm(result){
   var m=document.getElementById('ob-appt-confirm'); if(!m) return;
-  var rowIdx=m._rowIdx; var dateStr=m._dateStr;
+  var rowId=m._rowId; var dateStr=m._dateStr;
+  var rowIdx=-1;
+  for(var i=0;i<obRows.length;i++){ if(obRows[i].id===rowId){ rowIdx=i; break; } }
   var r=obRows[rowIdx]; if(!r) return;
   var checked=JSON.parse(localStorage.getItem('ob_appt_checked')||'{}');
   checked[r.id+'_'+dateStr]=result;
@@ -6057,7 +6059,7 @@ function obStartEdit(el){
         var dir=e.shiftKey?-1:1;
         _obMoveToNextCell(el,dir);
       }
-      if(e.key==='Escape'){el.innerHTML=_obDateDisplay(obNormDate(val),field);}
+      if(e.key==='Escape'){done=true; el.innerHTML=_obDateDisplay(obNormDate(val),field);}
     });
     return;
   }
@@ -6158,6 +6160,7 @@ function obAreaPickerOpen(anchor, currentVal, onSave){
   if(left+344>window.innerWidth) left=window.innerWidth-348;
   if(top+464>window.innerHeight) top=Math.max(4,rect.top-468);
   function renderPicker(){
+    var wasSearchFocused=!!(document.activeElement&&document.activeElement.id==='ob-area-search');
     var picker=document.getElementById('ob-area-picker');
     if(!picker){ picker=document.createElement('div'); picker.id='ob-area-picker'; picker.className='ob-area-picker'; picker.style.cssText='left:'+left+'px;top:'+top+'px'; document.body.appendChild(picker); }
     var prefs=Object.keys(OB_AREA_DATA);
@@ -6169,7 +6172,7 @@ function obAreaPickerOpen(anchor, currentVal, onSave){
       '<div class="ob-area-picker-footer"><span class="ob-area-count">'+(selected.length?selected.length+'件選択中':'未選択')+'</span>'+
       '<div style="display:flex;gap:6px"><button onclick="window.__obAreaClear()" style="padding:5px 10px;border:1px solid #DDD;border-radius:5px;background:#fff;font-size:.76rem;cursor:pointer">クリア</button>'+
       '<button onclick="window.__obAreaApply()" style="padding:5px 14px;border:none;border-radius:5px;background:#2B2B2B;color:#fff;font-size:.76rem;cursor:pointer;font-weight:700">適用</button></div></div>';
-    setTimeout(function(){ var s=document.getElementById('ob-area-search'); if(s&&!searchQ) s.focus(); },30);
+    setTimeout(function(){ var s=document.getElementById('ob-area-search'); if(s&&(!searchQ||wasSearchFocused)){ s.focus(); if(s.setSelectionRange) s.setSelectionRange(s.value.length,s.value.length); } },30);
   }
   window.__obAreaTab=function(p){ activePref=p; searchQ=''; renderPicker(); };
   window.__obAreaSearch=function(q){ searchQ=q; renderPicker(); };
