@@ -1002,7 +1002,7 @@ tr:hover .ob-del{opacity:1}
 .ob-card-meta{display:flex;align-items:center;gap:8px;font-size:.72rem;color:#888;flex-wrap:wrap}
 .ob-card-staff{font-weight:700;color:#555}
 .ob-card-last{font-size:.72rem;color:#9A8C76;font-weight:600}
-.ob-card-next{font-size:.76rem;font-weight:700;padding:5px 11px;border-radius:7px;white-space:normal;line-height:1.5}
+.ob-card-next{font-size:.76rem;font-weight:700;padding:5px 11px;border-radius:7px;white-space:nowrap;line-height:1.5}
 .ob-card-next.ok{background:#F0FDF4;color:#166534;border:1px solid #BBF7D0}
 .ob-card-next.warn{background:#FFF7ED;color:#92500A;border:1px solid #FDE68A}
 .ob-card-next.over{background:#FEF2F2;color:#991B1B;border:1px solid #FECACA}
@@ -5568,6 +5568,7 @@ function obRenderVisitors(){
         '<td onclick="event.stopPropagation()" class="ob-td-next">'+
           '<div class="'+(nextCls!=='none'?'ob-card-next '+nextCls:'')+'">'+
             obCell(r,'次回予定')+
+            (nextRaw&&r['次回内容']?'<div style="font-size:.68rem;font-weight:500;opacity:.75;margin-top:1px;white-space:nowrap">'+esc(r['次回内容'])+'</div>':'')+
           '</div>'+
         '</td>'+
         '<td onclick="event.stopPropagation()" style="font-size:.76rem;color:#666;min-width:88px">'+obCell(r,'次回内容')+'</td>'+
@@ -5978,8 +5979,9 @@ function obStartEdit(el){
       var colorStyle=(f==='アポ確定日')?'color:#2563EB;font-weight:600':(f==='次回予定'?'color:#166534;font-weight:600':'');
       return colorStyle?'<span style="'+colorStyle+'">'+obFmtDate(v)+'</span>':obFmtDate(v);
     }
-    function saveDate(){ if(done)return; done=true; var v=inp.value; el.innerHTML=_obDateDisplay(v,field); obSaveField(row,field,v); }
-    inp.addEventListener('change',saveDate); inp.addEventListener('blur',saveDate);
+    function saveDate(v){ if(done)return; done=true; el.innerHTML=_obDateDisplay(v,field); obSaveField(row,field,v); }
+    inp.addEventListener('change',function(){ saveDate(inp.value); });
+    inp.addEventListener('blur',function(){ setTimeout(function(){ if(!done){ done=true; el.innerHTML=_obDateDisplay(obNormDate(val),field); } },300); });
     inp.addEventListener('keydown',function(e){
       if(e.key==='Tab'){
         e.preventDefault();
@@ -6006,20 +6008,23 @@ function obStartEdit(el){
     sel.innerHTML='<option value="">—</option>'+opts.map(function(o){return '<option'+(o===val?' selected':'')+'>'+esc(o)+'</option>';}).join('');
     el.innerHTML=''; el.appendChild(sel); sel.focus();
     var done2=false;
-    function saveSel(){ if(done2)return; done2=true; var v=sel.value; el.textContent=v||'—'; obSaveField(row,field,v);
+    function saveSel(v){
+      if(done2)return; done2=true;
+      if(v===undefined){ el.innerHTML=val?esc(val):'<span style="color:#CCC;font-size:.72rem;font-style:italic">—</span>'; return; }
+      el.innerHTML=v?esc(v):'<span style="color:#CCC;font-size:.72rem;font-style:italic">—</span>';
+      obSaveField(row,field,v);
       if(field==='商談ステータス'){
         var nc=OB_STATUS_CLASS[v]||'ob-s0';
-        // テーブル行内のバッジ更新（来客状況タブ）
         var tr=el.closest('tr'); if(tr){var b=tr.querySelector('.ob-badge'); if(b){b.textContent=v;b.className='ob-badge '+nc;}}
-        // 詳細パネルのヘッダーバッジ更新
         if(row===obDetailRow){var db=document.getElementById('ob-det-badge'); if(db){db.textContent=v;db.className='ob-badge '+nc;}}
       }
     }
-    sel.addEventListener('change',saveSel); sel.addEventListener('blur',saveSel);
+    sel.addEventListener('change',function(){ saveSel(sel.value); });
+    sel.addEventListener('blur',function(){ setTimeout(function(){ saveSel(undefined); },300); });
     sel.addEventListener('keydown',function(e){
       if(e.key==='Tab'){
         e.preventDefault();
-        saveSel();
+        saveSel(sel.value);
         var dir=e.shiftKey?-1:1;
         _obMoveToNextCell(el,dir);
       }
@@ -6430,6 +6435,7 @@ function obCloseNewModal(){ document.getElementById('obNewModal').classList.remo
 function obSaveNew(){
   var name=document.getElementById('obNewName').value.trim();
   if(!name){ toast('顧客名を入力してください'); return; }
+  _obLastSaveTs = Date.now(); // 新規追加も競合保護の対象に
   var inquiryDate=document.getElementById('obNewDate').value||'';
   var visitDateEl=document.getElementById('obNewVisitDate');
   var visitDate=visitDateEl?visitDateEl.value||'':'';
