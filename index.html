@@ -2128,7 +2128,7 @@ tr:hover .ob-del{opacity:1}
   </div>
   <div class="ob-hist-pop-btns">
     <button class="ob-hist-pop-cancel" onclick="obHistPopClose()">閉じる</button>
-    <button class="ob-hist-pop-save" onclick="obHistPopSave()">追加</button>
+    <button id="ob-hist-pop-save" class="ob-hist-pop-save" onclick="obHistPopSave()">追加</button>
   </div>
 </div>
 
@@ -3374,9 +3374,9 @@ function checkRemoteChanges(){
     var _inInput=_ae&&/INPUT|TEXTAREA|SELECT/.test(_ae.tagName);
     function _editing(id){return _inInput&&!!(document.getElementById(id)||{contains:function(){return false;}}).contains(_ae);}
     if(r.ob!==_syncState.ob){_syncState.ob=r.ob;if(!_editing('ob-visitors-content')&&!_editing('ob-active-content')&&!_editing('ob-detail')){localStorage.removeItem('ob_v3_ts');obLoad(true,true);}}
-    if(r.kj!==_syncState.kj){_syncState.kj=r.kj;if(!_editing('kj-list-content')&&!_editing('kj-detail-content')){localStorage.removeItem('kj_v1_ts');kjLoad(true,true);}}
+    if(r.kj!==_syncState.kj){_syncState.kj=r.kj;if(!_editing('kj-list-content')&&!_editing('kj-det-body')){localStorage.removeItem('kj_v1_ts');kjLoad(true,true);}}
     if(r.tochi!==_syncState.tochi){_syncState.tochi=r.tochi;if(!_editing('tochi-content')){localStorage.removeItem('tc_v1_ts');tochiLoad(true,true);}}
-    if(r.mtg!==_syncState.mtg){_syncState.mtg=r.mtg;if(!_editing('mtgboard')){localStorage.removeItem('mtg_v1_ts');mtgLoad(true,true);}}
+    if(r.mtg!==_syncState.mtg){_syncState.mtg=r.mtg;if(!_editing('mtgboard')&&!_editing('mtg-det-body')){localStorage.removeItem('mtg_v1_ts');mtgLoad(true,true);}}
     if(r.events!==_syncState.events){_syncState.events=r.events;scheduleEvSyncFromGAS();}
   });
 }
@@ -4429,7 +4429,7 @@ function gasGet(action,cb,timeout){
 function loadList(){
   document.getElementById('list').innerHTML='<div class="state">⏳ 読み込み中...<br><small style="color:#AAA;font-size:.78rem">初回は30秒ほどかかる場合があります</small></div>';
   gasGet('listInfoCustomers',function(d){
-    if(!d){ document.getElementById('list').innerHTML='<div class="state">❌ データ取得エラー<br><small style="color:#AAA">接続を確認して再度お試しください</small><br><button class="rl" style="margin-top:14px" onclick="loadList()">🔄 再読込</button></div>'; return; }
+    if(!d||d.error){ document.getElementById('list').innerHTML='<div class="state">❌ データ取得エラー'+(d&&d.error?'<br><small style="color:#AAA">'+esc(d.error)+'</small>':'<br><small style="color:#AAA">接続を確認して再度お試しください</small>')+'<br><button class="rl" style="margin-top:14px" onclick="loadList()">🔄 再読込</button></div>'; return; }
     __all=(d&&d.list)?d.list:[];
     if(!__all.length){document.getElementById('list').innerHTML='<div class="state">顧客データがありません<br><button class="rl" style="margin-top:14px" onclick="loadList()">🔄 再読込</button></div>';return}
     renderList();
@@ -5132,7 +5132,7 @@ function obLoad(silent, force){
   function _isObEditing(){
     var ae=document.activeElement;
     return ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
-      (document.getElementById('ob-detail').contains(ae)||document.getElementById('ob-visitors-content').contains(ae)||document.getElementById('ob-active-content').contains(ae));
+      (document.getElementById('ob-detail').contains(ae)||document.getElementById('ob-visitors-content').contains(ae)||document.getElementById('ob-active-content').contains(ae)||document.getElementById('ob-hist-pop').contains(ae)||document.getElementById('ob-next-pop').contains(ae));
   }
   var cached=obGetCache();
   // キャッシュが新鮮 かつ 強制更新でない場合はGASを叩かず即表示
@@ -5157,7 +5157,7 @@ function obLoad(silent, force){
     // ユーザーが入力中の場合は再描画をスキップ
     var ae=document.activeElement;
     var userEditing = _obAreaPickerOpen || (ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
-      (document.getElementById('ob-detail').contains(ae) || document.getElementById('ob-visitors-content').contains(ae) || document.getElementById('ob-active-content').contains(ae)));
+      (document.getElementById('ob-detail').contains(ae) || document.getElementById('ob-visitors-content').contains(ae) || document.getElementById('ob-active-content').contains(ae) || document.getElementById('ob-hist-pop').contains(ae) || document.getElementById('ob-next-pop').contains(ae)));
     // フェッチ中にユーザーが保存した場合は古いGASデータで上書きしない（レースコンディション対策）
     if(_obLastSaveTs !== _saveTsAtFetchStart){
       obSetCache(obRows);
@@ -6932,6 +6932,12 @@ function obHistPopSave(){
     for(var i=0;i<r.history.length;i++){
       if(obNormDate(r.history[i].date||'')===kdate&&(r.history[i].type||'')===ktype){editIdx=i;break;}
     }
+    if(editIdx<0){
+      // フォールバック：日付のみで検索（種別が一致しない場合）
+      for(var i=0;i<r.history.length;i++){
+        if(obNormDate(r.history[i].date||'')===kdate){editIdx=i;break;}
+      }
+    }
     if(editIdx>=0){
       r.history.splice(editIdx,1);
       post({action:'obDeleteHistory',id:r.id,row:rowIdx,histIndex:editIdx});
@@ -7029,9 +7035,17 @@ function _obNextPopUpdateCell(rowIdx){
   }
   var alarm=nextCls==='over'?'⚠ ':nextCls==='warn'?'🔔 ':'';
   var dateDisp=nextRaw?'<span style="color:#166534;font-weight:700">'+alarm+obFmtDate(nextRaw)+'</span>':'<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>';
-  var html='<div class="'+(nextCls!=='none'?'ob-card-next '+nextCls:'')+'">'+dateDisp+'</div>';
+  var tableHtml='<div class="'+(nextCls!=='none'?'ob-card-next '+nextCls:'')+'">'+dateDisp+'</div>';
+  // テーブルビュー更新
   var cell=document.querySelector('tr[data-row="'+rowIdx+'"] .ob-td-next');
-  if(cell) cell.innerHTML=html;
+  if(cell) cell.innerHTML=tableHtml;
+  // カードビュー更新
+  var nextLbl=nextRaw?('📅 '+obFmtDate(nextRaw)+(r['次回内容']?' — '+esc(r['次回内容']):'')):'';
+  var cardNext=document.querySelector('[data-row="'+rowIdx+'"] .ob-card-next');
+  if(cardNext){
+    if(nextLbl){cardNext.className='ob-card-next '+nextCls;cardNext.innerHTML=nextLbl;}
+    else{cardNext.className='ob-card-next none';cardNext.innerHTML='📋 次回予定なし — クリックして設定';}
+  }
 }
 
 function obHistPopDel(key){
@@ -9253,20 +9267,23 @@ function generateNotifications(){
     }
   });
 
-  // KJ 着工日が近々（7日以内）
+  // KJ 着工間近（基礎着工が7日以内）
   (kjRows||[]).forEach(function(r){
-    var ks = r['着工日']||r['工事着工日']||'';
+    var ks = r['基礎着工']||r['地鎮祭']||'';
     if(!ks) return;
-    if(ks >= todayStr && ks <= in7Str){
-      items.push({key:'kj_soon_'+r._id, icon:'🔨', title:'着工間近', sub:(r['物件名']||r['顧客名']||'')+'（'+ks+'）', time:ks, board:'kj'});
+    var ksN = (ks+'').replace(/\//g,'-').substring(0,10);
+    if(ksN >= todayStr && ksN <= in7Str){
+      items.push({key:'kj_soon_'+r._id, icon:'🔨', title:'着工間近', sub:(r['物件名']||r['顧客名']||'')+'（'+ksN+'）', time:ksN, board:'kj'});
     }
   });
 
   // KJ 引渡し予定が過ぎている
   (kjRows||[]).forEach(function(r){
-    var hd = r['引渡予定日']||'';
-    if(hd && hd < todayStr && (r['ステータス']||'').indexOf('引渡')< 0){
-      items.push({key:'kj_hd_'+r._id, icon:'🔴', title:'引渡予定日超過', sub:(r['物件名']||'')+'（予定 '+hd+'）', time:hd, board:'kj'});
+    var hd = r['引渡し']||'';
+    if(!hd) return;
+    var hdN = (hd+'').replace(/\//g,'-').substring(0,10);
+    if(hdN && hdN < todayStr && (r['ステータス']||'').indexOf('引渡')<0){
+      items.push({key:'kj_hd_'+r._id, icon:'🔴', title:'引渡予定日超過', sub:(r['物件名']||'')+'（予定 '+hdN+'）', time:hdN, board:'kj'});
     }
   });
 
@@ -9364,10 +9381,25 @@ function gsearchRun(){
 
 function gsearchJump(type, id){
   closeGlobalSearch();
-  if(type==='ob')    { enterOpenBoard(); }
-  else if(type==='mtg')  { enterMtgBoard(); }
-  else if(type==='kj')   { enterKojiBoard(); }
-  else if(type==='tochi'){ enterTochiBoard(); }
+  if(type==='ob'){
+    enterOpenBoard();
+    if(id!==null&&id!==undefined&&id!==''){
+      setTimeout(function(){
+        var row=typeof id==='number'?id:parseInt(id);
+        var tr=document.querySelector('tr[data-row="'+row+'"]');
+        if(tr){ tr.scrollIntoView({behavior:'smooth',block:'center'}); tr.style.outline='2px solid #9A8C76'; setTimeout(function(){tr.style.outline='';},1800); }
+        else if(!isNaN(row)){ obOpenDetail(row); }
+      },600);
+    }
+  } else if(type==='mtg'){
+    enterMtgBoard();
+    if(id!==null&&id!==''&&id!==undefined){ setTimeout(function(){ mtgOpenDetail(id); },600); }
+  } else if(type==='kj'){
+    enterKojiBoard();
+    if(id!==null&&id!==''&&id!==undefined){ setTimeout(function(){ kjOpenDetail(id); },600); }
+  } else if(type==='tochi'){
+    enterTochiBoard();
+  }
 }
 
 // ══════════════════════════════════════
