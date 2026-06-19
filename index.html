@@ -786,7 +786,7 @@ tr:hover .ob-del{opacity:1}
 .ob-table tr[data-sc="ob-s9"] td:first-child{border-left-color:#FECACA}
 .ob-table tr[data-sc="ob-sP"] td:first-child{border-left-color:#86EFAC}
 .ob-table tr[data-sc="ob-sF"] td:first-child{border-left-color:#D1D5DB}
-.ob-table tr[data-sc="ob-sF"] td{background:#F4F4F4;color:#AAA}
+.ob-table tr[data-sc="ob-sF"] td{background:#C8C8C8;color:#777}
 .ob-table tr[data-sc="ob-sF"] .ob-hist-chip{opacity:.5}
 
 /* ─── 来客状況カード表示 ─── */
@@ -5566,7 +5566,7 @@ function obQuickAddVisitor(ym){
 }
 
 function obHistChips(r){
-  var h=obDedupHistory(r.history||[]);
+  var h=obDedupHistory(r.history||[]).filter(function(item){ return item.type!=='面談'; });
   if(!h.length) return '<span class="ob-hist-chip" style="color:#DDD;border-color:#EEE">—</span>';
   var last=h.length-1;
   var chips=h.map(function(item,i){
@@ -5574,17 +5574,20 @@ function obHistChips(r){
     var shortD=d?(function(){var p=d.match(/^(\d{4})-(\d{2})-(\d{2})/);return p?parseInt(p[2])+'月'+parseInt(p[3])+'日':'';}()):'';
     var content=String(item.content||'').trim();
     var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0||OB_SOURCES.indexOf(content)>=0;
-    // 来場typeで具体的な種別がある場合は種別名を前面に出す（「見学会」「無料相談会」など）
+    // contentがgenericな来場chipは顧客の来場種別フィールドで補完
+    if(isGeneric&&(item.type==='来場'||item.type==='問い合わせ')&&r['来場種別']){
+      content=r['来場種別'];
+      isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0||OB_SOURCES.indexOf(content)>=0;
+    }
     var lbl;
     if((item.type==='来場'||item.type==='問い合わせ')&&content&&!isGeneric){
-      lbl=(shortD?shortD+' ':'')+content; // 「6/3 見学会」
+      lbl=(shortD?shortD+' ':'')+content;
     } else {
       lbl=(shortD?shortD+' ':'')+String(item.type||'')+((content&&!isGeneric)?'・'+content:'');
     }
     var title=(shortD?shortD+' ':'')+(item.type||'')+(content?'：'+content:'')+(item.staff?'（'+item.staff+'）':'');
     return '<span class="ob-hist-chip'+(i===last?' new':'')+'" title="'+esc(title)+'">'+esc(lbl)+'</span>';
   });
-  // 全件表示（切り捨てなし）
   return chips.join('');
 }
 
