@@ -5566,7 +5566,16 @@ function obQuickAddVisitor(ym){
 }
 
 function obHistChips(r){
-  var h=obDedupHistory(r.history||[]).filter(function(item){ return item.type!=='面談'; });
+  var inquiryDate=obNormDate(r['問い合わせ日']||'');
+  var h=obDedupHistory(r.history||[]).filter(function(item){
+    if(item.type==='面談') return false;
+    // 問い合わせ日と同日でcontentがgenericな来場は非表示
+    var iDate=obNormDate(item.date||'');
+    var content=String(item.content||'').trim();
+    var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0||OB_SOURCES.indexOf(content)>=0||!content;
+    if(inquiryDate&&iDate===inquiryDate&&isGeneric) return false;
+    return true;
+  });
   if(!h.length) return '<span class="ob-hist-chip" style="color:#DDD;border-color:#EEE">—</span>';
   var last=h.length-1;
   var chips=h.map(function(item,i){
