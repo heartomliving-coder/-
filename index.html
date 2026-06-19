@@ -5159,8 +5159,10 @@ function obLoad(silent, force){
     var ae=document.activeElement;
     var userEditing = _obAreaPickerOpen || (ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
       (document.getElementById('ob-detail').contains(ae) || document.getElementById('ob-visitors-content').contains(ae) || document.getElementById('ob-active-content').contains(ae) || document.getElementById('ob-hist-pop').contains(ae) || document.getElementById('ob-next-pop').contains(ae)));
-    // フェッチ中にユーザーが保存した場合は古いGASデータで上書きしない（レースコンディション対策）
-    if(_obLastSaveTs !== _saveTsAtFetchStart){
+    // フェッチ中にユーザーが保存した場合、または最近保存した場合は古いGASデータで上書きしない
+    // （保存後45秒以内は GAS がまだ処理中の可能性があるため）
+    var _recentSave = _obLastSaveTs > 0 && (Date.now() - _obLastSaveTs) < 45000;
+    if(_obLastSaveTs !== _saveTsAtFetchStart || _recentSave){
       obSetCache(obRows);
       __obLastUpdated=Date.now();
       obUpdateLastUpdatedLabel();
