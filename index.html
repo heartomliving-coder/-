@@ -5171,6 +5171,11 @@ function obLoad(silent, force){
       hubUpdateBadges();
       return;
     }
+    // 編集中は obRows の置換自体をしない
+    // （obRows=newRows → r._row 再割り当て → 再描画スキップ → DOM の onclick が古い行番号を指す問題を防ぐ）
+    if(userEditing){
+      __obLastUpdated=Date.now(); obUpdateLastUpdatedLabel(); hubUpdateBadges(); return;
+    }
     obRows=newRows;
     obRows.forEach(function(r,i){r._row=i;});
     obSetCache(obRows);
@@ -5188,7 +5193,7 @@ function obLoad(silent, force){
     obPopulateFilters();
     // OBボードが表示中のときだけ再描画（非表示中は不要なDOM操作を省略）
     var obVisible = document.getElementById('openboard').classList.contains('show');
-    if(!userEditing && obVisible){ obRenderAll(); }
+    if(obVisible){ obRenderAll(); }
     if(silent && obRows.length>prevLen){ toast('🔔 新規データ '+(obRows.length-prevLen)+'件 を取得しました'); }
     hubUpdateBadges();
     // ハブが表示中なら活動ログも更新
