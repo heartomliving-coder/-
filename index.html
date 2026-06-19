@@ -700,6 +700,18 @@ tr:hover .ob-del{opacity:1}
 .ob-hist-add-btn{font-size:.7rem;padding:2px 8px;border-radius:20px;border:1px dashed #C0A070;color:#C0A070;background:none;cursor:pointer;font-weight:700;opacity:0;transition:opacity .15s;white-space:nowrap;flex-shrink:0}
 .ob-hist-add-btn:hover{background:#C0A070;color:#fff}
 /* 来場履歴インラインポップオーバー */
+#ob-appt-confirm{z-index:10001}
+#ob-appt-confirm .modal-box{padding:32px 28px;text-align:center;max-width:380px}
+.ob-appt-icon{font-size:2.4rem;margin-bottom:10px}
+.ob-appt-name{font-size:1.1rem;font-weight:800;color:#2B2B2B;margin-bottom:4px}
+.ob-appt-date{font-size:.92rem;color:#666;margin-bottom:4px}
+.ob-appt-date strong{color:#991B1B;font-weight:700}
+.ob-appt-sub{font-size:.82rem;color:#999;margin-bottom:20px;min-height:18px}
+.ob-appt-q{font-size:.95rem;font-weight:700;color:#2B2B2B;margin-bottom:18px}
+.ob-appt-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.ob-appt-yes{background:#166534;color:#fff;border:none;border-radius:8px;padding:11px 22px;font-size:.88rem;cursor:pointer;font-weight:700;font-family:inherit}
+.ob-appt-no{background:#991B1B;color:#fff;border:none;border-radius:8px;padding:11px 22px;font-size:.88rem;cursor:pointer;font-weight:700;font-family:inherit}
+.ob-appt-skip{background:none;border:none;color:#BBB;cursor:pointer;font-size:.78rem;font-family:inherit;text-decoration:underline}
 #ob-hist-pop{position:fixed;z-index:9999;background:#fff;border:1px solid #DDD;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:16px;min-width:320px;display:none}
 #ob-hist-pop.show{display:block}
 .ob-hist-pop-title{font-weight:700;font-size:.9rem;color:#2B2B2B;margin-bottom:12px;border-bottom:1px solid #F0EDE8;padding-bottom:8px}
@@ -2117,6 +2129,21 @@ tr:hover .ob-del{opacity:1}
   <div class="ob-hist-pop-btns">
     <button class="ob-hist-pop-cancel" onclick="obHistPopClose()">閉じる</button>
     <button class="ob-hist-pop-save" onclick="obHistPopSave()">追加</button>
+  </div>
+</div>
+
+<div class="modal" id="ob-appt-confirm">
+  <div class="modal-box">
+    <div class="ob-appt-icon">📅</div>
+    <div class="ob-appt-name"><span id="ob-appt-name"></span> 様</div>
+    <div class="ob-appt-date">次回予定日 <strong id="ob-appt-date"></strong> が過ぎました</div>
+    <div class="ob-appt-sub" id="ob-appt-sub"></div>
+    <div class="ob-appt-q">来場されましたか？</div>
+    <div class="ob-appt-btns">
+      <button class="ob-appt-yes" onclick="obApptConfirm('visited')">✅ 来場した</button>
+      <button class="ob-appt-no" onclick="obApptConfirm('cancelled')">❌ 来場しなかった</button>
+    </div>
+    <button class="ob-appt-skip" onclick="obApptConfirm('skip')">後で確認</button>
   </div>
 </div>
 
@@ -5182,7 +5209,50 @@ function obUpdateLastUpdatedLabel(){
   el.title='次回自動更新: '+(isCacheFresh('ob_v3_ts')?Math.round((CACHE_TTL_MS-(Date.now()-ts))/60000)+'分後':'まもなく');
 }
 
-function obRenderAll(){ obRenderPipeline(); obRenderVisitors(); obRenderActive(); if(obCurrentTab==='agg') obRenderAgg(); }
+function obRenderAll(){ obRenderPipeline(); obRenderVisitors(); obRenderActive(); if(obCurrentTab==='agg') obRenderAgg(); setTimeout(obCheckPastAppointments,400); }
+
+function obCheckPastAppointments(){
+  var today=new Date(); today.setHours(0,0,0,0);
+  var checked=JSON.parse(localStorage.getItem('ob_appt_checked')||'{}');
+  for(var i=0;i<obRows.length;i++){
+    var r=obRows[i]; if(!r||!r.id||!r['次回予定']) continue;
+    var nd=obNormDate(r['次回予定']); if(!nd||nd.length<10) continue;
+    var nDate=new Date(nd+'T00:00:00'); if(nDate>=today) continue;
+    var key=r.id+'_'+nd;
+    if(checked[key]) continue;
+    _obShowApptConfirm(i,nd,r['次回内容']||'');
+    return;
+  }
+}
+function _obShowApptConfirm(rowIdx,dateStr,content){
+  var r=obRows[rowIdx]; if(!r) return;
+  var m=document.getElementById('ob-appt-confirm'); if(!m) return;
+  document.getElementById('ob-appt-name').textContent=r['顧客名']||'—';
+  document.getElementById('ob-appt-date').textContent=obFmtDate(dateStr);
+  document.getElementById('ob-appt-sub').textContent=content?'（'+content+'）':'';
+  m._rowIdx=rowIdx; m._dateStr=dateStr;
+  m.classList.add('show');
+}
+function obApptConfirm(result){
+  var m=document.getElementById('ob-appt-confirm'); if(!m) return;
+  var rowIdx=m._rowIdx; var dateStr=m._dateStr;
+  var r=obRows[rowIdx]; if(!r) return;
+  var checked=JSON.parse(localStorage.getItem('ob_appt_checked')||'{}');
+  checked[r.id+'_'+dateStr]=result;
+  localStorage.setItem('ob_appt_checked',JSON.stringify(checked));
+  m.classList.remove('show');
+  if(result==='skip'){ setTimeout(obCheckPastAppointments,1000); return; }
+  var content=result==='visited'?(r['次回内容']||'来場'):'キャンセル';
+  if(!r.history) r.history=[];
+  r.history.push({date:dateStr,type:'来場',content:content,staff:r['担当者']||''});
+  r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+  _obLastSaveTs=Date.now();
+  obSetCache(obRows);
+  obRenderVisitors();
+  post({action:'obAddHistory',id:r.id,row:rowIdx,date:dateStr,type:'来場',content:content,staff:r['担当者']||''});
+  toast(result==='visited'?'✅ 来場履歴に追加しました':'📋 キャンセルとして記録しました');
+  setTimeout(obCheckPastAppointments,600);
+}
 
 // パイプラインフロー（ステータスごとの件数バー）
 function obRenderPipeline(){
@@ -5455,17 +5525,16 @@ function obRenderVisitors(){
     });
   });
 
-  var COL=13;
+  var COL=12;
   var html=aggHtml+'<table class="ob-table ob-vis-table"><thead><tr>'+
     '<th class="ob-rn" style="width:28px">#</th>'+
     '<th style="min-width:84px">来場日</th>'+
-    '<th style="min-width:72px">種別</th>'+
+    '<th style="min-width:80px">反響元</th>'+
     '<th style="min-width:160px">顧客名 / 電話番号</th>'+
     '<th style="min-width:90px">ステータス</th>'+
     '<th style="min-width:64px">担当</th>'+
     '<th style="min-width:64px">サブ担当</th>'+
     '<th style="min-width:62px">エリア</th>'+
-    '<th style="min-width:66px">反響元</th>'+
     '<th style="min-width:200px">来場履歴</th>'+
     '<th style="min-width:92px">次回予定日</th>'+
     '<th style="min-width:90px">次回内容</th>'+
@@ -5544,7 +5613,7 @@ function obRenderVisitors(){
           '</span>'+
         '</td>'+
         '<td onclick="event.stopPropagation()">'+
-          '<span class="ob-editable ob-tipo-chip" data-row="'+r._row+'" data-field="来場種別" data-type="sel" onclick="obStartEdit(this);event.stopPropagation()">'+esc(r['来場種別']||'—')+'</span>'+
+          '<span class="ob-editable ob-tipo-chip" data-row="'+r._row+'" data-field="反響元" data-type="sel" onclick="obStartEdit(this);event.stopPropagation()">'+(r['反響元']?esc(r['反響元']):'<span style="color:#CCC;font-weight:400">—</span>')+'</span>'+
         '</td>'+
         '<td class="ob-td-name">'+
           '<span class="ob-name-link" onclick="obOpenDetail('+r._row+');event.stopPropagation()">'+esc(r['顧客名']||'—')+'</span>'+
@@ -5561,7 +5630,6 @@ function obRenderVisitors(){
           obCell(r,'サブ担当')+
         '</td>'+
         '<td onclick="event.stopPropagation()" style="font-size:.76rem">'+obCell(r,'エリア')+'</td>'+
-        '<td onclick="event.stopPropagation()" style="font-size:.76rem">'+obCell(r,'反響元')+'</td>'+
         '<td class="ob-td-hist" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()" title="クリックして来場履歴を追加・編集">'+
           '<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div>'+
         '</td>'+
