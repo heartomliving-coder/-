@@ -27,7 +27,7 @@
 html{font-size:calc(16px * var(--fs))}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--tx);
   font-family:"Noto Sans JP",sans-serif;overscroll-behavior:none;
-  -webkit-text-size-adjust:100%;text-size-adjust:100%}
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden}
 body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,118,.06),transparent 60%)}
 
 /* ─────────── ログイン画面（社内業務システム / スプリット） ─────────── */
@@ -1521,10 +1521,15 @@ tr:hover .ob-del{opacity:1}
 .ws-sidebar.collapsed .ws-sb-section{display:none}
 .ws-sb-footer{flex-shrink:0;border-top:1px solid rgba(255,255,255,.07);padding:6px 0}
 /* Body shift when sidebar open */
+/* サイドバー開閉トランジション */
+.hub{transition:left .2s ease!important}
+.ob,.kj,.mtg,#kojiboard,#tochiboard,#custboard,#notesboard,#customdbboard{transition:margin-left .2s ease,width .2s ease}
+/* サイドバー開いた時のレイアウトシフト */
 body.ws-open .hub{left:240px!important}
-body.ws-open .ob,body.ws-open #kojiboard,body.ws-open #tochiboard,body.ws-open .mtg,body.ws-open #custboard,body.ws-open #notesboard,body.ws-open #customdbboard{margin-left:240px}
+body.ws-open .ob,body.ws-open .kj,body.ws-open #kojiboard,body.ws-open #tochiboard,body.ws-open .mtg,body.ws-open #custboard,body.ws-open #notesboard,body.ws-open #customdbboard{margin-left:240px;width:calc(100vw - 240px)}
+/* サイドバー折りたたみ時 */
 body.ws-collapsed .hub{left:52px!important}
-body.ws-collapsed .ob,body.ws-collapsed #kojiboard,body.ws-collapsed #tochiboard,body.ws-collapsed .mtg,body.ws-collapsed #custboard,body.ws-collapsed #notesboard,body.ws-collapsed #customdbboard{margin-left:52px}
+body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws-collapsed #tochiboard,body.ws-collapsed .mtg,body.ws-collapsed #custboard,body.ws-collapsed #notesboard,body.ws-collapsed #customdbboard{margin-left:52px;width:calc(100vw - 52px)}
 
 /* ── カスタムDB ──────────────────────────────────────── */
 #customdbboard{display:none;flex-direction:column;height:100dvh;overflow:hidden;background:#F7F6F3}
@@ -3566,12 +3571,15 @@ function showApp(){
     document.getElementById('board').style.display = 'flex';
     initBoard();
   } else {
+    // サイドバーを先に初期化（hub表示前にleft:240px適用してジャンプ防止）
+    wsInit(); wsShow();
     document.getElementById('hub').classList.add('show');
     // キャッシュから即時描画、続いてバックグラウンドで最新取得
     var obCached = (function(){ try{var d=localStorage.getItem('ob_v3');return d?JSON.parse(d):[];}catch(e){return[];} })();
     var kjCached = (function(){ try{var d=localStorage.getItem('kj_v1');return d?JSON.parse(d):[];}catch(e){return[];} })();
     if(obCached.length){ obRows=obCached; obRows.forEach(function(r,i){r._row=i;}); }
     if(kjCached.length){ kjRows=kjCached; kjRows.forEach(function(r,i){r._idx=i;}); }
+    wsSetActiveSection('hub');
     hubUpdateBadges();
     scheduleEvSyncFromGAS(); // 初回ログイン時もGASからイベントを即時取得
     setTimeout(function(){ obLoad(true); kjLoad(true); }, 400);
@@ -3579,7 +3587,6 @@ function showApp(){
     setTimeout(function(){ hubLoadTodayKpi(); }, 1200);
     setTimeout(function(){ hubLoadGcal(); }, 2000); // Googleカレンダー
     setTimeout(function(){ hubBuildActivityFeed(); hubRenderExtKpi(); refreshNotifBadge(); }, 500);
-    wsInit(); wsShow(); wsSetActiveSection('hub');
     // ★ ログイン直後に誕生日をバックグラウンドで自動同期
     setTimeout(function(){
       if(!adminKey()) return;
