@@ -1611,6 +1611,7 @@ tr:hover .ob-del{opacity:1}
       <div class="hh-title">HEARTOM LIVING<span class="hh-sub">Management Console — 社内業務統合システム</span></div>
     </div>
     <div class="hh-grow"></div>
+    <div id="hubOnlineUsers" style="display:flex;align-items:center;gap:6px;margin-right:4px"></div>
     <div id="hubBdayNotif" class="hh-notif" onclick="hubOpenBdayTab()" style="display:none">🎂 <span id="hubBdayNotifTxt"></span></div>
     <div class="hh-clock-wrap">
       <div class="hh-clock" id="hubClockTime">--:--:--</div>
@@ -1620,7 +1621,10 @@ tr:hover .ob-del{opacity:1}
     <div id="hubUserInfo" style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:all .2s" onclick="showSettings()" title="設定を開く" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
       <span style="font-size:1rem">👤</span>
       <div style="line-height:1.25">
-        <div id="hubUserName" style="font-size:.8rem;color:rgba(255,255,255,.92);font-weight:700;letter-spacing:.02em;white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis"></div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div id="hubUserName" style="font-size:.8rem;color:rgba(255,255,255,.92);font-weight:700;letter-spacing:.02em;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis"></div>
+          <span id="hubRoleBadge" style="font-size:.58rem;padding:1px 7px;border-radius:99px;color:#fff;white-space:nowrap;background:#6B7280"></span>
+        </div>
         <div id="hubUserEmail" style="font-size:.6rem;color:rgba(255,255,255,.38);letter-spacing:.01em;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
       </div>
     </div>
@@ -2050,6 +2054,7 @@ tr:hover .ob-del{opacity:1}
       <button class="ob-det-tab" data-dtab="birthday" onclick="obDetTab('birthday')">🎂 誕生日</button>
       <button class="ob-det-tab" data-dtab="timeline" onclick="obDetTab('timeline')">📅 TL</button>
       <button class="ob-det-tab" data-dtab="drive" onclick="obDetTab('drive')">📁 ドライブ</button>
+      <button class="ob-det-tab" data-dtab="mendan" onclick="obDetTab('mendan')">📝 面談報告</button>
     </div>
   </div>
   <div class="ob-det-body">
@@ -2105,6 +2110,46 @@ tr:hover .ob-del{opacity:1}
         <button class="hbtn primary" onclick="obSaveDriveUrl()">保存・表示</button>
       </div>
       <div id="ob-drive-frame-wrap"></div>
+    </div>
+    <!-- 面談報告 -->
+    <div class="ob-det-pane" data-dtab="mendan" id="ob-det-pane-mendan">
+      <div id="ob-mendan-today-banner" style="display:none;background:#FFF8E6;border:1px solid #F5C842;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:.84rem;color:#92400E;font-weight:600">
+        📋 本日来場日です。面談報告を入力してください。
+      </div>
+      <div id="ob-mendan-history" style="margin-bottom:24px"></div>
+      <div class="ob-sec-title" style="margin-bottom:12px">＋ 新規面談報告を追加</div>
+      <div id="ob-mendan-form" style="background:#fff;border:1px solid #E8E4DE;border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label style="font-size:.72rem;font-weight:700;color:#888;letter-spacing:.1em;display:block;margin-bottom:4px">面談日時</label><input type="datetime-local" id="mf-datetime" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:8px 10px;font-size:.84rem;font-family:inherit"></div>
+          <div><label style="font-size:.72rem;font-weight:700;color:#888;letter-spacing:.1em;display:block;margin-bottom:4px">場所</label><input type="text" id="mf-place" placeholder="例）展示場・現地・オンライン" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:8px 10px;font-size:.84rem;font-family:inherit;box-sizing:border-box"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label style="font-size:.72rem;font-weight:700;color:#888;letter-spacing:.1em;display:block;margin-bottom:4px">来場者</label><input type="text" id="mf-visitors" placeholder="例）ご夫婦・お子様2名" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:8px 10px;font-size:.84rem;font-family:inherit;box-sizing:border-box"></div>
+          <div><label style="font-size:.72rem;font-weight:700;color:#888;letter-spacing:.1em;display:block;margin-bottom:4px">対応メンバー</label><input type="text" id="mf-staff" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:8px 10px;font-size:.84rem;font-family:inherit;box-sizing:border-box"></div>
+        </div>
+        <div><label style="font-size:.72rem;font-weight:700;color:#888;letter-spacing:.1em;display:block;margin-bottom:4px">結果</label><input type="text" id="mf-result" placeholder="例）見学のみ・資料持ち帰り・次回FP予定" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:8px 10px;font-size:.84rem;font-family:inherit;box-sizing:border-box"></div>
+        <div class="ob-sec-title" style="font-size:.72rem;margin:4px 0 0">経緯・内容</div>
+        <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">お客様が何を知りたくて来場したか・現在の不安・悩み</label><textarea id="mf-background" rows="3" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:8px 10px;font-size:.84rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
+        <div class="ob-sec-title" style="font-size:.72rem;margin:4px 0 0">5ポイント（○×）</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
+          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">動機（なぜ家づくりを始めたか）</label><textarea id="mf-motivation" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
+          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">時期（着工・完工・引越し希望時期）</label><textarea id="mf-timing" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
+          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">競合（他社・検討状況）</label><textarea id="mf-competitor" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
+          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">関与者（決定権者・影響者）</label><textarea id="mf-stakeholder" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
+          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">予算（総予算・FP・事前審査）</label><textarea id="mf-budget" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
+          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">ファン化（会社・デザイン・性能・施工）</label><textarea id="mf-fan" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
+          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">土地（所有・購入・希望エリア）</label><textarea id="mf-land" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
+          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">設計（建築家/trip希望）</label><textarea id="mf-design" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
+        </div>
+        <div><label style="font-size:.72rem;font-weight:700;color:#888;letter-spacing:.1em;display:block;margin-bottom:4px">詳細（箇条書き）</label><textarea id="mf-detail" rows="4" placeholder="・高性能住宅に興味あり&#10;・" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:8px 10px;font-size:.84rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
+        <div><label style="font-size:.72rem;font-weight:700;color:#888;letter-spacing:.1em;display:block;margin-bottom:4px">担当者感想</label><textarea id="mf-impression" rows="3" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:8px 10px;font-size:.84rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
+        <div><label style="font-size:.72rem;font-weight:700;color:#888;letter-spacing:.1em;display:block;margin-bottom:4px">レビュー（営業MTG後に追記）</label><textarea id="mf-review" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:8px 10px;font-size:.84rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="hbtn" onclick="obMendanClear()">クリア</button>
+          <button class="hbtn primary" onclick="obMendanSave()">💾 面談報告を保存</button>
+        </div>
+        <div id="ob-mendan-save-msg" style="font-size:.8rem;min-height:1em;text-align:right"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -2824,7 +2869,14 @@ tr:hover .ob-del{opacity:1}
           <div class="st-account-info" id="stAccountInfo">読み込み中...</div>
           <button class="st-logout" onclick="logout()">ログアウト</button>
 
-          <div class="st-sec" style="margin-top:16px">管理アカウント</div>
+          <div class="st-sec" style="margin-top:16px">権限レベル</div>
+          <div style="font-size:.8rem;color:#555;line-height:1.8;margin-bottom:12px;border:1px solid #E8E4DE;border-radius:6px;padding:12px 14px;background:#FAFAF8">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><span style="background:#9A8C76;color:#fff;font-size:.68rem;padding:2px 9px;border-radius:99px">オーナー</span> heartom.living / oki.heartom — アカウント管理・システム設定全般</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><span style="background:#2563EB;color:#fff;font-size:.68rem;padding:2px 9px;border-radius:99px">フルアクセス</span> hatada / inaba — 編集・DB作成・レイアウト変更（アカウント管理不可）</div>
+            <div style="display:flex;gap:8px;align-items:center"><span style="background:#6B7280;color:#fff;font-size:.68rem;padding:2px 9px;border-radius:99px">一般</span> その他 — 閲覧・データ入力・必要な更新作業のみ</div>
+          </div>
+
+          <div class="st-sec" style="margin-top:16px">管理アカウント一覧 <span style="font-size:.72rem;font-weight:400;color:#999">（オーナーのみ管理可）</span></div>
           <div id="adminEmailList" style="margin-bottom:10px;font-size:.85rem;color:var(--charcoal)">読み込み中…</div>
           <div style="display:flex;gap:6px;align-items:center">
             <input type="email" id="newAdminEmailInput" placeholder="追加するGmailアドレス"
@@ -2833,6 +2885,18 @@ tr:hover .ob-del{opacity:1}
             <button class="save" style="padding:7px 14px;font-size:.85rem;white-space:nowrap" onclick="addAdminEmailFromUI()">追加</button>
           </div>
           <div id="adminEmailMsg" style="margin-top:6px;font-size:.8rem;min-height:1em"></div>
+
+          <div class="st-sec" style="margin-top:20px">追加予定アカウント</div>
+          <div style="font-size:.8rem;color:#666;margin-bottom:8px">以下のアカウントをまだ追加していない場合は「一括追加」で登録してください。</div>
+          <div style="background:#F3F4F6;border-radius:6px;padding:10px 14px;font-size:.82rem;color:#444;line-height:2;margin-bottom:10px;font-family:monospace">
+            tada.heartom@gmail.com<br>
+            watanabe.heartom@gmail.com<br>
+            wada.heartom@gmail.com<br>
+            ishikawa.heartom@gmail.com<br>
+            tanaka.heartom@gmail.com
+          </div>
+          <button class="hbtn" onclick="obAddPendingAccounts()">➕ 上記を一括追加</button>
+          <div id="pendingAccountsMsg" style="margin-top:6px;font-size:.8rem;min-height:1em"></div>
         </div>
 
       </div>
@@ -2894,6 +2958,52 @@ var DEFAULT_CUSTOMER_URL="https://heartom-customer.vercel.app/";
 function sendUrl(){ return (localStorage.getItem('admin_gas_url')||SEND_URL_DEFAULT).trim(); }
 function customerUrl(){ return (localStorage.getItem('admin_customer_url')||DEFAULT_CUSTOMER_URL).trim(); }
 var SESSION_EXPIRE_MS = 8 * 60 * 60 * 1000; // 8時間
+
+// ─── 権限管理 ───────────────────────────────────────────────
+// オーナー：アカウント追加・削除・権限変更・システム設定全般
+var ROLE_OWNER = [
+  'heartom.living@gmail.com',
+  'oki.heartom@gmail.com'
+];
+// フルアクセス：ページ編集・DB作成・DB編集・レイアウト変更（アカウント管理不可）
+var ROLE_FULL = [
+  'hatada.heartom@gmail.com',
+  'inaba.heartom@gmail.com'
+];
+// 一般：閲覧・データ入力・必要な更新作業のみ（上記以外は全員一般）
+
+function getUserRole(){
+  var email = (localStorage.getItem('admin_session_email')||'').toLowerCase().trim();
+  if(!email) return 'general';
+  if(ROLE_OWNER.indexOf(email)>=0) return 'owner';
+  if(ROLE_FULL.indexOf(email)>=0) return 'full';
+  return 'general';
+}
+function isOwner(){ return getUserRole()==='owner'; }
+function isFullAccess(){ return getUserRole()==='owner'||getUserRole()==='full'; }
+
+function applyRoleUI(){
+  var role = getUserRole();
+  var roleLbl = role==='owner'?'オーナー':role==='full'?'フルアクセス':'一般';
+  var roleColor = role==='owner'?'#9A8C76':role==='full'?'#2563EB':'#6B7280';
+  // ロールバッジをユーザー情報エリアに表示
+  var badge = document.getElementById('hubRoleBadge');
+  if(badge){ badge.textContent=roleLbl; badge.style.background=roleColor; }
+  // アカウント管理タブ（オーナーのみ）
+  var accountTab = document.getElementById('stab-account');
+  if(accountTab) accountTab.style.display = isOwner() ? '' : 'none';
+  // システム設定全般（データ管理・接続設定はオーナー/フルアクセスのみ）
+  var datatoolsTab = document.getElementById('stab-datatools');
+  if(datatoolsTab) datatoolsTab.style.display = isFullAccess() ? '' : 'none';
+  var connectionTab = document.getElementById('stab-connection');
+  if(connectionTab) connectionTab.style.display = isFullAccess() ? '' : 'none';
+  var supabaseTab = document.getElementById('stab-supabase');
+  if(supabaseTab) supabaseTab.style.display = isOwner() ? '' : 'none';
+  // 削除ボタン（フルアクセス以上のみ）
+  document.querySelectorAll('.ob-del,.ob-vis-card-act.del,.kj-del-btn').forEach(function(el){
+    el.style.display = isFullAccess() ? '' : 'none';
+  });
+}
 
 function adminKey(){
   var tok = localStorage.getItem('admin_session_token') || '';
@@ -3199,6 +3309,7 @@ function showApp(){
   var em = localStorage.getItem('admin_session_email') || '';
   if(nameEl){ nameEl.textContent = nm || em || 'ログイン中'; nameEl.title = nm || em; }
   if(emailEl){ emailEl.textContent = nm ? em : ''; }
+  applyRoleUI();
   if (isBoardView) {
     document.getElementById('board').style.display = 'flex';
     initBoard();
@@ -3367,6 +3478,53 @@ function initSyncPoll(){
     if(r&&r.ok){_syncState.ob=r.ob;_syncState.kj=r.kj;_syncState.tochi=r.tochi;_syncState.mtg=r.mtg;_syncState.events=r.events;}
     window.__syncPollTimer=setInterval(checkRemoteChanges,20000);
   });
+  // 同時編集者表示：60秒ごとにpresenceを更新・表示
+  presenceUpdate();
+  window.__presenceTimer=setInterval(presenceUpdate,60000);
+}
+
+// ─── 同時編集者表示 ─────────────────────────────────────────
+function presenceUpdate(){
+  var sbUrl=localStorage.getItem('sb_url');
+  var sbKey=localStorage.getItem('sb_key');
+  var email=localStorage.getItem('admin_session_email')||'';
+  var name=localStorage.getItem('admin_session_name')||email||'';
+  if(!sbUrl||!sbKey||!email) return;
+  var page=_getPresencePage();
+  // 自分の存在をupsert（user_presenceテーブルが必要）
+  fetch(sbUrl+'/rest/v1/user_presence',{
+    method:'POST',
+    headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
+    body:JSON.stringify({email:email,name:name,page:page,updated_at:new Date().toISOString()})
+  }).then(function(){
+    // 全アクティブユーザーを取得（5分以内）
+    var cutoff=new Date(Date.now()-5*60*1000).toISOString();
+    return fetch(sbUrl+'/rest/v1/user_presence?updated_at=gte.'+cutoff+'&select=email,name,page',{
+      headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey,'Accept':'application/json'}
+    });
+  }).then(function(r){return r.json();}).then(function(rows){
+    if(!Array.isArray(rows)) return;
+    _renderPresence(rows, email);
+  }).catch(function(){});
+}
+function _getPresencePage(){
+  if(document.getElementById('ob-detail')&&document.getElementById('ob-detail').classList.contains('show')) return 'OB詳細';
+  if(document.getElementById('openboard')&&document.getElementById('openboard').classList.contains('show')) return 'OB';
+  if(document.getElementById('kj-board')&&document.getElementById('kj-board').classList.contains('show')) return '着工';
+  if(document.getElementById('mtgboard')&&document.getElementById('mtgboard').classList.contains('show')) return 'MTG';
+  if(document.getElementById('tochi-board')&&document.getElementById('tochi-board').classList.contains('show')) return '土地DB';
+  return 'ハブ';
+}
+function _renderPresence(rows, myEmail){
+  var el=document.getElementById('hubOnlineUsers'); if(!el) return;
+  var others=rows.filter(function(r){return r.email!==myEmail;});
+  if(!others.length){ el.innerHTML=''; return; }
+  el.innerHTML='<span style="font-size:.6rem;color:rgba(255,255,255,.35);letter-spacing:.06em;margin-right:2px">閲覧中</span>'+
+    others.map(function(u){
+      var initials=(u.name||u.email||'?').replace(/@.*$/,'').slice(0,2).toUpperCase();
+      var color=['#4F46E5','#0891B2','#059669','#D97706','#DC2626'][Math.abs(u.email.charCodeAt(0))%5];
+      return '<span title="'+esc(u.name||u.email)+' ('+esc(u.page||'')+')" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:'+color+';color:#fff;font-size:.58rem;font-weight:700;border:1.5px solid rgba(255,255,255,.25)">'+initials+'</span>';
+    }).join('');
 }
 function checkRemoteChanges(){
   gasGet('getChangeTimes',function(r){
@@ -3611,17 +3769,8 @@ function hubRenderBdayMini(){
     if(days<=7) soon.push({b:b,days:days,date:(target.getMonth()+1)+'月'+target.getDate()+'日'});
   });
   soon.sort(function(a,x){return a.days-x.days;});
-  // ヘッダー通知
-  if(soon.length && notifEl && notifTxtEl){
-    var todayBdays=soon.filter(function(s){return s.days===0;});
-    if(todayBdays.length){
-      notifTxtEl.textContent='今日 '+todayBdays.length+'件の誕生日';
-      notifEl.style.display='flex';
-    } else {
-      notifTxtEl.textContent=soon.length+'件（'+soon[0].days+'日後〜）';
-      notifEl.style.display='flex';
-    }
-  } else if(notifEl) { notifEl.style.display='none'; }
+  // ヘッダー通知は非表示（誕生日はサイドバーのみ表示）
+  if(notifEl) notifEl.style.display='none';
   if(!soon.length){ el.innerHTML='<div class="hub-empty-mini">今後7日の誕生日なし</div>'; return; }
   el.innerHTML=soon.slice(0,6).map(function(s){
     var b=s.b; var isToday=s.days===0;
@@ -4167,6 +4316,12 @@ function copyBoardUrl() {
 }
 
 // ─── 管理アカウント管理 ───
+function getRoleLabel(email){
+  var e=(email||'').toLowerCase().trim();
+  if(ROLE_OWNER.indexOf(e)>=0) return {label:'オーナー',color:'#9A8C76'};
+  if(ROLE_FULL.indexOf(e)>=0) return {label:'フルアクセス',color:'#2563EB'};
+  return {label:'一般',color:'#6B7280'};
+}
 function loadAdminEmailList() {
   var el = document.getElementById('adminEmailList');
   if (!el) return;
@@ -4176,8 +4331,10 @@ function loadAdminEmailList() {
     if (d.all.length === 0) { el.innerHTML = '<span style="color:#999">登録なし</span>'; return; }
     el.innerHTML = d.all.map(function(email) {
       var isFixed = d.fixed && d.fixed.indexOf(email) >= 0;
-      return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--bd)">' +
+      var rl=getRoleLabel(email);
+      return '<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--bd)">' +
         '<span style="flex:1;font-size:.85rem">' + email + '</span>' +
+        '<span style="font-size:.7rem;padding:2px 8px;border-radius:99px;background:'+rl.color+';color:#fff;white-space:nowrap">'+rl.label+'</span>'+
         (isFixed
           ? '<span style="font-size:.72rem;color:#999;white-space:nowrap">固定</span>'
           : '<button onclick="removeAdminEmailFromUI(\'' + email.replace(/'/g,"\\'") + '\')" style="background:none;border:1px solid #ccc;border-radius:4px;padding:2px 8px;font-size:.75rem;cursor:pointer;color:#c00">削除</button>'
@@ -4217,6 +4374,22 @@ function removeAdminEmailFromUI(email) {
       if (msg) { msg.style.color = '#2a7a2a'; msg.textContent = '✓ 削除しました'; setTimeout(function(){ msg.textContent=''; }, 3000); }
       loadAdminEmailList();
     }
+  });
+}
+
+function obAddPendingAccounts(){
+  var pending=['tada.heartom@gmail.com','watanabe.heartom@gmail.com','wada.heartom@gmail.com','ishikawa.heartom@gmail.com','tanaka.heartom@gmail.com'];
+  var msg=document.getElementById('pendingAccountsMsg');
+  if(msg){ msg.style.color='#888'; msg.textContent='追加中...'; }
+  var done=0;
+  pending.forEach(function(email){
+    gasGet('addAdminEmail&email='+encodeURIComponent(email),function(d){
+      done++;
+      if(done===pending.length){
+        loadAdminEmailList();
+        if(msg){ msg.style.color='#22C55E'; msg.textContent='✅ 追加完了（既存は無視されます）'; setTimeout(function(){msg.textContent='';},4000); }
+      }
+    });
   });
 }
 
@@ -5161,7 +5334,8 @@ function obLoad(silent, force){
       (document.getElementById('ob-detail').contains(ae) || document.getElementById('ob-visitors-content').contains(ae) || document.getElementById('ob-active-content').contains(ae) || document.getElementById('ob-hist-pop').contains(ae) || document.getElementById('ob-next-pop').contains(ae)));
     // フェッチ中にユーザーが保存した場合、または最近保存した場合は古いGASデータで上書きしない
     // （保存後45秒以内は GAS がまだ処理中の可能性があるため）
-    var _recentSave = _obLastSaveTs > 0 && (Date.now() - _obLastSaveTs) < 45000;
+    // 手動更新（silent=false）の場合は保護をスキップし必ず最新データを適用する
+    var _recentSave = silent && _obLastSaveTs > 0 && (Date.now() - _obLastSaveTs) < 45000;
     if(_obLastSaveTs !== _saveTsAtFetchStart || _recentSave){
       obSetCache(obRows);
       __obLastUpdated=Date.now();
@@ -5270,11 +5444,16 @@ function obApptConfirm(result){
   if(!r.history) r.history=[];
   r.history.push({date:dateStr,type:'来場',content:content,staff:r['担当者']||''});
   r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+  // 来場確認処理完了後に次回予定をクリア
+  r['次回予定']=''; r['次回種別']=''; r['次回内容']='';
   _obLastSaveTs=Date.now();
   obSetCache(obRows);
   obRenderVisitors();
   post({action:'obAddHistory',id:r.id,row:rowIdx,date:dateStr,type:'来場',content:content,staff:r['担当者']||''});
-  toast(result==='visited'?'✅ 来場履歴に追加しました':'📋 キャンセルとして記録しました');
+  obSaveField(rowIdx,'次回予定','');
+  obSaveField(rowIdx,'次回種別','');
+  obSaveField(rowIdx,'次回内容','');
+  toast(result==='visited'?'✅ 来場履歴に追加・次回予定をクリアしました':'📋 キャンセルとして記録・次回予定をクリアしました');
   setTimeout(obCheckPastAppointments,600);
 }
 
@@ -6508,6 +6687,7 @@ function obConfirmDel(rowIdx){
   // UIから即時削除（楽観的更新）
   obRows.splice(rowIdx,1);
   obRows.forEach(function(r,i){r._row=i;});
+  _obLastSaveTs=Date.now(); // 削除直後のバックグラウンドポーリングで復活しないよう保護
   obSetCache(obRows);
   // 詳細パネルのobDetailRowを補正（削除行より後ろは1つずれる）
   if(obDetailRow===rowIdx){ obCloseDetail(); }
@@ -6603,6 +6783,12 @@ function obOpenDetail(rowIdx){
   if(tlEl) tlEl.innerHTML = buildCustomerTimeline(r);
   document.getElementById('ob-detail').classList.add('show');
   document.getElementById('ob-detail').scrollTop=0;
+  // 来場日当日なら面談報告タブを自動表示
+  var todayStr=(function(){var t=new Date();return t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2);})();
+  var visitDate=obNormDate(r['来場日']||'');
+  if(visitDate===todayStr){
+    setTimeout(function(){ obDetTab('mendan'); },200);
+  }
 }
 
 function obOpenDetailTab(row, tab){
@@ -6644,6 +6830,107 @@ function obDetTab(tab){
   if(tab==='birthday') obRenderDetBirthday();
   if(tab==='drive') obRenderDetDrive();
   if(tab==='timeline') obRenderDetTimeline();
+  if(tab==='mendan') obRenderMendanTab();
+}
+
+// ─── 面談報告 ───────────────────────────────────────────────
+function obRenderMendanTab(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  // 本日来場日バナー
+  var todayStr=(function(){var t=new Date();return t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2);})();
+  var visitDate=obNormDate(r['来場日']||'');
+  var banner=document.getElementById('ob-mendan-today-banner');
+  if(banner) banner.style.display=(visitDate===todayStr)?'block':'none';
+  // 担当者を自動入力
+  var staffEl=document.getElementById('mf-staff');
+  if(staffEl&&!staffEl.value){
+    staffEl.value=(localStorage.getItem('admin_session_name')||r['担当者']||'');
+  }
+  // 今日の日時を自動入力
+  var dtEl=document.getElementById('mf-datetime');
+  if(dtEl&&!dtEl.value){
+    var now=new Date();
+    dtEl.value=now.getFullYear()+'-'+('0'+(now.getMonth()+1)).slice(-2)+'-'+('0'+now.getDate()).slice(-2)+'T'+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2);
+  }
+  // 既存面談報告を表示
+  obRenderMendanHistory(r);
+}
+
+function obRenderMendanHistory(r){
+  var el=document.getElementById('ob-mendan-history'); if(!el) return;
+  var reports=(r.mendan||[]);
+  if(!reports.length){ el.innerHTML='<div style="color:#BBB;font-size:.82rem;padding:8px 0">面談報告なし</div>'; return; }
+  var sorted=reports.slice().sort(function(a,b){return (b.datetime||b.date||'')>(a.datetime||a.date||'')?1:-1;});
+  el.innerHTML='<div class="ob-sec-title" style="margin-bottom:10px">📝 面談報告履歴（'+sorted.length+'件）</div>'+
+    sorted.map(function(m,i){
+      return '<div style="background:#fff;border:1px solid #E8E4DE;border-radius:8px;padding:16px 18px;margin-bottom:12px">'+
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
+          '<span style="font-weight:700;font-size:.9rem">'+esc(m.datetime||m.date||'—')+'</span>'+
+          '<span style="font-size:.78rem;color:#888">'+esc(m.place||'')+'</span>'+
+          '<span style="font-size:.78rem;color:#888">'+esc(m.staff||'')+'</span>'+
+          '<span style="flex:1"></span>'+
+          '<button onclick="obMendanDelete('+i+')" style="background:none;border:1px solid #EEE;border-radius:4px;color:#CCC;font-size:.7rem;padding:2px 8px;cursor:pointer">削除</button>'+
+        '</div>'+
+        (m.result?'<div style="font-size:.8rem;color:#555;margin-bottom:6px"><b>結果：</b>'+esc(m.result)+'</div>':'')+
+        (m.background?'<div style="font-size:.8rem;color:#555;margin-bottom:6px;white-space:pre-wrap"><b>経緯・内容：</b><br>'+esc(m.background)+'</div>':'')+
+        (m.detail?'<div style="font-size:.8rem;color:#555;margin-bottom:6px;white-space:pre-wrap"><b>詳細：</b><br>'+esc(m.detail)+'</div>':'')+
+        (m.impression?'<div style="font-size:.8rem;color:#555;margin-bottom:6px;white-space:pre-wrap"><b>感想：</b><br>'+esc(m.impression)+'</div>':'')+
+        (m.review?'<div style="font-size:.8rem;color:#9A8C76;white-space:pre-wrap"><b>レビュー：</b><br>'+esc(m.review)+'</div>':'')+
+      '</div>';
+    }).join('');
+}
+
+function obMendanSave(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  var report={
+    datetime: (document.getElementById('mf-datetime')||{}).value||'',
+    place:    (document.getElementById('mf-place')||{}).value.trim()||'',
+    visitors: (document.getElementById('mf-visitors')||{}).value.trim()||'',
+    staff:    (document.getElementById('mf-staff')||{}).value.trim()||'',
+    result:   (document.getElementById('mf-result')||{}).value.trim()||'',
+    background:(document.getElementById('mf-background')||{}).value.trim()||'',
+    motivation:(document.getElementById('mf-motivation')||{}).value.trim()||'',
+    timing:   (document.getElementById('mf-timing')||{}).value.trim()||'',
+    competitor:(document.getElementById('mf-competitor')||{}).value.trim()||'',
+    stakeholder:(document.getElementById('mf-stakeholder')||{}).value.trim()||'',
+    budget:   (document.getElementById('mf-budget')||{}).value.trim()||'',
+    fan:      (document.getElementById('mf-fan')||{}).value.trim()||'',
+    land:     (document.getElementById('mf-land')||{}).value.trim()||'',
+    design:   (document.getElementById('mf-design')||{}).value.trim()||'',
+    detail:   (document.getElementById('mf-detail')||{}).value.trim()||'',
+    impression:(document.getElementById('mf-impression')||{}).value.trim()||'',
+    review:   (document.getElementById('mf-review')||{}).value.trim()||''
+  };
+  if(!report.datetime&&!report.detail&&!report.background){ toast('日時または内容を入力してください'); return; }
+  if(!r.mendan) r.mendan=[];
+  r.mendan.push(report);
+  _obLastSaveTs=Date.now();
+  obSetCache(obRows);
+  obRenderMendanHistory(r);
+  obMendanClear();
+  post({action:'obUpdateField',id:r.id,row:obDetailRow,field:'mendan',value:JSON.stringify(r.mendan)});
+  var msg=document.getElementById('ob-mendan-save-msg');
+  if(msg){ msg.style.color='#22C55E'; msg.textContent='✅ 保存しました'; setTimeout(function(){msg.textContent='';},3000); }
+  toast('面談報告を保存しました');
+}
+
+function obMendanClear(){
+  ['mf-datetime','mf-place','mf-visitors','mf-staff','mf-result','mf-background',
+   'mf-motivation','mf-timing','mf-competitor','mf-stakeholder','mf-budget','mf-fan',
+   'mf-land','mf-design','mf-detail','mf-impression','mf-review'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+}
+
+function obMendanDelete(idx){
+  var r=obRows[obDetailRow]; if(!r||!r.mendan) return;
+  if(!confirm('この面談報告を削除しますか？')) return;
+  r.mendan.splice(idx,1);
+  _obLastSaveTs=Date.now();
+  obSetCache(obRows);
+  obRenderMendanHistory(r);
+  post({action:'obUpdateField',id:r.id,row:obDetailRow,field:'mendan',value:JSON.stringify(r.mendan)});
+  toast('面談報告を削除しました');
 }
 
 function obRenderDetTimeline(){
