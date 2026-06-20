@@ -1487,6 +1487,105 @@ tr:hover .ob-del{opacity:1}
 .hub-act-sub{color:rgba(255,255,255,.38);font-size:.68rem;white-space:nowrap}
 .hub-act-date{color:rgba(255,255,255,.3);white-space:nowrap;font-size:.67rem}
 
+/* ── Notionワークスペース サイドバー ─────────────────────── */
+.ws-sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:#191919;color:rgba(255,255,255,.85);display:none;flex-direction:column;z-index:350;overflow:hidden;transition:width .2s ease;user-select:none}
+.ws-sidebar.show{display:flex}
+.ws-sidebar.collapsed{width:52px}
+.ws-sb-top{display:flex;align-items:center;gap:8px;padding:14px 10px 12px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
+.ws-sb-logo{height:18px;filter:brightness(0) invert(1);opacity:.7;flex-shrink:0}
+.ws-sb-title{font-family:"Playfair Display",serif;font-size:.7rem;letter-spacing:.2em;color:rgba(255,255,255,.55);flex:1;overflow:hidden;white-space:nowrap;text-transform:uppercase}
+.ws-sidebar.collapsed .ws-sb-title{display:none}
+.ws-sb-collapse{background:none;border:none;color:rgba(255,255,255,.28);cursor:pointer;font-size:1.05rem;padding:3px 5px;border-radius:4px;line-height:1;transition:all .15s;flex-shrink:0}
+.ws-sb-collapse:hover{background:rgba(255,255,255,.09);color:rgba(255,255,255,.7)}
+.ws-sidebar.collapsed .ws-sb-collapse{transform:rotate(180deg)}
+.ws-sb-search{display:flex;align-items:center;gap:7px;margin:8px 6px 4px;padding:7px 10px;border-radius:6px;background:rgba(255,255,255,.06);cursor:pointer;transition:background .15s;overflow:hidden;flex-shrink:0}
+.ws-sb-search:hover{background:rgba(255,255,255,.1)}
+.ws-sb-search-icon{font-size:.8rem;flex-shrink:0}
+.ws-sb-search-txt{font-size:.75rem;color:rgba(255,255,255,.33);flex:1;white-space:nowrap}
+.ws-sb-search-kb{font-size:.62rem;color:rgba(255,255,255,.2)}
+.ws-sidebar.collapsed .ws-sb-search-txt,.ws-sidebar.collapsed .ws-sb-search-kb{display:none}
+.ws-sb-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 0 8px}
+.ws-sb-nav::-webkit-scrollbar{width:3px}
+.ws-sb-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px}
+.ws-sb-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:5px;margin:1px 6px;cursor:pointer;transition:background .12s;white-space:nowrap;overflow:hidden;min-height:30px}
+.ws-sb-item:hover{background:rgba(255,255,255,.08)}
+.ws-sb-item.active{background:rgba(255,255,255,.13)}
+.ws-sb-icon{width:20px;text-align:center;flex-shrink:0;font-size:.88rem}
+.ws-sb-label{font-size:.78rem;flex:1;overflow:hidden;text-overflow:ellipsis;color:rgba(255,255,255,.75)}
+.ws-sb-count{font-size:.62rem;background:rgba(255,255,255,.1);color:rgba(255,255,255,.45);border-radius:10px;padding:1px 6px;flex-shrink:0}
+.ws-sidebar.collapsed .ws-sb-label,.ws-sidebar.collapsed .ws-sb-count{display:none}
+.ws-sidebar.collapsed .ws-sb-item{justify-content:center;padding:7px 0;margin:1px 4px}
+.ws-sb-section{padding:10px 14px 3px;font-size:.6rem;letter-spacing:.15em;color:rgba(255,255,255,.28);font-weight:700;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;white-space:nowrap;overflow:hidden;flex-shrink:0}
+.ws-sb-section button{background:none;border:none;color:rgba(255,255,255,.28);cursor:pointer;font-size:.88rem;padding:1px 4px;border-radius:3px;line-height:1;transition:all .12s}
+.ws-sb-section button:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.09)}
+.ws-sidebar.collapsed .ws-sb-section{display:none}
+.ws-sb-footer{flex-shrink:0;border-top:1px solid rgba(255,255,255,.07);padding:6px 0}
+/* Body shift when sidebar open */
+body.ws-open .hub{left:240px!important}
+body.ws-open .ob,body.ws-open #kojiboard,body.ws-open #tochiboard,body.ws-open .mtg,body.ws-open #custboard,body.ws-open #notesboard,body.ws-open #customdbboard{margin-left:240px}
+body.ws-collapsed .hub{left:52px!important}
+body.ws-collapsed .ob,body.ws-collapsed #kojiboard,body.ws-collapsed #tochiboard,body.ws-collapsed .mtg,body.ws-collapsed #custboard,body.ws-collapsed #notesboard,body.ws-collapsed #customdbboard{margin-left:52px}
+
+/* ── カスタムDB ──────────────────────────────────────── */
+#customdbboard{display:none;flex-direction:column;height:100dvh;overflow:hidden;background:#F7F6F3}
+#customdbboard.show{display:flex}
+.cdb-hd{flex-shrink:0;background:#fff;border-bottom:1px solid #E8E4DE;padding:14px 24px;display:flex;align-items:center;gap:12px}
+.cdb-hd-icon{font-size:1.3rem;cursor:pointer;border-radius:6px;padding:2px 6px;transition:background .15s}
+.cdb-hd-icon:hover{background:#F0EDE8}
+.cdb-hd-title{font-size:1.05rem;font-weight:700;color:#333;flex:1;border:none;outline:none;background:none;font-family:inherit}
+.cdb-toolbar{flex-shrink:0;padding:8px 24px;display:flex;align-items:center;gap:8px;background:#FAFAF8;border-bottom:1px solid #EEEBE5}
+.cdb-body{flex:1;overflow:auto;padding:20px 24px}
+.cdb-table{width:100%;border-collapse:collapse;font-size:.84rem}
+.cdb-table th{background:#F5F4F1;border:1px solid #E0DDD8;padding:8px 12px;font-size:.7rem;font-weight:700;color:#666;text-align:left;white-space:nowrap}
+.cdb-table td{border:1px solid #E8E5E0;padding:7px 11px;vertical-align:middle}
+.cdb-table tr:hover td{background:#F9F8F5}
+.cdb-table td[contenteditable="true"]:focus{outline:2px solid #C0A070;background:#FFFBF5;border-color:#C0A070}
+.cdb-add-row{width:100%;margin-top:8px;padding:9px;border:1.5px dashed #DDD;border-radius:6px;background:none;color:#999;cursor:pointer;font-size:.82rem;text-align:left;transition:all .15s}
+.cdb-add-row:hover{border-color:#C0A070;color:#C0A070;background:#FFFBF5}
+
+/* ── ノート/ページ ─────────────────────────────────────── */
+#notesboard{display:none;flex-direction:column;height:100dvh;overflow:hidden;background:#FAFAF8}
+#notesboard.show{display:flex}
+.notes-header-bar{flex-shrink:0;padding:10px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #EEE;background:#fff}
+.notes-scroll{flex:1;overflow-y:auto}
+.notes-inner{margin:0 auto;max-width:760px;padding:32px 40px 80px}
+.notes-icon-btn{font-size:2.2rem;cursor:pointer;border-radius:8px;padding:2px 6px;transition:background .15s;display:inline-block;margin-bottom:6px}
+.notes-icon-btn:hover{background:#F0EDE8}
+.notes-title-inp{width:100%;border:none;outline:none;font-size:1.65rem;font-weight:700;color:#222;background:none;font-family:"Noto Sans JP",sans-serif;margin-bottom:16px;letter-spacing:.02em}
+.notes-title-inp::placeholder{color:#CCC}
+.nb-wrap{position:relative;display:flex;align-items:flex-start;gap:4px;padding:2px 0;cursor:text}
+.nb-drag-handle{color:rgba(0,0,0,.15);cursor:grab;font-size:.75rem;padding:4px 2px;flex-shrink:0;opacity:0;margin-top:2px;transition:opacity .15s}
+.nb-wrap:hover .nb-drag-handle{opacity:1}
+.nb-content{flex:1;border:none;outline:none;font-size:.93rem;line-height:1.75;color:#333;background:transparent;font-family:"Noto Sans JP",sans-serif;resize:none;min-height:28px;overflow:hidden;padding:0;width:100%}
+.nb-content::placeholder{color:#C5C5C5}
+.nb-h1{font-size:1.5rem;font-weight:700;color:#111}
+.nb-h2{font-size:1.18rem;font-weight:700;color:#222}
+.nb-h3{font-size:1.0rem;font-weight:700;color:#333}
+.nb-quote{border-left:3px solid #C0A070;padding-left:12px;color:#666;font-style:italic}
+.nb-add-block{width:100%;margin-top:6px;padding:8px 14px;border:1.5px dashed #DDD;border-radius:6px;background:none;color:#BBB;cursor:pointer;font-size:.8rem;text-align:left;transition:all .15s}
+.nb-add-block:hover{border-color:#C0A070;color:#C0A070}
+/* Block type picker */
+.ws-block-picker{position:fixed;background:#fff;border:1px solid #DDD;border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.14);z-index:600;padding:6px 0;min-width:200px;font-size:.82rem}
+.ws-block-picker .wbp-item{padding:7px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s}
+.ws-block-picker .wbp-item:hover{background:#F5F3FF}
+.ws-block-picker .wbp-icon{width:22px;text-align:center;font-size:.8rem;color:#666}
+/* ── WSモーダル ──────────────────────────────────────── */
+.ws-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.48);display:none;align-items:center;justify-content:center}
+.ws-modal.show{display:flex}
+.ws-modal-box{background:#fff;border-radius:12px;padding:28px 32px;min-width:420px;max-width:580px;width:90%;max-height:82vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.22)}
+.ws-modal-title{font-size:1.08rem;font-weight:700;color:#222;margin-bottom:20px}
+.ws-mf{margin-bottom:14px}
+.ws-mf label{display:block;font-size:.72rem;font-weight:700;color:#666;margin-bottom:5px;letter-spacing:.06em}
+.ws-mf input,.ws-mf select{width:100%;border:1.5px solid #DDD;border-radius:6px;padding:8px 12px;font-size:.86rem;font-family:inherit;outline:none;transition:border .15s;box-sizing:border-box}
+.ws-mf input:focus,.ws-mf select:focus{border-color:#C0A070}
+.ws-field-row{display:flex;gap:6px;align-items:center;margin-bottom:7px}
+.ws-field-row .wfr-name{flex:1;border:1.5px solid #DDD;border-radius:5px;padding:7px 10px;font-size:.82rem;font-family:inherit;outline:none}
+.ws-field-row .wfr-name:focus{border-color:#C0A070}
+.ws-field-row select{border:1.5px solid #DDD;border-radius:5px;padding:7px 10px;font-size:.82rem;font-family:inherit;outline:none;background:#fff}
+.ws-field-row .wfr-del{background:none;border:none;color:#CC4444;cursor:pointer;font-size:.95rem;padding:4px 7px;border-radius:4px}
+.ws-field-row .wfr-del:hover{background:#FEE2E2}
+.ws-modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid #EEE}
+
 /* ── 営業MTGボード ── */
 .mtg{display:none;flex-direction:column;height:100vh;overflow:hidden;background:#F5F3EF}
 .mtg.show{display:flex}
@@ -1589,6 +1688,105 @@ tr:hover .ob-del{opacity:1}
         <div id="gasStatus" style="font-size:.72rem;color:var(--tx4);text-align:center;letter-spacing:.03em"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ══ Notionワークスペース サイドバー ══ -->
+<div id="ws-sidebar" class="ws-sidebar">
+  <div class="ws-sb-top">
+    <span style="font-size:1rem;margin-right:2px">🏠</span>
+    <span class="ws-sb-title">HEARTOM</span>
+    <button class="ws-sb-collapse" id="ws-collapse-btn" onclick="wsToggleCollapse()" title="サイドバーを折りたたむ">‹</button>
+  </div>
+  <div class="ws-sb-search" onclick="wsFocusSearch()">
+    <span class="ws-sb-search-icon">🔍</span>
+    <span class="ws-sb-search-txt">検索...</span>
+    <span class="ws-sb-search-kb">⌘K</span>
+  </div>
+  <div class="ws-sb-nav" id="ws-sb-nav">
+    <div class="ws-sb-section"><span>ナビゲーション</span></div>
+    <div class="ws-sb-item" id="ws-nav-hub" onclick="wsNavTo('hub')">
+      <span class="ws-sb-icon">🏠</span><span class="ws-sb-label">ホーム</span>
+    </div>
+    <div class="ws-sb-item" id="ws-nav-ob" onclick="wsNavTo('ob')">
+      <span class="ws-sb-icon">👤</span><span class="ws-sb-label">OBハブ</span>
+    </div>
+    <div class="ws-sb-item" id="ws-nav-kj" onclick="wsNavTo('kj')">
+      <span class="ws-sb-icon">🏗</span><span class="ws-sb-label">着工管理</span>
+    </div>
+    <div class="ws-sb-item" id="ws-nav-tochi" onclick="wsNavTo('tochi')">
+      <span class="ws-sb-icon">🗺</span><span class="ws-sb-label">土地DB</span>
+    </div>
+    <div class="ws-sb-item" id="ws-nav-mtg" onclick="wsNavTo('mtg')">
+      <span class="ws-sb-icon">📅</span><span class="ws-sb-label">営業MTG</span>
+    </div>
+    <div class="ws-sb-item" id="ws-nav-cust" onclick="wsNavTo('cust')">
+      <span class="ws-sb-icon">📋</span><span class="ws-sb-label">顧客管理</span>
+    </div>
+    <div class="ws-sb-section" style="margin-top:8px">
+      <span>カスタムDB</span>
+      <button onclick="wsOpenNewCDB()" title="新しいDB作成">＋</button>
+    </div>
+    <div id="ws-cdb-list"></div>
+    <div class="ws-sb-section" style="margin-top:8px">
+      <span>ノート</span>
+      <button onclick="wsCreateNote()" title="新しいノート作成">＋</button>
+    </div>
+    <div id="ws-notes-list"></div>
+  </div>
+  <div class="ws-sb-footer">
+    <div class="ws-sb-item" onclick="wsOpenNewCDB()">
+      <span class="ws-sb-icon">＋</span><span class="ws-sb-label">カスタムDBを作成</span>
+    </div>
+    <div class="ws-sb-item" onclick="wsCreateNote()">
+      <span class="ws-sb-icon">📝</span><span class="ws-sb-label">新しいノート</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ カスタムDB作成モーダル ══ -->
+<div class="ws-modal" id="ws-cdb-modal">
+  <div class="ws-modal-box">
+    <div class="ws-modal-title" id="ws-cdb-modal-title">📊 カスタムDBを作成</div>
+    <div class="ws-mf">
+      <label>DB名</label>
+      <input id="ws-cdb-name" type="text" placeholder="例: 仕入れ先リスト">
+    </div>
+    <div class="ws-mf">
+      <label>アイコン</label>
+      <input id="ws-cdb-icon" type="text" placeholder="例: 📦" style="width:80px">
+    </div>
+    <div class="ws-mf">
+      <label>フィールド <button onclick="wsAddFieldRow()" style="margin-left:8px;background:none;border:1px solid #C0A070;color:#C0A070;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:.74rem">＋ 追加</button></label>
+      <div id="ws-cdb-fields">
+        <div class="ws-field-row">
+          <input class="wfr-name" type="text" placeholder="フィールド名" value="名前">
+          <select><option value="text">テキスト</option><option value="number">数値</option><option value="date">日付</option><option value="select">選択肢</option><option value="checkbox">チェック</option></select>
+          <button class="wfr-del" onclick="wsDelFieldRow(this)" title="削除">✕</button>
+        </div>
+        <div class="ws-field-row">
+          <input class="wfr-name" type="text" placeholder="フィールド名" value="メモ">
+          <select><option value="text">テキスト</option><option value="number">数値</option><option value="date">日付</option><option value="select">選択肢</option><option value="checkbox">チェック</option></select>
+          <button class="wfr-del" onclick="wsDelFieldRow(this)" title="削除">✕</button>
+        </div>
+      </div>
+    </div>
+    <div class="ws-modal-actions">
+      <button class="btn-ghost" onclick="document.getElementById('ws-cdb-modal').classList.remove('show')">キャンセル</button>
+      <button class="btn-primary" onclick="wsSaveCDB()">作成する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 汎用検索モーダル ══ -->
+<div class="ws-modal" id="ws-search-modal">
+  <div class="ws-modal-box" style="max-width:640px">
+    <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid #EEE;padding-bottom:12px;margin-bottom:12px">
+      <span style="font-size:1rem">🔍</span>
+      <input id="ws-search-inp" type="text" placeholder="ページ・DB・顧客名を検索..." style="flex:1;border:none;outline:none;font-size:.95rem;font-family:inherit" oninput="wsSearch(this.value)" onkeydown="wsSearchKeyNav(event)">
+      <button onclick="document.getElementById('ws-search-modal').classList.remove('show')" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:#AAA">✕</button>
+    </div>
+    <div id="ws-search-results" style="max-height:360px;overflow-y:auto;font-size:.85rem"></div>
   </div>
 </div>
 
@@ -2945,6 +3143,38 @@ tr:hover .ob-del{opacity:1}
   </div>
 </div>
 
+<!-- ══ カスタムDBボード ══ -->
+<div id="customdbboard">
+  <div class="cdb-hd">
+    <span class="cdb-hd-icon" id="cdb-hd-icon" onclick="wsPickDBIcon()">📊</span>
+    <input class="cdb-hd-title" id="cdb-hd-title" type="text" value="" placeholder="DB名" onchange="wsUpdateDBMeta()">
+    <button class="hbtn" onclick="wsDeleteCurrentDB()" style="color:#CC4444;border-color:#CC4444;margin-left:8px">🗑 削除</button>
+    <button class="hbtn" onclick="showHub()">‹ 戻る</button>
+  </div>
+  <div class="cdb-toolbar">
+    <button class="hbtn primary" onclick="wsCdbAddRow()">＋ 行を追加</button>
+    <button class="hbtn ghost" onclick="wsAddFieldToCurrentDB()">＋ フィールド追加</button>
+    <span style="flex:1"></span>
+    <input type="text" id="cdb-search-inp" placeholder="🔍 このDBを検索..." style="border:1.5px solid #DDD;border-radius:6px;padding:6px 10px;font-size:.8rem;outline:none;width:200px" oninput="wsCdbRenderTable()">
+  </div>
+  <div class="cdb-body">
+    <div id="cdb-table-wrap"></div>
+  </div>
+</div>
+
+<!-- ══ ノートボード ══ -->
+<div id="notesboard">
+  <div class="notes-header-bar">
+    <button class="hbtn" onclick="showHub()">‹ 戻る</button>
+    <button class="hbtn ghost" onclick="wsCreateNote()" style="margin-left:auto">＋ 新しいノート</button>
+  </div>
+  <div class="notes-scroll">
+    <div class="notes-inner" id="notes-inner">
+      <div id="notes-content"></div>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -3349,6 +3579,7 @@ function showApp(){
     setTimeout(function(){ hubLoadTodayKpi(); }, 1200);
     setTimeout(function(){ hubLoadGcal(); }, 2000); // Googleカレンダー
     setTimeout(function(){ hubBuildActivityFeed(); hubRenderExtKpi(); refreshNotifBadge(); }, 500);
+    wsInit(); wsShow(); wsSetActiveSection('hub');
     // ★ ログイン直後に誕生日をバックグラウンドで自動同期
     setTimeout(function(){
       if(!adminKey()) return;
@@ -3386,11 +3617,13 @@ function enterOpenBoard(){
   obUpdateLastUpdatedLabel();
   if(!window.__obPollTimer) window.__obPollTimer=setInterval(function(){ obLoad(true,true); },CACHE_TTL_MS);
   obStartAutoSync();
+  wsSetActiveSection('ob');
 }
 
 function enterMtgBoard(){
   document.getElementById('hub').classList.remove('show');
   document.getElementById('mtgboard').classList.add('show');
+  wsSetActiveSection('mtg');
   mtgLoad();
   if(!window.__mtgPollTimer) window.__mtgPollTimer = setInterval(function(){ mtgLoad(true,true); }, CACHE_TTL_MS);
   if(!window.__mtgCwAutoTimer) window.__mtgCwAutoTimer = setInterval(function(){
@@ -3411,7 +3644,10 @@ function showHub(){
   document.getElementById('mtgboard').classList.remove('show');
   document.getElementById('custboard').classList.remove('show');
   document.getElementById('app').classList.remove('show');
+  var cdb=document.getElementById('customdbboard'); if(cdb) cdb.classList.remove('show');
+  var nb=document.getElementById('notesboard'); if(nb) nb.classList.remove('show');
   document.getElementById('hub').classList.add('show');
+  wsSetActiveSection('hub');
   hubUpdateBadges();
   // ハブ戻り時：キャッシュが古い場合のみバックグラウンド取得
   obLoad(true);
@@ -3450,6 +3686,7 @@ if(!window.__bdaySyncTimer){
 function enterKojiBoard(){
   document.getElementById('hub').classList.remove('show');
   document.getElementById('kojiboard').classList.add('show');
+  wsSetActiveSection('kj');
   kjLoad();
   kjUpdateLastUpdatedLabel();
   // 60秒ごとに自動更新
@@ -8595,6 +8832,7 @@ var __tcLastUpdated = 0;
 function enterTochiBoard(){
   document.getElementById('hub').classList.remove('show');
   document.getElementById('tochiboard').classList.add('show');
+  wsSetActiveSection('tochi');
   var cached=tochiGetCache();
   if(cached.length){ tochiRows=cached; tochiRenderList(); }
   tochiLoad(false); // キャッシュ新鮮なら即返る、古ければ取得
@@ -8995,6 +9233,7 @@ function custBoardTab(tab){
 function enterCustBoard(){
   document.getElementById('hub').classList.remove('show');
   document.getElementById('custboard').classList.add('show');
+  wsSetActiveSection('cust');
   custLoad();
 }
 
@@ -10129,6 +10368,545 @@ function hubRenderExtKpi(){
   '</div>';
   el.innerHTML=html;
 }
+
+// ════════════════════════════════════════════════════════
+//  WORKSPACE (Notion-like) — localStorage persistence
+// ════════════════════════════════════════════════════════
+var WS_KEY_CDB  = 'ws_custom_dbs';
+var WS_KEY_NOTE = 'ws_notes';
+var WS_KEY_PREF = 'ws_pref';
+var __wsCurrentCdbId  = null;
+var __wsCurrentNoteId = null;
+var __wsEditingCdbId  = null;
+
+// ── ユーティリティ ─────────────────────────────────────
+function wsGenId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function wsLoadCdbs(){ try{return JSON.parse(localStorage.getItem(WS_KEY_CDB)||'[]');}catch(e){return[];} }
+function wsSaveCdbs(d){ localStorage.setItem(WS_KEY_CDB,JSON.stringify(d)); }
+function wsLoadNotes(){ try{return JSON.parse(localStorage.getItem(WS_KEY_NOTE)||'[]');}catch(e){return[];} }
+function wsSaveNotes(d){ localStorage.setItem(WS_KEY_NOTE,JSON.stringify(d)); }
+function wsLoadPref(){ try{return JSON.parse(localStorage.getItem(WS_KEY_PREF)||'{}');}catch(e){return {};} }
+function wsSavePref(p){ localStorage.setItem(WS_KEY_PREF,JSON.stringify(p)); }
+
+// ── 初期化 ────────────────────────────────────────────
+function wsInit(){
+  var pref=wsLoadPref();
+  var sb=document.getElementById('ws-sidebar');
+  if(!sb) return;
+  sb.classList.add('show');
+  if(pref.collapsed){
+    sb.classList.add('collapsed');
+    document.body.classList.add('ws-collapsed');
+    document.body.classList.remove('ws-open');
+  } else {
+    document.body.classList.add('ws-open');
+    document.body.classList.remove('ws-collapsed');
+  }
+  wsRenderSidebarCdbs();
+  wsRenderSidebarNotes();
+  // ⌘K / Ctrl+K で検索
+  document.addEventListener('keydown',function(e){
+    if((e.metaKey||e.ctrlKey)&&e.key==='k'){
+      e.preventDefault();
+      wsFocusSearch();
+    }
+  });
+}
+function wsShow(){ var sb=document.getElementById('ws-sidebar'); if(sb) sb.classList.add('show'); }
+
+function wsToggleCollapse(){
+  var sb=document.getElementById('ws-sidebar');
+  var pref=wsLoadPref();
+  var isNowCollapsed=sb.classList.toggle('collapsed');
+  if(isNowCollapsed){
+    document.body.classList.add('ws-collapsed');
+    document.body.classList.remove('ws-open');
+    pref.collapsed=true;
+  } else {
+    document.body.classList.add('ws-open');
+    document.body.classList.remove('ws-collapsed');
+    pref.collapsed=false;
+  }
+  wsSavePref(pref);
+}
+
+// ── アクティブセクションをサイドバーに反映 ─────────────
+function wsSetActiveSection(sec){
+  var ids=['hub','ob','kj','tochi','mtg','cust'];
+  ids.forEach(function(id){
+    var el=document.getElementById('ws-nav-'+id);
+    if(el) el.classList.remove('active');
+  });
+  // cdbとnotesはIDが動的なので別処理
+  document.querySelectorAll('.ws-sb-item[data-cdb-id],.ws-sb-item[data-note-id]').forEach(function(el){
+    el.classList.remove('active');
+  });
+  var target=document.getElementById('ws-nav-'+sec);
+  if(target) target.classList.add('active');
+}
+function wsSetActiveCdb(id){
+  document.querySelectorAll('.ws-sb-item').forEach(function(el){ el.classList.remove('active'); });
+  var el=document.querySelector('.ws-sb-item[data-cdb-id="'+id+'"]');
+  if(el) el.classList.add('active');
+}
+function wsSetActiveNote(id){
+  document.querySelectorAll('.ws-sb-item').forEach(function(el){ el.classList.remove('active'); });
+  var el=document.querySelector('.ws-sb-item[data-note-id="'+id+'"]');
+  if(el) el.classList.add('active');
+}
+
+// ── ナビゲーション ────────────────────────────────────
+function wsNavTo(sec){
+  if(sec==='hub') showHub();
+  else if(sec==='ob') enterOpenBoard();
+  else if(sec==='kj') enterKojiBoard();
+  else if(sec==='tochi') enterTochiBoard();
+  else if(sec==='mtg') enterMtgBoard();
+  else if(sec==='cust') enterCustBoard();
+}
+
+// ── 検索 ─────────────────────────────────────────────
+function wsFocusSearch(){
+  var modal=document.getElementById('ws-search-modal');
+  var inp=document.getElementById('ws-search-inp');
+  if(!modal||!inp) return;
+  modal.classList.add('show');
+  inp.value='';
+  wsSearch('');
+  setTimeout(function(){ inp.focus(); },80);
+  modal.addEventListener('click',function handler(e){
+    if(e.target===modal){ modal.classList.remove('show'); modal.removeEventListener('click',handler); }
+  });
+}
+function wsSearch(q){
+  var res=document.getElementById('ws-search-results');
+  if(!res) return;
+  var items=[];
+  // OBデータ
+  if(obRows){ obRows.forEach(function(r,i){
+    var n=r['お名前']||r['顧客名']||'';
+    if(!q||n.toLowerCase().indexOf(q.toLowerCase())>=0)
+      items.push({icon:'👤',label:n,sub:'OBハブ',action:"document.getElementById('ws-search-modal').classList.remove('show');enterOpenBoard();setTimeout(function(){obOpenDetail("+i+");},400)"});
+  });}
+  // カスタムDB
+  var cdbs=wsLoadCdbs();
+  cdbs.forEach(function(db){
+    if(!q||db.name.toLowerCase().indexOf(q.toLowerCase())>=0)
+      items.push({icon:db.icon||'📊',label:db.name,sub:'カスタムDB',action:"document.getElementById('ws-search-modal').classList.remove('show');wsOpenCdb('"+db.id+"')"});
+    // DB内レコード
+    if(q && db.rows){
+      db.rows.forEach(function(row){
+        var match=Object.values(row).some(function(v){ return String(v||'').toLowerCase().indexOf(q.toLowerCase())>=0; });
+        if(match) items.push({icon:db.icon||'📊',label:Object.values(row)[0]||'',sub:db.name,action:"document.getElementById('ws-search-modal').classList.remove('show');wsOpenCdb('"+db.id+"')"});
+      });
+    }
+  });
+  // ノート
+  var notes=wsLoadNotes();
+  notes.forEach(function(n){
+    if(!q||n.title.toLowerCase().indexOf(q.toLowerCase())>=0)
+      items.push({icon:n.icon||'📝',label:n.title||'無題ノート',sub:'ノート',action:"document.getElementById('ws-search-modal').classList.remove('show');wsOpenNote('"+n.id+"')"});
+  });
+  if(!items.length){
+    res.innerHTML='<div style="text-align:center;padding:24px;color:#BBB">「'+wsSafeHtml(q)+'」に一致する結果はありません</div>';
+    return;
+  }
+  res.innerHTML=items.slice(0,30).map(function(it,i){
+    return '<div class="ws-sb-item" style="border-radius:6px;margin:2px 0;padding:9px 12px" onclick="'+it.action+'" data-sidx="'+i+'"><span style="width:22px;text-align:center;font-size:.85rem">'+it.icon+'</span><span style="flex:1;color:#333;font-size:.84rem">'+wsSafeHtml(it.label)+'</span><span style="font-size:.7rem;color:#AAA">'+wsSafeHtml(it.sub)+'</span></div>';
+  }).join('');
+}
+var __wsSearchSel=0;
+function wsSearchKeyNav(e){
+  var res=document.getElementById('ws-search-results');
+  if(!res) return;
+  var items=res.querySelectorAll('.ws-sb-item');
+  if(e.key==='ArrowDown'){ __wsSearchSel=Math.min(__wsSearchSel+1,items.length-1); }
+  else if(e.key==='ArrowUp'){ __wsSearchSel=Math.max(__wsSearchSel-1,0); }
+  else if(e.key==='Enter' && items[__wsSearchSel]){ items[__wsSearchSel].click(); return; }
+  else if(e.key==='Escape'){ document.getElementById('ws-search-modal').classList.remove('show'); return; }
+  items.forEach(function(el,i){ el.style.background=i===__wsSearchSel?'#F0EEF8':''; });
+}
+function wsSafeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── カスタムDB作成モーダル ────────────────────────────
+function wsOpenNewCDB(){
+  __wsEditingCdbId=null;
+  document.getElementById('ws-cdb-modal-title').textContent='📊 カスタムDBを作成';
+  document.getElementById('ws-cdb-name').value='';
+  document.getElementById('ws-cdb-icon').value='📊';
+  document.getElementById('ws-cdb-fields').innerHTML=
+    wsFieldRowHTML('名前','text')+wsFieldRowHTML('メモ','text');
+  document.getElementById('ws-cdb-modal').classList.add('show');
+  setTimeout(function(){ document.getElementById('ws-cdb-name').focus(); },80);
+}
+function wsFieldRowHTML(name,type){
+  return '<div class="ws-field-row"><input class="wfr-name" type="text" placeholder="フィールド名" value="'+wsSafeHtml(name)+'"><select><option value="text"'+(type==='text'?' selected':'')+'>テキスト</option><option value="number"'+(type==='number'?' selected':'')+'>数値</option><option value="date"'+(type==='date'?' selected':'')+'>日付</option><option value="select"'+(type==='select'?' selected':'')+'>選択肢</option><option value="checkbox"'+(type==='checkbox'?' selected':'')+'>チェック</option></select><button class="wfr-del" onclick="wsDelFieldRow(this)" title="削除">✕</button></div>';
+}
+function wsAddFieldRow(){
+  var c=document.getElementById('ws-cdb-fields');
+  if(!c) return;
+  var d=document.createElement('div');
+  d.innerHTML=wsFieldRowHTML('','text');
+  c.appendChild(d.firstChild);
+}
+function wsDelFieldRow(btn){
+  var row=btn.closest('.ws-field-row');
+  if(row){ var p=row.parentNode; p.removeChild(row); }
+}
+function wsSaveCDB(){
+  var name=document.getElementById('ws-cdb-name').value.trim();
+  var icon=document.getElementById('ws-cdb-icon').value.trim()||'📊';
+  if(!name){ toast('DB名を入力してください'); return; }
+  var fieldRows=document.querySelectorAll('#ws-cdb-fields .ws-field-row');
+  var fields=[];
+  fieldRows.forEach(function(row){
+    var nm=row.querySelector('.wfr-name').value.trim();
+    var tp=row.querySelector('select').value;
+    if(nm) fields.push({name:nm,type:tp});
+  });
+  if(!fields.length) fields=[{name:'名前',type:'text'},{name:'メモ',type:'text'}];
+  var cdbs=wsLoadCdbs();
+  if(__wsEditingCdbId){
+    var idx=cdbs.findIndex(function(d){return d.id===__wsEditingCdbId;});
+    if(idx>=0){ cdbs[idx].name=name; cdbs[idx].icon=icon; cdbs[idx].fields=fields; }
+  } else {
+    cdbs.push({id:wsGenId(),name:name,icon:icon,fields:fields,rows:[],created:Date.now()});
+  }
+  wsSaveCdbs(cdbs);
+  document.getElementById('ws-cdb-modal').classList.remove('show');
+  wsRenderSidebarCdbs();
+  toast('✅ DB「'+name+'」を'+((__wsEditingCdbId)?'更新':'作成')+'しました');
+  var newDb=cdbs[cdbs.length-1];
+  if(!__wsEditingCdbId) wsOpenCdb(newDb.id);
+  __wsEditingCdbId=null;
+}
+
+// ── サイドバーレンダリング ────────────────────────────
+function wsRenderSidebarCdbs(){
+  var el=document.getElementById('ws-cdb-list'); if(!el) return;
+  var cdbs=wsLoadCdbs();
+  if(!cdbs.length){ el.innerHTML='<div class="ws-sb-item" style="opacity:.4;font-size:.72rem;padding-left:28px"><span class="ws-sb-label" style="color:rgba(255,255,255,.3)">DBがありません</span></div>'; return; }
+  el.innerHTML=cdbs.map(function(db){
+    return '<div class="ws-sb-item" data-cdb-id="'+db.id+'" onclick="wsOpenCdb(\''+db.id+'\')"><span class="ws-sb-icon">'+(db.icon||'📊')+'</span><span class="ws-sb-label">'+wsSafeHtml(db.name)+'</span><span class="ws-sb-count">'+(db.rows?db.rows.length:0)+'</span></div>';
+  }).join('');
+}
+function wsRenderSidebarNotes(){
+  var el=document.getElementById('ws-notes-list'); if(!el) return;
+  var notes=wsLoadNotes();
+  if(!notes.length){ el.innerHTML='<div class="ws-sb-item" style="opacity:.4;font-size:.72rem;padding-left:28px"><span class="ws-sb-label" style="color:rgba(255,255,255,.3)">ノートがありません</span></div>'; return; }
+  el.innerHTML=notes.map(function(n){
+    return '<div class="ws-sb-item" data-note-id="'+n.id+'" onclick="wsOpenNote(\''+n.id+'\')"><span class="ws-sb-icon">'+(n.icon||'📝')+'</span><span class="ws-sb-label">'+wsSafeHtml(n.title||'無題ノート')+'</span></div>';
+  }).join('');
+}
+
+// ── カスタムDB 開く / 操作 ─────────────────────────────
+function wsOpenCdb(id){
+  var cdbs=wsLoadCdbs();
+  var db=cdbs.find(function(d){return d.id===id;});
+  if(!db){ toast('DBが見つかりません'); return; }
+  __wsCurrentCdbId=id;
+  document.getElementById('hub').classList.remove('show');
+  document.getElementById('openboard').classList.remove('show');
+  document.getElementById('kojiboard').classList.remove('show');
+  document.getElementById('tochiboard').classList.remove('show');
+  document.getElementById('mtgboard').classList.remove('show');
+  document.getElementById('custboard').classList.remove('show');
+  var nb=document.getElementById('notesboard'); if(nb) nb.classList.remove('show');
+  document.getElementById('customdbboard').classList.add('show');
+  document.getElementById('cdb-hd-icon').textContent=db.icon||'📊';
+  document.getElementById('cdb-hd-title').value=db.name;
+  document.getElementById('cdb-search-inp').value='';
+  wsCdbRenderTable();
+  wsSetActiveCdb(id);
+}
+function wsCdbRenderTable(){
+  var wrap=document.getElementById('cdb-table-wrap'); if(!wrap) return;
+  var cdbs=wsLoadCdbs();
+  var db=cdbs.find(function(d){return d.id===__wsCurrentCdbId;}); if(!db) return;
+  var q=(document.getElementById('cdb-search-inp')||{}).value||'';
+  var rows=db.rows||[];
+  if(q){ rows=rows.filter(function(r){ return Object.values(r).some(function(v){return String(v||'').toLowerCase().indexOf(q.toLowerCase())>=0;}); }); }
+  var fields=db.fields||[];
+  var html='<table class="cdb-table"><thead><tr>'+
+    fields.map(function(f){return '<th>'+wsSafeHtml(f.name)+'</th>';}).join('')+
+    '<th style="width:50px"></th></tr></thead><tbody>';
+  rows.forEach(function(row,ri){
+    html+='<tr>';
+    fields.forEach(function(f){
+      var val=row[f.name]||'';
+      if(f.type==='checkbox'){
+        html+='<td style="text-align:center"><input type="checkbox"'+(val?' checked':'')+' onchange="wsCdbCellCheck(this,\''+wsSafeHtml(f.name)+'\','+ri+')"></td>';
+      } else if(f.type==='date'){
+        html+='<td><input type="date" value="'+wsSafeHtml(val)+'" style="border:none;background:transparent;font-size:.84rem;font-family:inherit;outline:none;width:100%" onchange="wsCdbCellEdit(this,\''+wsSafeHtml(f.name)+'\','+ri+')"></td>';
+      } else {
+        html+='<td contenteditable="true" data-field="'+wsSafeHtml(f.name)+'" data-row="'+ri+'" onblur="wsCdbCellBlur(this)" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();this.blur()}">'+wsSafeHtml(val)+'</td>';
+      }
+    });
+    html+='<td style="text-align:center"><button onclick="wsCdbDeleteRow('+ri+')" style="background:none;border:none;color:#CC4444;cursor:pointer;font-size:.85rem;padding:2px 6px;border-radius:3px" title="行を削除">✕</button></td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  html+='<button class="cdb-add-row" onclick="wsCdbAddRow()">＋ 行を追加</button>';
+  wrap.innerHTML=html;
+}
+function wsCdbCellBlur(td){
+  var fieldName=td.getAttribute('data-field');
+  var ri=parseInt(td.getAttribute('data-row'),10);
+  var val=td.textContent;
+  var cdbs=wsLoadCdbs();
+  var db=cdbs.find(function(d){return d.id===__wsCurrentCdbId;}); if(!db) return;
+  if(!db.rows[ri]) return;
+  db.rows[ri][fieldName]=val;
+  wsSaveCdbs(cdbs);
+}
+function wsCdbCellEdit(inp,fieldName,ri){
+  var cdbs=wsLoadCdbs();
+  var db=cdbs.find(function(d){return d.id===__wsCurrentCdbId;}); if(!db) return;
+  if(!db.rows[ri]) return;
+  db.rows[ri][fieldName]=inp.value;
+  wsSaveCdbs(cdbs);
+}
+function wsCdbCellCheck(inp,fieldName,ri){
+  var cdbs=wsLoadCdbs();
+  var db=cdbs.find(function(d){return d.id===__wsCurrentCdbId;}); if(!db) return;
+  if(!db.rows[ri]) return;
+  db.rows[ri][fieldName]=inp.checked;
+  wsSaveCdbs(cdbs);
+}
+function wsCdbAddRow(){
+  var cdbs=wsLoadCdbs();
+  var db=cdbs.find(function(d){return d.id===__wsCurrentCdbId;}); if(!db) return;
+  var newRow={};
+  (db.fields||[]).forEach(function(f){ newRow[f.name]=''; });
+  if(!db.rows) db.rows=[];
+  db.rows.push(newRow);
+  wsSaveCdbs(cdbs);
+  wsCdbRenderTable();
+  // フォーカスを最初のtdへ
+  setTimeout(function(){
+    var tds=document.querySelectorAll('#cdb-table-wrap tbody tr:last-child td[contenteditable]');
+    if(tds.length) tds[0].focus();
+  },60);
+}
+function wsCdbDeleteRow(ri){
+  var cdbs=wsLoadCdbs();
+  var db=cdbs.find(function(d){return d.id===__wsCurrentCdbId;}); if(!db) return;
+  db.rows.splice(ri,1);
+  wsSaveCdbs(cdbs);
+  wsCdbRenderTable();
+  wsRenderSidebarCdbs();
+}
+function wsUpdateDBMeta(){
+  var cdbs=wsLoadCdbs();
+  var db=cdbs.find(function(d){return d.id===__wsCurrentCdbId;}); if(!db) return;
+  db.name=document.getElementById('cdb-hd-title').value;
+  db.icon=document.getElementById('cdb-hd-icon').textContent;
+  wsSaveCdbs(cdbs);
+  wsRenderSidebarCdbs();
+}
+function wsDeleteCurrentDB(){
+  var cdbs=wsLoadCdbs();
+  var db=cdbs.find(function(d){return d.id===__wsCurrentCdbId;}); if(!db) return;
+  if(!confirm('「'+db.name+'」を削除します。よろしいですか？')) return;
+  var filtered=cdbs.filter(function(d){return d.id!==__wsCurrentCdbId;});
+  wsSaveCdbs(filtered);
+  __wsCurrentCdbId=null;
+  document.getElementById('customdbboard').classList.remove('show');
+  wsRenderSidebarCdbs();
+  showHub();
+  toast('🗑 DBを削除しました');
+}
+function wsAddFieldToCurrentDB(){
+  var cdbs=wsLoadCdbs();
+  var db=cdbs.find(function(d){return d.id===__wsCurrentCdbId;}); if(!db) return;
+  var n=prompt('新しいフィールド名を入力してください:');
+  if(!n||!n.trim()) return;
+  db.fields.push({name:n.trim(),type:'text'});
+  (db.rows||[]).forEach(function(row){ row[n.trim()]=''; });
+  wsSaveCdbs(cdbs);
+  wsCdbRenderTable();
+  toast('フィールド「'+n.trim()+'」を追加しました');
+}
+function wsPickDBIcon(){
+  var icons=['📊','📋','📁','📂','🗂','📑','🗃','💼','🏷','📌','📍','🔖','⭐','💡','🔑','📎','🔗','🌐','🏠','🏗'];
+  var picked=prompt('アイコンを入力 (絵文字1文字):\n例: '+icons.join(' '));
+  if(picked){
+    document.getElementById('cdb-hd-icon').textContent=picked.trim().slice(0,2);
+    wsUpdateDBMeta();
+  }
+}
+
+// ── ノート 開く / 操作 ────────────────────────────────
+function wsCreateNote(){
+  var notes=wsLoadNotes();
+  var n={id:wsGenId(),title:'',icon:'📝',blocks:[{id:wsGenId(),type:'p',content:''}],created:Date.now(),updated:Date.now()};
+  notes.unshift(n);
+  wsSaveNotes(notes);
+  wsRenderSidebarNotes();
+  wsOpenNote(n.id);
+}
+function wsOpenNote(id){
+  var notes=wsLoadNotes();
+  var note=notes.find(function(n){return n.id===id;}); if(!note) return;
+  __wsCurrentNoteId=id;
+  document.getElementById('hub').classList.remove('show');
+  document.getElementById('openboard').classList.remove('show');
+  document.getElementById('kojiboard').classList.remove('show');
+  document.getElementById('tochiboard').classList.remove('show');
+  document.getElementById('mtgboard').classList.remove('show');
+  document.getElementById('custboard').classList.remove('show');
+  var cdb=document.getElementById('customdbboard'); if(cdb) cdb.classList.remove('show');
+  document.getElementById('notesboard').classList.add('show');
+  wsRenderNote(note);
+  wsSetActiveNote(id);
+}
+function wsRenderNote(note){
+  var inner=document.getElementById('notes-inner'); if(!inner) return;
+  var blocks=note.blocks||[{id:wsGenId(),type:'p',content:''}];
+  var html='<div onclick="wsNoteIconClick()" class="notes-icon-btn" id="note-icon-disp" title="アイコンを変更">'+(note.icon||'📝')+'</div><input class="notes-title-inp" id="note-title-inp" type="text" value="'+wsSafeHtml(note.title||'')+'" placeholder="タイトルなし" onchange="wsNoteAutoSave()" oninput="wsNoteAutoSave()">';
+  html+='<div id="note-blocks">';
+  blocks.forEach(function(b){
+    html+=wsBlockHTML(b);
+  });
+  html+='</div>';
+  html+='<button class="nb-add-block" onclick="wsShowBlockPicker(null,null)">＋ ブロックを追加...</button>';
+  inner.innerHTML=html;
+}
+function wsBlockHTML(b){
+  var typeClass={'p':'','h1':'nb-h1','h2':'nb-h2','h3':'nb-h3','quote':'nb-quote'}[b.type]||'';
+  var ph={'p':'テキストを入力...','h1':'見出し 1','h2':'見出し 2','h3':'見出し 3','quote':'引用文...'}[b.type]||'入力...';
+  return '<div class="nb-wrap" data-bid="'+b.id+'">'+'<span class="nb-drag-handle" title="ドラッグして並び替え">⠿</span>'+'<textarea class="nb-content '+typeClass+'" placeholder="'+ph+'" rows="1" data-bid="'+b.id+'" onkeydown="wsBlockKeydown(event,this)" oninput="wsBlockAutoGrow(this);wsNoteAutoSave()" onblur="wsNoteAutoSave()" onclick="wsBlockClick(event,this)">'+wsSafeHtml(b.content||'')+'</textarea>'+'</div>';
+}
+function wsBlockAutoGrow(ta){
+  ta.style.height='auto';
+  ta.style.height=ta.scrollHeight+'px';
+}
+function wsBlockKeydown(e,ta){
+  var bid=ta.getAttribute('data-bid');
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    wsNoteAutoSave();
+    var notes=wsLoadNotes();
+    var note=notes.find(function(n){return n.id===__wsCurrentNoteId;}); if(!note) return;
+    var bi=note.blocks.findIndex(function(b){return b.id===bid;});
+    var newB={id:wsGenId(),type:'p',content:''};
+    note.blocks.splice(bi+1,0,newB);
+    note.updated=Date.now();
+    wsSaveNotes(notes);
+    wsRenderNote(note);
+    setTimeout(function(){
+      var ta2=document.querySelector('.nb-content[data-bid="'+newB.id+'"]');
+      if(ta2){ ta2.focus(); wsBlockAutoGrow(ta2); }
+    },30);
+  } else if(e.key==='Backspace'&&ta.value===''){
+    e.preventDefault();
+    var notes2=wsLoadNotes();
+    var note2=notes2.find(function(n){return n.id===__wsCurrentNoteId;}); if(!note2) return;
+    if(note2.blocks.length<=1) return;
+    var bi2=note2.blocks.findIndex(function(b){return b.id===bid;});
+    if(bi2<=0) return;
+    var prevId=note2.blocks[bi2-1].id;
+    note2.blocks.splice(bi2,1);
+    note2.updated=Date.now();
+    wsSaveNotes(notes2);
+    wsRenderNote(note2);
+    setTimeout(function(){
+      var prevTa=document.querySelector('.nb-content[data-bid="'+prevId+'"]');
+      if(prevTa){ prevTa.focus(); prevTa.selectionStart=prevTa.selectionEnd=prevTa.value.length; wsBlockAutoGrow(prevTa); }
+    },30);
+  } else if(e.key==='/'&&ta.value===''){
+    e.preventDefault();
+    wsShowBlockPicker(ta,bid);
+  }
+}
+function wsBlockClick(e,ta){
+  setTimeout(function(){ wsBlockAutoGrow(ta); },0);
+}
+var __wsPickerTarget=null;
+var __wsPickerBid=null;
+function wsShowBlockPicker(ta,bid){
+  __wsPickerTarget=ta; __wsPickerBid=bid;
+  var existing=document.getElementById('ws-block-picker-popup');
+  if(existing) existing.remove();
+  var rect=ta?ta.getBoundingClientRect():{top:200,left:200};
+  var types=[
+    {type:'p',icon:'¶',label:'テキスト'},
+    {type:'h1',icon:'H1',label:'見出し 1'},
+    {type:'h2',icon:'H2',label:'見出し 2'},
+    {type:'h3',icon:'H3',label:'見出し 3'},
+    {type:'quote',icon:'"',label:'引用'},
+  ];
+  var el=document.createElement('div');
+  el.id='ws-block-picker-popup';
+  el.className='ws-block-picker';
+  el.style.top=(rect.bottom+4+window.scrollY)+'px';
+  el.style.left=(rect.left+window.scrollX)+'px';
+  el.innerHTML=types.map(function(t){
+    return '<div class="wbp-item" onclick="wsChangeBlockType(\''+t.type+'\')"><span class="wbp-icon">'+t.icon+'</span>'+wsSafeHtml(t.label)+'</div>';
+  }).join('');
+  document.body.appendChild(el);
+  setTimeout(function(){
+    document.addEventListener('click',function rm(e){ if(!el.contains(e.target)){el.remove();document.removeEventListener('click',rm);} });
+  },50);
+}
+function wsChangeBlockType(type){
+  var picker=document.getElementById('ws-block-picker-popup'); if(picker) picker.remove();
+  if(!__wsPickerBid) return;
+  var notes=wsLoadNotes();
+  var note=notes.find(function(n){return n.id===__wsCurrentNoteId;}); if(!note) return;
+  var b=note.blocks.find(function(b){return b.id===__wsPickerBid;}); if(!b) return;
+  b.type=type;
+  note.updated=Date.now();
+  wsSaveNotes(notes);
+  wsRenderNote(note);
+  setTimeout(function(){
+    var ta=document.querySelector('.nb-content[data-bid="'+__wsPickerBid+'"]');
+    if(ta){ ta.focus(); wsBlockAutoGrow(ta); }
+  },30);
+}
+var __wsNoteSaveTimer=null;
+function wsNoteAutoSave(){
+  clearTimeout(__wsNoteSaveTimer);
+  __wsNoteSaveTimer=setTimeout(function(){
+    if(!__wsCurrentNoteId) return;
+    var notes=wsLoadNotes();
+    var note=notes.find(function(n){return n.id===__wsCurrentNoteId;}); if(!note) return;
+    var titleInp=document.getElementById('note-title-inp');
+    if(titleInp) note.title=titleInp.value;
+    var iconEl=document.getElementById('note-icon-disp');
+    if(iconEl) note.icon=iconEl.textContent.trim();
+    var blocks=[];
+    document.querySelectorAll('#note-blocks .nb-content').forEach(function(ta){
+      var bid=ta.getAttribute('data-bid');
+      var wrap=ta.closest('.nb-wrap');
+      var existB=note.blocks.find(function(b){return b.id===bid;});
+      blocks.push({id:bid,type:existB?existB.type:'p',content:ta.value});
+    });
+    note.blocks=blocks;
+    note.updated=Date.now();
+    wsSaveNotes(notes);
+    wsRenderSidebarNotes();
+  },400);
+}
+function wsNoteIconClick(){
+  var icons=['📝','📓','📔','📒','📕','📗','📘','📙','🗒','✏️','🖊','📌','💡','🎯','🌟','🔥'];
+  var picked=prompt('アイコンを入力 (絵文字1文字):\n例: '+icons.join(' '));
+  if(picked){
+    var el=document.getElementById('note-icon-disp');
+    if(el){ el.textContent=picked.trim().slice(0,2); wsNoteAutoSave(); }
+  }
+}
+
+// auto-grow on render
+(function(){
+  document.addEventListener('input',function(e){
+    if(e.target && e.target.classList && e.target.classList.contains('nb-content')) wsBlockAutoGrow(e.target);
+  });
+  document.addEventListener('focus',function(e){
+    if(e.target && e.target.classList && e.target.classList.contains('nb-content')) wsBlockAutoGrow(e.target);
+  },true);
+})();
+// ════════════════════════════════════════════════════════
 
 </script>
 </body>
