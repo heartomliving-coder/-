@@ -1588,11 +1588,23 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
 .nb-quote{border-left:3px solid #C0A070;padding-left:12px;color:#666;font-style:italic}
 .nb-add-block{width:100%;margin-top:6px;padding:8px 14px;border:1.5px dashed #DDD;border-radius:6px;background:none;color:#BBB;cursor:pointer;font-size:.8rem;text-align:left;transition:all .15s}
 .nb-add-block:hover{border-color:#C0A070;color:#C0A070}
+/* 追加ブロックタイプ */
+.nb-code{font-family:monospace;background:#F5F5F4;border-radius:4px;padding:2px 4px;font-size:.83rem;color:#E05050}
+.nb-ul-row,.nb-ol-row,.nb-todo-row{display:flex;align-items:flex-start;gap:6px;width:100%}
+.nb-bullet{color:#666;flex-shrink:0;padding-top:3px;font-size:.85rem;user-select:none;min-width:18px}
+.nb-todo-check{flex-shrink:0;margin-top:4px;width:15px;height:15px;cursor:pointer;accent-color:#C0A070}
+.nb-todo-done{text-decoration:line-through;color:#AAA}
+.nb-hr{border:none;border-top:2px solid #EEE;margin:6px 0;flex:1;cursor:default}
+.nb-type-btn{opacity:0;background:none;border:none;color:#999;cursor:pointer;font-size:.62rem;font-weight:700;padding:2px 4px;border-radius:3px;flex-shrink:0;margin-top:4px;transition:opacity .12s;min-width:20px;text-align:center;line-height:1}
+.nb-wrap:hover .nb-type-btn{opacity:1}
+.nb-type-btn:hover{background:#EEE;color:#333}
 /* Block type picker */
-.ws-block-picker{position:fixed;background:#fff;border:1px solid #DDD;border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.14);z-index:600;padding:6px 0;min-width:200px;font-size:.82rem}
-.ws-block-picker .wbp-item{padding:7px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s}
-.ws-block-picker .wbp-item:hover{background:#F5F3FF}
-.ws-block-picker .wbp-icon{width:22px;text-align:center;font-size:.8rem;color:#666}
+.ws-block-picker{position:fixed;background:#fff;border:1px solid #E0DDD8;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.16);z-index:9999;padding:6px;min-width:200px;font-size:.82rem;max-height:320px;overflow-y:auto}
+.ws-block-picker .wbp-item{padding:7px 10px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s;border-radius:6px}
+.ws-block-picker .wbp-item:hover{background:#F5F3EF}
+.ws-block-picker .wbp-icon{width:26px;text-align:center;font-size:.75rem;font-weight:700;color:#888;background:#F0EDE8;border-radius:4px;padding:2px 4px;flex-shrink:0}
+.ws-block-picker .wbp-label{color:#333;font-size:.82rem}
+.ws-block-picker .wbp-desc{color:#BBB;font-size:.72rem}
 /* ── WSモーダル ──────────────────────────────────────── */
 .ws-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.48);display:none;align-items:center;justify-content:center}
 .ws-modal.show{display:flex}
@@ -2019,6 +2031,15 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
         <div class="hub-recent-list" id="hubRecentList">
           <div class="hub-empty-mini">読み込み中...</div>
         </div>
+      </div>
+
+      <!-- カスタムノート（Notionブロック） -->
+      <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px 18px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.1em">📌 ハブノート</span>
+          <button onclick="hubNoteAddBlock()" style="background:none;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);border-radius:5px;padding:2px 10px;font-size:.72rem;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='rgba(192,160,112,.6)';this.style.color='#C0A070'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='rgba(255,255,255,.4)'">＋ 追加</button>
+        </div>
+        <div id="hub-note-blocks" style="display:flex;flex-direction:column;gap:2px;min-height:28px"></div>
       </div>
     </div>
   </div>
@@ -3816,10 +3837,11 @@ function showHub(){
   kjLoad(true);
   setTimeout(function(){ hubLoadTodayKpi(); }, 800);
   setTimeout(function(){ hubLoadGcal(); }, 1500);
-  hubBuildActivityFeed(); // ハブ戻り時も即座に活動ログ更新
+  hubBuildActivityFeed();
   hubRenderExtKpi();
   refreshNotifBadge();
   scheduleEvSyncFromGAS();
+  hubNoteRender();
 }
 
 // ★ ログイン後は30分ごとにOB・KJをバックグラウンド同期（キャッシュが古くなったタイミングで更新）
@@ -3865,6 +3887,151 @@ function hubTick(){
   // 旧ID互換
   var el=document.getElementById('hubClock'); if(el) el.textContent=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+w+'）';
 }
+// ══ ハブノートブロック ════════════════════════════════════
+var HUB_NOTE_KEY='hub_note_blocks_v1';
+function hubNoteLoad(){ try{return JSON.parse(localStorage.getItem(HUB_NOTE_KEY)||'[]');}catch(e){return[];} }
+function hubNoteSave(blocks){ localStorage.setItem(HUB_NOTE_KEY,JSON.stringify(blocks)); }
+
+function hubNoteRender(){
+  var el=document.getElementById('hub-note-blocks'); if(!el) return;
+  var blocks=hubNoteLoad();
+  if(!blocks.length){
+    el.innerHTML='<div style="color:rgba(255,255,255,.25);font-size:.78rem;padding:4px 0;cursor:text" onclick="hubNoteAddBlock()">クリックしてメモを追加...</div>';
+    return;
+  }
+  var olNum=0;
+  el.innerHTML=blocks.map(function(b){
+    if(b.type==='ol') olNum++; else olNum=0;
+    return hubNoteBlockHTML(b,olNum);
+  }).join('');
+  el.querySelectorAll('.hub-note-ta').forEach(function(ta){ ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; });
+}
+
+function hubNoteBlockHTML(b,olNum){
+  var ti=wsBlockTypeInfo(b.type||'p');
+  var bid=b.id;
+  var styles={
+    p:'color:rgba(255,255,255,.75);font-size:.84rem',
+    h1:'color:#fff;font-size:1.15rem;font-weight:700',
+    h2:'color:#fff;font-size:.96rem;font-weight:700',
+    h3:'color:rgba(255,255,255,.9);font-size:.86rem;font-weight:700',
+    quote:'color:rgba(255,255,255,.5);font-style:italic;border-left:3px solid rgba(192,160,112,.5);padding-left:10px',
+    code:'color:#F9A8D4;font-family:monospace;background:rgba(255,255,255,.06);border-radius:4px;padding:2px 6px;font-size:.8rem',
+    ul:'color:rgba(255,255,255,.75);font-size:.84rem',
+    ol:'color:rgba(255,255,255,.75);font-size:.84rem',
+    todo:'color:rgba(255,255,255,.75);font-size:.84rem',
+  };
+  var st=styles[b.type||'p']||styles.p;
+  var taBase='rows="1" data-bid="'+bid+'" '
+    +'onkeydown="hubNoteKeydown(event,this)" '
+    +'oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\';hubNoteSaveAll()" '
+    +'onblur="hubNoteSaveAll()" '
+    +'style="'+st+';width:100%;border:none;outline:none;resize:none;background:transparent;font-family:inherit;overflow:hidden;min-height:1.6em"';
+  var del='<button onclick="hubNoteDeleteBlock(\''+bid+'\')" style="opacity:0;background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.7rem;padding:2px 5px;flex-shrink:0;transition:opacity .15s" class="hub-note-del-btn" title="削除">✕</button>';
+  var wrap='display:flex;align-items:flex-start;gap:4px;padding:1px 0';
+  if(b.type==='hr'){
+    return '<div style="'+wrap+'" data-bid="'+bid+'">'
+      +'<hr style="border:none;border-top:1px solid rgba(255,255,255,.12);flex:1;margin:8px 0">'+del+'</div>';
+  } else if(b.type==='ul'){
+    return '<div style="'+wrap+'" data-bid="'+bid+'" class="hub-note-block">'
+      +'<span style="color:rgba(255,255,255,.4);padding-top:3px;flex-shrink:0">•</span>'
+      +'<textarea class="hub-note-ta" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea>'+del+'</div>';
+  } else if(b.type==='ol'){
+    return '<div style="'+wrap+'" data-bid="'+bid+'" class="hub-note-block">'
+      +'<span style="color:rgba(255,255,255,.4);padding-top:3px;flex-shrink:0;min-width:18px">'+(olNum||1)+'.</span>'
+      +'<textarea class="hub-note-ta" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea>'+del+'</div>';
+  } else if(b.type==='todo'){
+    var checked=b.checked?'checked':'';
+    return '<div style="'+wrap+'" data-bid="'+bid+'" class="hub-note-block">'
+      +'<input type="checkbox" '+checked+' data-bid="'+bid+'" onchange="hubNoteCheckboxChange(this)" style="margin-top:4px;flex-shrink:0;accent-color:#C0A070">'
+      +'<textarea class="hub-note-ta" placeholder="'+ti.ph+'" '+taBase+(b.checked?' text-decoration:line-through;color:rgba(255,255,255,.3)':'')+'>'+wsSafeHtml(b.content||'')+'</textarea>'+del+'</div>';
+  } else {
+    return '<div style="'+wrap+'" data-bid="'+bid+'" class="hub-note-block">'
+      +'<textarea class="hub-note-ta" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea>'+del+'</div>';
+  }
+}
+
+function hubNoteSaveAll(){
+  var el=document.getElementById('hub-note-blocks'); if(!el) return;
+  var blocks=hubNoteLoad();
+  el.querySelectorAll('[data-bid]').forEach(function(wrap){
+    var bid=wrap.getAttribute('data-bid');
+    var b=blocks.find(function(x){return x.id===bid;}); if(!b) return;
+    var ta=wrap.querySelector('.hub-note-ta');
+    if(ta) b.content=ta.value;
+    var cb=wrap.querySelector('input[type=checkbox]');
+    if(cb) b.checked=cb.checked;
+  });
+  hubNoteSave(blocks);
+}
+
+function hubNoteAddBlock(type){
+  var blocks=hubNoteLoad();
+  blocks.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),type:type||'p',content:'',checked:false});
+  hubNoteSave(blocks);
+  hubNoteRender();
+  setTimeout(function(){
+    var tas=document.querySelectorAll('#hub-note-blocks .hub-note-ta');
+    if(tas.length) tas[tas.length-1].focus();
+  },30);
+}
+
+function hubNoteDeleteBlock(bid){
+  var blocks=hubNoteLoad();
+  var i=blocks.findIndex(function(b){return b.id===bid;}); if(i<0) return;
+  blocks.splice(i,1);
+  hubNoteSave(blocks);
+  hubNoteRender();
+}
+
+function hubNoteCheckboxChange(cb){
+  var bid=cb.getAttribute('data-bid');
+  var blocks=hubNoteLoad();
+  var b=blocks.find(function(x){return x.id===bid;}); if(!b) return;
+  b.checked=cb.checked;
+  hubNoteSave(blocks);
+}
+
+function hubNoteKeydown(e,ta){
+  var bid=ta.getAttribute('data-bid');
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    hubNoteSaveAll();
+    var blocks=hubNoteLoad();
+    var bi=blocks.findIndex(function(b){return b.id===bid;});
+    var newB={id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),type:'p',content:'',checked:false};
+    blocks.splice(bi+1,0,newB);
+    hubNoteSave(blocks);
+    hubNoteRender();
+    setTimeout(function(){
+      var nta=document.querySelector('#hub-note-blocks .hub-note-ta[data-bid="'+newB.id+'"]');
+      if(nta) nta.focus();
+    },30);
+  } else if(e.key==='Backspace'&&ta.value===''){
+    e.preventDefault();
+    var blocks2=hubNoteLoad(); if(blocks2.length<=1) return;
+    var bi2=blocks2.findIndex(function(b){return b.id===bid;}); if(bi2<=0) return;
+    var prevId=blocks2[bi2-1].id;
+    blocks2.splice(bi2,1);
+    hubNoteSave(blocks2);
+    hubNoteRender();
+    setTimeout(function(){
+      var pTa=document.querySelector('#hub-note-blocks .hub-note-ta[data-bid="'+prevId+'"]');
+      if(pTa){ pTa.focus(); pTa.selectionStart=pTa.selectionEnd=pTa.value.length; }
+    },30);
+  }
+}
+
+// ハブノートブロックのホバー削除ボタン
+document.addEventListener('mouseover',function(e){
+  var block=e.target.closest && e.target.closest('.hub-note-block');
+  if(block){ var btn=block.querySelector('.hub-note-del-btn'); if(btn) btn.style.opacity='1'; }
+});
+document.addEventListener('mouseout',function(e){
+  var block=e.target.closest && e.target.closest('.hub-note-block');
+  if(block){ var btn=block.querySelector('.hub-note-del-btn'); if(btn) btn.style.opacity='0'; }
+});
+
 function hubUpdateBadges(){
   var obActive=obRows.filter(function(r){var s=r['商談ステータス']||''; return ['失注','引渡済'].indexOf(s)<0;}).length;
   var el=document.getElementById('hubObCount'); if(el) el.textContent=obActive+'件';
@@ -11109,12 +11276,17 @@ function wsRenderNote(note){
   var blocks=note.blocks||[{id:wsGenId(),type:'p',content:''}];
   var html='<div onclick="wsNoteIconClick()" class="notes-icon-btn" id="note-icon-disp" title="アイコンを変更">'+(note.icon||'📝')+'</div><input class="notes-title-inp" id="note-title-inp" type="text" value="'+wsSafeHtml(note.title||'')+'" placeholder="タイトルなし" onchange="wsNoteAutoSave()" oninput="wsNoteAutoSave()">';
   html+='<div id="note-blocks">';
+  var olNum=0;
   blocks.forEach(function(b){
-    html+=wsBlockHTML(b);
+    if(b.type==='ol') olNum++; else olNum=0;
+    html+=wsBlockHTML(b,olNum);
   });
   html+='</div>';
-  html+='<button class="nb-add-block" onclick="wsShowBlockPicker(null,null)">＋ ブロックを追加...</button>';
+  html+='<button class="nb-add-block" onclick="wsAddNewBlock()">＋ ブロックを追加...</button>';
   inner.innerHTML=html;
+  setTimeout(function(){
+    inner.querySelectorAll('.nb-content').forEach(function(ta){ wsBlockAutoGrow(ta); });
+  },10);
 }
 // wsBlockHTML はドラッグ対応版を下部で定義
 function wsBlockAutoGrow(ta){
@@ -11164,43 +11336,80 @@ function wsBlockClick(e,ta){
 }
 var __wsPickerTarget=null;
 var __wsPickerBid=null;
+function wsAddNewBlock(){
+  if(!__wsCurrentNoteId) return;
+  var notes=wsLoadNotes();
+  var note=notes.find(function(n){return n.id===__wsCurrentNoteId;}); if(!note) return;
+  var newB={id:wsGenId(),type:'p',content:'',checked:false};
+  note.blocks.push(newB);
+  note.updated=Date.now();
+  wsSaveNotes(notes);
+  wsRenderNote(note);
+  setTimeout(function(){
+    var ta=document.querySelector('.nb-content[data-bid="'+newB.id+'"]');
+    if(ta){ ta.focus(); wsBlockAutoGrow(ta); }
+  },30);
+}
+
+function wsOpenTypePickerFromBtn(btn,bid){
+  __wsPickerTarget=null; __wsPickerBid=bid;
+  wsShowPickerAt(btn.getBoundingClientRect(),false);
+}
+
 function wsShowBlockPicker(ta,bid){
   __wsPickerTarget=ta; __wsPickerBid=bid;
+  wsShowPickerAt(ta?ta.getBoundingClientRect():{bottom:200,left:200,top:200},true);
+}
+
+function wsShowPickerAt(rect,isNewBlock){
   var existing=document.getElementById('ws-block-picker-popup');
   if(existing) existing.remove();
-  var rect=ta?ta.getBoundingClientRect():{top:200,left:200};
-  var types=[
-    {type:'p',icon:'¶',label:'テキスト'},
-    {type:'h1',icon:'H1',label:'見出し 1'},
-    {type:'h2',icon:'H2',label:'見出し 2'},
-    {type:'h3',icon:'H3',label:'見出し 3'},
-    {type:'quote',icon:'"',label:'引用'},
-  ];
   var el=document.createElement('div');
   el.id='ws-block-picker-popup';
   el.className='ws-block-picker';
-  el.style.top=(rect.bottom+4+window.scrollY)+'px';
-  el.style.left=(rect.left+window.scrollX)+'px';
-  el.innerHTML=types.map(function(t){
-    return '<div class="wbp-item" onclick="wsChangeBlockType(\''+t.type+'\')"><span class="wbp-icon">'+t.icon+'</span>'+wsSafeHtml(t.label)+'</div>';
+  var top=rect.bottom+4+window.scrollY;
+  var left=Math.max(8,Math.min(rect.left+window.scrollX, window.innerWidth-220));
+  // flip up if too close to bottom
+  if(rect.bottom+180>window.innerHeight) top=rect.top-4+window.scrollY-180;
+  el.style.top=top+'px';
+  el.style.left=left+'px';
+  el.innerHTML=WS_BLOCK_TYPES.map(function(t){
+    return '<div class="wbp-item" onclick="wsChangeBlockType(\''+t.type+'\','+isNewBlock+')">'
+      +'<span class="wbp-icon">'+t.icon+'</span>'
+      +'<span class="wbp-label">'+wsSafeHtml(t.label)+'</span>'
+      +'<span class="wbp-desc" style="margin-left:auto;font-size:.7rem;color:#CCC">'+wsSafeHtml(t.desc)+'</span>'
+      +'</div>';
   }).join('');
   document.body.appendChild(el);
   setTimeout(function(){
     document.addEventListener('click',function rm(e){ if(!el.contains(e.target)){el.remove();document.removeEventListener('click',rm);} });
   },50);
 }
-function wsChangeBlockType(type){
+function wsChangeBlockType(type, isNewBlock){
   var picker=document.getElementById('ws-block-picker-popup'); if(picker) picker.remove();
-  if(!__wsPickerBid) return;
+  if(!__wsCurrentNoteId) return;
   var notes=wsLoadNotes();
   var note=notes.find(function(n){return n.id===__wsCurrentNoteId;}); if(!note) return;
-  var b=note.blocks.find(function(b){return b.id===__wsPickerBid;}); if(!b) return;
-  b.type=type;
+  if(isNewBlock){
+    // '/' キーで新しいブロックを追加する場合 — 既存ブロックを指定タイプに変換
+    if(__wsPickerBid){
+      var b0=note.blocks.find(function(b){return b.id===__wsPickerBid;}); if(!b0) return;
+      b0.type=type; if(type==='hr') b0.content='';
+    } else {
+      var newB={id:wsGenId(),type:type,content:'',checked:false};
+      note.blocks.push(newB); __wsPickerBid=newB.id;
+    }
+  } else {
+    if(!__wsPickerBid) return;
+    var b1=note.blocks.find(function(b){return b.id===__wsPickerBid;}); if(!b1) return;
+    b1.type=type; if(type==='hr') b1.content='';
+  }
   note.updated=Date.now();
   wsSaveNotes(notes);
   wsRenderNote(note);
+  var focusBid=__wsPickerBid;
   setTimeout(function(){
-    var ta=document.querySelector('.nb-content[data-bid="'+__wsPickerBid+'"]');
+    var ta=document.querySelector('.nb-content[data-bid="'+focusBid+'"]');
     if(ta){ ta.focus(); wsBlockAutoGrow(ta); }
   },30);
 }
@@ -11216,11 +11425,18 @@ function wsNoteAutoSave(){
     var iconEl=document.getElementById('note-icon-disp');
     if(iconEl) note.icon=iconEl.textContent.trim();
     var blocks=[];
-    document.querySelectorAll('#note-blocks .nb-content').forEach(function(ta){
-      var bid=ta.getAttribute('data-bid');
-      var wrap=ta.closest('.nb-wrap');
+    document.querySelectorAll('#note-blocks .nb-wrap').forEach(function(wrap){
+      var bid=wrap.getAttribute('data-bid');
       var existB=note.blocks.find(function(b){return b.id===bid;});
-      blocks.push({id:bid,type:existB?existB.type:'p',content:ta.value});
+      var type=existB?existB.type:'p';
+      var ta=wrap.querySelector('.nb-content');
+      var content=ta?ta.value:(existB?existB.content||'':'');
+      var checked=false;
+      if(type==='todo'){
+        var cb=wrap.querySelector('.nb-todo-check');
+        checked=cb?cb.checked:(existB?!!existB.checked:false);
+      }
+      blocks.push({id:bid,type:type,content:content,checked:checked});
     });
     note.blocks=blocks;
     note.updated=Date.now();
@@ -11250,14 +11466,59 @@ function wsNoteIconClick(){
 var __wsDragBid = null;
 var __wsDragOver = null;
 
-function wsBlockHTML(b) {
-  var typeClass = {'p':'','h1':'nb-h1','h2':'nb-h2','h3':'nb-h3','quote':'nb-quote'}[b.type]||'';
-  var ph = {'p':'テキストを入力...','h1':'見出し 1','h2':'見出し 2','h3':'見出し 3','quote':'引用文...'}[b.type]||'入力...';
-  return '<div class="nb-wrap" data-bid="'+b.id+'" draggable="false">'
-    +'<span class="nb-drag-handle" title="ドラッグして並び替え" draggable="true" onmousedown="wsBlockDragStart(event,\''+b.id+'\')" ontouchstart="wsBlockTouchStart(event,\''+b.id+'\')">⠿</span>'
-    +'<textarea class="nb-content '+typeClass+'" placeholder="'+ph+'" rows="1" data-bid="'+b.id+'" onkeydown="wsBlockKeydown(event,this)" oninput="wsBlockAutoGrow(this);wsNoteAutoSave()" onblur="wsNoteAutoSave()" onclick="wsBlockClick(event,this)">'+wsSafeHtml(b.content||'')+'</textarea>'
-    +'<button class="nb-del-btn" onclick="wsDeleteBlock(\''+b.id+'\')" title="ブロックを削除">✕</button>'
-    +'</div>';
+var WS_BLOCK_TYPES=[
+  {type:'p',    icon:'¶',   label:'テキスト',   desc:'普通のテキスト',   ph:'テキストを入力...'},
+  {type:'h1',   icon:'H1',  label:'見出し 1',   desc:'大きな見出し',     ph:'見出し 1'},
+  {type:'h2',   icon:'H2',  label:'見出し 2',   desc:'中見出し',         ph:'見出し 2'},
+  {type:'h3',   icon:'H3',  label:'見出し 3',   desc:'小見出し',         ph:'見出し 3'},
+  {type:'ul',   icon:'•',   label:'箇条書き',   desc:'点の付きリスト',   ph:'リスト項目...'},
+  {type:'ol',   icon:'1.',  label:'番号リスト', desc:'番号付きリスト',   ph:'リスト項目...'},
+  {type:'todo', icon:'☑',  label:'チェック',   desc:'チェックリスト',   ph:'TODOを入力...'},
+  {type:'quote',icon:'"',   label:'引用',       desc:'引用文',           ph:'引用文...'},
+  {type:'code', icon:'<>',  label:'コード',     desc:'等幅フォント',     ph:'コードを入力...'},
+  {type:'hr',   icon:'—',   label:'区切り線',   desc:'水平線',           ph:''},
+];
+function wsBlockTypeInfo(type){ return WS_BLOCK_TYPES.find(function(t){return t.type===type;})||WS_BLOCK_TYPES[0]; }
+
+function wsBlockHTML(b, olNum) {
+  var ti=wsBlockTypeInfo(b.type);
+  var bid=b.id;
+  var handle='<button class="nb-type-btn" onclick="wsOpenTypePickerFromBtn(this,\''+bid+'\')" title="タイプ変更">'+ti.icon+'</button>'
+    +'<span class="nb-drag-handle" title="ドラッグして並び替え" draggable="true" onmousedown="wsBlockDragStart(event,\''+bid+'\')" ontouchstart="wsBlockTouchStart(event,\''+bid+'\')">⠿</span>';
+  var del='<button class="nb-del-btn" onclick="wsDeleteBlock(\''+bid+'\')" title="ブロックを削除">✕</button>';
+  var taBase='rows="1" data-bid="'+bid+'" onkeydown="wsBlockKeydown(event,this)" oninput="wsBlockAutoGrow(this);wsNoteAutoSave()" onblur="wsNoteAutoSave()" onclick="wsBlockClick(event,this)"';
+  var cnt;
+  if(b.type==='hr'){
+    cnt='<hr class="nb-hr">';
+  } else if(b.type==='ul'){
+    cnt='<div class="nb-ul-row"><span class="nb-bullet">•</span>'
+      +'<textarea class="nb-content" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea></div>';
+  } else if(b.type==='ol'){
+    cnt='<div class="nb-ol-row"><span class="nb-bullet">'+(olNum||1)+'.</span>'
+      +'<textarea class="nb-content" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea></div>';
+  } else if(b.type==='todo'){
+    cnt='<div class="nb-todo-row">'
+      +'<input type="checkbox" class="nb-todo-check"'+(b.checked?' checked':'')+' data-bid="'+bid+'" onchange="wsNoteCheckboxChange(this)">'
+      +'<textarea class="nb-content'+(b.checked?' nb-todo-done':'')+'" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea>'
+      +'</div>';
+  } else {
+    var cls={'h1':'nb-h1','h2':'nb-h2','h3':'nb-h3','quote':'nb-quote','code':'nb-code'}[b.type]||'';
+    cnt='<textarea class="nb-content'+(cls?' '+cls:'')+'" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea>';
+  }
+  return '<div class="nb-wrap" data-bid="'+bid+'" draggable="false">'+handle+cnt+del+'</div>';
+}
+
+function wsNoteCheckboxChange(checkbox){
+  var bid=checkbox.getAttribute('data-bid');
+  var notes=wsLoadNotes();
+  var note=notes.find(function(n){return n.id===__wsCurrentNoteId;}); if(!note) return;
+  var b=note.blocks.find(function(b){return b.id===bid;}); if(!b) return;
+  b.checked=checkbox.checked;
+  note.updated=Date.now();
+  wsSaveNotes(notes);
+  // Update textarea style without full re-render
+  var ta=document.querySelector('.nb-content[data-bid="'+bid+'"]');
+  if(ta) ta.classList.toggle('nb-todo-done', checkbox.checked);
 }
 
 function wsDeleteBlock(bid){
@@ -11482,29 +11743,51 @@ function obGetMemoKey(){ var r=obRows[obDetailRow]; return r?(OB_MEMO_KEY+'_'+(r
 function obLoadMemo(){ try{ var k=obGetMemoKey(); return k?JSON.parse(localStorage.getItem(k)||'[]'):[];}catch(e){return[];} }
 function obSaveMemo(blocks){ var k=obGetMemoKey(); if(k) localStorage.setItem(k,JSON.stringify(blocks)); }
 
+function obMemoBlockHTML(b, olNum){
+  var ti=wsBlockTypeInfo(b.type||'p');
+  var bid=b.id;
+  var handle='<button class="nb-type-btn" onclick="obMemoOpenTypePicker(this,\''+bid+'\')" title="タイプ変更">'+ti.icon+'</button>'
+    +'<span class="nb-drag-handle" draggable="true" onmousedown="obMemoDragByHandle(event,\''+bid+'\')" title="ドラッグ">⠿</span>';
+  var del='<button class="nb-del-btn" onclick="obMemoDeleteByBid(\''+bid+'\')" title="削除">✕</button>';
+  var taBase='rows="1" data-bid="'+bid+'" onkeydown="obMemoKeydown(event,this)" oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'" onblur="obMemoSaveByBid(this)"';
+  var cnt;
+  if(b.type==='hr'){
+    cnt='<hr class="nb-hr">';
+  } else if(b.type==='ul'){
+    cnt='<div class="nb-ul-row"><span class="nb-bullet">•</span>'
+      +'<textarea class="ob-memo-textarea nb-content" placeholder="'+ti.ph+'" '+taBase+'>'+esc(b.content||'')+'</textarea></div>';
+  } else if(b.type==='ol'){
+    cnt='<div class="nb-ol-row"><span class="nb-bullet">'+(olNum||1)+'.</span>'
+      +'<textarea class="ob-memo-textarea nb-content" placeholder="'+ti.ph+'" '+taBase+'>'+esc(b.content||'')+'</textarea></div>';
+  } else if(b.type==='todo'){
+    cnt='<div class="nb-todo-row">'
+      +'<input type="checkbox" class="nb-todo-check"'+(b.checked?' checked':'')+' data-bid="'+bid+'" onchange="obMemoCheckboxChange(this)">'
+      +'<textarea class="ob-memo-textarea nb-content'+(b.checked?' nb-todo-done':'')+'" placeholder="'+ti.ph+'" '+taBase+'>'+esc(b.content||'')+'</textarea></div>';
+  } else {
+    var cls={'h1':'nb-h1','h2':'nb-h2','h3':'nb-h3','quote':'nb-quote','code':'nb-code'}[b.type||'p']||'';
+    cnt='<textarea class="ob-memo-textarea nb-content'+(cls?' '+cls:'')+'" placeholder="'+ti.ph+'" '+taBase+'>'+esc(b.content||'')+'</textarea>';
+  }
+  return '<div class="nb-wrap" data-bid="'+bid+'" draggable="false">'+handle+cnt+del+'</div>';
+}
+
 function obRenderMemoBlocks(){
   var el=document.getElementById('ob-det-memo-blocks'); if(!el) return;
   var blocks=obLoadMemo();
   if(!blocks.length){
-    el.innerHTML='<div style="color:#CCC;font-size:.78rem;padding:4px 0">クリックしてメモを追加...</div>';
-    el.onclick=function(){ obAddNoteBlock(); el.onclick=null; };
+    el.innerHTML='<div style="color:#CCC;font-size:.78rem;padding:4px 0;cursor:text" onclick="obAddNoteBlock()">クリックしてメモを追加...</div>';
     return;
   }
-  el.onclick=null;
-  el.innerHTML=blocks.map(function(b,i){
-    var typeMap={p:'',h1:'font-size:1.1rem;font-weight:700',h2:'font-size:.95rem;font-weight:700',h3:'font-size:.88rem;font-weight:600',quote:'border-left:3px solid #C0A070;padding-left:8px;color:#666;font-style:italic'};
-    var st=typeMap[b.type||'p']||'';
-    return '<div class="ob-memo-block" data-idx="'+i+'" draggable="true" ondragstart="obMemoDragStart(event,'+i+')" ondragover="obMemoDragOver(event)" ondrop="obMemoDrop(event,'+i+')" ondragend="obMemoDragEnd()">'+
-      '<span class="ob-memo-block-handle">⠿</span>'+
-      '<textarea class="ob-memo-textarea" style="'+st+'" placeholder="テキスト入力..." onblur="obMemoSaveBlock(this,'+i+')" oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'">'+esc(b.content||'')+'</textarea>'+
-      '<button class="ob-memo-del" onclick="obMemoDeleteBlock('+i+')" title="削除">✕</button>'+
-    '</div>';
+  var olNum=0;
+  el.innerHTML=blocks.map(function(b){
+    if(b.type==='ol') olNum++; else olNum=0;
+    return obMemoBlockHTML(b,olNum);
   }).join('');
   el.querySelectorAll('.ob-memo-textarea').forEach(function(ta){ ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; });
 }
-function obAddNoteBlock(){
+
+function obAddNoteBlock(type){
   var blocks=obLoadMemo();
-  blocks.push({type:'p',content:'',id:Date.now().toString(36)});
+  blocks.push({type:type||'p',content:'',id:Date.now().toString(36),checked:false});
   obSaveMemo(blocks);
   obRenderMemoBlocks();
   setTimeout(function(){
@@ -11512,31 +11795,145 @@ function obAddNoteBlock(){
     if(tas.length) tas[tas.length-1].focus();
   },50);
 }
-function obMemoSaveBlock(ta,idx){
+
+function obMemoSaveByBid(ta){
+  var bid=ta.getAttribute('data-bid');
   var blocks=obLoadMemo();
-  if(!blocks[idx]) return;
-  blocks[idx].content=ta.value;
+  var b=blocks.find(function(b){return b.id===bid;}); if(!b) return;
+  b.content=ta.value;
   obSaveMemo(blocks);
 }
-function obMemoDeleteBlock(idx){
+
+function obMemoCheckboxChange(cb){
+  var bid=cb.getAttribute('data-bid');
   var blocks=obLoadMemo();
-  blocks.splice(idx,1);
+  var b=blocks.find(function(b){return b.id===bid;}); if(!b) return;
+  b.checked=cb.checked;
+  obSaveMemo(blocks);
+  var ta=cb.parentNode.querySelector('.ob-memo-textarea');
+  if(ta) ta.classList.toggle('nb-todo-done',cb.checked);
+}
+
+function obMemoDeleteByBid(bid){
+  var blocks=obLoadMemo();
+  var i=blocks.findIndex(function(b){return b.id===bid;}); if(i<0) return;
+  blocks.splice(i,1);
   obSaveMemo(blocks);
   obRenderMemoBlocks();
 }
-var __obMemoDragIdx=null;
-function obMemoDragStart(e,idx){ __obMemoDragIdx=idx; e.dataTransfer.effectAllowed='move'; }
-function obMemoDragOver(e){ e.preventDefault(); }
-function obMemoDrop(e,toIdx){
+
+function obMemoKeydown(e,ta){
+  var bid=ta.getAttribute('data-bid');
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    obMemoSaveByBid(ta);
+    var blocks=obLoadMemo();
+    var bi=blocks.findIndex(function(b){return b.id===bid;});
+    var newB={id:Date.now().toString(36),type:'p',content:'',checked:false};
+    blocks.splice(bi+1,0,newB);
+    obSaveMemo(blocks);
+    obRenderMemoBlocks();
+    setTimeout(function(){
+      var nta=document.querySelector('#ob-det-memo-blocks .nb-content[data-bid="'+newB.id+'"]');
+      if(nta) nta.focus();
+    },30);
+  } else if(e.key==='Backspace'&&ta.value===''){
+    e.preventDefault();
+    var blocks2=obLoadMemo(); if(blocks2.length<=1) return;
+    var bi2=blocks2.findIndex(function(b){return b.id===bid;}); if(bi2<=0) return;
+    var prevId=blocks2[bi2-1].id;
+    blocks2.splice(bi2,1);
+    obSaveMemo(blocks2);
+    obRenderMemoBlocks();
+    setTimeout(function(){
+      var prevTa=document.querySelector('#ob-det-memo-blocks .nb-content[data-bid="'+prevId+'"]');
+      if(prevTa){ prevTa.focus(); prevTa.selectionStart=prevTa.selectionEnd=prevTa.value.length; }
+    },30);
+  }
+}
+
+// タイプピッカー（メモ用）
+var __obMemoPickerBid=null;
+function obMemoOpenTypePicker(btn,bid){
+  __obMemoPickerBid=bid;
+  var existing=document.getElementById('ws-block-picker-popup');
+  if(existing) existing.remove();
+  var rect=btn.getBoundingClientRect();
+  var el=document.createElement('div');
+  el.id='ws-block-picker-popup';
+  el.className='ws-block-picker';
+  var top=rect.bottom+4+window.scrollY;
+  var left=Math.max(8,Math.min(rect.left+window.scrollX,window.innerWidth-220));
+  if(rect.bottom+200>window.innerHeight) top=rect.top+window.scrollY-200;
+  el.style.top=top+'px'; el.style.left=left+'px';
+  el.innerHTML=WS_BLOCK_TYPES.map(function(t){
+    return '<div class="wbp-item" onclick="obMemoChangeType(\''+t.type+'\')">'
+      +'<span class="wbp-icon">'+t.icon+'</span>'
+      +'<span class="wbp-label">'+wsSafeHtml(t.label)+'</span></div>';
+  }).join('');
+  document.body.appendChild(el);
+  setTimeout(function(){
+    document.addEventListener('click',function rm(e){ if(!el.contains(e.target)){el.remove();document.removeEventListener('click',rm);} });
+  },50);
+}
+function obMemoChangeType(type){
+  var picker=document.getElementById('ws-block-picker-popup'); if(picker) picker.remove();
+  if(!__obMemoPickerBid) return;
+  var blocks=obLoadMemo();
+  var b=blocks.find(function(b){return b.id===__obMemoPickerBid;}); if(!b) return;
+  b.type=type; if(type==='hr') b.content='';
+  obSaveMemo(blocks);
+  obRenderMemoBlocks();
+}
+
+// ドラッグ（ハンドルから開始）
+var __obMemoDragBid=null, __obMemoDragOver=null;
+function obMemoDragByHandle(e,bid){
+  __obMemoDragBid=bid;
+  var container=document.getElementById('ob-det-memo-blocks'); if(!container) return;
+  container.querySelectorAll('.nb-wrap').forEach(function(w){
+    w.setAttribute('draggable','true');
+    w.addEventListener('dragover',obMemoDragOverHandler);
+    w.addEventListener('drop',obMemoDropHandler);
+  });
+  var self=container.querySelector('.nb-wrap[data-bid="'+bid+'"]');
+  if(self){
+    try{ self.dispatchEvent(new DragEvent('dragstart',{bubbles:true,dataTransfer:new DataTransfer()})); }catch(ex){}
+  }
+  document.addEventListener('dragend',obMemoDragEndHandler,{once:true});
+}
+function obMemoDragOverHandler(e){
   e.preventDefault();
-  if(__obMemoDragIdx===null||__obMemoDragIdx===toIdx) return;
+  var bid=this.getAttribute('data-bid'); if(bid===__obMemoDragBid) return;
+  if(__obMemoDragOver!==bid){
+    __obMemoDragOver=bid;
+    document.querySelectorAll('#ob-det-memo-blocks .nb-wrap').forEach(function(w){w.style.borderTop='';w.style.borderBottom='';});
+    var mid=this.getBoundingClientRect().top+this.getBoundingClientRect().height/2;
+    if(e.clientY<mid) this.style.borderTop='2px solid #C0A070';
+    else this.style.borderBottom='2px solid #C0A070';
+  }
+}
+function obMemoDropHandler(e){
+  e.preventDefault();
+  var targetBid=this.getAttribute('data-bid');
+  if(!__obMemoDragBid||targetBid===__obMemoDragBid){ obMemoDragEndHandler(); return; }
+  var rect=this.getBoundingClientRect();
+  var before=e.clientY<rect.top+rect.height/2;
   var blocks=obLoadMemo();
-  var moved=blocks.splice(__obMemoDragIdx,1)[0];
-  blocks.splice(toIdx,0,moved);
+  var fi=blocks.findIndex(function(b){return b.id===__obMemoDragBid;});
+  var ti=blocks.findIndex(function(b){return b.id===targetBid;});
+  if(fi<0||ti<0){ obMemoDragEndHandler(); return; }
+  var moved=blocks.splice(fi,1)[0];
+  var newTi=blocks.findIndex(function(b){return b.id===targetBid;});
+  blocks.splice(before?newTi:newTi+1,0,moved);
   obSaveMemo(blocks);
+  obMemoDragEndHandler();
   obRenderMemoBlocks();
 }
-function obMemoDragEnd(){ __obMemoDragIdx=null; document.querySelectorAll('.ob-memo-block').forEach(function(el){el.style.borderTop='';el.style.borderBottom='';}); }
+function obMemoDragEndHandler(){
+  __obMemoDragBid=null; __obMemoDragOver=null;
+  document.querySelectorAll('#ob-det-memo-blocks .nb-wrap').forEach(function(w){ w.style.borderTop=''; w.style.borderBottom=''; w.setAttribute('draggable','false'); });
+}
 
 // ══ OBタブ切り替えショートカット ═══════════════════════
 function obDetSwitchTab(tab){ obDetTab(tab); }
