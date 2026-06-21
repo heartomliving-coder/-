@@ -7466,7 +7466,7 @@ function obRenderDetInfo(){
   }).join('');
 
   var hd=document.getElementById('ob-det-hurdles');
-  hd.innerHTML=OB_HURDLES.map(function(h){
+  if(hd) hd.innerHTML=OB_HURDLES.map(function(h){
     var done=(r[h.key]==='1'||r[h.key]===true||r[h.key]===1);
     return '<div class="ob-hurdle-card'+(done?' done':'')+'" onclick="obToggleDet(this,\''+h.key+'\','+obDetailRow+')">'+
       '<span class="ob-hurdle-icon">'+h.icon+'</span>'+
@@ -7475,7 +7475,7 @@ function obRenderDetInfo(){
   }).join('');
 
   var fd=document.getElementById('ob-det-framing');
-  fd.innerHTML=OB_FRAMINGS.map(function(f){
+  if(fd) fd.innerHTML=OB_FRAMINGS.map(function(f){
     var done=(r[f.key]==='1'||r[f.key]===true||r[f.key]===1);
     return '<div class="ob-hurdle-card'+(done?' done':'')+'" onclick="obToggleDet(this,\''+f.key+'\','+obDetailRow+')">'+
       '<span class="ob-hurdle-icon">'+f.icon+'</span>'+
