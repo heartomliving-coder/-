@@ -615,7 +615,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-table tbody tr:nth-child(even) td{background:#FAFAF8}
 .ob-table tbody tr:hover td{background:#F5F2EC;transition:background .1s}
 .ob-table tr.ob-sel td{background:#FFF8EE !important}
-.ob-vis-table tbody tr{cursor:pointer}
+.ob-vis-table tbody tr .ob-name-link{cursor:pointer}
 
 /* 顧客名リンク */
 .ob-name-link{font-family:var(--serif);font-weight:600;color:var(--charcoal);cursor:pointer;border-bottom:1px solid transparent;transition:all .15s;font-size:1.02rem}
@@ -1719,10 +1719,10 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
 .mf-textarea{width:100%;border:1.5px solid #E8E4DE;border-radius:6px;padding:9px 12px;font-size:.84rem;font-family:inherit;resize:vertical;box-sizing:border-box;outline:none;background:#FAFAF8;transition:border-color .15s}
 .mf-textarea:focus{border-color:#C0A070;box-shadow:0 0 0 3px rgba(192,160,112,.12);background:#fff}
 .mf-point-row{background:#fff;border:1px solid #ECEAE6;border-radius:8px;padding:10px 14px}
-.mf-point-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mf-point-hd{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .mf-point-label{font-weight:700;font-size:.84rem;color:#2B2B2B;min-width:48px}
 .mf-point-sub{font-size:.74rem;color:#999;flex:1}
-.mf-ox-wrap{display:flex;gap:4px;margin-left:auto}
+.mf-ox-wrap{display:flex;gap:4px;flex-basis:100%;margin-top:2px}
 .mf-ox-btn{border:1.5px solid #DDD;background:#fff;border-radius:20px;padding:2px 12px;font-size:.85rem;cursor:pointer;font-weight:700;color:#AAA;transition:all .15s;font-family:inherit}
 .mf-ox-btn.active-maru{background:#E8F5E9;border-color:#4CAF50;color:#2E7D32}
 .mf-ox-btn.active-batu{background:#FFEBEE;border-color:#EF5350;color:#C62828}
@@ -1836,11 +1836,14 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
   </div>
   <div class="ws-sb-nav" id="ws-sb-nav">
     <div class="ws-sb-section"><span>ナビゲーション</span></div>
-    <div class="ws-sb-item" id="ws-nav-hub" onclick="wsNavTo('hub')">
-      <span class="ws-sb-icon">🏠</span><span class="ws-sb-label">ホーム</span>
+    <div class="ws-sb-item" id="ws-nav-app" onclick="enterReception();wsSetActiveSection('app')">
+      <span class="ws-sb-icon">🖥</span><span class="ws-sb-label">受付管理</span>
     </div>
     <div class="ws-sb-item" id="ws-nav-ob" onclick="wsNavTo('ob')">
       <span class="ws-sb-icon">👤</span><span class="ws-sb-label">OBハブ</span>
+    </div>
+    <div class="ws-sb-item" id="ws-nav-hub" onclick="wsNavTo('hub')">
+      <span class="ws-sb-icon">🏠</span><span class="ws-sb-label">ホーム</span>
     </div>
     <div class="ws-sb-item" id="ws-nav-kj" onclick="wsNavTo('kj')">
       <span class="ws-sb-icon">🏗</span><span class="ws-sb-label">着工管理</span>
@@ -6607,7 +6610,7 @@ function obRenderVisitors(){
       var visitDateDisp=firstVisitH?obNormDate(firstVisitH.date||''):(obSanitizeVal(r['来場日']||r['問い合わせ日']||''));
       var inquiryDate=obSanitizeVal(r['問い合わせ日']||r['来場日']||'');
       var areaHtml=r['エリア']?obSanitizeVal(r['エリア']).split(',').filter(Boolean).map(function(m){return '<span class="ob-area-tag">'+esc(m.trim())+'</span>';}).join(' '):'<span style="color:#CCC">—</span>';
-      html+='<tr data-sc="'+sc+'" data-row="'+r._row+'" onclick="obOpenDetail('+r._row+')">'+
+      html+='<tr data-sc="'+sc+'" data-row="'+r._row+'">'+
         '<td class="ob-rn">'+monthN+'</td>'+
         '<td style="font-size:.76rem;color:#888;white-space:nowrap">'+
           (visitDateDisp?obFmtDate(visitDateDisp):'<span style="color:#DDD">—</span>')+
@@ -6628,7 +6631,7 @@ function obRenderVisitors(){
         '</td>'+
         '<td style="white-space:nowrap;font-size:.76rem;color:#888">'+esc(obSanitizeVal(r['サブ担当']||''))+'</td>'+
         '<td style="font-size:.76rem">'+areaHtml+'</td>'+
-        '<td class="ob-td-hist" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()" title="クリックして来場履歴を追加・編集">'+
+        '<td class="ob-td-hist" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()" style="cursor:pointer">'+
           '<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div>'+
         '</td>'+
         '<td onclick="obNextPopOpen(event,'+r._row+');event.stopPropagation()" class="ob-td-next" style="cursor:pointer" title="クリックして次回予定を設定">'+
@@ -11173,7 +11176,7 @@ function wsToggleCollapse(){
 
 // ── アクティブセクションをサイドバーに反映 ─────────────
 function wsSetActiveSection(sec){
-  var ids=['hub','ob','kj','tochi','mtg','cust'];
+  var ids=['hub','ob','kj','tochi','mtg','cust','app'];
   ids.forEach(function(id){
     var el=document.getElementById('ws-nav-'+id);
     if(el) el.classList.remove('active');
