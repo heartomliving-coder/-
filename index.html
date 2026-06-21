@@ -6911,9 +6911,14 @@ function obGetBdays(){
 var __obAllBdays=null;
 function obLoadAllBdays(force){
   if(__obAllBdays!==null && !force) return;
+  // seed from cache so hub calendar has data immediately
+  if(__obAllBdays===null){
+    try{ __obAllBdays=JSON.parse(localStorage.getItem('ob_all_bdays_v1')||'null'); }catch(e){}
+  }
   __obAllBdays=__obAllBdays||[];
   gasGet('obGetAllBirthdays',function(d){
     __obAllBdays=(d&&d.birthdays)?d.birthdays:[];
+    try{ localStorage.setItem('ob_all_bdays_v1',JSON.stringify(__obAllBdays)); }catch(e){}
     obRenderBirthday();
   });
 }
@@ -11337,6 +11342,7 @@ function hubOpenBdayCalendar(){
   var now=new Date(); __bdayCalYear=now.getFullYear(); __bdayCalMonth=now.getMonth();
   document.getElementById('hub-bday-popup').classList.add('show');
   document.getElementById('hub-bday-overlay').style.display='block';
+  obLoadAllBdays(false);
   hubRenderBdayCal();
 }
 function hubCloseBdayCalendar(){
@@ -11352,7 +11358,7 @@ function hubRenderBdayCal(){
   if(title) title.textContent=y+'年'+(m+1)+'月';
   if(popup) popup.textContent='誕生日カレンダー '+(m+1)+'月';
   var grid=document.getElementById('hub-bday-cal-grid'); if(!grid) return;
-  var allBdays=obLoadAllBdayData();
+  var allBdays=(__obAllBdays&&__obAllBdays.length)?__obAllBdays:obLoadAllBdayData();
   var today=new Date();
   var firstDay=new Date(y,m,1).getDay();
   var daysInMonth=new Date(y,m+1,0).getDate();
@@ -11397,7 +11403,7 @@ function hubRenderBdayCal(){
   document.getElementById('hub-bday-day-detail').style.display='none';
 }
 function hubShowBdayDay(d){
-  var allBdays=obLoadAllBdayData();
+  var allBdays=(__obAllBdays&&__obAllBdays.length)?__obAllBdays:obLoadAllBdayData();
   var dayBdays=allBdays.filter(function(b){ return parseInt((b.date||'').slice(5,7),10)-1===__bdayCalMonth && parseInt((b.date||'').slice(8,10),10)===d; });
   var dtl=document.getElementById('hub-bday-day-detail');
   var dtlT=document.getElementById('hub-bday-day-title');
