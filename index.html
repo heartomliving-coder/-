@@ -911,6 +911,18 @@ tr:hover .ob-del{opacity:1}
 /* ─── 顧客詳細画面 ─── */
 .ob-detail{position:fixed;top:0;left:0;right:0;bottom:0;z-index:60;display:none;flex-direction:column;background:#F7F6F3;transition:left .2s ease}
 .ob-detail.show{display:flex}
+/* OB基本情報セクション並び替え */
+.ob-info-sec{transition:outline .15s,opacity .15s}
+.ob-info-layout-editing .ob-info-sec{cursor:grab;outline:2px dashed rgba(154,140,118,.3);outline-offset:4px;border-radius:8px;padding:6px}
+.ob-info-layout-editing .ob-info-sec:hover{outline-color:rgba(192,160,112,.7)}
+.ob-info-layout-editing .ob-info-sec.drag-over{outline:2px dashed #C0A070;background:rgba(192,160,112,.05)}
+.ob-info-layout-editing .ob-info-sec.dragging{opacity:.4}
+.ob-info-layout-editing .ob-info-sec-handle{display:block!important}
+/* ob-detail内のhbtnは白背景用に上書き（デフォルトhbtnは暗背景前提なので） */
+.ob-detail .ob-det-pane .hbtn{background:#fff;border:1px solid #DDD;color:#333;transition:all .15s}
+.ob-detail .ob-det-pane .hbtn:hover{background:#F5F3EF;border-color:#C0A070;color:#222}
+.ob-detail .ob-det-pane .hbtn.primary{background:#2B2B2B;border-color:#2B2B2B;color:#fff}
+.ob-detail .ob-det-pane .hbtn.primary:hover{background:#444;border-color:#444}
 body.ws-open .ob-detail{left:240px}
 body.ws-collapsed .ob-detail{left:52px}
 .ob-det-hd{flex-shrink:0;background:#2B2B2B;color:#fff;padding:max(16px,env(safe-area-inset-top)) 24px 0;display:flex;flex-direction:column}
@@ -1072,10 +1084,9 @@ body.ws-collapsed .ob-detail{left:52px}
 .ob-tl-dot{flex-shrink:0;width:10px;height:10px;border-radius:50%;background:#9A8C76;border:2px solid #fff;box-shadow:0 0 0 1px #9A8C76;cursor:pointer;position:relative}
 .ob-tl-dot.first{background:#4B9EFF;box-shadow:0 0 0 1px #4B9EFF}
 .ob-tl-dot.pgoal{background:#5E9E5E;width:12px;height:12px;box-shadow:0 0 0 2px #5E9E5E}
-.ob-tl-dot.next{background:#F59E0B;box-shadow:0 0 0 2px #F59E0B;animation:ob-tl-pulse 1.5s infinite}
-.ob-tl-dot.over{background:#EF4444;box-shadow:0 0 0 2px #EF4444;animation:ob-tl-pulse 1s infinite}
-@keyframes ob-tl-pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.ob-tl-label{font-size:.58rem;color:#AAA;white-space:nowrap;position:absolute;top:14px;left:50%;transform:translateX(-50%)}
+.ob-tl-dot.next{background:#F59E0B;box-shadow:0 0 0 2px #F59E0B;width:12px;height:12px}
+.ob-tl-dot.over{background:#EF4444;box-shadow:0 0 0 3px rgba(239,68,68,.3)}
+.ob-tl-label{font-size:.6rem;color:#666;white-space:nowrap;position:absolute;top:14px;left:50%;transform:translateX(-50%);font-weight:600}
 /* カードアクションフッター */
 .ob-card-foot{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid #F0EDE8;background:#FAFAF9}
 .ob-card-foot-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer;border:1px solid transparent;transition:all .14s;white-space:nowrap}
@@ -2389,39 +2400,52 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
   <div class="ob-det-body">
     <!-- 基本情報 -->
     <div class="ob-det-pane show" data-dtab="info" id="ob-det-pane-info">
+      <!-- レイアウト編集ボタン -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
+        <button id="obInfoLayoutBtn" class="hub-layout-btn" onclick="obInfoToggleLayout()" style="font-size:.7rem;padding:4px 10px">⊞ 並び替え</button>
+      </div>
       <div class="ob-info-grid" id="ob-det-info-grid"></div>
       <!-- 来場履歴サマリー -->
-      <div style="margin-top:20px" id="ob-info-history-wrap">
+      <div class="ob-info-sec" data-sec="history" draggable="false" style="margin-top:20px" id="ob-info-history-wrap">
+        <div class="ob-info-sec-handle" style="display:none;font-size:.6rem;color:#AAA;text-align:center;margin-bottom:4px;cursor:grab">⠿ ドラッグで並び替え</div>
         <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">📋 来場履歴 <span id="ob-info-hist-count" style="font-size:.72rem;color:#AAA"></span></div>
         <div id="ob-info-history-list" style="margin-top:8px"></div>
       </div>
       <!-- カルテ概要 -->
-      <div style="margin-top:20px" id="ob-info-karte-wrap">
+      <div class="ob-info-sec" data-sec="karte" draggable="false" style="margin-top:20px" id="ob-info-karte-wrap">
+        <div class="ob-info-sec-handle" style="display:none;font-size:.6rem;color:#AAA;text-align:center;margin-bottom:4px;cursor:grab">⠿ ドラッグで並び替え</div>
         <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">🗂 カルテ概要</div>
         <div id="ob-info-karte-grid" style="margin-top:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px"></div>
       </div>
       <!-- 誕生日 -->
-      <div style="margin-top:20px" id="ob-info-bday-wrap">
+      <div class="ob-info-sec" data-sec="bday" draggable="false" style="margin-top:20px" id="ob-info-bday-wrap">
+        <div class="ob-info-sec-handle" style="display:none;font-size:.6rem;color:#AAA;text-align:center;margin-bottom:4px;cursor:grab">⠿ ドラッグで並び替え</div>
         <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">🎂 誕生日</div>
         <div id="ob-info-bday-list" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px"></div>
       </div>
       <!-- タイムライン -->
-      <div style="margin-top:20px" id="ob-info-tl-wrap">
+      <div class="ob-info-sec" data-sec="timeline" draggable="false" style="margin-top:20px" id="ob-info-tl-wrap">
+        <div class="ob-info-sec-handle" style="display:none;font-size:.6rem;color:#AAA;text-align:center;margin-bottom:4px;cursor:grab">⠿ ドラッグで並び替え</div>
         <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">📅 タイムライン</div>
         <div id="ob-info-tl-content" style="margin-top:8px"></div>
       </div>
       <!-- 顧客メモ（ブロックエディタ） -->
-      <div style="margin-top:20px">
+      <div class="ob-info-sec" data-sec="memo" draggable="false" style="margin-top:20px">
+        <div class="ob-info-sec-handle" style="display:none;font-size:.6rem;color:#AAA;text-align:center;margin-bottom:4px;cursor:grab">⠿ ドラッグで並び替え</div>
         <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">📝 顧客メモ <button onclick="obAddNoteBlock()" style="background:none;border:1px solid #DDD;border-radius:4px;padding:1px 8px;cursor:pointer;font-size:.72rem;color:#666">＋ブロック追加</button></div>
         <div id="ob-det-memo-blocks" style="margin-top:8px;display:flex;flex-direction:column;gap:4px"></div>
       </div>
       <!-- 関連MTG一覧 -->
-      <div style="margin-top:20px" id="ob-det-mtg-inline-wrap">
-        <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">💼 面談記録 <span id="ob-det-mtg-count" style="font-size:.72rem;color:#AAA"></span> <button onclick="obDetTab('mendan')" style="background:none;border:1px solid #C0A070;border-radius:4px;padding:1px 8px;cursor:pointer;font-size:.72rem;color:#C0A070">＋追加</button></div>
+      <div class="ob-info-sec" data-sec="mendan" draggable="false" style="margin-top:20px" id="ob-det-mtg-inline-wrap">
+        <div class="ob-info-sec-handle" style="display:none;font-size:.6rem;color:#AAA;text-align:center;margin-bottom:4px;cursor:grab">⠿ ドラッグで並び替え</div>
+        <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">💼 面談記録 <span id="ob-det-mtg-count" style="font-size:.72rem;color:#AAA"></span>
+          <button onclick="obDetTab('mendan')" style="background:#C0A070;border:none;border-radius:5px;padding:3px 12px;cursor:pointer;font-size:.72rem;color:#fff;font-weight:700">＋ 新規追加</button>
+        </div>
         <div id="ob-det-mtg-inline" style="margin-top:8px;display:flex;flex-direction:column;gap:8px"></div>
       </div>
       <!-- 関連DB -->
-      <div style="margin-top:20px" id="ob-det-related-db-wrap">
+      <div class="ob-info-sec" data-sec="related" draggable="false" style="margin-top:20px" id="ob-det-related-db-wrap">
+        <div class="ob-info-sec-handle" style="display:none;font-size:.6rem;color:#AAA;text-align:center;margin-bottom:4px;cursor:grab">⠿ ドラッグで並び替え</div>
         <div class="ob-sec-title">📎 関連DB</div>
         <div id="ob-det-related-db" style="margin-top:8px;display:flex;flex-direction:column;gap:8px"></div>
       </div>
@@ -2462,7 +2486,8 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
     <div class="ob-det-pane" data-dtab="drive" id="ob-det-pane-drive">
       <div class="drive-url-row">
         <input type="url" id="ob-drive-url" placeholder="https://drive.google.com/drive/folders/...">
-        <button class="hbtn primary" onclick="obSaveDriveUrl()">保存</button>
+        <button style="background:#2B2B2B;border:1px solid #2B2B2B;color:#fff;padding:8px 14px;border-radius:6px;font-size:.82rem;cursor:pointer;white-space:nowrap" onclick="obSaveDriveUrl()">保存</button>
+        <button id="ob-drive-open-btn" style="display:none;background:#4285F4;border:1px solid #4285F4;color:#fff;padding:8px 14px;border-radius:6px;font-size:.82rem;cursor:pointer;white-space:nowrap" onclick="obOpenDriveInNewTab()">🔗 Driveで開く</button>
       </div>
       <input type="file" id="ob-drive-file-input" style="display:none" multiple onchange="driveUploadFiles(this.files,'ob')">
       <div class="drive-drop-zone" id="ob-drive-drop-zone" onclick="document.getElementById('ob-drive-file-input').click()">
@@ -2471,9 +2496,9 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
         <div style="font-size:.76rem;color:#AAA;margin-top:4px">または クリックして選択</div>
       </div>
       <div class="drive-toolbar" id="ob-drive-toolbar" style="display:none">
-        <button class="hbtn" onclick="driveNewFolder('ob')">📁 新フォルダ</button>
-        <button class="hbtn" onclick="obDriveListFiles('ob')">🔄 更新</button>
-        <span id="ob-drive-file-count" style="font-size:.76rem;color:#888;margin-left:auto"></span>
+        <button style="background:#fff;border:1px solid #DDD;color:#333;padding:6px 12px;border-radius:5px;font-size:.8rem;cursor:pointer" onclick="driveNewFolder('ob')">📁 新フォルダ</button>
+        <button style="background:#fff;border:1px solid #DDD;color:#333;padding:6px 12px;border-radius:5px;font-size:.8rem;cursor:pointer" onclick="obDriveListFiles('ob')">🔄 更新</button>
+        <span id="ob-drive-file-count" style="font-size:.76rem;color:#666;margin-left:auto;font-weight:600"></span>
       </div>
       <div id="ob-drive-file-list"></div>
     </div>
@@ -2504,6 +2529,8 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
         </div>
         <!-- 結果 -->
         <div class="mf-field"><label class="mf-label">✅ 結果</label><input type="text" id="mf-result" placeholder="見学のみ・資料持ち帰り・次回FP予定" class="mf-input"></div>
+        <!-- 経緯・内容 -->
+        <div class="mf-field"><label class="mf-label">📋 経緯・内容 <span class="mf-hint">お客様が何を知りたくて来場したか・現在の不安・悩み</span></label><textarea id="mf-background" rows="3" class="mf-textarea"></textarea></div>
         <!-- 動機（別欄） -->
         <div class="mf-field" style="background:#FEF9F0;border-radius:8px;padding:12px 14px;border:1px solid #F0E8D0">
           <label class="mf-label" style="color:#8C6E2A">💡 動機 <span class="mf-hint">なぜ家づくりを始めたか</span></label>
@@ -2514,8 +2541,6 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
           </div>
           <textarea id="mf-motivation" rows="2" placeholder="動機・きっかけを記入..." class="mf-textarea"></textarea>
         </div>
-        <!-- 経緯・内容 -->
-        <div class="mf-field"><label class="mf-label">📋 経緯・内容 <span class="mf-hint">お客様が何を知りたくて来場したか・現在の不安・悩み</span></label><textarea id="mf-background" rows="3" class="mf-textarea"></textarea></div>
         <!-- 5大ハードル -->
         <div style="background:#F8F6F2;border-radius:8px;padding:14px 16px">
           <div style="font-size:.72rem;font-weight:800;color:#9A8C76;letter-spacing:.12em;margin-bottom:10px">5大ハードル</div>
@@ -3950,6 +3975,79 @@ function hubRestoreLayout(){
     order.forEach(function(sec){
       var el = main.querySelector('[data-sec="'+sec+'"]');
       if(el) main.appendChild(el);
+    });
+  }catch(e){}
+}
+
+/* ─── OB基本情報セクション並び替え ─── */
+var _obInfoLayoutEditing = false;
+var OB_INFO_LAYOUT_KEY = 'ob_info_layout_v1';
+
+function obInfoToggleLayout(){
+  _obInfoLayoutEditing = !_obInfoLayoutEditing;
+  var pane = document.getElementById('ob-det-pane-info');
+  var btn  = document.getElementById('obInfoLayoutBtn');
+  if(!pane) return;
+  pane.classList.toggle('ob-info-layout-editing', _obInfoLayoutEditing);
+  document.querySelectorAll('#ob-det-pane-info .ob-info-sec').forEach(function(s){
+    s.setAttribute('draggable', _obInfoLayoutEditing ? 'true' : 'false');
+  });
+  if(btn){
+    btn.textContent = _obInfoLayoutEditing ? '✅ 完了' : '⊞ 並び替え';
+    btn.classList.toggle('active', _obInfoLayoutEditing);
+  }
+  if(_obInfoLayoutEditing) obInfoInitDrag(); else obInfoSaveLayout();
+}
+
+function obInfoInitDrag(){
+  var _dragged = null;
+  document.querySelectorAll('#ob-det-pane-info .ob-info-sec').forEach(function(sec){
+    sec.ondragstart = function(e){
+      _dragged = this;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(function(){ if(_dragged) _dragged.classList.add('dragging'); }, 0);
+    };
+    sec.ondragend = function(){
+      this.classList.remove('dragging');
+      document.querySelectorAll('#ob-det-pane-info .ob-info-sec').forEach(function(s){ s.classList.remove('drag-over'); });
+    };
+    sec.ondragover = function(e){
+      e.preventDefault();
+      if(_dragged && _dragged !== this){
+        document.querySelectorAll('#ob-det-pane-info .ob-info-sec').forEach(function(s){ s.classList.remove('drag-over'); });
+        this.classList.add('drag-over');
+      }
+    };
+    sec.ondragleave = function(){ this.classList.remove('drag-over'); };
+    sec.ondrop = function(e){
+      e.preventDefault();
+      this.classList.remove('drag-over');
+      if(_dragged && _dragged !== this){
+        var pane = document.getElementById('ob-det-pane-info');
+        var secs = Array.from(pane.querySelectorAll('.ob-info-sec'));
+        var di = secs.indexOf(_dragged), ti = secs.indexOf(this);
+        if(di < ti) this.after(_dragged); else this.before(_dragged);
+      }
+      _dragged = null;
+    };
+  });
+}
+
+function obInfoSaveLayout(){
+  var secs = document.querySelectorAll('#ob-det-pane-info .ob-info-sec');
+  var order = Array.from(secs).map(function(s){ return s.dataset.sec; });
+  try{ localStorage.setItem(OB_INFO_LAYOUT_KEY, JSON.stringify(order)); }catch(e){}
+}
+
+function obInfoRestoreLayout(){
+  try{
+    var order = JSON.parse(localStorage.getItem(OB_INFO_LAYOUT_KEY) || 'null');
+    if(!order || !order.length) return;
+    var pane = document.getElementById('ob-det-pane-info');
+    if(!pane) return;
+    order.forEach(function(sec){
+      var el = pane.querySelector('[data-sec="'+sec+'"]');
+      if(el) pane.appendChild(el);
     });
   }catch(e){}
 }
@@ -7581,6 +7679,7 @@ function obOpenDetail(rowIdx){
   if(tlEl) tlEl.innerHTML = buildCustomerTimeline(r);
   document.getElementById('ob-detail').classList.add('show');
   document.getElementById('ob-detail').scrollTop=0;
+  obInfoRestoreLayout();
   // 来場日当日なら面談報告タブを自動表示
   var todayStr=(function(){var t=new Date();return t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2);})();
   var visitDate=obNormDate(r['来場日']||'');
@@ -8580,6 +8679,8 @@ function obRenderDetDrive(){
   var r=obRows[obDetailRow]; if(!r) return;
   var url=r['driveUrl']||'';
   var inp=document.getElementById('ob-drive-url'); if(inp) inp.value=url;
+  var openBtn=document.getElementById('ob-drive-open-btn');
+  if(openBtn) openBtn.style.display=url?'':'none';
   driveInitDropZone('ob');
   obDriveListFiles('ob');
 }
