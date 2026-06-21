@@ -594,27 +594,28 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-pane.show{display:flex}
 
 /* フィルターバー */
-.ob-filter{flex-shrink:0;padding:9px 18px;background:#fff;border-bottom:1px solid #E8E4DE;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.04)}
-.ob-filter label{font-size:.74rem;font-weight:700;color:#777;letter-spacing:.08em}
-.ob-filter select,.ob-filter input[type=text]{padding:6px 10px;border:1px solid #DDD;border-radius:3px;font-size:.88rem;background:#FAFAFA;color:var(--tx);outline:none;font-family:inherit;transition:border .15s}
-.ob-filter select:focus,.ob-filter input[type=text]:focus{border-color:var(--charcoal);background:#fff}
-.ob-filter-count{margin-left:auto;font-size:.72rem;color:#AAA;font-weight:700;letter-spacing:.06em}
+.ob-filter{flex-shrink:0;padding:7px 14px;background:#fff;border-bottom:1px solid #EDEAE4;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ob-filter label{font-size:.7rem;font-weight:700;color:#999;letter-spacing:.07em}
+.ob-filter select,.ob-filter input[type=text]{padding:5px 9px;border:1px solid #E0DBD3;border-radius:5px;font-size:.84rem;background:#FAFAF8;color:var(--tx);outline:none;font-family:inherit;transition:border .15s;height:30px}
+.ob-filter select:focus,.ob-filter input[type=text]:focus{border-color:#888;background:#fff}
+.ob-filter-count{margin-left:auto;font-size:.72rem;color:#AAA;font-weight:700;letter-spacing:.06em;white-space:nowrap}
 .ob-filter-chk{display:flex;align-items:center;gap:6px;font-size:.76rem;color:#666;font-weight:600;cursor:pointer;user-select:none}
 .ob-filter-chk input{accent-color:var(--charcoal);width:14px;height:14px}
 
 /* テーブル共通 */
 .ob-scroll{flex:1;overflow:auto}
 .ob-table{width:100%;border-collapse:collapse;font-size:.93rem}
-.ob-table thead th{background:linear-gradient(135deg,#2B2B2B 0%,#3D3530 100%);color:rgba(255,255,255,.88);font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:11px 13px;text-align:left;position:sticky;top:0;z-index:3;white-space:nowrap;border-right:1px solid rgba(255,255,255,.1);text-transform:uppercase}
+.ob-table thead th{background:#1E1E1E;color:rgba(255,255,255,.82);font-size:.7rem;font-weight:700;letter-spacing:.1em;padding:10px 13px;text-align:left;position:sticky;top:0;z-index:3;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);text-transform:uppercase}
 .ob-table thead th:first-child{border-radius:0}
 .ob-table thead th.cb-th{text-align:center;padding:6px 5px;font-size:.7rem;letter-spacing:.02em;line-height:1.4}
-.ob-table td{padding:9px 13px;border-bottom:1px solid #EDE9E2;color:#2B2B2B;vertical-align:middle;background:#fff;border-right:1px solid #F0EDE8;white-space:nowrap}
+.ob-table td{padding:8px 13px;border-bottom:1px solid #EDE9E2;color:#2B2B2B;vertical-align:middle;background:#fff;border-right:1px solid #F5F3EF;white-space:nowrap}
 .ob-table td.ob-td-hist{white-space:normal;min-width:200px}
 .ob-table td.ob-td-name{min-width:140px;max-width:200px}
 .ob-table td.ob-td-tel{min-width:130px;white-space:nowrap}
 .ob-table tbody tr:nth-child(even) td{background:#FAFAF8}
-.ob-table tbody tr:hover td{background:#F7F4EE;transition:background .12s}
+.ob-table tbody tr:hover td{background:#F5F2EC;transition:background .1s}
 .ob-table tr.ob-sel td{background:#FFF8EE !important}
+.ob-vis-table tbody tr{cursor:pointer}
 
 /* 顧客名リンク */
 .ob-name-link{font-family:var(--serif);font-weight:600;color:var(--charcoal);cursor:pointer;border-bottom:1px solid transparent;transition:all .15s;font-size:1.02rem}
@@ -623,7 +624,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 
 /* 月グループヘッダー（KPIダッシュボード） */
 .ob-month-hd td{padding:0;border-top:3px solid #2B2B2B;border-bottom:none;border-right:none !important;background:transparent}
-.ob-mkpi{background:linear-gradient(135deg,#2B2B2B 0%,#3A332E 100%);padding:12px 18px 0;display:flex;flex-direction:column;gap:0}
+.ob-mkpi{background:#1E1E1E;padding:12px 18px 0;display:flex;flex-direction:column;gap:0}
 .ob-mkpi-top{display:flex;align-items:center;gap:12px;padding-bottom:10px;flex-wrap:wrap}
 .ob-mkpi-month{font-family:var(--serif);font-size:1.12rem;font-weight:700;color:#fff;letter-spacing:.1em;flex-shrink:0}
 .ob-mkpi-total{background:rgba(255,255,255,.15);color:#fff;font-size:.78rem;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:.04em}
@@ -740,7 +741,7 @@ tr:hover .ob-del{opacity:1}
 .ob-agg-inline-row td{background:#FAF8F5;padding:5px 16px;border-bottom:1px solid #EDE9E3}
 .ob-agg-inline-lbl{font-size:.73rem;font-weight:700;color:#777;letter-spacing:.06em;margin-right:10px;text-transform:uppercase}
 .ob-vis-agg-wrap{margin:0 0 16px;border:1px solid #E8E4DE;border-radius:4px;overflow:hidden;background:#fff}
-.ob-vis-agg-title{padding:10px 16px;background:#2B2B2B;color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.12em;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none}
+.ob-vis-agg-title{padding:9px 16px;background:#1E1E1E;color:rgba(255,255,255,.82);font-size:.7rem;font-weight:700;letter-spacing:.1em;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none}
 .ob-vis-agg-toggle{font-size:.8rem;transition:transform .2s}
 .ob-vis-agg-wrap.open .ob-vis-agg-toggle{transform:rotate(180deg)}
 .ob-vis-agg-body{display:none;overflow-x:auto}
@@ -826,7 +827,7 @@ tr:hover .ob-del{opacity:1}
 .ob-vis-view-btn{background:none;border:none;padding:4px 11px;font-size:.68rem;font-weight:700;color:#888;cursor:pointer;transition:all .12s;letter-spacing:.04em}
 .ob-vis-view-btn.on{background:#2B2B2B;color:#fff;border-radius:3px}
 .ob-vis-section{margin-bottom:20px}
-.ob-vis-month-hd{display:flex;align-items:center;gap:8px;padding:9px 16px;background:linear-gradient(135deg,#2B2B2B 0%,#3D3530 100%);color:#fff;border-radius:6px 6px 0 0;flex-wrap:wrap}
+.ob-vis-month-hd{display:flex;align-items:center;gap:8px;padding:9px 16px;background:#1E1E1E;color:#fff;border-radius:6px 6px 0 0;flex-wrap:wrap}
 .ob-vis-month-label{font-size:.88rem;font-weight:700;letter-spacing:.06em;color:#fff;white-space:nowrap}
 .ob-vis-month-stats{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto;align-items:center}
 .ob-vis-month-stat{background:rgba(255,255,255,.14);color:rgba(255,255,255,.9);font-size:.66rem;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
@@ -888,12 +889,13 @@ tr:hover .ob-del{opacity:1}
 /* テーブルビュー時の表示切り替え */
 .ob-vis-table-wrap{border:1px solid #E0DAD4;border-radius:0 0 6px 6px;overflow-x:auto;background:#F5F2EE;padding:8px 12px}
 /* パイプラインフロー */
-.ob-pipeline{flex-shrink:0;display:flex;padding:6px 16px;background:#FAFAF8;border-bottom:1px solid #E8E4DE;overflow-x:auto;gap:0;align-items:center}
-.ob-pipe-s{display:flex;align-items:center;gap:0;font-size:.73rem;font-weight:700;color:#999;white-space:nowrap;cursor:pointer;transition:color .15s}
-.ob-pipe-s:hover .ob-pipe-lbl{background:rgba(43,43,43,.08)}
-.ob-pipe-lbl{padding:3px 9px;border-radius:20px;transition:background .15s}
-.ob-pipe-s.on .ob-pipe-lbl{background:var(--charcoal);color:#fff}
-.ob-pipe-arr{color:#BBB;padding:0 3px;font-size:.72rem;flex-shrink:0}
+.ob-pipeline{flex-shrink:0;display:flex;padding:7px 14px;background:#F7F5F1;border-bottom:1px solid #E8E4DE;overflow-x:auto;gap:4px;align-items:center}
+.ob-pipe-s{display:flex;align-items:center;gap:0;font-size:.7rem;font-weight:700;color:#AAA;white-space:nowrap;cursor:pointer;transition:color .15s}
+.ob-pipe-s:hover .ob-pipe-lbl{background:rgba(43,43,43,.1);color:#555}
+.ob-pipe-lbl{padding:4px 10px;border-radius:20px;transition:all .15s;border:1px solid transparent}
+.ob-pipe-s.on .ob-pipe-lbl{background:#2B2B2B;color:#fff;border-color:#2B2B2B}
+.ob-pipe-s.pipe-active .ob-pipe-lbl{background:#C0A070;color:#fff;border-color:#C0A070}
+.ob-pipe-arr{color:#CCC;padding:0 2px;font-size:.65rem;flex-shrink:0}
 
 /* 集計タブ */
 .ob-agg-body{flex:1;overflow:auto;padding:20px 24px;display:flex;flex-direction:column;gap:28px}
@@ -6604,31 +6606,28 @@ function obRenderVisitors(){
       for(var hi=0;hi<histForDate.length;hi++){if(histForDate[hi].type==='来場'){firstVisitH=histForDate[hi];break;}}
       var visitDateDisp=firstVisitH?obNormDate(firstVisitH.date||''):(obSanitizeVal(r['来場日']||r['問い合わせ日']||''));
       var inquiryDate=obSanitizeVal(r['問い合わせ日']||r['来場日']||'');
-      html+='<tr data-sc="'+sc+'" data-row="'+r._row+'">'+
+      var areaHtml=r['エリア']?obSanitizeVal(r['エリア']).split(',').filter(Boolean).map(function(m){return '<span class="ob-area-tag">'+esc(m.trim())+'</span>';}).join(' '):'<span style="color:#CCC">—</span>';
+      html+='<tr data-sc="'+sc+'" data-row="'+r._row+'" onclick="obOpenDetail('+r._row+')">'+
         '<td class="ob-rn">'+monthN+'</td>'+
-        '<td style="font-size:.76rem;color:#999;white-space:nowrap">'+
-          '<span class="ob-editable" data-row="'+r._row+'" data-field="来場日" data-type="date" onclick="obStartEdit(this);event.stopPropagation()" style="font-size:.76rem;color:#777">'+
-            (visitDateDisp?obFmtDate(visitDateDisp):'<span style="color:#DDD">—</span>')+
-          '</span>'+
+        '<td style="font-size:.76rem;color:#888;white-space:nowrap">'+
+          (visitDateDisp?obFmtDate(visitDateDisp):'<span style="color:#DDD">—</span>')+
         '</td>'+
-        '<td onclick="event.stopPropagation()">'+
-          '<span class="ob-editable ob-tipo-chip" data-row="'+r._row+'" data-field="反響元" data-type="sel" onclick="obStartEdit(this);event.stopPropagation()">'+(r['反響元']?esc(r['反響元']):'<span style="color:#CCC;font-weight:400">—</span>')+'</span>'+
+        '<td>'+
+          (r['反響元']?'<span class="ob-tipo-chip" style="pointer-events:none">'+esc(r['反響元'])+'</span>':'<span style="color:#CCC">—</span>')+
         '</td>'+
         '<td class="ob-td-name">'+
-          '<span class="ob-name-link" onclick="obOpenDetail('+r._row+');event.stopPropagation()">'+esc(r['顧客名']||'—')+'</span>'+
+          '<span class="ob-name-link">'+esc(r['顧客名']||'—')+'</span>'+
           (kana?'<div class="ob-name-sub">'+esc(kana)+'</div>':'')+
           (tel?'<div class="ob-name-sub" style="color:#7B6248;font-family:monospace;letter-spacing:.03em;margin-top:2px">📞 '+esc(tel)+'</div>':'')+
         '</td>'+
         '<td onclick="event.stopPropagation()" style="white-space:nowrap">'+
-          '<span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+')" style="cursor:pointer;font-size:.7rem;padding:3px 9px">'+esc(dispStatus)+'</span>'+
+          '<span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+');event.stopPropagation()" style="cursor:pointer;font-size:.7rem;padding:3px 9px">'+esc(dispStatus)+'</span>'+
         '</td>'+
-        '<td onclick="event.stopPropagation()" style="white-space:nowrap">'+
-          '<div style="font-size:.8rem;font-weight:700;color:#2B2B2B">'+obCell(r,'担当者')+'</div>'+
+        '<td style="white-space:nowrap">'+
+          '<div style="font-size:.8rem;font-weight:700;color:#2B2B2B">'+esc(obSanitizeVal(r['担当者']||''))+'</div>'+
         '</td>'+
-        '<td onclick="event.stopPropagation()" style="white-space:nowrap;font-size:.76rem;color:#888">'+
-          obCell(r,'サブ担当')+
-        '</td>'+
-        '<td onclick="event.stopPropagation()" style="font-size:.76rem">'+obCell(r,'エリア')+'</td>'+
+        '<td style="white-space:nowrap;font-size:.76rem;color:#888">'+esc(obSanitizeVal(r['サブ担当']||''))+'</td>'+
+        '<td style="font-size:.76rem">'+areaHtml+'</td>'+
         '<td class="ob-td-hist" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()" title="クリックして来場履歴を追加・編集">'+
           '<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div>'+
         '</td>'+
@@ -6639,13 +6638,11 @@ function obRenderVisitors(){
               '<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>')+
           '</div>'+
         '</td>'+
-        '<td onclick="event.stopPropagation()" style="padding:4px 8px">'+
-          '<span class="ob-editable" data-row="'+r._row+'" data-field="次回内容" data-type="text" onclick="obStartEdit(this);event.stopPropagation()" style="font-size:.78rem;display:block;min-height:20px">'+
-            (r['次回内容']?esc(r['次回内容']):'<span style="color:#CCC;font-style:italic">—</span>')+
-          '</span>'+
+        '<td style="padding:4px 8px;font-size:.78rem;color:#555">'+
+          (r['次回内容']?esc(r['次回内容']):'<span style="color:#CCC;font-style:italic">—</span>')+
         '</td>'+
         '<td style="padding:4px 6px;text-align:center" onclick="event.stopPropagation()">'+
-          '<button class="ob-del" onclick="obConfirmDel('+r._row+')" title="削除">✕</button>'+
+          '<button class="ob-del" onclick="obConfirmDel('+r._row+');event.stopPropagation()" title="削除">✕</button>'+
         '</td>'+
       '</tr>';
     });
