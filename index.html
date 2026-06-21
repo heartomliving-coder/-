@@ -582,10 +582,13 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-brand img{height:24px;filter:brightness(0) invert(1) opacity(.85)}
 .ob-hd-ti{font-family:var(--serif);font-size:1rem;letter-spacing:.16em;font-weight:600;color:#fff}
 .ob-hd-ti small{display:block;font-family:"Playfair Display",serif;font-size:.55rem;letter-spacing:.36em;color:rgba(255,255,255,.36);font-weight:400;margin-top:2px}
-.ob-tabs{display:flex;align-self:flex-end;gap:0;padding:0 2px}
+.ob-tabs{display:flex;align-self:flex-end;gap:0;padding:0 2px;overflow-x:auto;flex-shrink:1}
 .ob-tab{background:none;border:none;border-bottom:3px solid transparent;color:rgba(255,255,255,.48);padding:13px 16px;font-size:.78rem;font-weight:700;letter-spacing:.09em;cursor:pointer;white-space:nowrap;transition:all .18s}
 .ob-tab:hover{color:rgba(255,255,255,.85)}
 .ob-tab.on{color:#fff;border-bottom-color:var(--gold)}
+.ob-tab-sep{width:1px;background:rgba(255,255,255,.18);margin:8px 6px;align-self:stretch;flex-shrink:0}
+.ob-tab-nav{opacity:.7;font-size:.73rem}
+.ob-tab-nav:hover{opacity:1}
 .ob-hd-tools{display:flex;align-items:center;gap:8px;padding:0 0 14px;margin-left:auto;flex-wrap:wrap}
 .ob-pane{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0}
 .ob-pane.show{display:flex}
@@ -1969,18 +1972,6 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
           <span class="hc-badge" id="hubTcCount">—</span>
           <div class="hc-desc">確定土地・物件管理<br>工事案内図・見学会案内図</div>
         </div>
-        <div class="hub-card" onclick="enterMtgBoard()">
-          <div class="hc-icon">💼</div>
-          <div class="hc-title">営業MTG</div>
-          <span class="hc-badge" id="hubMtgCount">—</span>
-          <div class="hc-desc">面談報告・商談管理<br>Chatwork自動取込</div>
-        </div>
-        <div class="hub-card" onclick="enterCustBoard()">
-          <div class="hc-icon">👤</div>
-          <div class="hc-title">顧客情報DB</div>
-          <span class="hc-badge" id="hc-cust-cnt">—</span>
-          <div class="hc-desc">Notion顧客マスタ連携<br>OB・KJ・Chatwork統合</div>
-        </div>
       </div>
 
       <!-- 拡張KPI -->
@@ -2071,6 +2062,9 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       <button class="ob-tab on" data-tab="visitors" onclick="obSwitchTab('visitors')">📅 来客状況</button>
       <button class="ob-tab" data-tab="active" onclick="obSwitchTab('active')">🔥 直近案件</button>
       <button class="ob-tab" data-tab="agg" onclick="obSwitchTab('agg')">📊 集計</button>
+      <span class="ob-tab-sep"></span>
+      <button class="ob-tab ob-tab-nav" onclick="enterCustBoard()">👥 顧客DB</button>
+      <button class="ob-tab ob-tab-nav" onclick="enterMtgBoard()">💼 営業MTG</button>
     </div>
     <div class="ob-hd-tools">
       <span id="ob-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
@@ -2683,7 +2677,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
     <div class="kj-actions">
       <span id="cust-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
       <button class="hbtn ghost" onclick="custLoad()">🔄 Notion同期</button>
-      <button class="hbtn ghost" onclick="showHub()">‹ 戻る</button>
+      <button class="hbtn ghost" onclick="enterOpenBoard()">‹ OBへ戻る</button>
     </div>
   </div>
 
@@ -2760,7 +2754,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       <button class="hbtn ghost" onclick="mtgLoad(false,true)" title="最新データ取得">🔄 更新</button>
       <button class="hbtn" style="background:#00B900;border-color:#00B900;color:#fff" onclick="mtgSyncChatwork()" title="Chatworkから面談報告を取込">💬 Chatwork取込</button>
       <button class="hbtn primary" onclick="mtgAddNew()">＋ 手動追加</button>
-      <button class="hbtn" onclick="showHub()">‹ 戻る</button>
+      <button class="hbtn" onclick="enterOpenBoard()">‹ OBへ戻る</button>
     </div>
   </div>
 
@@ -3739,6 +3733,7 @@ function enterOpenBoard(){
 
 function enterMtgBoard(){
   document.getElementById('hub').classList.remove('show');
+  document.getElementById('openboard').classList.remove('show');
   document.getElementById('mtgboard').classList.add('show');
   wsSetActiveSection('mtg');
   mtgLoad();
@@ -9378,6 +9373,7 @@ function custBoardTab(tab){
 
 function enterCustBoard(){
   document.getElementById('hub').classList.remove('show');
+  document.getElementById('openboard').classList.remove('show');
   document.getElementById('custboard').classList.add('show');
   wsSetActiveSection('cust');
   custLoad();
@@ -11442,14 +11438,40 @@ function obLoadAllBdayData(){
   }
 })();
 
-// ══ 点滅防止：詳細パネル開示中は obRenderAll をスキップ ══
+// ══ 点滅防止：詳細パネル開示中 または データ・フィルタ未変更時は obRenderAll をスキップ ══
 (function(){
   var origRenderAll=window.obRenderAll;
+  var _lastHash='';
+  function _snapHash(){
+    try{
+      var ds=(typeof obRows!=='undefined'?obRows:[]).map(function(r){
+        return (r['顧客名']||'')+'|'+(r['商談ステータス']||'')+'|'+(r['来場日']||r['問い合わせ日']||'')+'|'+(r['次回予定']||'')+'|'+(r['担当者']||'');
+      }).join(';');
+      var fs=[
+        ((document.getElementById('ob-filter-year')||{}).value||''),
+        ((document.getElementById('ob-filter-month')||{}).value||''),
+        ((document.getElementById('ob-vis-staff')||{}).value||''),
+        ((document.getElementById('ob-vis-q')||{}).value||''),
+        ((document.getElementById('ob-vis-sort')||{}).value||''),
+        (typeof obStatusFilter!=='undefined'?obStatusFilter||'':''),
+        (typeof obCurrentTab!=='undefined'?obCurrentTab||'':'')
+      ].join('|');
+      return ds+'::'+fs;
+    }catch(e){return '';}
+  }
   if(typeof origRenderAll==='function'){
     window.obRenderAll=function(){
       var detailOpen=document.getElementById('ob-detail')&&document.getElementById('ob-detail').classList.contains('show');
       if(detailOpen) return;
+      var h=_snapHash();
+      if(h && h===_lastHash) return;
+      _lastHash=h;
       origRenderAll.apply(this,arguments);
+      // 選択行ハイライトを再適用
+      if(typeof obDetailRow!=='undefined' && obDetailRow>=0){
+        var sel=document.querySelector('#ob-visitors-content tr[data-row="'+obDetailRow+'"]');
+        if(sel) sel.classList.add('ob-sel');
+      }
     };
   }
 })();
