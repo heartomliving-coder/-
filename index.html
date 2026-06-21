@@ -971,18 +971,31 @@ body.ws-collapsed .ob-detail{left:52px}
 .ob-karte-fld textarea{resize:vertical;min-height:70px}
 .ob-karte-fld.full{grid-column:1/-1}
 
-/* ドライブ埋め込み */
-.ob-drive-input{display:flex;gap:8px;margin-bottom:16px}
-.ob-drive-input input{flex:1;padding:10px 14px;border:1px solid #DDD;border-radius:3px;font-size:.86rem;font-family:inherit;outline:none}
-.ob-drive-input input:focus{border-color:var(--charcoal)}
-.ob-drive-frame{width:100%;height:calc(100vh - 280px);border:1px solid #E8E4DE;border-radius:6px;background:#fff}
-.ob-drive-placeholder{padding:60px 20px;text-align:center;color:#BBB;font-size:.9rem;border:2px dashed #E8E4DE;border-radius:6px}
-/* KJ Drive / Chatwork */
-.kj-drive-input{display:flex;gap:8px;margin-bottom:16px}
-.kj-drive-input input{flex:1;padding:10px 14px;border:1px solid #DDD;border-radius:3px;font-size:.86rem;font-family:inherit;outline:none}
-.kj-drive-input input:focus{border-color:var(--charcoal)}
-.kj-drive-frame{width:100%;height:calc(100dvh - 300px);border:1px solid #E8E4DE;border-radius:6px;background:#fff}
-.kj-drive-placeholder{padding:60px 20px;text-align:center;color:#BBB;font-size:.9rem;border:2px dashed #E8E4DE;border-radius:6px}
+/* Drive redesign */
+.drive-url-row{display:flex;gap:8px;margin-bottom:14px}
+.drive-url-row input{flex:1;padding:9px 12px;border:1px solid #DDD;border-radius:6px;font-size:.84rem;font-family:inherit;outline:none;color:#222}
+.drive-url-row input:focus{border-color:#888}
+.drive-drop-zone{border:2px dashed #D0CCC6;border-radius:10px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#FAFAF8;margin-bottom:14px;user-select:none}
+.drive-drop-zone:hover,.drive-drop-zone.drag-over{border-color:#C0A070;background:#FBF6F0}
+.drive-drop-zone.drag-over{border-style:solid;box-shadow:0 0 0 3px rgba(192,160,112,.18)}
+.drive-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.drive-file-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;padding:4px 0}
+.drive-file-card{border:1px solid #E8E4DE;border-radius:8px;padding:12px 10px;cursor:pointer;transition:all .18s;background:#fff;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;min-height:90px}
+.drive-file-card:hover{border-color:#C0A070;background:#FBF6F0;transform:translateY(-1px);box-shadow:0 3px 12px rgba(0,0,0,.08)}
+.drive-file-card-icon{font-size:2rem;line-height:1}
+.drive-file-card-name{font-size:.72rem;color:#333;text-align:center;word-break:break-all;line-height:1.3;max-height:3.6em;overflow:hidden;width:100%}
+.drive-file-card-date{font-size:.64rem;color:#AAA;margin-top:auto}
+.drive-file-card-del{position:absolute;top:4px;right:4px;background:#fff;border:1px solid #EEE;border-radius:50%;width:20px;height:20px;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:.65rem;color:#CC4444;line-height:1;z-index:2}
+.drive-file-card:hover .drive-file-card-del{display:flex}
+.drive-empty-msg{color:#AAA;font-size:.84rem;text-align:center;padding:30px 0}
+/* Drive preview modal */
+.drive-preview-modal{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;padding:20px}
+.drive-preview-modal.show{display:flex}
+.drive-preview-inner{background:#fff;border-radius:10px;display:flex;flex-direction:column;width:min(900px,92vw);height:min(82vh,760px);overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,.35)}
+.drive-preview-hd{padding:12px 16px;border-bottom:1px solid #EEE;display:flex;align-items:center;gap:12px;flex-shrink:0;background:#fff}
+.drive-preview-name{flex:1;font-size:.88rem;font-weight:600;color:#222;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drive-preview-body{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;background:#F0EFEC}
+/* KJ Chatwork */
 .kj-cw-room-sel{display:flex;gap:8px;margin-bottom:14px;align-items:center}
 .kj-cw-room-sel select{flex:1;padding:9px 12px;border:1px solid #DDD;border-radius:3px;font-size:.84rem;font-family:inherit;outline:none}
 .kj-cw-msgs{display:flex;flex-direction:column;gap:10px;max-height:calc(100dvh - 340px);overflow-y:auto;padding:4px 2px}
@@ -2275,20 +2288,22 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
     <div class="kj-det-pane" data-dtab="complete" id="kj-pane-complete"></div>
     <!-- ドライブ -->
     <div class="kj-det-pane" data-dtab="drive" id="kj-pane-drive" style="padding:18px 20px">
-      <div class="ob-sec-title" style="margin-bottom:10px">Google Drive フォルダURL</div>
-      <div class="kj-drive-input">
+      <div class="drive-url-row">
         <input type="url" id="kj-drive-url" placeholder="https://drive.google.com/drive/folders/...">
         <button class="hbtn primary" onclick="kjSaveDriveUrl()">保存</button>
-        <button class="hbtn" id="kj-drive-open-btn" onclick="kjOpenDriveInNewTab()" style="display:none">🔗 Driveで開く</button>
       </div>
-      <div id="kj-drive-toolbar" style="display:none;margin:10px 0;gap:8px;align-items:center">
-        <button class="hbtn" onclick="kjDriveUploadClick()">⬆ アップロード</button>
-        <input type="file" id="kj-drive-file-input" style="display:none" multiple onchange="kjDriveUploadFiles(this.files)">
-        <button class="hbtn" onclick="kjDriveNewFolder()">📁 新しいフォルダ</button>
-        <button class="hbtn" onclick="kjDriveRefresh()">🔄 更新</button>
+      <input type="file" id="kj-drive-file-input" style="display:none" multiple onchange="driveUploadFiles(this.files,'kj')">
+      <div class="drive-drop-zone" id="kj-drive-drop-zone" onclick="document.getElementById('kj-drive-file-input').click()">
+        <div style="font-size:2rem;margin-bottom:6px">📂</div>
+        <div style="font-size:.86rem;font-weight:600;color:#555">ファイルをここにドロップ</div>
+        <div style="font-size:.76rem;color:#AAA;margin-top:4px">または クリックして選択</div>
       </div>
-      <div id="kj-drive-file-list" style="display:none;margin-bottom:12px"></div>
-      <div id="kj-drive-frame-wrap"></div>
+      <div class="drive-toolbar" id="kj-drive-toolbar" style="display:none">
+        <button class="hbtn" onclick="driveNewFolder('kj')">📁 新フォルダ</button>
+        <button class="hbtn" onclick="obDriveListFiles('kj')">🔄 更新</button>
+        <span id="kj-drive-file-count" style="font-size:.76rem;color:#888;margin-left:auto"></span>
+      </div>
+      <div id="kj-drive-file-list"></div>
     </div>
     <!-- Chatwork -->
     <div class="kj-det-pane" data-dtab="chatwork" id="kj-pane-chatwork" style="padding:18px 20px">
@@ -2377,20 +2392,22 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
     </div>
     <!-- ドライブ -->
     <div class="ob-det-pane" data-dtab="drive" id="ob-det-pane-drive">
-      <div class="ob-sec-title">Google Drive フォルダURL</div>
-      <div class="ob-drive-input">
+      <div class="drive-url-row">
         <input type="url" id="ob-drive-url" placeholder="https://drive.google.com/drive/folders/...">
         <button class="hbtn primary" onclick="obSaveDriveUrl()">保存</button>
-        <button class="hbtn" id="ob-drive-open-btn" onclick="obOpenDriveInNewTab()" style="display:none">🔗 Driveで開く</button>
       </div>
-      <div id="ob-drive-toolbar" style="display:none;margin:10px 0;display:none;gap:8px;align-items:center">
-        <button class="hbtn" onclick="obDriveUploadClick()">⬆ アップロード</button>
-        <input type="file" id="ob-drive-file-input" style="display:none" multiple onchange="obDriveUploadFiles(this.files)">
-        <button class="hbtn" onclick="obDriveNewFolder()">📁 新しいフォルダ</button>
-        <button class="hbtn" onclick="obDriveRefresh()">🔄 更新</button>
+      <input type="file" id="ob-drive-file-input" style="display:none" multiple onchange="driveUploadFiles(this.files,'ob')">
+      <div class="drive-drop-zone" id="ob-drive-drop-zone" onclick="document.getElementById('ob-drive-file-input').click()">
+        <div style="font-size:2rem;margin-bottom:6px">📂</div>
+        <div style="font-size:.86rem;font-weight:600;color:#555">ファイルをここにドロップ</div>
+        <div style="font-size:.76rem;color:#AAA;margin-top:4px">または クリックして選択</div>
       </div>
-      <div id="ob-drive-file-list" style="display:none;margin-bottom:12px"></div>
-      <div id="ob-drive-frame-wrap"></div>
+      <div class="drive-toolbar" id="ob-drive-toolbar" style="display:none">
+        <button class="hbtn" onclick="driveNewFolder('ob')">📁 新フォルダ</button>
+        <button class="hbtn" onclick="obDriveListFiles('ob')">🔄 更新</button>
+        <span id="ob-drive-file-count" style="font-size:.76rem;color:#888;margin-left:auto"></span>
+      </div>
+      <div id="ob-drive-file-list"></div>
     </div>
     <!-- 面談報告 -->
     <div class="ob-det-pane" data-dtab="mendan" id="ob-det-pane-mendan">
@@ -3262,6 +3279,17 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
 </div>
 <div id="hub-bday-overlay" onclick="hubCloseBdayCalendar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:399"></div>
 
+<!-- Drive preview modal -->
+<div class="drive-preview-modal" id="drive-preview-modal" onclick="if(event.target===this)driveClosePreview()">
+  <div class="drive-preview-inner">
+    <div class="drive-preview-hd">
+      <span class="drive-preview-name" id="drive-preview-filename"></span>
+      <a id="drive-preview-ext-link" href="#" target="_blank" class="hbtn" style="font-size:.78rem;flex-shrink:0">↗ Driveで開く</a>
+      <button onclick="driveClosePreview()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;padding:0 4px;line-height:1;flex-shrink:0">✕</button>
+    </div>
+    <div class="drive-preview-body" id="drive-preview-body"></div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>
@@ -7879,128 +7907,150 @@ function tochiJumpToKj(kjId){
   setTimeout(function(){ kjOpenDetail(kjId); },400);
 }
 
-// ── Googleドライブ（OB）──────────────────────────────────────
-function obRenderDetDrive(){
-  var r=obRows[obDetailRow]; if(!r) return;
-  var url=r['driveUrl']||'';
-  var inp=document.getElementById('ob-drive-url'); if(inp) inp.value=url;
-  var openBtn=document.getElementById('ob-drive-open-btn');
-  var toolbar=document.getElementById('ob-drive-toolbar');
-  if(openBtn) openBtn.style.display=url?'':'none';
-  obShowDriveFrame(url);
-  if(url){
-    if(toolbar) toolbar.style.display='flex';
-    obDriveListFiles('ob');
-  } else {
-    if(toolbar) toolbar.style.display='none';
-    var fl=document.getElementById('ob-drive-file-list');
-    if(fl) fl.style.display='none';
-  }
-}
-
-function obSaveDriveUrl(){
-  var r=obRows[obDetailRow]; if(!r) return;
-  var url=document.getElementById('ob-drive-url').value.trim();
-  r['driveUrl']=url; obSetCache(obRows);
-  obSaveField(obDetailRow,'driveUrl',url);
-  var openBtn=document.getElementById('ob-drive-open-btn');
-  if(openBtn) openBtn.style.display=url?'':'none';
-  var toolbar=document.getElementById('ob-drive-toolbar');
-  obShowDriveFrame(url);
-  if(url){
-    if(toolbar) toolbar.style.display='flex';
-    obDriveListFiles('ob');
-  } else {
-    if(toolbar) toolbar.style.display='none';
-  }
-  toast('URLを保存しました');
-}
-
-function obOpenDriveInNewTab(){
-  var r=obRows[obDetailRow]; if(!r||!r['driveUrl']) return;
-  window.open(r['driveUrl'],'_blank');
-}
-
-function obShowDriveFrame(url){
-  var wrap=document.getElementById('ob-drive-frame-wrap'); if(!wrap) return;
-  if(!url){ wrap.innerHTML='<div class="ob-drive-placeholder">Google DriveのフォルダURLを上に入力すると<br>ここに埋め込まれます</div>'; return; }
-  var embedUrl=url;
-  var m=url.match(/\/folders\/([^?/]+)/);
-  if(m) embedUrl='https://drive.google.com/embeddedfolderview?id='+m[1]+'#list';
-  wrap.innerHTML='<iframe class="ob-drive-frame" src="'+esc(embedUrl)+'" allowfullscreen></iframe>';
-}
-
-// ── Driveファイル一覧（GAS連携）─────────────────────────────
+// ── Googleドライブ（共通）─────────────────────────────────────
 function driveExtractFolderId(url){
   var m=(url||'').match(/\/folders\/([^?/]+)/);
   return m?m[1]:null;
 }
+function driveExtractFileId(url){
+  var m=(url||'').match(/\/(?:file\/d|open\?id=)([^/?&]+)/);
+  return m?m[1]:null;
+}
+function driveGetFileIcon(mimeType,isFolder){
+  if(isFolder) return '📁';
+  var mt=mimeType||'';
+  if(mt.indexOf('image')>=0) return '🖼';
+  if(mt.indexOf('pdf')>=0) return '📋';
+  if(mt.indexOf('spreadsheet')>=0) return '📊';
+  if(mt.indexOf('document')>=0||mt.indexOf('word')>=0) return '📝';
+  if(mt.indexOf('presentation')>=0||mt.indexOf('powerpoint')>=0) return '📊';
+  if(mt.indexOf('video')>=0) return '🎬';
+  if(mt.indexOf('audio')>=0) return '🎵';
+  if(mt.indexOf('zip')>=0||mt.indexOf('archive')>=0) return '🗜';
+  return '📄';
+}
+function driveGetPreviewUrl(file){
+  var id=file.id; var mt=file.mimeType||'';
+  if(mt.indexOf('image')>=0) return 'https://drive.google.com/thumbnail?id='+id+'&sz=w1200';
+  if(mt.indexOf('spreadsheet')>=0) return 'https://docs.google.com/spreadsheets/d/'+id+'/preview';
+  if(mt.indexOf('presentation')>=0) return 'https://docs.google.com/presentation/d/'+id+'/preview';
+  if(mt.indexOf('document')>=0) return 'https://docs.google.com/document/d/'+id+'/preview';
+  return 'https://drive.google.com/file/d/'+id+'/preview';
+}
+function driveOpenFilePreview(file){
+  if(file.type==='folder'){ toast('📁 フォルダ内のファイルはDriveで確認できます'); return; }
+  var nameEl=document.getElementById('drive-preview-filename');
+  var linkEl=document.getElementById('drive-preview-ext-link');
+  var bodyEl=document.getElementById('drive-preview-body');
+  var modal=document.getElementById('drive-preview-modal');
+  if(!modal||!bodyEl) return;
+  if(nameEl) nameEl.textContent=file.name;
+  if(linkEl){ linkEl.href=file.url||'#'; }
+  var previewUrl=driveGetPreviewUrl(file);
+  var mt=file.mimeType||'';
+  if(mt.indexOf('image')>=0){
+    bodyEl.innerHTML='<img src="'+esc(previewUrl)+'" style="max-width:100%;max-height:100%;object-fit:contain;display:block">';
+  } else {
+    bodyEl.innerHTML='<iframe src="'+esc(previewUrl)+'" style="width:100%;height:100%;border:none" allowfullscreen></iframe>';
+  }
+  modal.classList.add('show');
+}
+function driveClosePreview(){
+  var modal=document.getElementById('drive-preview-modal');
+  if(modal){ modal.classList.remove('show'); document.getElementById('drive-preview-body').innerHTML=''; }
+}
+function driveInitDropZone(prefix){
+  var zone=document.getElementById(prefix+'-drive-drop-zone'); if(!zone) return;
+  zone.addEventListener('dragover',function(e){ e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave',function(){ zone.classList.remove('drag-over'); });
+  zone.addEventListener('drop',function(e){
+    e.preventDefault(); zone.classList.remove('drag-over');
+    if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length){
+      driveUploadFiles(e.dataTransfer.files,prefix);
+    }
+  });
+}
+
+// ── Driveファイル一覧（GAS連携）─────────────────────────────
 function obDriveListFiles(prefix){
   var r=(prefix==='ob')?obRows[obDetailRow]:kjRows.find(function(x){return x._id===kjDetailId;});
   if(!r) return;
   var folderId=driveExtractFolderId(r['driveUrl']||'');
-  if(!folderId) return;
-  var listEl=document.getElementById(prefix+'-drive-file-list'); if(!listEl) return;
-  listEl.style.display='';
-  listEl.innerHTML='<div style="color:#999;font-size:.82rem;padding:8px">読み込み中…</div>';
+  var listEl=document.getElementById(prefix+'-drive-file-list');
+  var toolbar=document.getElementById(prefix+'-drive-toolbar');
+  if(!folderId){
+    if(listEl) listEl.innerHTML='';
+    if(toolbar) toolbar.style.display='none';
+    return;
+  }
+  if(toolbar) toolbar.style.display='flex';
+  if(listEl) listEl.innerHTML='<div class="drive-empty-msg" style="padding:20px 0">読み込み中…</div>';
   post({action:'listDriveFiles',folderId:folderId},function(d){
     if(!d||d.error){
-      listEl.innerHTML='<div style="color:#999;font-size:.82rem;padding:8px">ファイル一覧はGAS更新後に利用できます（現在はiframe表示中）</div>';
+      if(listEl) listEl.innerHTML='<div class="drive-empty-msg">ファイル一覧を取得できませんでした<br><span style="font-size:.72rem">GAS権限を確認してください</span></div>';
       return;
     }
-    driveRenderFileList(listEl,d.files||[],folderId,prefix);
+    driveRenderFileGrid(listEl,d.files||[],prefix);
   });
 }
-function driveRenderFileList(el,files,folderId,prefix){
-  if(!files.length){ el.innerHTML='<div style="color:#999;font-size:.82rem;padding:8px">フォルダにファイルがありません</div>'; return; }
-  var html='<div style="border:1px solid #E8E4DE;border-radius:8px;overflow:hidden">';
-  files.forEach(function(f,i){
+function driveRenderFileGrid(el,files,prefix){
+  if(!el) return;
+  var countEl=document.getElementById(prefix+'-drive-file-count');
+  if(countEl) countEl.textContent=files.length+'件';
+  if(!files.length){ el.innerHTML='<div class="drive-empty-msg">フォルダにファイルがありません</div>'; return; }
+  var html='<div class="drive-file-grid">';
+  files.forEach(function(f){
     var isFolder=f.type==='folder';
-    var icon=isFolder?'📁':'📄';
-    if(f.mimeType&&f.mimeType.indexOf('image')>=0) icon='🖼';
-    else if(f.mimeType&&f.mimeType.indexOf('pdf')>=0) icon='📋';
-    else if(f.mimeType&&f.mimeType.indexOf('spreadsheet')>=0) icon='📊';
-    else if(f.mimeType&&(f.mimeType.indexOf('document')>=0||f.mimeType.indexOf('word')>=0)) icon='📝';
-    html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;'+(i%2===0?'background:#FAFAF8':'background:#fff')+';border-bottom:'+(i<files.length-1?'1px solid #EEE':'none')+'">'+
-      '<span style="font-size:1rem">'+icon+'</span>'+
-      '<span style="flex:1;font-size:.82rem;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(f.name)+'">'+esc(f.name)+'</span>'+
-      (f.updatedAt?'<span style="font-size:.72rem;color:#999;white-space:nowrap">'+esc(f.updatedAt)+'</span>':'')+
-      '<a href="'+esc(f.url)+'" target="_blank" style="font-size:.72rem;color:#C0A070;font-weight:700;white-space:nowrap;text-decoration:none">開く</a>'+
-      (!isFolder?'<button onclick="driveDeleteFile(\''+esc(f.id)+'\',\''+esc(f.name)+'\',\''+prefix+'\')" style="background:none;border:none;color:#CC4444;cursor:pointer;font-size:.78rem;padding:2px 4px">✕</button>':'')+
-    '</div>';
+    var icon=driveGetFileIcon(f.mimeType,isFolder);
+    var safeId=esc(f.id); var safeName=(f.name||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    var cardData='data-fid="'+safeId+'" data-fname="'+esc(f.name)+'" data-furl="'+esc(f.url||'')+'" data-fmime="'+esc(f.mimeType||'')+'" data-ftype="'+(isFolder?'folder':'file')+'"';
+    html+='<div class="drive-file-card" '+cardData+' onclick="driveCardClick(this)">';
+    if(!isFolder){
+      html+='<button class="drive-file-card-del" onclick="event.stopPropagation();driveDeleteFile(\''+safeId+'\',\''+safeName+'\',\''+prefix+'\')" title="削除">✕</button>';
+    }
+    html+='<span class="drive-file-card-icon">'+icon+'</span>';
+    html+='<span class="drive-file-card-name" title="'+esc(f.name)+'">'+esc(f.name)+'</span>';
+    if(f.updatedAt) html+='<span class="drive-file-card-date">'+esc(f.updatedAt)+'</span>';
+    html+='</div>';
   });
   html+='</div>';
   el.innerHTML=html;
 }
+function driveCardClick(card){
+  driveOpenFilePreview({
+    id:card.getAttribute('data-fid'),
+    name:card.getAttribute('data-fname'),
+    url:card.getAttribute('data-furl'),
+    mimeType:card.getAttribute('data-fmime'),
+    type:card.getAttribute('data-ftype')
+  });
+}
 function driveDeleteFile(fileId,fileName,prefix){
-  if(!confirm(esc(fileName)+' を削除しますか？（ゴミ箱へ移動）')) return;
+  if(!confirm(fileName+' を削除しますか？（ゴミ箱へ移動）')) return;
   post({action:'deleteDriveFile',fileId:fileId},function(d){
     if(!d||d.error){ toast('⚠️ 削除エラー: '+(d?d.error:'不明')); return; }
     toast('🗑 '+fileName+' を削除しました');
     obDriveListFiles(prefix);
   });
 }
-function obDriveUploadClick(){ var fi=document.getElementById('ob-drive-file-input'); if(fi) fi.click(); }
-function obDriveUploadFiles(files){ driveUploadFiles(files,'ob'); }
-function obDriveNewFolder(){ driveNewFolder('ob'); }
-function obDriveRefresh(){ obDriveListFiles('ob'); }
-
 function driveUploadFiles(files,prefix){
   var r=(prefix==='ob')?obRows[obDetailRow]:kjRows.find(function(x){return x._id===kjDetailId;});
   if(!r||!files||!files.length) return;
   var folderId=driveExtractFolderId(r['driveUrl']||'');
-  if(!folderId){ toast('⚠️ ドライブURLを先に保存してください'); return; }
-  toast('アップロード中 ('+files.length+'件)…');
-  var done=0;
+  if(!folderId){ toast('⚠️ フォルダURLを先に保存してください'); return; }
+  var total=files.length; var done=0; var errors=0;
+  toast('アップロード中 ('+total+'件)…');
   Array.from(files).forEach(function(file){
     var reader=new FileReader();
     reader.onload=function(e){
       var b64=e.target.result.split(',')[1];
       post({action:'uploadDriveFile',parentId:folderId,fileName:file.name,base64:b64,mimeType:file.type||'application/octet-stream'},function(d){
         done++;
-        if(done===files.length){
-          if(d&&d.error){ toast('⚠️ アップロードエラー: '+d.error); }
-          else { toast('✅ '+done+'件アップロード完了'); obDriveListFiles(prefix); }
+        if(d&&d.error) errors++;
+        if(done===total){
+          if(errors>0) toast('⚠️ '+(total-errors)+'件成功、'+errors+'件失敗');
+          else toast('✅ '+total+'件アップロード完了');
+          obDriveListFiles(prefix);
         }
       });
     };
@@ -8011,7 +8061,7 @@ function driveNewFolder(prefix){
   var r=(prefix==='ob')?obRows[obDetailRow]:kjRows.find(function(x){return x._id===kjDetailId;});
   if(!r) return;
   var folderId=driveExtractFolderId(r['driveUrl']||'');
-  if(!folderId){ toast('⚠️ ドライブURLを先に保存してください'); return; }
+  if(!folderId){ toast('⚠️ フォルダURLを先に保存してください'); return; }
   var name=prompt('新しいフォルダ名を入力してください');
   if(!name||!name.trim()) return;
   post({action:'createDriveFolder',parentId:folderId,name:name.trim()},function(d){
@@ -8019,6 +8069,31 @@ function driveNewFolder(prefix){
     toast('📁 フォルダ「'+name+'」を作成しました');
     obDriveListFiles(prefix);
   });
+}
+
+// ── Googleドライブ（OB）──────────────────────────────────────
+function obRenderDetDrive(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  var url=r['driveUrl']||'';
+  var inp=document.getElementById('ob-drive-url'); if(inp) inp.value=url;
+  driveInitDropZone('ob');
+  obDriveListFiles('ob');
+}
+function obSaveDriveUrl(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  var url=document.getElementById('ob-drive-url').value.trim();
+  r['driveUrl']=url; obSetCache(obRows);
+  obSaveField(obDetailRow,'driveUrl',url);
+  obDriveListFiles('ob');
+  toast('URLを保存しました');
+}
+function obDriveUploadClick(){ document.getElementById('ob-drive-file-input').click(); }
+function obDriveUploadFiles(files){ driveUploadFiles(files,'ob'); }
+function obDriveNewFolder(){ driveNewFolder('ob'); }
+function obDriveRefresh(){ obDriveListFiles('ob'); }
+function obOpenDriveInNewTab(){
+  var r=obRows[obDetailRow]; if(!r||!r['driveUrl']) return;
+  window.open(r['driveUrl'],'_blank');
 }
 
 // 誕生日同期（NotionバースデーDB → OBドライブJSON）
@@ -8698,56 +8773,22 @@ function kjRenderDetDrive(){
   var r=kjRows.find(function(x){return x._id===kjDetailId;}); if(!r) return;
   var url=r['driveUrl']||'';
   var inp=document.getElementById('kj-drive-url'); if(inp) inp.value=url;
-  var openBtn=document.getElementById('kj-drive-open-btn');
-  var toolbar=document.getElementById('kj-drive-toolbar');
-  if(openBtn) openBtn.style.display=url?'':'none';
-  kjShowDriveFrame(url);
-  if(url){
-    if(toolbar) toolbar.style.display='flex';
-    obDriveListFiles('kj');
-  } else {
-    if(toolbar) toolbar.style.display='none';
-    var fl=document.getElementById('kj-drive-file-list');
-    if(fl) fl.style.display='none';
-  }
+  driveInitDropZone('kj');
+  obDriveListFiles('kj');
 }
-
 function kjSaveDriveUrl(){
   var r=kjRows.find(function(x){return x._id===kjDetailId;}); if(!r) return;
   var url=document.getElementById('kj-drive-url').value.trim();
   r['driveUrl']=url; kjSetCache(kjRows);
   post({action:'kjUpdateField',id:kjDetailId,field:'driveUrl',value:url});
-  var openBtn=document.getElementById('kj-drive-open-btn');
-  if(openBtn) openBtn.style.display=url?'':'none';
-  var toolbar=document.getElementById('kj-drive-toolbar');
-  kjShowDriveFrame(url);
-  if(url){
-    if(toolbar) toolbar.style.display='flex';
-    obDriveListFiles('kj');
-  } else {
-    if(toolbar) toolbar.style.display='none';
-  }
+  obDriveListFiles('kj');
   toast('ドライブURLを保存しました');
 }
-
 function kjOpenDriveInNewTab(){
   var r=kjRows.find(function(x){return x._id===kjDetailId;}); if(!r||!r['driveUrl']) return;
   window.open(r['driveUrl'],'_blank');
 }
-
-function kjShowDriveFrame(url){
-  var wrap=document.getElementById('kj-drive-frame-wrap'); if(!wrap) return;
-  if(!url){
-    wrap.innerHTML='<div class="kj-drive-placeholder">Google DriveのフォルダURLを上に入力すると<br>ここに埋め込まれます</div>';
-    return;
-  }
-  var embedUrl=url;
-  var m=url.match(/\/folders\/([^?/]+)/);
-  if(m) embedUrl='https://drive.google.com/embeddedfolderview?id='+m[1]+'#list';
-  wrap.innerHTML='<iframe class="kj-drive-frame" src="'+esc(embedUrl)+'" allowfullscreen></iframe>';
-}
-
-function kjDriveUploadClick(){ var fi=document.getElementById('kj-drive-file-input'); if(fi) fi.click(); }
+function kjDriveUploadClick(){ document.getElementById('kj-drive-file-input').click(); }
 function kjDriveUploadFiles(files){ driveUploadFiles(files,'kj'); }
 function kjDriveNewFolder(){ driveNewFolder('kj'); }
 function kjDriveRefresh(){ obDriveListFiles('kj'); }
