@@ -906,8 +906,10 @@ tr:hover .ob-del{opacity:1}
 .ob-agg-table .hi{color:#166534;font-weight:700}
 
 /* ─── 顧客詳細画面 ─── */
-.ob-detail{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;background:#F7F6F3}
+.ob-detail{position:fixed;top:0;left:0;right:0;bottom:0;z-index:60;display:none;flex-direction:column;background:#F7F6F3;transition:left .2s ease}
 .ob-detail.show{display:flex}
+body.ws-open .ob-detail{left:240px}
+body.ws-collapsed .ob-detail{left:52px}
 .ob-det-hd{flex-shrink:0;background:#2B2B2B;color:#fff;padding:max(16px,env(safe-area-inset-top)) 24px 0;display:flex;flex-direction:column}
 .ob-det-top{display:flex;align-items:center;gap:14px;padding-bottom:14px}
 .ob-det-back{background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);padding:7px 14px;border-radius:3px;font-size:.75rem;font-weight:700;cursor:pointer;letter-spacing:.08em;transition:all .15s;flex-shrink:0}
@@ -10588,23 +10590,7 @@ function wsSaveCDB(){
   __wsEditingCdbId=null;
 }
 
-// ── サイドバーレンダリング ────────────────────────────
-function wsRenderSidebarCdbs(){
-  var el=document.getElementById('ws-cdb-list'); if(!el) return;
-  var cdbs=wsLoadCdbs();
-  if(!cdbs.length){ el.innerHTML='<div class="ws-sb-item" style="opacity:.4;font-size:.72rem;padding-left:28px"><span class="ws-sb-label" style="color:rgba(255,255,255,.3)">DBがありません</span></div>'; return; }
-  el.innerHTML=cdbs.map(function(db){
-    return '<div class="ws-sb-item" data-cdb-id="'+db.id+'" onclick="wsOpenCdb(\''+db.id+'\')"><span class="ws-sb-icon">'+(db.icon||'📊')+'</span><span class="ws-sb-label">'+wsSafeHtml(db.name)+'</span><span class="ws-sb-count">'+(db.rows?db.rows.length:0)+'</span></div>';
-  }).join('');
-}
-function wsRenderSidebarNotes(){
-  var el=document.getElementById('ws-notes-list'); if(!el) return;
-  var notes=wsLoadNotes();
-  if(!notes.length){ el.innerHTML='<div class="ws-sb-item" style="opacity:.4;font-size:.72rem;padding-left:28px"><span class="ws-sb-label" style="color:rgba(255,255,255,.3)">ノートがありません</span></div>'; return; }
-  el.innerHTML=notes.map(function(n){
-    return '<div class="ws-sb-item" data-note-id="'+n.id+'" onclick="wsOpenNote(\''+n.id+'\')"><span class="ws-sb-icon">'+(n.icon||'📝')+'</span><span class="ws-sb-label">'+wsSafeHtml(n.title||'無題ノート')+'</span></div>';
-  }).join('');
-}
+// wsRenderSidebarCdbs / wsRenderSidebarNotes はドラッグ対応版を下部で定義
 
 // ── カスタムDB 開く / 操作 ─────────────────────────────
 function wsOpenCdb(id){
@@ -10779,11 +10765,7 @@ function wsRenderNote(note){
   html+='<button class="nb-add-block" onclick="wsShowBlockPicker(null,null)">＋ ブロックを追加...</button>';
   inner.innerHTML=html;
 }
-function wsBlockHTML(b){
-  var typeClass={'p':'','h1':'nb-h1','h2':'nb-h2','h3':'nb-h3','quote':'nb-quote'}[b.type]||'';
-  var ph={'p':'テキストを入力...','h1':'見出し 1','h2':'見出し 2','h3':'見出し 3','quote':'引用文...'}[b.type]||'入力...';
-  return '<div class="nb-wrap" data-bid="'+b.id+'">'+'<span class="nb-drag-handle" title="ドラッグして並び替え">⠿</span>'+'<textarea class="nb-content '+typeClass+'" placeholder="'+ph+'" rows="1" data-bid="'+b.id+'" onkeydown="wsBlockKeydown(event,this)" oninput="wsBlockAutoGrow(this);wsNoteAutoSave()" onblur="wsNoteAutoSave()" onclick="wsBlockClick(event,this)">'+wsSafeHtml(b.content||'')+'</textarea>'+'</div>';
-}
+// wsBlockHTML はドラッグ対応版を下部で定義
 function wsBlockAutoGrow(ta){
   ta.style.height='auto';
   ta.style.height=ta.scrollHeight+'px';
@@ -10913,6 +10895,208 @@ function wsNoteIconClick(){
     if(e.target && e.target.classList && e.target.classList.contains('nb-content')) wsBlockAutoGrow(e.target);
   },true);
 })();
+// ── ドラッグ並び替え：ノートブロック ─────────────────────
+var __wsDragBid = null;
+var __wsDragOver = null;
+
+function wsBlockHTML(b) {
+  var typeClass = {'p':'','h1':'nb-h1','h2':'nb-h2','h3':'nb-h3','quote':'nb-quote'}[b.type]||'';
+  var ph = {'p':'テキストを入力...','h1':'見出し 1','h2':'見出し 2','h3':'見出し 3','quote':'引用文...'}[b.type]||'入力...';
+  return '<div class="nb-wrap" data-bid="'+b.id+'" draggable="false">'
+    +'<span class="nb-drag-handle" title="ドラッグして並び替え" draggable="true" onmousedown="wsBlockDragStart(event,\''+b.id+'\')" ontouchstart="wsBlockTouchStart(event,\''+b.id+'\')">⠿</span>'
+    +'<textarea class="nb-content '+typeClass+'" placeholder="'+ph+'" rows="1" data-bid="'+b.id+'" onkeydown="wsBlockKeydown(event,this)" oninput="wsBlockAutoGrow(this);wsNoteAutoSave()" onblur="wsNoteAutoSave()" onclick="wsBlockClick(event,this)">'+wsSafeHtml(b.content||'')+'</textarea>'
+    +'</div>';
+}
+
+function wsBlockDragStart(e, bid){
+  __wsDragBid = bid;
+  var container = document.getElementById('note-blocks');
+  if(!container) return;
+  var wraps = container.querySelectorAll('.nb-wrap');
+  wraps.forEach(function(w){
+    w.addEventListener('dragover', wsBlockDragOverHandler);
+    w.addEventListener('drop', wsBlockDropHandler);
+    w.setAttribute('draggable','true');
+  });
+  var selfWrap = container.querySelector('.nb-wrap[data-bid="'+bid+'"]');
+  if(selfWrap){
+    selfWrap.addEventListener('dragstart', function(ev){ ev.dataTransfer.effectAllowed='move'; });
+    selfWrap.dispatchEvent(new DragEvent('dragstart',{bubbles:true,dataTransfer:new DataTransfer()}));
+  }
+  document.addEventListener('dragend', wsBlockDragEnd, {once:true});
+}
+
+function wsBlockDragOverHandler(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  var bid = this.getAttribute('data-bid');
+  if(bid === __wsDragBid) return;
+  if(__wsDragOver !== bid){
+    __wsDragOver = bid;
+    document.querySelectorAll('.nb-wrap').forEach(function(w){ w.style.borderTop=''; w.style.borderBottom=''; });
+    // determine position
+    var rect = this.getBoundingClientRect();
+    var mid = rect.top + rect.height/2;
+    if(e.clientY < mid) this.style.borderTop='2px solid #C0A070';
+    else this.style.borderBottom='2px solid #C0A070';
+  }
+}
+
+function wsBlockDropHandler(e){
+  e.preventDefault();
+  var targetBid = this.getAttribute('data-bid');
+  if(!__wsDragBid || targetBid === __wsDragBid) return wsBlockDragEnd();
+  var rect = this.getBoundingClientRect();
+  var insertBefore = e.clientY < rect.top + rect.height/2;
+  var notes = wsLoadNotes();
+  var note = notes.find(function(n){ return n.id===__wsCurrentNoteId; }); if(!note) return;
+  var fromIdx = note.blocks.findIndex(function(b){ return b.id===__wsDragBid; });
+  var toIdx   = note.blocks.findIndex(function(b){ return b.id===targetBid; });
+  if(fromIdx<0||toIdx<0) return wsBlockDragEnd();
+  var moved = note.blocks.splice(fromIdx,1)[0];
+  var newTo = note.blocks.findIndex(function(b){ return b.id===targetBid; });
+  note.blocks.splice(insertBefore ? newTo : newTo+1, 0, moved);
+  note.updated = Date.now();
+  wsSaveNotes(notes);
+  wsBlockDragEnd();
+  wsRenderNote(note);
+}
+
+function wsBlockDragEnd(){
+  __wsDragBid = null; __wsDragOver = null;
+  document.querySelectorAll('.nb-wrap').forEach(function(w){
+    w.style.borderTop=''; w.style.borderBottom='';
+    w.setAttribute('draggable','false');
+    w.removeEventListener('dragover', wsBlockDragOverHandler);
+    w.removeEventListener('drop', wsBlockDropHandler);
+  });
+}
+
+// Touch drag for mobile
+var __wsTouchBid=null, __wsTouchGhost=null, __wsTouchLastOver=null;
+function wsBlockTouchStart(e,bid){
+  __wsTouchBid=bid;
+  var ta=document.querySelector('.nb-content[data-bid="'+bid+'"]');
+  if(!ta) return;
+  var ghost=document.createElement('div');
+  ghost.style.cssText='position:fixed;pointer-events:none;opacity:.7;background:#fff;border:2px solid #C0A070;border-radius:6px;padding:6px 10px;font-size:.85rem;max-width:300px;z-index:9999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+  ghost.textContent=ta.value.slice(0,40)||'(空)';
+  document.body.appendChild(ghost);
+  __wsTouchGhost=ghost;
+  document.addEventListener('touchmove',wsBlockTouchMove,{passive:false});
+  document.addEventListener('touchend',wsBlockTouchEnd,{once:true});
+}
+function wsBlockTouchMove(e){
+  e.preventDefault();
+  var t=e.touches[0];
+  if(__wsTouchGhost){ __wsTouchGhost.style.left=(t.clientX+12)+'px'; __wsTouchGhost.style.top=(t.clientY-20)+'px'; }
+  var el=document.elementFromPoint(t.clientX,t.clientY);
+  var wrap=el&&el.closest('.nb-wrap');
+  if(wrap&&wrap.getAttribute('data-bid')!==__wsTouchBid){
+    document.querySelectorAll('.nb-wrap').forEach(function(w){ w.style.borderTop=''; w.style.borderBottom=''; });
+    var rect=wrap.getBoundingClientRect();
+    if(t.clientY<rect.top+rect.height/2) wrap.style.borderTop='2px solid #C0A070';
+    else wrap.style.borderBottom='2px solid #C0A070';
+    __wsTouchLastOver=wrap;
+  }
+}
+function wsBlockTouchEnd(e){
+  document.removeEventListener('touchmove',wsBlockTouchMove);
+  if(__wsTouchGhost){ document.body.removeChild(__wsTouchGhost); __wsTouchGhost=null; }
+  document.querySelectorAll('.nb-wrap').forEach(function(w){ w.style.borderTop=''; w.style.borderBottom=''; });
+  if(!__wsTouchLastOver||!__wsTouchBid){ __wsTouchBid=null; __wsTouchLastOver=null; return; }
+  var targetBid=__wsTouchLastOver.getAttribute('data-bid');
+  var rect=__wsTouchLastOver.getBoundingClientRect();
+  var t=e.changedTouches[0];
+  var insertBefore=t.clientY<rect.top+rect.height/2;
+  var notes=wsLoadNotes();
+  var note=notes.find(function(n){return n.id===__wsCurrentNoteId;}); if(!note){ __wsTouchBid=null; __wsTouchLastOver=null; return; }
+  var fromIdx=note.blocks.findIndex(function(b){return b.id===__wsTouchBid;});
+  var toIdx=note.blocks.findIndex(function(b){return b.id===targetBid;});
+  if(fromIdx>=0&&toIdx>=0&&fromIdx!==toIdx){
+    var moved=note.blocks.splice(fromIdx,1)[0];
+    var newTo=note.blocks.findIndex(function(b){return b.id===targetBid;});
+    note.blocks.splice(insertBefore?newTo:newTo+1,0,moved);
+    note.updated=Date.now();
+    wsSaveNotes(notes);
+    wsRenderNote(note);
+  }
+  __wsTouchBid=null; __wsTouchLastOver=null;
+}
+
+// ── ドラッグ並び替え：サイドバーリスト ───────────────────
+var __wsSbDragType=null, __wsSbDragId=null;
+
+function wsRenderSidebarCdbs(){
+  var el=document.getElementById('ws-cdb-list'); if(!el) return;
+  var cdbs=wsLoadCdbs();
+  if(!cdbs.length){ el.innerHTML='<div class="ws-sb-item" style="opacity:.4"><span class="ws-sb-label" style="font-size:.72rem;color:rgba(255,255,255,.3)">DBがありません</span></div>'; return; }
+  el.innerHTML=cdbs.map(function(db){
+    return '<div class="ws-sb-item" data-cdb-id="'+db.id+'" draggable="true" onclick="wsOpenCdb(\''+db.id+'\')" ondragstart="wsSbDragStart(event,\'cdb\',\''+db.id+'\')" ondragover="wsSbDragOver(event)" ondrop="wsSbDrop(event,\'cdb\')" style="cursor:grab"><span class="ws-sb-icon">'+(db.icon||'📊')+'</span><span class="ws-sb-label">'+wsSafeHtml(db.name)+'</span><span class="ws-sb-count">'+(db.rows?db.rows.length:0)+'</span></div>';
+  }).join('');
+}
+
+function wsRenderSidebarNotes(){
+  var el=document.getElementById('ws-notes-list'); if(!el) return;
+  var notes=wsLoadNotes();
+  if(!notes.length){ el.innerHTML='<div class="ws-sb-item" style="opacity:.4"><span class="ws-sb-label" style="font-size:.72rem;color:rgba(255,255,255,.3)">ノートがありません</span></div>'; return; }
+  el.innerHTML=notes.map(function(n){
+    return '<div class="ws-sb-item" data-note-id="'+n.id+'" draggable="true" onclick="wsOpenNote(\''+n.id+'\')" ondragstart="wsSbDragStart(event,\'note\',\''+n.id+'\')" ondragover="wsSbDragOver(event)" ondrop="wsSbDrop(event,\'note\')" style="cursor:grab"><span class="ws-sb-icon">'+(n.icon||'📝')+'</span><span class="ws-sb-label">'+wsSafeHtml(n.title||'無題ノート')+'</span></div>';
+  }).join('');
+}
+
+function wsSbDragStart(e,type,id){
+  __wsSbDragType=type; __wsSbDragId=id;
+  e.dataTransfer.effectAllowed='move';
+  e.stopPropagation();
+}
+function wsSbDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  var item=e.currentTarget;
+  document.querySelectorAll('.ws-sb-item[data-cdb-id],.ws-sb-item[data-note-id]').forEach(function(el){el.style.borderTop='';el.style.borderBottom='';});
+  var rect=item.getBoundingClientRect();
+  if(e.clientY<rect.top+rect.height/2) item.style.borderTop='2px solid rgba(255,255,255,.5)';
+  else item.style.borderBottom='2px solid rgba(255,255,255,.5)';
+}
+function wsSbDrop(e,type){
+  e.preventDefault();
+  document.querySelectorAll('.ws-sb-item').forEach(function(el){el.style.borderTop='';el.style.borderBottom='';});
+  var targetId=e.currentTarget.getAttribute('data-'+type+'-id');
+  if(!targetId||!__wsSbDragId||targetId===__wsSbDragId){ __wsSbDragId=null; return; }
+  var rect=e.currentTarget.getBoundingClientRect();
+  var insertBefore=e.clientY<rect.top+rect.height/2;
+  if(type==='cdb'){
+    var cdbs=wsLoadCdbs();
+    var fromIdx=cdbs.findIndex(function(d){return d.id===__wsSbDragId;});
+    var toIdx=cdbs.findIndex(function(d){return d.id===targetId;});
+    if(fromIdx>=0&&toIdx>=0){
+      var moved=cdbs.splice(fromIdx,1)[0];
+      var newTo=cdbs.findIndex(function(d){return d.id===targetId;});
+      cdbs.splice(insertBefore?newTo:newTo+1,0,moved);
+      wsSaveCdbs(cdbs); wsRenderSidebarCdbs();
+    }
+  } else {
+    var notes=wsLoadNotes();
+    var fromIdx2=notes.findIndex(function(n){return n.id===__wsSbDragId;});
+    var toIdx2=notes.findIndex(function(n){return n.id===targetId;});
+    if(fromIdx2>=0&&toIdx2>=0){
+      var moved2=notes.splice(fromIdx2,1)[0];
+      var newTo2=notes.findIndex(function(n){return n.id===targetId;});
+      notes.splice(insertBefore?newTo2:newTo2+1,0,moved2);
+      wsSaveNotes(notes); wsRenderSidebarNotes();
+    }
+  }
+  __wsSbDragId=null; __wsSbDragType=null;
+}
+
+// ── ドラッグ中のボーダークリア（ドラッグアウト時）────────
+document.addEventListener('dragend',function(){
+  document.querySelectorAll('.ws-sb-item,.nb-wrap').forEach(function(el){
+    el.style.borderTop=''; el.style.borderBottom='';
+  });
+});
+
 // ════════════════════════════════════════════════════════
 
 </script>
