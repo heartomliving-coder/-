@@ -7211,6 +7211,7 @@ function obEditDetName(){
 function obDetTab(tab){
   document.querySelectorAll('.ob-det-tab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-dtab')===tab);});
   document.querySelectorAll('.ob-det-pane').forEach(function(p){p.classList.toggle('show',p.getAttribute('data-dtab')===tab);});
+  if(tab==='info'){ obRenderMtgInline(); obRenderRelatedDB(); }
   if(tab==='birthday') obRenderDetBirthday();
   if(tab==='drive') obRenderDetDrive();
   if(tab==='timeline') obRenderDetTimeline();
@@ -7966,8 +7967,10 @@ function driveClosePreview(){
 }
 function driveInitDropZone(prefix){
   var zone=document.getElementById(prefix+'-drive-drop-zone'); if(!zone) return;
+  if(zone.dataset.dzInit) return;
+  zone.dataset.dzInit='1';
   zone.addEventListener('dragover',function(e){ e.preventDefault(); zone.classList.add('drag-over'); });
-  zone.addEventListener('dragleave',function(){ zone.classList.remove('drag-over'); });
+  zone.addEventListener('dragleave',function(e){ if(!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over'); });
   zone.addEventListener('drop',function(e){
     e.preventDefault(); zone.classList.remove('drag-over');
     if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length){
@@ -11453,7 +11456,7 @@ function obLoadAllBdayData(){
 
 // ══ システム設定オーナーのみ ════════════════════════════
 function isOwnerRole(){
-  var email=localStorage.getItem('admin_session_email')||'';
+  var email=(localStorage.getItem('admin_session_email')||'').toLowerCase().trim();
   var OWNER_EMAILS=['heartom.living@gmail.com'];
   return OWNER_EMAILS.indexOf(email)>=0;
 }
