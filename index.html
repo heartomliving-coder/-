@@ -1655,6 +1655,66 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
 .mtg-room-item:hover{background:#F5F1EB}
 .mtg-room-item.sel{background:#EBF4FF;font-weight:700;color:#1A4F8C}
 @media(max-width:600px){.mtg-detail{width:100%;right:-100%}.mtg-card-grid{grid-template-columns:1fr}.mtg-hd{padding:10px 12px;gap:8px}}
+
+/* ═══ 5ポイント ○× UI ═══ */
+.mf-point-row{background:#fff;border:1px solid #ECEAE6;border-radius:8px;padding:10px 14px}
+.mf-point-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mf-point-label{font-weight:700;font-size:.84rem;color:#2B2B2B;min-width:48px}
+.mf-point-sub{font-size:.74rem;color:#999;flex:1}
+.mf-ox-wrap{display:flex;gap:4px;margin-left:auto}
+.mf-ox-btn{border:1.5px solid #DDD;background:#fff;border-radius:20px;padding:2px 12px;font-size:.85rem;cursor:pointer;font-weight:700;color:#AAA;transition:all .15s;font-family:inherit}
+.mf-ox-btn.active-maru{background:#E8F5E9;border-color:#4CAF50;color:#2E7D32}
+.mf-ox-btn.active-batu{background:#FFEBEE;border-color:#EF5350;color:#C62828}
+
+/* ═══ OB顧客ノートブロック ═══ */
+.ob-memo-block{display:flex;align-items:flex-start;gap:6px;background:#fff;border:1px solid #ECEAE6;border-radius:6px;padding:6px 10px;transition:border-color .15s}
+.ob-memo-block:focus-within{border-color:#C0A070}
+.ob-memo-block-handle{cursor:grab;color:#CCC;font-size:1rem;padding-top:2px;user-select:none}
+.ob-memo-block-type{font-size:.72rem;color:#CCC;min-width:20px;padding-top:4px;cursor:pointer}
+.ob-memo-textarea{flex:1;border:none;outline:none;resize:none;font-family:inherit;font-size:.84rem;color:#2B2B2B;background:transparent;min-height:24px;line-height:1.6}
+.ob-memo-del{background:none;border:none;color:#CCC;cursor:pointer;font-size:.85rem;padding:2px 4px;opacity:0;transition:opacity .15s}
+.ob-memo-block:hover .ob-memo-del{opacity:1}
+
+/* ═══ MTG インライン表示 ═══ */
+.ob-mtg-inline-card{background:#fff;border:1px solid #ECEAE6;border-radius:8px;padding:10px 14px;cursor:pointer;transition:border-color .15s}
+.ob-mtg-inline-card:hover{border-color:#C0A070}
+.ob-mtg-inline-hd{display:flex;align-items:center;gap:8px;font-size:.82rem;color:#666}
+.ob-mtg-inline-date{font-weight:700;color:#2B2B2B;font-size:.85rem}
+.ob-mtg-inline-body{margin-top:6px;font-size:.8rem;color:#555;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ob-mtg-ox-chip{display:inline-flex;align-items:center;gap:3px;background:#F5F3EF;border-radius:12px;padding:1px 8px;font-size:.72rem;font-weight:700}
+.ob-mtg-ox-chip.maru{background:#E8F5E9;color:#2E7D32}
+.ob-mtg-ox-chip.batu{background:#FFEBEE;color:#C62828}
+
+/* ═══ ハブ 誕生日カレンダーポップアップ ═══ */
+.hub-bday-popup{position:fixed;top:0;right:0;bottom:0;width:min(460px,100vw);background:#fff;box-shadow:-12px 0 60px rgba(0,0,0,.18);z-index:400;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .28s cubic-bezier(.23,1,.32,1)}
+.hub-bday-popup.show{transform:translateX(0)}
+.hub-bday-popup-hd{background:#1A1A1A;color:#fff;padding:18px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.hub-bday-popup-body{flex:1;overflow-y:auto;padding:16px}
+.hub-bday-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:.78rem}
+.hub-bday-cal-hd{text-align:center;padding:4px 0;font-weight:700;color:#888;font-size:.72rem}
+.hub-bday-cal-day{text-align:center;padding:6px 2px;border-radius:6px;cursor:default;min-height:32px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.hub-bday-cal-day.has-bday{background:#FFF3CD;cursor:pointer}
+.hub-bday-cal-day.has-bday:hover{background:#FFE082}
+.hub-bday-cal-day.today{border:2px solid #C0A070}
+.hub-bday-cal-num{font-size:.8rem;font-weight:700;color:#2B2B2B}
+.hub-bday-cal-dot{width:5px;height:5px;background:#C0A070;border-radius:50%}
+.hub-bday-mini-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #F0EDE8;cursor:pointer}
+.hub-bday-mini-item:hover{background:#FFF8F0;margin:0 -8px;padding:6px 8px;border-radius:6px}
+.hub-bday-mini-item:last-child{border-bottom:none}
+
+/* ═══ 可読性全体改善 ═══ */
+.ob-sec-title{font-size:.8rem;font-weight:700;color:#555;letter-spacing:.06em;margin-bottom:6px}
+.ob-det-tab{font-size:.78rem;padding:8px 12px;white-space:nowrap}
+.ob-info-card-label{font-size:.72rem;color:#888;letter-spacing:.08em}
+.ob-info-card-val{font-size:.9rem;color:#1A1A1A;font-weight:500;line-height:1.5;word-break:break-all}
+.ob-tab{font-size:.8rem;padding:8px 14px}
+.hbtn{font-size:.8rem}
+.kj-card{font-size:.82rem}
+.tochi-card-name{font-size:.92rem;font-weight:700;color:#1A1A1A}
+
+/* ═══ 点滅防止：リスト再描画時のフラッシュ抑制 ═══ */
+#ob-visitors-content,#ob-active-content,#kj-list-content,#tochi-content{contain:layout style}
+.ws-sb-item{will-change:background}
 </style>
 </head>
 <body>
@@ -1864,7 +1924,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       <div class="hub-ev-mini" id="hubEvMini">
         <div class="hub-empty-mini">イベント未登録</div>
       </div>
-      <div class="hub-side-sec" style="margin-top:14px">🎂 今後7日の誕生日</div>
+      <div class="hub-side-sec" style="margin-top:14px;display:flex;align-items:center;justify-content:space-between">🎂 今後7日の誕生日 <button onclick="hubOpenBdayCalendar()" style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);border-radius:4px;padding:1px 8px;font-size:.7rem;cursor:pointer">カレンダー</button></div>
       <div class="hub-bday-mini" id="hubBdayMini">
         <div class="hub-empty-mini">読み込み中...</div>
       </div>
@@ -1998,7 +2058,6 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       <button class="ob-tab on" data-tab="visitors" onclick="obSwitchTab('visitors')">📅 来客状況</button>
       <button class="ob-tab" data-tab="active" onclick="obSwitchTab('active')">🔥 直近案件</button>
       <button class="ob-tab" data-tab="agg" onclick="obSwitchTab('agg')">📊 集計</button>
-      <button class="ob-tab" data-tab="birthday" onclick="obSwitchTab('birthday')">🎂 誕生日</button>
     </div>
     <div class="ob-hd-tools">
       <span id="ob-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
@@ -2035,14 +2094,6 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
     </div>
     <div class="ob-scroll" id="ob-vis-scroll">
       <div id="ob-visitors-content" style="padding:14px 16px"><div class="ob-empty-state">読み込み中...</div></div>
-    </div>
-  </div>
-
-  <!-- 誕生日カレンダー -->
-  <div class="ob-pane" data-tab="birthday">
-    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-      <div id="ob-birthday-upcoming" class="ob-bday-upcoming"></div>
-      <div class="ob-scroll"><div id="ob-birthday-content"></div></div>
     </div>
   </div>
 
@@ -2276,14 +2327,17 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
     <!-- 基本情報 -->
     <div class="ob-det-pane show" data-dtab="info" id="ob-det-pane-info">
       <div class="ob-info-grid" id="ob-det-info-grid"></div>
-      <div style="margin-top:4px">
-        <div class="ob-sec-title">5大ハードル</div>
-        <div class="ob-hurdle-grid" id="ob-det-hurdles"></div>
-      </div>
+      <!-- 顧客メモ（ブロックエディタ） -->
       <div style="margin-top:20px">
-        <div class="ob-sec-title">フレーミング</div>
-        <div class="ob-framing-grid" id="ob-det-framing"></div>
+        <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">📝 顧客メモ <button onclick="obAddNoteBlock()" style="background:none;border:1px solid #DDD;border-radius:4px;padding:1px 8px;cursor:pointer;font-size:.72rem;color:#666">＋ブロック追加</button></div>
+        <div id="ob-det-memo-blocks" style="margin-top:8px;display:flex;flex-direction:column;gap:4px"></div>
       </div>
+      <!-- 関連MTG一覧 -->
+      <div style="margin-top:20px" id="ob-det-mtg-inline-wrap">
+        <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">💼 面談記録 <span id="ob-det-mtg-count" style="font-size:.72rem;color:#AAA"></span> <button onclick="obDetSwitchTab('mendan')" style="background:none;border:1px solid #C0A070;border-radius:4px;padding:1px 8px;cursor:pointer;font-size:.72rem;color:#C0A070">＋追加</button></div>
+        <div id="ob-det-mtg-inline" style="margin-top:8px;display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+      <!-- 関連DB -->
       <div style="margin-top:20px" id="ob-det-related-db-wrap">
         <div class="ob-sec-title">📎 関連DB</div>
         <div id="ob-det-related-db" style="margin-top:8px;display:flex;flex-direction:column;gap:8px"></div>
@@ -2357,16 +2411,13 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
         <div><label style="font-size:.72rem;font-weight:700;color:#888;letter-spacing:.1em;display:block;margin-bottom:4px">結果</label><input type="text" id="mf-result" placeholder="例）見学のみ・資料持ち帰り・次回FP予定" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:8px 10px;font-size:.84rem;font-family:inherit;box-sizing:border-box"></div>
         <div class="ob-sec-title" style="font-size:.72rem;margin:4px 0 0">経緯・内容</div>
         <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">お客様が何を知りたくて来場したか・現在の不安・悩み</label><textarea id="mf-background" rows="3" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:8px 10px;font-size:.84rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
-        <div class="ob-sec-title" style="font-size:.72rem;margin:4px 0 0">5ポイント（○×）</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
-          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">動機（なぜ家づくりを始めたか）</label><textarea id="mf-motivation" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
-          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">時期（着工・完工・引越し希望時期）</label><textarea id="mf-timing" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
-          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">競合（他社・検討状況）</label><textarea id="mf-competitor" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
-          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">関与者（決定権者・影響者）</label><textarea id="mf-stakeholder" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
-          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">予算（総予算・FP・事前審査）</label><textarea id="mf-budget" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
-          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">ファン化（会社・デザイン・性能・施工）</label><textarea id="mf-fan" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
-          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">土地（所有・購入・希望エリア）</label><textarea id="mf-land" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
-          <div><label style="font-size:.7rem;color:#888;display:block;margin-bottom:4px">設計（建築家/trip希望）</label><textarea id="mf-design" rows="2" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:7px 9px;font-size:.82rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
+        <div class="ob-sec-title" style="font-size:.76rem;margin:4px 0 8px">5ポイント</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">動機</span><span class="mf-point-sub">なぜ家づくりを始めたか</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-motivation-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-motivation-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-motivation-ox"></span></div><textarea id="mf-motivation" rows="2" placeholder="詳細を記入..." style="width:100%;border:1px solid #EEE;border-radius:6px;padding:7px 10px;font-size:.83rem;font-family:inherit;resize:vertical;box-sizing:border-box;margin-top:4px;background:#FAFAFA"></textarea></div>
+          <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">時期</span><span class="mf-point-sub">着工・完工・引越し希望時期</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-timing-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-timing-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-timing-ox"></span></div><textarea id="mf-timing" rows="2" placeholder="詳細を記入..." style="width:100%;border:1px solid #EEE;border-radius:6px;padding:7px 10px;font-size:.83rem;font-family:inherit;resize:vertical;box-sizing:border-box;margin-top:4px;background:#FAFAFA"></textarea></div>
+          <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">競合</span><span class="mf-point-sub">他社・検討状況</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-competitor-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-competitor-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-competitor-ox"></span></div><textarea id="mf-competitor" rows="2" placeholder="詳細を記入..." style="width:100%;border:1px solid #EEE;border-radius:6px;padding:7px 10px;font-size:.83rem;font-family:inherit;resize:vertical;box-sizing:border-box;margin-top:4px;background:#FAFAFA"></textarea></div>
+          <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">関与者</span><span class="mf-point-sub">決定権者・影響者</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-stakeholder-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-stakeholder-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-stakeholder-ox"></span></div><textarea id="mf-stakeholder" rows="2" placeholder="詳細を記入..." style="width:100%;border:1px solid #EEE;border-radius:6px;padding:7px 10px;font-size:.83rem;font-family:inherit;resize:vertical;box-sizing:border-box;margin-top:4px;background:#FAFAFA"></textarea></div>
+          <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">予算</span><span class="mf-point-sub">総予算・FP・事前審査</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-budget-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-budget-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-budget-ox"></span></div><textarea id="mf-budget" rows="2" placeholder="詳細を記入..." style="width:100%;border:1px solid #EEE;border-radius:6px;padding:7px 10px;font-size:.83rem;font-family:inherit;resize:vertical;box-sizing:border-box;margin-top:4px;background:#FAFAFA"></textarea></div>
         </div>
         <div><label style="font-size:.72rem;font-weight:700;color:#888;letter-spacing:.1em;display:block;margin-bottom:4px">詳細（箇条書き）</label><textarea id="mf-detail" rows="4" placeholder="・高性能住宅に興味あり&#10;・" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:8px 10px;font-size:.84rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
         <div><label style="font-size:.72rem;font-weight:700;color:#888;letter-spacing:.1em;display:block;margin-bottom:4px">担当者感想</label><textarea id="mf-impression" rows="3" style="width:100%;border:1px solid #DDD;border-radius:4px;padding:8px 10px;font-size:.84rem;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>
@@ -3181,6 +3232,35 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
     </div>
   </div>
 </div>
+
+<!-- ═══ 誕生日カレンダーポップアップ ═══ -->
+<div class="hub-bday-popup" id="hub-bday-popup">
+  <div class="hub-bday-popup-hd">
+    <span style="font-size:1.2rem">🎂</span>
+    <div style="flex:1">
+      <div style="font-weight:700;font-size:1rem" id="hub-bday-popup-month">誕生日カレンダー</div>
+      <div style="font-size:.74rem;color:rgba(255,255,255,.5)">クリックで詳細表示</div>
+    </div>
+    <button onclick="hubCloseBdayCalendar()" style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:.82rem">✕ 閉じる</button>
+  </div>
+  <div class="hub-bday-popup-body">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <button onclick="hubBdayCalPrev()" style="background:none;border:1px solid #DDD;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:.85rem">‹ 前月</button>
+      <span id="hub-bday-cal-title" style="font-weight:700;font-size:.95rem;color:#2B2B2B"></span>
+      <button onclick="hubBdayCalNext()" style="background:none;border:1px solid #DDD;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:.85rem">翌月 ›</button>
+    </div>
+    <div class="hub-bday-cal" id="hub-bday-cal-grid"></div>
+    <div id="hub-bday-day-detail" style="margin-top:16px;display:none">
+      <div style="font-weight:700;font-size:.85rem;color:#555;margin-bottom:8px" id="hub-bday-day-title"></div>
+      <div id="hub-bday-day-list" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+    <div style="margin-top:20px">
+      <div style="font-weight:700;font-size:.82rem;color:#555;margin-bottom:8px" id="hub-bday-month-title"></div>
+      <div id="hub-bday-month-list" style="display:flex;flex-direction:column;gap:4px"></div>
+    </div>
+  </div>
+</div>
+<div id="hub-bday-overlay" onclick="hubCloseBdayCalendar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:399"></div>
 
 <div id="toast"></div>
 
@@ -7047,6 +7127,8 @@ function obOpenDetail(rowIdx){
   obRenderDetKarte();
   obRenderDetDrive();
   obRenderRelatedDB();
+  obRenderMemoBlocks();
+  obRenderMtgInline();
   // 顧客タイムラインを挿入
   var tlEl = document.getElementById('ob-cust-timeline');
   if(tlEl) tlEl.innerHTML = buildCustomerTimeline(r);
@@ -7130,45 +7212,50 @@ function obRenderMendanHistory(r){
   var reports=(r.mendan||[]);
   if(!reports.length){ el.innerHTML='<div style="color:#BBB;font-size:.82rem;padding:8px 0">面談報告なし</div>'; return; }
   var sorted=reports.slice().sort(function(a,b){return (b.datetime||b.date||'')>(a.datetime||a.date||'')?1:-1;});
+  var pts=[{key:'motivation',label:'動機'},{key:'timing',label:'時期'},{key:'competitor',label:'競合'},{key:'stakeholder',label:'関与者'},{key:'budget',label:'予算'}];
+  function oxChip(val,label){
+    if(!val) return '<span class="ob-mtg-ox-chip">'+esc(label)+'</span>';
+    return '<span class="ob-mtg-ox-chip '+(val==='○'?'maru':'batu')+'">'+esc(label)+' '+esc(val)+'</span>';
+  }
   el.innerHTML='<div class="ob-sec-title" style="margin-bottom:10px">📝 面談報告履歴（'+sorted.length+'件）</div>'+
     sorted.map(function(m,i){
-      return '<div style="background:#fff;border:1px solid #E8E4DE;border-radius:8px;padding:16px 18px;margin-bottom:12px">'+
-        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
-          '<span style="font-weight:700;font-size:.9rem">'+esc(m.datetime||m.date||'—')+'</span>'+
-          '<span style="font-size:.78rem;color:#888">'+esc(m.place||'')+'</span>'+
-          '<span style="font-size:.78rem;color:#888">'+esc(m.staff||'')+'</span>'+
+      var oxRow=pts.map(function(p){ return oxChip(m[p.key+'Ox']||'',p.label); }).join('');
+      return '<div style="background:#fff;border:1px solid #E8E4DE;border-radius:8px;padding:14px 16px;margin-bottom:10px">'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">'+
+          '<span style="font-weight:700;font-size:.88rem;color:#1A1A1A">'+esc((m.datetime||m.date||'').replace('T',' '))+'</span>'+
+          (m.place?'<span style="font-size:.76rem;color:#888;background:#F5F3EF;padding:1px 8px;border-radius:10px">'+esc(m.place)+'</span>':'')+
+          (m.staff?'<span style="font-size:.76rem;color:#888">'+esc(m.staff)+'</span>':'')+
           '<span style="flex:1"></span>'+
           '<button onclick="obMendanDelete('+i+')" style="background:none;border:1px solid #EEE;border-radius:4px;color:#CCC;font-size:.7rem;padding:2px 8px;cursor:pointer">削除</button>'+
         '</div>'+
-        (m.result?'<div style="font-size:.8rem;color:#555;margin-bottom:6px"><b>結果：</b>'+esc(m.result)+'</div>':'')+
-        (m.background?'<div style="font-size:.8rem;color:#555;margin-bottom:6px;white-space:pre-wrap"><b>経緯・内容：</b><br>'+esc(m.background)+'</div>':'')+
-        (m.detail?'<div style="font-size:.8rem;color:#555;margin-bottom:6px;white-space:pre-wrap"><b>詳細：</b><br>'+esc(m.detail)+'</div>':'')+
-        (m.impression?'<div style="font-size:.8rem;color:#555;margin-bottom:6px;white-space:pre-wrap"><b>感想：</b><br>'+esc(m.impression)+'</div>':'')+
-        (m.review?'<div style="font-size:.8rem;color:#9A8C76;white-space:pre-wrap"><b>レビュー：</b><br>'+esc(m.review)+'</div>':'')+
+        '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">'+oxRow+'</div>'+
+        (m.result?'<div style="font-size:.8rem;color:#333;margin-bottom:5px"><b>結果：</b>'+esc(m.result)+'</div>':'')+
+        (m.background?'<div style="font-size:.8rem;color:#555;margin-bottom:5px;white-space:pre-wrap;border-left:3px solid #E8E4DE;padding-left:8px">'+esc(m.background)+'</div>':'')+
+        (m.detail?'<div style="font-size:.8rem;color:#555;margin-bottom:5px;white-space:pre-wrap">'+esc(m.detail)+'</div>':'')+
+        (m.impression?'<div style="font-size:.78rem;color:#777;white-space:pre-wrap"><b>感想：</b>'+esc(m.impression)+'</div>':'')+
+        (m.review?'<div style="font-size:.78rem;color:#9A8C76;white-space:pre-wrap;margin-top:4px"><b>レビュー：</b>'+esc(m.review)+'</div>':'')+
       '</div>';
     }).join('');
 }
 
 function obMendanSave(){
   var r=obRows[obDetailRow]; if(!r) return;
+  function gv(id){ var el=document.getElementById(id); return el?el.value.trim():''; }
   var report={
-    datetime: (document.getElementById('mf-datetime')||{}).value||'',
-    place:    (document.getElementById('mf-place')||{}).value.trim()||'',
-    visitors: (document.getElementById('mf-visitors')||{}).value.trim()||'',
-    staff:    (document.getElementById('mf-staff')||{}).value.trim()||'',
-    result:   (document.getElementById('mf-result')||{}).value.trim()||'',
-    background:(document.getElementById('mf-background')||{}).value.trim()||'',
-    motivation:(document.getElementById('mf-motivation')||{}).value.trim()||'',
-    timing:   (document.getElementById('mf-timing')||{}).value.trim()||'',
-    competitor:(document.getElementById('mf-competitor')||{}).value.trim()||'',
-    stakeholder:(document.getElementById('mf-stakeholder')||{}).value.trim()||'',
-    budget:   (document.getElementById('mf-budget')||{}).value.trim()||'',
-    fan:      (document.getElementById('mf-fan')||{}).value.trim()||'',
-    land:     (document.getElementById('mf-land')||{}).value.trim()||'',
-    design:   (document.getElementById('mf-design')||{}).value.trim()||'',
-    detail:   (document.getElementById('mf-detail')||{}).value.trim()||'',
-    impression:(document.getElementById('mf-impression')||{}).value.trim()||'',
-    review:   (document.getElementById('mf-review')||{}).value.trim()||''
+    datetime:   gv('mf-datetime'),
+    place:      gv('mf-place'),
+    visitors:   gv('mf-visitors'),
+    staff:      gv('mf-staff'),
+    result:     gv('mf-result'),
+    background: gv('mf-background'),
+    motivation: gv('mf-motivation'), motivationOx: gv('mf-motivation-ox'),
+    timing:     gv('mf-timing'),     timingOx:     gv('mf-timing-ox'),
+    competitor: gv('mf-competitor'), competitorOx: gv('mf-competitor-ox'),
+    stakeholder:gv('mf-stakeholder'),stakeholderOx:gv('mf-stakeholder-ox'),
+    budget:     gv('mf-budget'),     budgetOx:     gv('mf-budget-ox'),
+    detail:     gv('mf-detail'),
+    impression: gv('mf-impression'),
+    review:     gv('mf-review')
   };
   if(!report.datetime&&!report.detail&&!report.background){ toast('日時または内容を入力してください'); return; }
   if(!r.mendan) r.mendan=[];
@@ -7185,10 +7272,11 @@ function obMendanSave(){
 
 function obMendanClear(){
   ['mf-datetime','mf-place','mf-visitors','mf-staff','mf-result','mf-background',
-   'mf-motivation','mf-timing','mf-competitor','mf-stakeholder','mf-budget','mf-fan',
-   'mf-land','mf-design','mf-detail','mf-impression','mf-review'].forEach(function(id){
-    var el=document.getElementById(id); if(el) el.value='';
-  });
+   'mf-motivation','mf-timing','mf-competitor','mf-stakeholder','mf-budget',
+   'mf-detail','mf-impression','mf-review',
+   'mf-motivation-ox','mf-timing-ox','mf-competitor-ox','mf-stakeholder-ox','mf-budget-ox'
+  ].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  document.querySelectorAll('.mf-ox-btn').forEach(function(btn){ btn.classList.remove('active-maru','active-batu'); });
 }
 
 function obMendanDelete(idx){
@@ -11096,6 +11184,258 @@ document.addEventListener('dragend',function(){
     el.style.borderTop=''; el.style.borderBottom='';
   });
 });
+
+// ════════════════════════════════════════════════════════
+
+// ══ ○× トグル ══════════════════════════════════════════
+function mfToggleOx(btn){
+  var val=btn.getAttribute('data-val');
+  var hidId=btn.getAttribute('data-id');
+  var hidEl=document.getElementById(hidId);
+  var wrap=btn.closest('.mf-ox-wrap');
+  var btns=wrap?wrap.querySelectorAll('.mf-ox-btn'):[];
+  btns.forEach(function(b){ b.classList.remove('active-maru','active-batu'); });
+  if(hidEl&&hidEl.value===val){ hidEl.value=''; return; }
+  btn.classList.add(val==='○'?'active-maru':'active-batu');
+  if(hidEl) hidEl.value=val;
+}
+
+// ══ OB顧客メモブロック ════════════════════════════════
+var OB_MEMO_KEY='ob_memo_blocks_v1';
+function obGetMemoKey(){ var r=obRows[obDetailRow]; return r?(OB_MEMO_KEY+'_'+(r.id||r['顧客名']||obDetailRow)):null; }
+function obLoadMemo(){ try{ var k=obGetMemoKey(); return k?JSON.parse(localStorage.getItem(k)||'[]'):[];}catch(e){return[];} }
+function obSaveMemo(blocks){ var k=obGetMemoKey(); if(k) localStorage.setItem(k,JSON.stringify(blocks)); }
+
+function obRenderMemoBlocks(){
+  var el=document.getElementById('ob-det-memo-blocks'); if(!el) return;
+  var blocks=obLoadMemo();
+  if(!blocks.length){
+    el.innerHTML='<div style="color:#CCC;font-size:.78rem;padding:4px 0">クリックしてメモを追加...</div>';
+    el.onclick=function(){ obAddNoteBlock(); el.onclick=null; };
+    return;
+  }
+  el.onclick=null;
+  el.innerHTML=blocks.map(function(b,i){
+    var typeMap={p:'',h1:'font-size:1.1rem;font-weight:700',h2:'font-size:.95rem;font-weight:700',h3:'font-size:.88rem;font-weight:600',quote:'border-left:3px solid #C0A070;padding-left:8px;color:#666;font-style:italic'};
+    var st=typeMap[b.type||'p']||'';
+    return '<div class="ob-memo-block" data-idx="'+i+'" draggable="true" ondragstart="obMemoDragStart(event,'+i+')" ondragover="obMemoDragOver(event)" ondrop="obMemoDrop(event,'+i+')" ondragend="obMemoDragEnd()">'+
+      '<span class="ob-memo-block-handle">⠿</span>'+
+      '<textarea class="ob-memo-textarea" style="'+st+'" placeholder="テキスト入力..." onblur="obMemoSaveBlock(this,'+i+')" oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'">'+esc(b.content||'')+'</textarea>'+
+      '<button class="ob-memo-del" onclick="obMemoDeleteBlock('+i+')" title="削除">✕</button>'+
+    '</div>';
+  }).join('');
+  el.querySelectorAll('.ob-memo-textarea').forEach(function(ta){ ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; });
+}
+function obAddNoteBlock(){
+  var blocks=obLoadMemo();
+  blocks.push({type:'p',content:'',id:Date.now().toString(36)});
+  obSaveMemo(blocks);
+  obRenderMemoBlocks();
+  setTimeout(function(){
+    var tas=document.querySelectorAll('#ob-det-memo-blocks .ob-memo-textarea');
+    if(tas.length) tas[tas.length-1].focus();
+  },50);
+}
+function obMemoSaveBlock(ta,idx){
+  var blocks=obLoadMemo();
+  if(!blocks[idx]) return;
+  blocks[idx].content=ta.value;
+  obSaveMemo(blocks);
+}
+function obMemoDeleteBlock(idx){
+  var blocks=obLoadMemo();
+  blocks.splice(idx,1);
+  obSaveMemo(blocks);
+  obRenderMemoBlocks();
+}
+var __obMemoDragIdx=null;
+function obMemoDragStart(e,idx){ __obMemoDragIdx=idx; e.dataTransfer.effectAllowed='move'; }
+function obMemoDragOver(e){ e.preventDefault(); }
+function obMemoDrop(e,toIdx){
+  e.preventDefault();
+  if(__obMemoDragIdx===null||__obMemoDragIdx===toIdx) return;
+  var blocks=obLoadMemo();
+  var moved=blocks.splice(__obMemoDragIdx,1)[0];
+  blocks.splice(toIdx,0,moved);
+  obSaveMemo(blocks);
+  obRenderMemoBlocks();
+}
+function obMemoDragEnd(){ __obMemoDragIdx=null; document.querySelectorAll('.ob-memo-block').forEach(function(el){el.style.borderTop='';el.style.borderBottom='';}); }
+
+// ══ OBタブ切り替えショートカット ═══════════════════════
+function obDetSwitchTab(tab){ obDetTab(tab); }
+
+// ══ 面談記録インライン表示（基本情報タブ）══════════════
+function obRenderMtgInline(){
+  var r=obRows[obDetailRow]; if(!r) return;
+  var el=document.getElementById('ob-det-mtg-inline'); if(!el) return;
+  var cnt=document.getElementById('ob-det-mtg-count');
+  var reports=(r.mendan||[]).slice().sort(function(a,b){return (b.datetime||b.date||'')>(a.datetime||a.date||'')?1:-1;});
+  if(cnt) cnt.textContent=reports.length?'('+reports.length+'件)':'';
+  if(!reports.length){ el.innerHTML='<div style="color:#CCC;font-size:.78rem;padding:4px 0">面談記録なし</div>'; return; }
+  var pts=[{k:'motivation',l:'動機'},{k:'timing',l:'時期'},{k:'competitor',l:'競合'},{k:'stakeholder',l:'関与者'},{k:'budget',l:'予算'}];
+  el.innerHTML=reports.slice(0,5).map(function(m){
+    var oxHtml=pts.filter(function(p){return m[p.k+'Ox'];}).map(function(p){
+      var v=m[p.k+'Ox'];
+      return '<span class="ob-mtg-ox-chip '+(v==='○'?'maru':'batu')+'">'+esc(p.l)+' '+esc(v)+'</span>';
+    }).join('');
+    var body=(m.result||m.background||m.detail||'').slice(0,80);
+    return '<div class="ob-mtg-inline-card" onclick="obDetSwitchTab(\'mendan\')">'+
+      '<div class="ob-mtg-inline-hd"><span class="ob-mtg-inline-date">'+esc((m.datetime||m.date||'').replace('T',' ').slice(0,16))+'</span>'+(m.place?'<span>'+esc(m.place)+'</span>':'')+
+      (m.staff?'<span>'+esc(m.staff)+'</span>':'')+'</div>'+
+      (oxHtml?'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">'+oxHtml+'</div>':'')+
+      (body?'<div class="ob-mtg-inline-body">'+esc(body)+'</div>':'')+
+    '</div>';
+  }).join('');
+  if(reports.length>5) el.innerHTML+='<div style="text-align:center;margin-top:4px"><button onclick="obDetSwitchTab(\'mendan\')" style="background:none;border:none;color:#C0A070;cursor:pointer;font-size:.78rem">すべて見る ('+reports.length+'件) →</button></div>';
+}
+
+// ══ ハブ 誕生日カレンダーポップアップ ══════════════════
+var __bdayCalYear=0, __bdayCalMonth=0;
+function hubOpenBdayCalendar(){
+  var now=new Date(); __bdayCalYear=now.getFullYear(); __bdayCalMonth=now.getMonth();
+  document.getElementById('hub-bday-popup').classList.add('show');
+  document.getElementById('hub-bday-overlay').style.display='block';
+  hubRenderBdayCal();
+}
+function hubCloseBdayCalendar(){
+  document.getElementById('hub-bday-popup').classList.remove('show');
+  document.getElementById('hub-bday-overlay').style.display='none';
+}
+function hubBdayCalPrev(){ if(--__bdayCalMonth<0){__bdayCalMonth=11;__bdayCalYear--;} hubRenderBdayCal(); }
+function hubBdayCalNext(){ if(++__bdayCalMonth>11){__bdayCalMonth=0;__bdayCalYear++;} hubRenderBdayCal(); }
+function hubRenderBdayCal(){
+  var y=__bdayCalYear, m=__bdayCalMonth;
+  var title=document.getElementById('hub-bday-cal-title');
+  var popup=document.getElementById('hub-bday-popup-month');
+  if(title) title.textContent=y+'年'+(m+1)+'月';
+  if(popup) popup.textContent='誕生日カレンダー '+(m+1)+'月';
+  var grid=document.getElementById('hub-bday-cal-grid'); if(!grid) return;
+  var allBdays=obLoadAllBdayData();
+  var today=new Date();
+  var firstDay=new Date(y,m,1).getDay();
+  var daysInMonth=new Date(y,m+1,0).getDate();
+  // mm-dd → day map
+  var dayMap={};
+  allBdays.forEach(function(bd){
+    var mmdd=(bd.date||'').slice(5,10);
+    if(!mmdd) return;
+    var d=parseInt(mmdd.slice(3,5),10);
+    var mo=parseInt(mmdd.slice(0,2),10)-1;
+    if(mo===m){ if(!dayMap[d]) dayMap[d]=[]; dayMap[d].push(bd); }
+  });
+  var dow=['日','月','火','水','木','金','土'];
+  var html=dow.map(function(d){ return '<div class="hub-bday-cal-hd">'+d+'</div>'; }).join('');
+  for(var i=0;i<firstDay;i++) html+='<div class="hub-bday-cal-day"></div>';
+  for(var d=1;d<=daysInMonth;d++){
+    var isToday=(today.getFullYear()===y&&today.getMonth()===m&&today.getDate()===d);
+    var hasBday=!!dayMap[d];
+    var cls='hub-bday-cal-day'+(isToday?' today':'')+(hasBday?' has-bday':'');
+    var onclick=hasBday?'onclick="hubShowBdayDay('+d+')"':'';
+    html+='<div class="'+cls+'" '+onclick+'><span class="hub-bday-cal-num">'+d+'</span>'+(hasBday?'<span class="hub-bday-cal-dot"></span>':'')+'</div>';
+  }
+  grid.innerHTML=html;
+  // 今月の誕生日一覧
+  var ml=document.getElementById('hub-bday-month-list');
+  var mt=document.getElementById('hub-bday-month-title');
+  if(mt) mt.textContent=(m+1)+'月の誕生日（'+allBdays.filter(function(b){return parseInt((b.date||'').slice(5,7),10)-1===m;}).length+'人）';
+  if(ml){
+    var monthBdays=allBdays.filter(function(b){ return parseInt((b.date||'').slice(5,7),10)-1===m; }).sort(function(a,b){ return (a.date||'')>(b.date||'')?1:-1; });
+    if(!monthBdays.length){ ml.innerHTML='<div style="color:#BBB;font-size:.8rem">誕生日なし</div>'; }
+    else ml.innerHTML=monthBdays.map(function(bd){
+      var day=parseInt((bd.date||'').slice(8,10),10);
+      var age=bd.year?(y-parseInt(bd.year,10)):null;
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #F0EDE8;font-size:.83rem">'+
+        '<span style="font-weight:700;min-width:28px;color:#C0A070">'+day+'日</span>'+
+        '<span style="flex:1;color:#1A1A1A">'+esc(bd.name||'')+'</span>'+
+        (bd.relation?'<span style="font-size:.72rem;color:#999;background:#F5F3EF;padding:1px 8px;border-radius:10px">'+esc(bd.relation)+'</span>':'')+
+        (age!==null?'<span style="font-size:.75rem;color:#AAA">'+age+'歳</span>':'')+
+      '</div>';
+    }).join('');
+  }
+  document.getElementById('hub-bday-day-detail').style.display='none';
+}
+function hubShowBdayDay(d){
+  var allBdays=obLoadAllBdayData();
+  var dayBdays=allBdays.filter(function(b){ return parseInt((b.date||'').slice(5,7),10)-1===__bdayCalMonth && parseInt((b.date||'').slice(8,10),10)===d; });
+  var dtl=document.getElementById('hub-bday-day-detail');
+  var dtlT=document.getElementById('hub-bday-day-title');
+  var dtlL=document.getElementById('hub-bday-day-list');
+  if(!dtl||!dtlT||!dtlL) return;
+  dtlT.textContent=(__bdayCalMonth+1)+'月'+d+'日の誕生日';
+  dtlL.innerHTML=dayBdays.map(function(bd){
+    var age=bd.year?(__bdayCalYear-parseInt(bd.year,10)):null;
+    return '<div style="background:#FFF8F0;border-radius:6px;padding:8px 12px;font-size:.83rem">'+
+      '<span style="font-weight:700">'+esc(bd.name||'')+'</span>'+
+      (bd.relation?' <span style="font-size:.74rem;color:#999">'+esc(bd.relation)+'</span>':'')+
+      (age!==null?' <span style="font-size:.74rem;color:#AAA">'+age+'歳</span>':'')+
+    '</div>';
+  }).join('');
+  dtl.style.display='block';
+}
+function obLoadAllBdayData(){
+  try{ return JSON.parse(localStorage.getItem('ob_all_bdays_v1')||'[]'); }catch(e){ return []; }
+}
+
+// hubRenderBdayMini をクリック対応に拡張
+(function(){
+  var orig=window.hubRenderBdayMini;
+  if(typeof orig==='function'){
+    window.hubRenderBdayMini=function(){
+      orig();
+      var el=document.getElementById('hubBdayMini'); if(!el) return;
+      el.querySelectorAll('.hub-bday-mini-item').forEach(function(item){
+        if(!item.onclick) item.style.cursor='pointer';
+        item.addEventListener('click',function(){ hubOpenBdayCalendar(); });
+      });
+    };
+  }
+})();
+
+// ══ 点滅防止：詳細パネル開示中は obRenderAll をスキップ ══
+(function(){
+  var origRenderAll=window.obRenderAll;
+  if(typeof origRenderAll==='function'){
+    window.obRenderAll=function(){
+      var detailOpen=document.getElementById('ob-detail')&&document.getElementById('ob-detail').classList.contains('show');
+      if(detailOpen) return;
+      origRenderAll.apply(this,arguments);
+    };
+  }
+})();
+
+// ══ システム設定オーナーのみ ════════════════════════════
+function isOwnerRole(){
+  var email=localStorage.getItem('admin_session_email')||'';
+  var OWNER_EMAILS=['heartom.living@gmail.com'];
+  return OWNER_EMAILS.indexOf(email)>=0;
+}
+(function(){
+  var origApplyRoleUI=window.applyRoleUI;
+  window.applyRoleUI=function(){
+    if(typeof origApplyRoleUI==='function') origApplyRoleUI.apply(this,arguments);
+    var settingsEls=document.querySelectorAll('[data-owner-only],[onclick*="Settings"],[onclick*="settings"],[onclick*="config"]');
+    settingsEls.forEach(function(el){
+      if(!isOwnerRole()) el.style.display='none';
+    });
+  };
+})();
+
+// ══ キャッシュバスター：古いキャッシュキーをクリア ════
+(function(){
+  var CURRENT_VER='v20260621';
+  var verKey='admin_cache_version';
+  var prevVer=localStorage.getItem(verKey);
+  if(prevVer!==CURRENT_VER){
+    var toRemove=[];
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&(k.indexOf('_v1_ts')>=0||k.indexOf('_v3_ts')>=0||k.indexOf('ob_v3')===0||k.indexOf('kj_v1')===0)) toRemove.push(k);
+    }
+    toRemove.forEach(function(k){ localStorage.removeItem(k); });
+    localStorage.setItem(verKey,CURRENT_VER);
+  }
+})();
 
 // ════════════════════════════════════════════════════════
 
