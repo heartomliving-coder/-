@@ -1187,7 +1187,7 @@ body.ws-collapsed .ob-detail{left:52px}
 .hub-bday-row.today-bd{border-color:rgba(154,140,118,.6);background:rgba(154,140,118,.08)}
 .hub-bday-date{font-size:.68rem;color:#9A8C76;font-weight:700;min-width:36px}
 .hub-bday-name{flex:1;font-size:.76rem;color:rgba(255,255,255,.72);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hub-bday-days{font-size:.62rem;color:rgba(255,255,255,.38);white-space:nowrap}
+.hub-bday-days{font-size:.72rem;color:rgba(255,255,255,.65);white-space:nowrap;font-weight:600}
 .hub-empty-mini{font-size:.74rem;color:rgba(255,255,255,.25);padding:10px 4px;text-align:center}
 /* ─── イベントミニセクション ─── */
 .hub-ev-mini{display:flex;flex-direction:column;gap:4px;margin-bottom:2px}
@@ -4151,7 +4151,7 @@ function hubRenderBdayMini(){
   el.innerHTML=soon.slice(0,6).map(function(s){
     var b=s.b; var isToday=s.days===0;
     var lbl=isToday?'🎉 今日！':s.days===1?'⭐ 明日':s.days+'日後';
-    return '<div class="hub-bday-row'+(isToday?' today-bd':'')+'" onclick="enterOpenBoard()">'+
+    return '<div class="hub-bday-row'+(isToday?' today-bd':'')+'" onclick="hubOpenBdayCalendar()">'+
       '<span class="hub-bday-date">'+s.date+'</span>'+
       '<span class="hub-bday-name">'+esc(b.displayName||b.name||'—')+'</span>'+
       '<span class="hub-bday-days">'+lbl+'</span>'+
