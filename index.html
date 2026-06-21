@@ -1477,6 +1477,17 @@ body.ws-collapsed .ob-detail{left:52px}
 .tochi-extra-fields input,.tochi-extra-fields textarea{width:100%;border:1px solid #DDD;border-radius:5px;padding:7px 10px;font-size:.84rem;margin-bottom:8px;box-sizing:border-box}
 
 /* ── ハブ Googleカレンダーウィジェット ── */
+/* ─── ハブ自由レイアウト ─── */
+.hub-sec{position:relative;transition:opacity .15s,outline .15s}
+.hub-layout-editing .hub-sec{cursor:grab;outline:2px dashed rgba(199,178,130,.28);outline-offset:6px;border-radius:10px}
+.hub-layout-editing .hub-sec:hover{outline-color:rgba(199,178,130,.65)}
+.hub-layout-editing .hub-sec.drag-over{outline:2px dashed #C0A070;background:rgba(192,160,112,.06)}
+.hub-layout-editing .hub-sec.dragging{opacity:.4;cursor:grabbing}
+.hub-sec-handle{display:none;position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:.62rem;color:rgba(255,255,255,.35);background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:2px 10px;white-space:nowrap;pointer-events:none;z-index:5}
+.hub-layout-editing .hub-sec:hover .hub-sec-handle{display:block}
+.hub-layout-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.55);border-radius:6px;padding:6px 12px;font-size:.72rem;cursor:pointer;letter-spacing:.03em;transition:all .2s;white-space:nowrap}
+.hub-layout-btn:hover{background:rgba(255,255,255,.14);color:rgba(255,255,255,.85)}
+.hub-layout-btn.active{background:rgba(192,160,112,.22);border-color:rgba(192,160,112,.55);color:#C0A070}
 .hub-gcal{background:rgba(4,5,9,.35);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:14px 18px;margin-top:4px}
 .hub-gcal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .hub-gcal-title{font-size:.75rem;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.55);text-transform:uppercase}
@@ -1544,9 +1555,11 @@ body.ws-collapsed .ob-detail{left:52px}
 .ob,.kj,.mtg,#kojiboard,#tochiboard,#custboard,#notesboard,#customdbboard{transition:margin-left .2s ease,width .2s ease}
 /* サイドバー開いた時のレイアウトシフト */
 body.ws-open .hub{left:240px!important}
+body.ws-open .app.show{margin-left:240px;width:calc(100vw - 240px)}
 body.ws-open .ob,body.ws-open .kj,body.ws-open #kojiboard,body.ws-open #tochiboard,body.ws-open .mtg,body.ws-open #custboard,body.ws-open #notesboard,body.ws-open #customdbboard{margin-left:240px;width:calc(100vw - 240px)}
 /* サイドバー折りたたみ時 */
 body.ws-collapsed .hub{left:52px!important}
+body.ws-collapsed .app.show{margin-left:52px;width:calc(100vw - 52px)}
 body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws-collapsed #tochiboard,body.ws-collapsed .mtg,body.ws-collapsed #custboard,body.ws-collapsed #notesboard,body.ws-collapsed #customdbboard{margin-left:52px;width:calc(100vw - 52px)}
 
 /* ── カスタムDB ──────────────────────────────────────── */
@@ -1965,31 +1978,39 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       </div>
     </div>
     <!-- メインエリア -->
-    <div class="hub-main">
+    <div class="hub-main" id="hub-main">
+      <!-- 配置編集ボタン -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:-10px">
+        <button id="hubLayoutBtn" class="hub-layout-btn" onclick="hubToggleLayout()">⊞ 配置編集</button>
+      </div>
+
       <!-- ナビゲーションカード -->
-      <div class="hub-cards-grid">
-        <div class="hub-card" onclick="enterReception()">
-          <div class="hc-icon">🏠</div>
-          <div class="hc-title">受付管理</div>
-          <div class="hc-desc">お客様受付・セッション管理<br>モニター・遠隔操作</div>
-        </div>
-        <div class="hub-card" onclick="enterOpenBoard()">
-          <div class="hc-icon">📋</div>
-          <div class="hc-title">オープンボード</div>
-          <span class="hc-badge" id="hubObCount">—</span>
-          <div class="hc-desc">顧客追客・商談進捗管理<br>月次集計・ハードル管理</div>
-        </div>
-        <div class="hub-card" onclick="enterKojiBoard()">
-          <div class="hc-icon">🔨</div>
-          <div class="hc-title">着工管理</div>
-          <span class="hc-badge" id="hubKjCount">—</span>
-          <div class="hc-desc">着工〜竣工・引渡し管理<br>工程スケジュール追跡</div>
-        </div>
-        <div class="hub-card" onclick="enterTochiBoard()">
-          <div class="hc-icon">📌</div>
-          <div class="hc-title">土地DB</div>
-          <span class="hc-badge" id="hubTcCount">—</span>
-          <div class="hc-desc">確定土地・物件管理<br>工事案内図・見学会案内図</div>
+      <div class="hub-sec" data-sec="cards" draggable="false">
+        <div class="hub-sec-handle">⠿ ドラッグして並び替え</div>
+        <div class="hub-cards-grid">
+          <div class="hub-card" onclick="if(!_hubLayoutEditing)enterReception()">
+            <div class="hc-icon">🏠</div>
+            <div class="hc-title">受付管理</div>
+            <div class="hc-desc">お客様受付・セッション管理<br>モニター・遠隔操作</div>
+          </div>
+          <div class="hub-card" onclick="if(!_hubLayoutEditing)enterOpenBoard()">
+            <div class="hc-icon">📋</div>
+            <div class="hc-title">オープンボード</div>
+            <span class="hc-badge" id="hubObCount">—</span>
+            <div class="hc-desc">顧客追客・商談進捗管理<br>月次集計・ハードル管理</div>
+          </div>
+          <div class="hub-card" onclick="if(!_hubLayoutEditing)enterKojiBoard()">
+            <div class="hc-icon">🔨</div>
+            <div class="hc-title">着工管理</div>
+            <span class="hc-badge" id="hubKjCount">—</span>
+            <div class="hc-desc">着工〜竣工・引渡し管理<br>工程スケジュール追跡</div>
+          </div>
+          <div class="hub-card" onclick="if(!_hubLayoutEditing)enterTochiBoard()">
+            <div class="hc-icon">📌</div>
+            <div class="hc-title">土地DB</div>
+            <span class="hc-badge" id="hubTcCount">—</span>
+            <div class="hc-desc">確定土地・物件管理<br>工事案内図・見学会案内図</div>
+          </div>
         </div>
       </div>
 
@@ -1997,45 +2018,57 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       <div id="hubExtKpi"></div>
 
       <!-- クイック登録ボタン -->
-      <div class="hub-quick">
-        <button class="hub-quick-btn" onclick="enterOpenBoard();setTimeout(obAddCustomer,500)">＋ 顧客登録</button>
-        <button class="hub-quick-btn" onclick="enterOpenBoard();setTimeout(function(){obDetTab('mendan');},600)">＋ 面談報告</button>
-        <button class="hub-quick-btn" onclick="openGlobalSearch()">🔍 横断検索 <kbd style="font-size:.6rem;opacity:.5">⌘K</kbd></button>
-        <button class="hub-quick-btn" onclick="openNotifPanel()">🔔 通知 <span id="notifBadge" style="background:#EF4444;color:#fff;border-radius:50%;width:16px;height:16px;font-size:.6rem;display:none;align-items:center;justify-content:center;margin-left:4px"></span></button>
+      <div class="hub-sec" data-sec="quick" draggable="false">
+        <div class="hub-sec-handle">⠿ ドラッグして並び替え</div>
+        <div class="hub-quick">
+          <button class="hub-quick-btn" onclick="if(!_hubLayoutEditing){enterOpenBoard();setTimeout(obAddCustomer,500)}">＋ 顧客登録</button>
+          <button class="hub-quick-btn" onclick="if(!_hubLayoutEditing){enterOpenBoard();setTimeout(function(){obDetTab('mendan');},600)}">＋ 面談報告</button>
+          <button class="hub-quick-btn" onclick="if(!_hubLayoutEditing)openGlobalSearch()">🔍 横断検索 <kbd style="font-size:.6rem;opacity:.5">⌘K</kbd></button>
+          <button class="hub-quick-btn" onclick="if(!_hubLayoutEditing)openNotifPanel()">🔔 通知 <span id="notifBadge" style="background:#EF4444;color:#fff;border-radius:50%;width:16px;height:16px;font-size:.6rem;display:none;align-items:center;justify-content:center;margin-left:4px"></span></button>
+        </div>
       </div>
 
       <!-- Googleカレンダー（本日の予定） -->
-      <div class="hub-gcal">
-        <div class="hub-gcal-hd">
-          <span class="hub-gcal-title">📅 本日のスケジュール</span>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="hub-gcal-date" id="hubGcalDate">—</span>
-            <button onclick="hubLoadGcal(true)" title="カレンダーを再読み込み" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.75rem;padding:0">🔄</button>
+      <div class="hub-sec" data-sec="gcal" draggable="false">
+        <div class="hub-sec-handle">⠿ ドラッグして並び替え</div>
+        <div class="hub-gcal">
+          <div class="hub-gcal-hd">
+            <span class="hub-gcal-title">📅 本日のスケジュール</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="hub-gcal-date" id="hubGcalDate">—</span>
+              <button onclick="hubLoadGcal(true)" title="カレンダーを再読み込み" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.75rem;padding:0">🔄</button>
+            </div>
           </div>
-        </div>
-        <div class="hub-gcal-list" id="hubGcalList">
-          <div class="hub-gcal-empty">読み込み中...</div>
+          <div class="hub-gcal-list" id="hubGcalList">
+            <div class="hub-gcal-empty">読み込み中...</div>
+          </div>
         </div>
       </div>
 
       <!-- 直近受付プレビュー -->
-      <div class="hub-recent">
-        <div class="hub-recent-hd">
-          <span>📅 直近の来客（オープンボード）</span>
-          <button class="hub-recent-more" onclick="enterOpenBoard()">すべて見る →</button>
-        </div>
-        <div class="hub-recent-list" id="hubRecentList">
-          <div class="hub-empty-mini">読み込み中...</div>
+      <div class="hub-sec" data-sec="recent" draggable="false">
+        <div class="hub-sec-handle">⠿ ドラッグして並び替え</div>
+        <div class="hub-recent">
+          <div class="hub-recent-hd">
+            <span>📅 直近の来客（オープンボード）</span>
+            <button class="hub-recent-more" onclick="if(!_hubLayoutEditing)enterOpenBoard()">すべて見る →</button>
+          </div>
+          <div class="hub-recent-list" id="hubRecentList">
+            <div class="hub-empty-mini">読み込み中...</div>
+          </div>
         </div>
       </div>
 
       <!-- カスタムノート（Notionブロック） -->
-      <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px 18px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <span style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.1em">📌 ハブノート</span>
-          <button onclick="hubNoteAddBlock()" style="background:none;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);border-radius:5px;padding:2px 10px;font-size:.72rem;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='rgba(192,160,112,.6)';this.style.color='#C0A070'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='rgba(255,255,255,.4)'">＋ 追加</button>
+      <div class="hub-sec" data-sec="note" draggable="false">
+        <div class="hub-sec-handle">⠿ ドラッグして並び替え</div>
+        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px 18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <span style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.1em">📌 ハブノート</span>
+            <button onclick="hubNoteAddBlock()" style="background:none;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);border-radius:5px;padding:2px 10px;font-size:.72rem;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='rgba(192,160,112,.6)';this.style.color='#C0A070'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='rgba(255,255,255,.4)'">＋ 追加</button>
+          </div>
+          <div id="hub-note-blocks" style="display:flex;flex-direction:column;gap:2px;min-height:28px"></div>
         </div>
-        <div id="hub-note-blocks" style="display:flex;flex-direction:column;gap:2px;min-height:28px"></div>
       </div>
     </div>
   </div>
@@ -2471,17 +2504,27 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
         </div>
         <!-- 結果 -->
         <div class="mf-field"><label class="mf-label">✅ 結果</label><input type="text" id="mf-result" placeholder="見学のみ・資料持ち帰り・次回FP予定" class="mf-input"></div>
+        <!-- 動機（別欄） -->
+        <div class="mf-field" style="background:#FEF9F0;border-radius:8px;padding:12px 14px;border:1px solid #F0E8D0">
+          <label class="mf-label" style="color:#8C6E2A">💡 動機 <span class="mf-hint">なぜ家づくりを始めたか</span></label>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <button type="button" class="mf-ox-btn" data-id="mf-motivation-ox" data-val="○" onclick="mfToggleOx(this)">○</button>
+            <button type="button" class="mf-ox-btn" data-id="mf-motivation-ox" data-val="×" onclick="mfToggleOx(this)">×</button>
+            <input type="hidden" id="mf-motivation-ox">
+          </div>
+          <textarea id="mf-motivation" rows="2" placeholder="動機・きっかけを記入..." class="mf-textarea"></textarea>
+        </div>
         <!-- 経緯・内容 -->
         <div class="mf-field"><label class="mf-label">📋 経緯・内容 <span class="mf-hint">お客様が何を知りたくて来場したか・現在の不安・悩み</span></label><textarea id="mf-background" rows="3" class="mf-textarea"></textarea></div>
         <!-- 5大ハードル -->
         <div style="background:#F8F6F2;border-radius:8px;padding:14px 16px">
           <div style="font-size:.72rem;font-weight:800;color:#9A8C76;letter-spacing:.12em;margin-bottom:10px">5大ハードル</div>
           <div style="display:flex;flex-direction:column;gap:8px">
-            <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">動機</span><span class="mf-point-sub">なぜ家づくりを始めたか</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-motivation-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-motivation-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-motivation-ox"></span></div><textarea id="mf-motivation" rows="2" placeholder="詳細を記入..." class="mf-textarea" style="margin-top:4px"></textarea></div>
-            <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">時期</span><span class="mf-point-sub">着工・完工・引越し希望時期</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-timing-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-timing-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-timing-ox"></span></div><textarea id="mf-timing" rows="2" placeholder="詳細を記入..." class="mf-textarea" style="margin-top:4px"></textarea></div>
-            <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">競合</span><span class="mf-point-sub">他社・検討状況</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-competitor-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-competitor-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-competitor-ox"></span></div><textarea id="mf-competitor" rows="2" placeholder="詳細を記入..." class="mf-textarea" style="margin-top:4px"></textarea></div>
-            <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">関与者</span><span class="mf-point-sub">決定権者・影響者</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-stakeholder-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-stakeholder-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-stakeholder-ox"></span></div><textarea id="mf-stakeholder" rows="2" placeholder="詳細を記入..." class="mf-textarea" style="margin-top:4px"></textarea></div>
             <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">予算</span><span class="mf-point-sub">総予算・FP・事前審査</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-budget-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-budget-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-budget-ox"></span></div><textarea id="mf-budget" rows="2" placeholder="詳細を記入..." class="mf-textarea" style="margin-top:4px"></textarea></div>
+            <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">時期</span><span class="mf-point-sub">着工・完工・引越し希望時期</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-timing-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-timing-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-timing-ox"></span></div><textarea id="mf-timing" rows="2" placeholder="詳細を記入..." class="mf-textarea" style="margin-top:4px"></textarea></div>
+            <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">関与者</span><span class="mf-point-sub">決定権者・影響者</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-stakeholder-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-stakeholder-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-stakeholder-ox"></span></div><textarea id="mf-stakeholder" rows="2" placeholder="詳細を記入..." class="mf-textarea" style="margin-top:4px"></textarea></div>
+            <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">競合</span><span class="mf-point-sub">他社・検討状況</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-competitor-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-competitor-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-competitor-ox"></span></div><textarea id="mf-competitor" rows="2" placeholder="詳細を記入..." class="mf-textarea" style="margin-top:4px"></textarea></div>
+            <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">土地</span><span class="mf-point-sub">土地提案・エリアへの反応</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-land-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-land-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-land-ox"></span></div><textarea id="mf-land" rows="2" placeholder="詳細を記入..." class="mf-textarea" style="margin-top:4px"></textarea></div>
           </div>
         </div>
         <!-- フレーミング -->
@@ -2491,7 +2534,6 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
             <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">建築家</span><span class="mf-point-sub">担当建築家への反応</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-architect-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-architect-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-architect-ox"></span></div><textarea id="mf-architect" rows="2" placeholder="詳細を記入..." class="mf-textarea" style="margin-top:4px"></textarea></div>
             <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">性能</span><span class="mf-point-sub">高性能住宅への理解・関心</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-performance-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-performance-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-performance-ox"></span></div><textarea id="mf-performance" rows="2" placeholder="詳細を記入..." class="mf-textarea" style="margin-top:4px"></textarea></div>
             <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">コスト</span><span class="mf-point-sub">価格・費用対効果の納得度</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-cost-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-cost-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-cost-ox"></span></div><textarea id="mf-cost" rows="2" placeholder="詳細を記入..." class="mf-textarea" style="margin-top:4px"></textarea></div>
-            <div class="mf-point-row"><div class="mf-point-hd"><span class="mf-point-label">土地</span><span class="mf-point-sub">土地提案・エリアへの反応</span><span class="mf-ox-wrap"><button type="button" class="mf-ox-btn" data-id="mf-land-ox" data-val="○" onclick="mfToggleOx(this)">○</button><button type="button" class="mf-ox-btn" data-id="mf-land-ox" data-val="×" onclick="mfToggleOx(this)">×</button><input type="hidden" id="mf-land-ox"></span></div><textarea id="mf-land" rows="2" placeholder="詳細を記入..." class="mf-textarea" style="margin-top:4px"></textarea></div>
           </div>
         </div>
         <div class="mf-field"><label class="mf-label">📄 詳細（箇条書き）</label><textarea id="mf-detail" rows="4" placeholder="・高性能住宅に興味あり&#10;・" class="mf-textarea"></textarea></div>
@@ -3791,7 +3833,7 @@ function enterOpenBoard(){
   obLoadExclStaff();
   obLoad();
   obUpdateLastUpdatedLabel();
-  if(!window.__obPollTimer) window.__obPollTimer=setInterval(function(){ obLoad(true,true); },CACHE_TTL_MS);
+  if(!window.__obPollTimer) window.__obPollTimer=setInterval(function(){ obLoad(true,true); },5*60*1000); // 5分ごとに新着チェック
   obStartAutoSync();
   wsSetActiveSection('ob');
 }
@@ -3836,9 +3878,83 @@ function showHub(){
   refreshNotifBadge();
   scheduleEvSyncFromGAS();
   hubNoteRender();
+  hubRestoreLayout();
 }
 
-// ★ ログイン後は30分ごとにOB・KJをバックグラウンド同期（キャッシュが古くなったタイミングで更新）
+/* ─── ハブ自由レイアウト ─── */
+var _hubLayoutEditing = false;
+var HUB_LAYOUT_KEY = 'hub_layout_v2';
+
+function hubToggleLayout(){
+  _hubLayoutEditing = !_hubLayoutEditing;
+  var main = document.getElementById('hub-main');
+  var btn  = document.getElementById('hubLayoutBtn');
+  if(!main) return;
+  main.classList.toggle('hub-layout-editing', _hubLayoutEditing);
+  document.querySelectorAll('#hub-main .hub-sec').forEach(function(s){
+    s.setAttribute('draggable', _hubLayoutEditing ? 'true' : 'false');
+  });
+  if(btn){
+    btn.textContent = _hubLayoutEditing ? '✅ 完了' : '⊞ 配置編集';
+    btn.classList.toggle('active', _hubLayoutEditing);
+  }
+  if(_hubLayoutEditing) hubInitDrag(); else hubSaveLayout();
+}
+
+function hubInitDrag(){
+  var _dragged = null;
+  document.querySelectorAll('#hub-main .hub-sec').forEach(function(sec){
+    sec.ondragstart = function(e){
+      _dragged = this;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(function(){ if(_dragged) _dragged.classList.add('dragging'); }, 0);
+    };
+    sec.ondragend = function(){
+      this.classList.remove('dragging');
+      document.querySelectorAll('#hub-main .hub-sec').forEach(function(s){ s.classList.remove('drag-over'); });
+    };
+    sec.ondragover = function(e){
+      e.preventDefault();
+      if(_dragged && _dragged !== this){
+        document.querySelectorAll('#hub-main .hub-sec').forEach(function(s){ s.classList.remove('drag-over'); });
+        this.classList.add('drag-over');
+      }
+    };
+    sec.ondragleave = function(){ this.classList.remove('drag-over'); };
+    sec.ondrop = function(e){
+      e.preventDefault();
+      this.classList.remove('drag-over');
+      if(_dragged && _dragged !== this){
+        var main = document.getElementById('hub-main');
+        var secs = Array.from(main.querySelectorAll('.hub-sec'));
+        var di = secs.indexOf(_dragged), ti = secs.indexOf(this);
+        if(di < ti) this.after(_dragged); else this.before(_dragged);
+      }
+      _dragged = null;
+    };
+  });
+}
+
+function hubSaveLayout(){
+  var secs = document.querySelectorAll('#hub-main .hub-sec');
+  var order = Array.from(secs).map(function(s){ return s.dataset.sec; });
+  try{ localStorage.setItem(HUB_LAYOUT_KEY, JSON.stringify(order)); }catch(e){}
+}
+
+function hubRestoreLayout(){
+  try{
+    var order = JSON.parse(localStorage.getItem(HUB_LAYOUT_KEY) || 'null');
+    if(!order || !order.length) return;
+    var main = document.getElementById('hub-main');
+    if(!main) return;
+    order.forEach(function(sec){
+      var el = main.querySelector('[data-sec="'+sec+'"]');
+      if(el) main.appendChild(el);
+    });
+  }catch(e){}
+}
+
+// ★ ログイン後は定期的にOB・KJをバックグラウンド同期（キャッシュが古くなったタイミングで更新）
 if(!window.__globalPollTimer){
   window.__globalPollTimer = setInterval(function(){
     if(!adminKey()) return; // 未ログイン時はスキップ
@@ -5730,7 +5846,7 @@ var OB_CACHE_KEY = 'ob_v3';
 
 // ── キャッシュ有効期限（デフォルト30分）─────────────────────
 // 手動「🔄 更新」は常にGASから取得、それ以外はこの期間内はキャッシュを使う
-var CACHE_TTL_MS = 30 * 60 * 1000; // 30分
+var CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12時間（ローカルDB優先）
 function isCacheFresh(tsKey){
   var ts = parseInt(localStorage.getItem(tsKey) || '0');
   return ts > 0 && (Date.now() - ts) < CACHE_TTL_MS;
@@ -7546,7 +7662,7 @@ function obRenderMendanHistory(r){
   var reports=(r.mendan||[]);
   if(!reports.length){ el.innerHTML='<div style="color:#BBB;font-size:.82rem;padding:8px 0">面談報告なし</div>'; return; }
   var sorted=reports.slice().sort(function(a,b){return (b.datetime||b.date||'')>(a.datetime||a.date||'')?1:-1;});
-  var pts=[{key:'motivation',label:'動機'},{key:'timing',label:'時期'},{key:'competitor',label:'競合'},{key:'stakeholder',label:'関与者'},{key:'budget',label:'予算'},{key:'architect',label:'建築家'},{key:'performance',label:'性能'},{key:'cost',label:'コスト'},{key:'land',label:'土地'}];
+  var pts=[{key:'motivation',label:'動機'},{key:'budget',label:'予算'},{key:'timing',label:'時期'},{key:'stakeholder',label:'関与者'},{key:'competitor',label:'競合'},{key:'land',label:'土地'},{key:'architect',label:'建築家'},{key:'performance',label:'性能'},{key:'cost',label:'コスト'}];
   function oxChip(val,label){
     if(!val) return '<span class="ob-mtg-ox-chip">'+esc(label)+'</span>';
     return '<span class="ob-mtg-ox-chip '+(val==='○'?'maru':'batu')+'">'+esc(label)+' '+esc(val)+'</span>';
@@ -11946,7 +12062,7 @@ function obRenderMtgInline(){
   var reports=(r.mendan||[]).slice().sort(function(a,b){return (b.datetime||b.date||'')>(a.datetime||a.date||'')?1:-1;});
   if(cnt) cnt.textContent=reports.length?'('+reports.length+'件)':'';
   if(!reports.length){ el.innerHTML='<div style="color:#CCC;font-size:.78rem;padding:4px 0">面談記録なし</div>'; return; }
-  var pts=[{k:'motivation',l:'動機'},{k:'timing',l:'時期'},{k:'competitor',l:'競合'},{k:'stakeholder',l:'関与者'},{k:'budget',l:'予算'},{k:'architect',l:'建築家'},{k:'performance',l:'性能'},{k:'cost',l:'コスト'},{k:'land',l:'土地'}];
+  var pts=[{k:'motivation',l:'動機'},{k:'budget',l:'予算'},{k:'timing',l:'時期'},{k:'stakeholder',l:'関与者'},{k:'competitor',l:'競合'},{k:'land',l:'土地'},{k:'architect',l:'建築家'},{k:'performance',l:'性能'},{k:'cost',l:'コスト'}];
   el.innerHTML=reports.slice(0,5).map(function(m){
     var oxHtml=pts.filter(function(p){return m[p.k+'Ox'];}).map(function(p){
       var v=m[p.k+'Ox'];
