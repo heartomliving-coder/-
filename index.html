@@ -2060,8 +2060,8 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       <button class="ob-tab" data-tab="active" onclick="obSwitchTab('active')">🔥 直近案件</button>
       <button class="ob-tab" data-tab="agg" onclick="obSwitchTab('agg')">📊 集計</button>
       <span class="ob-tab-sep"></span>
-      <button class="ob-tab ob-tab-nav" onclick="enterCustBoard()">👥 顧客DB</button>
-      <button class="ob-tab ob-tab-nav" onclick="enterMtgBoard()">💼 営業MTG</button>
+      <button class="ob-tab ob-tab-nav" data-tab="cust" onclick="obSwitchTab('cust')">👥 顧客DB</button>
+      <button class="ob-tab ob-tab-nav" data-tab="mtg" onclick="obSwitchTab('mtg')">💼 営業MTG</button>
     </div>
     <div class="ob-hd-tools">
       <span id="ob-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
@@ -2133,6 +2133,29 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
   <!-- 集計 -->
   <div class="ob-pane" data-tab="agg">
     <div class="ob-agg-body" id="ob-agg-content"><div class="ob-empty-state">読み込み中...</div></div>
+  </div>
+
+  <!-- 顧客DB（OBボード内埋め込み） -->
+  <div class="ob-pane" data-tab="cust">
+    <div style="padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+        <input type="text" id="ob-cust-q" placeholder="顧客名・電話・メールで検索…" oninput="obRenderCustTab()" style="flex:1;min-width:180px;border:1px solid #E0DDD8;border-radius:6px;padding:7px 12px;font-size:.82rem;outline:none">
+        <span id="ob-cust-count" style="font-size:.75rem;color:#999"></span>
+      </div>
+      <div id="ob-cust-content"><div class="ob-empty-state">読み込み中...</div></div>
+    </div>
+  </div>
+
+  <!-- 営業MTG（OBボード内埋め込み） -->
+  <div class="ob-pane" data-tab="mtg">
+    <div style="padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+        <input type="text" id="ob-mtg-q" placeholder="顧客名・内容で検索…" oninput="obRenderMtgTab()" style="flex:1;min-width:180px;border:1px solid #E0DDD8;border-radius:6px;padding:7px 12px;font-size:.82rem;outline:none">
+        <select id="ob-mtg-staff-f" onchange="obRenderMtgTab()" style="border:1px solid #E0DDD8;border-radius:6px;padding:7px 10px;font-size:.82rem;outline:none"><option value="">全担当</option></select>
+        <span id="ob-mtg-count" style="font-size:.75rem;color:#999"></span>
+      </div>
+      <div id="ob-mtg-content"><div class="ob-empty-state">読み込み中...</div></div>
+    </div>
   </div>
 </div>
 
@@ -2321,10 +2344,6 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
     </div>
     <div class="ob-det-tabs">
       <button class="ob-det-tab on" data-dtab="info" onclick="obDetTab('info')">基本情報</button>
-      <button class="ob-det-tab" data-dtab="history" onclick="obDetTab('history')">📋 履歴</button>
-      <button class="ob-det-tab" data-dtab="karte" onclick="obDetTab('karte')">🗂 カルテ</button>
-      <button class="ob-det-tab" data-dtab="birthday" onclick="obDetTab('birthday')">🎂 誕生日</button>
-      <button class="ob-det-tab" data-dtab="timeline" onclick="obDetTab('timeline')">📅 TL</button>
       <button class="ob-det-tab" data-dtab="drive" onclick="obDetTab('drive')">📁 ドライブ</button>
       <button class="ob-det-tab" data-dtab="mendan" onclick="obDetTab('mendan')">📝 面談報告</button>
     </div>
@@ -2335,22 +2354,22 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       <div class="ob-info-grid" id="ob-det-info-grid"></div>
       <!-- 来場履歴サマリー -->
       <div style="margin-top:20px" id="ob-info-history-wrap">
-        <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">📋 来場履歴 <span id="ob-info-hist-count" style="font-size:.72rem;color:#AAA"></span> <button onclick="obDetTab('history')" style="background:none;border:1px solid #DDD;border-radius:4px;padding:1px 8px;cursor:pointer;font-size:.72rem;color:#888">詳細 →</button></div>
+        <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">📋 来場履歴 <span id="ob-info-hist-count" style="font-size:.72rem;color:#AAA"></span></div>
         <div id="ob-info-history-list" style="margin-top:8px"></div>
       </div>
       <!-- カルテ概要 -->
       <div style="margin-top:20px" id="ob-info-karte-wrap">
-        <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">🗂 カルテ概要 <button onclick="obDetTab('karte')" style="background:none;border:1px solid #DDD;border-radius:4px;padding:1px 8px;cursor:pointer;font-size:.72rem;color:#888">編集 →</button></div>
+        <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">🗂 カルテ概要</div>
         <div id="ob-info-karte-grid" style="margin-top:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px"></div>
       </div>
       <!-- 誕生日 -->
       <div style="margin-top:20px" id="ob-info-bday-wrap">
-        <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">🎂 誕生日 <button onclick="obDetTab('birthday')" style="background:none;border:1px solid #DDD;border-radius:4px;padding:1px 8px;cursor:pointer;font-size:.72rem;color:#888">詳細 →</button></div>
+        <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">🎂 誕生日</div>
         <div id="ob-info-bday-list" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px"></div>
       </div>
       <!-- タイムライン -->
       <div style="margin-top:20px" id="ob-info-tl-wrap">
-        <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">📅 タイムライン <button onclick="obDetTab('timeline')" style="background:none;border:1px solid #DDD;border-radius:4px;padding:1px 8px;cursor:pointer;font-size:.72rem;color:#888">詳細 →</button></div>
+        <div class="ob-sec-title" style="display:flex;align-items:center;gap:8px">📅 タイムライン</div>
         <div id="ob-info-tl-content" style="margin-top:8px"></div>
       </div>
       <!-- 顧客メモ（ブロックエディタ） -->
@@ -6865,8 +6884,100 @@ function obSwitchTab(tab){
   obCurrentTab=tab;
   document.querySelectorAll('.ob-tab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-tab')===tab);});
   document.querySelectorAll('#openboard .ob-pane').forEach(function(p){p.classList.toggle('show',p.getAttribute('data-tab')===tab);});
+  // OBヘッダーのツールボタン（cust/mtg時は非表示）
+  var obTools=document.querySelector('#openboard .ob-hd-tools .hbtn.primary');
+  if(obTools) obTools.style.display=(tab==='cust'||tab==='mtg')?'none':'';
   if(tab==='agg') obRenderAgg();
   if(tab==='birthday'){ obLoadAllBdays(); obRenderBirthday(); }
+  if(tab==='cust') obLoadCustTab();
+  if(tab==='mtg') obLoadMtgTab();
+}
+
+// ── 顧客DBタブ（OBボード内） ────────────────────────────
+function obLoadCustTab(){
+  var el=document.getElementById('ob-cust-content');
+  if(custRows&&custRows.length){ obRenderCustTab(); return; }
+  if(el) el.innerHTML='<div style="text-align:center;padding:40px;color:#999">⏳ 読み込み中...</div>';
+  gasGet('listInfoCustomers',function(d){
+    if(!d||d.error){ if(el) el.innerHTML='<div style="text-align:center;padding:40px;color:#E55">取得エラー</div>'; return; }
+    custRows=d.list||[];
+    __custLoaded=true;
+    obRenderCustTab();
+  },90000);
+}
+function obRenderCustTab(){
+  var el=document.getElementById('ob-cust-content'); if(!el) return;
+  var q=((document.getElementById('ob-cust-q')||{}).value||'').toLowerCase().trim();
+  var rows=(custRows||[]).filter(function(r){
+    if(q&&!((r.name||'')+(r.furigana||'')+(r.tel||'')+(r.email||'')).toLowerCase().includes(q)) return false;
+    return true;
+  });
+  var cnt=document.getElementById('ob-cust-count'); if(cnt) cnt.textContent=rows.length+'件';
+  if(!rows.length){ el.innerHTML='<div style="text-align:center;padding:40px;color:#999">該当する顧客がいません</div>'; return; }
+  el.innerHTML='<table class="tochi-table"><thead><tr><th>氏名</th><th>ステータス</th><th>電話番号</th><th>メール</th><th>登録日</th></tr></thead><tbody>'+
+    rows.map(function(r){
+      var sc={'パートナー契約済':'#22C55E','商談中':'#3B82F6','見込み':'#F59E0B'}[r.status]||'#9CA3AF';
+      return '<tr style="cursor:pointer" onclick="obOpenCustDetail(\''+esc(r.id||'')+'\')">'+
+        '<td><strong>'+esc(r.name||'—')+'</strong>'+(r.furigana?'<br><span style="font-size:.72rem;color:#888">'+esc(r.furigana)+'</span>':'')+'</td>'+
+        '<td>'+(r.status?'<span style="color:'+sc+';font-weight:700;font-size:.78rem">'+esc(r.status)+'</span>':'<span style="color:#CCC">—</span>')+'</td>'+
+        '<td>'+esc(r.tel||'—')+'</td>'+
+        '<td>'+esc(r.email||'—')+'</td>'+
+        '<td>'+esc((r.registeredAt||'').substring(0,10)||'—')+'</td>'+
+        '</tr>';
+    }).join('')+'</tbody></table>';
+}
+function obOpenCustDetail(id){
+  enterCustBoard();
+  setTimeout(function(){ custOpenDetail(id); },400);
+}
+
+// ── 営業MTGタブ（OBボード内） ───────────────────────────
+function obLoadMtgTab(){
+  var el=document.getElementById('ob-mtg-content');
+  if(mtgRows&&mtgRows.length){ obPopulateMtgStaffFilter(); obRenderMtgTab(); return; }
+  if(el) el.innerHTML='<div style="text-align:center;padding:40px;color:#999">⏳ 読み込み中...</div>';
+  gasGet('mtgGetData',function(d){
+    if(!d||d.error){ if(el) el.innerHTML='<div style="text-align:center;padding:40px;color:#E55">取得エラー</div>'; return; }
+    mtgRows=d.rows||[];
+    mtgRows.forEach(function(r,i){r._idx=i;});
+    obPopulateMtgStaffFilter();
+    obRenderMtgTab();
+  },30000);
+}
+function obPopulateMtgStaffFilter(){
+  var sel=document.getElementById('ob-mtg-staff-f'); if(!sel) return;
+  var cur=sel.value;
+  var staffSet={};
+  (mtgRows||[]).forEach(function(r){ if(r['担当者']) staffSet[r['担当者']]=true; });
+  sel.innerHTML='<option value="">全担当</option>'+Object.keys(staffSet).sort().map(function(s){return '<option value="'+esc(s)+'">'+esc(s)+'</option>';}).join('');
+  if(cur) sel.value=cur;
+}
+function obRenderMtgTab(){
+  var el=document.getElementById('ob-mtg-content'); if(!el) return;
+  var q=((document.getElementById('ob-mtg-q')||{}).value||'').toLowerCase().trim();
+  var sf=((document.getElementById('ob-mtg-staff-f')||{}).value||'');
+  var rows=(mtgRows||[]).filter(function(r){
+    if(q&&!((r['顧客名']||'')+(r['面談内容']||r['content']||'')).toLowerCase().includes(q)) return false;
+    if(sf&&r['担当者']!==sf) return false;
+    return true;
+  });
+  var cnt=document.getElementById('ob-mtg-count'); if(cnt) cnt.textContent=rows.length+'件';
+  if(!rows.length){ el.innerHTML='<div style="text-align:center;padding:40px;color:#999">面談データなし</div>'; return; }
+  el.innerHTML='<table class="tochi-table"><thead><tr><th>顧客名</th><th>面談日</th><th>担当</th><th>結果</th><th>ステータス</th></tr></thead><tbody>'+
+    rows.slice(0,300).map(function(r){
+      var dt=(r['面談日']||r['date']||r['datetime']||'').substring(0,10);
+      return '<tr style="cursor:pointer" onclick="obOpenMtgDetail(\''+esc(r._id||String(r._idx||''))+'\')">'+
+        '<td><strong>'+esc(r['顧客名']||'—')+'</strong></td>'+
+        '<td>'+esc(dt||'—')+'</td>'+
+        '<td>'+esc(r['担当者']||'—')+'</td>'+
+        '<td>'+esc(r['面談結果']||r['result']||'—')+'</td>'+
+        '<td>'+esc(r['商談ステータス']||'—')+'</td>'+
+        '</tr>';
+    }).join('')+'</tbody></table>';
+}
+function obOpenMtgDetail(id){
+  enterMtgBoard();
+  setTimeout(function(){ mtgOpenDetail(id); },400);
 }
 
 // ── 誕生日カレンダー ──
