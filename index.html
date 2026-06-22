@@ -4833,7 +4833,7 @@ function hubBuildActivityFeed(force, showAll){
   }
 }
 
-setInterval(hubTick,1000); hubTick();
+(function _hubTickAlign(){ hubTick(); setTimeout(_hubTickAlign, 1000-(Date.now()%1000)); })();
 
 // ★ サブ担当の保存機能追加
 function saveStaff(){localStorage.setItem('admin_staff',document.getElementById('staff').value.trim())}
@@ -5935,7 +5935,7 @@ function loadBoardDash(){
 }
 
 function initBoard() {
-  tickBoard(); setInterval(tickBoard,1000);
+  (function _tbAlign(){ tickBoard(); setTimeout(_tbAlign, 1000-(Date.now()%1000)); })();
   renderBoardSeats([], {});
   pollBoard(); loadBoardDash();
   setInterval(pollBoard,2000); setInterval(loadBoardDash,20000);
@@ -7452,8 +7452,8 @@ function obFloatEdit(e,rowIdx,field,kind){
   box.classList.add('show');
   _obFloatCtx={rowIdx:rowIdx,field:field,td:td,ctrl:ctrl,done:false};
   ctrl.focus(); if(ctrl.select) ctrl.select();
-  // セレクトはワンクリックでそのまま候補を開く（二度手間防止）
-  if((kind==='select'||kind==='staff')){ setTimeout(function(){ try{ if(ctrl.showPicker) ctrl.showPicker(); }catch(e){} },0); }
+  // select/staffはfloatボックスを非表示にしてインラインselectのみ表示（二重表示防止）
+  if(kind==='select'||kind==='staff'){ box.classList.remove('show'); if(td){ td.innerHTML=''; td.appendChild(ctrl); ctrl.style.width='100%'; ctrl.style.fontSize='inherit'; } setTimeout(function(){ try{ if(ctrl.showPicker) ctrl.showPicker(); }catch(e){} },0); }
   function commit(save){
     var ctx=_obFloatCtx; if(!ctx||ctx.done) return; ctx.done=true; _obFloatCtx=null;
     document.removeEventListener('mousedown',outside,true);
@@ -7468,7 +7468,7 @@ function obFloatEdit(e,rowIdx,field,kind){
     }
     box.classList.remove('show'); box.innerHTML='';
   }
-  function outside(ev){ if(!box.contains(ev.target)) commit(true); }
+  function outside(ev){ if(!box.contains(ev.target)&&ev.target!==ctrl&&!ctrl.contains(ev.target)&&(!td||(!td.contains(ev.target)&&ev.target!==td))) commit(true); }
   if(kind==='select'||kind==='staff') ctrl.addEventListener('change',function(){ commit(true); });
   ctrl.addEventListener('keydown',function(ev){ if(ev.key==='Enter'){ ev.preventDefault(); commit(true); } else if(ev.key==='Escape'){ commit(false); } });
   // select/staffはshowPicker()のfocus移動でblurが早期発火するためblurは使わない
