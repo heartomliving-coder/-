@@ -696,6 +696,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-newinq-btn:hover{background:#A98A56}
 .ob-newinq-x{background:none;border:1px solid #E0CFA0;color:#A98A56;font-size:.78rem;padding:5px 9px;border-radius:6px;cursor:pointer;flex-shrink:0}
 .ob-newinq-x:hover{background:#F0E4C8}
+.ob-newinq-refresh{background:none;border:1px solid #E0CFA0;color:#A98A56;font-size:.82rem;padding:5px 8px;border-radius:6px;cursor:pointer;flex-shrink:0;line-height:1}
+.ob-newinq-refresh:hover{background:#F0E4C8}
 /* フローティングセル編集（行の高さを変えずに編集） */
 .ob-float-edit{position:fixed;z-index:10000;display:none;background:#fff;border:1px solid #C0A070;border-radius:7px;box-shadow:0 8px 28px rgba(0,0,0,.22);padding:6px}
 .ob-float-edit.show{display:block}
@@ -6316,14 +6318,44 @@ function obRenderAll(){ obRenderPipeline(); obRenderVisitors(); obRenderActive()
 // 受付/顧客DBの新規問い合わせのうち、オープンボード未登録のものを検出してバナー表示
 function _obNameKey(s){ return String(s||'').replace(/[\s　]/g,'').trim(); }
 function _obTelKey(s){ return String(s||'').replace(/[^0-9]/g,''); }
+
+// Gmail直接取得（Notion不要）- localStorageキャッシュ15分
+var _GMAIL_LEADS_KEY='gmail_leads_v1';
+var _obGmailLeads=null;
+var _obGmailFetching=false;
+function obFetchGmailLeads(cb){
+  // キャッシュ確認（15分以内なら再利用）
+  if(_obGmailLeads!==null){ cb(_obGmailLeads); return; }
+  try{
+    var c=JSON.parse(localStorage.getItem(_GMAIL_LEADS_KEY)||'null');
+    if(c&&c.ts&&(Date.now()-c.ts)<900000){ _obGmailLeads=c.data||[]; cb(_obGmailLeads); return; }
+  }catch(e){}
+  if(_obGmailFetching){ cb([]); return; }
+  _obGmailFetching=true;
+  gasGet('fetchGmailLeads',function(d){
+    _obGmailFetching=false;
+    var leads=(d&&Array.isArray(d.leads))?d.leads:[];
+    _obGmailLeads=leads;
+    try{ localStorage.setItem(_GMAIL_LEADS_KEY,JSON.stringify({ts:Date.now(),data:leads})); }catch(e){}
+    cb(leads);
+  },30000);
+}
+function obRefreshGmailLeads(){
+  _obGmailLeads=null;
+  try{ localStorage.removeItem(_GMAIL_LEADS_KEY); }catch(e){}
+  toast('📧 Gmailを再取得中…');
+  obFetchGmailLeads(function(){ obCheckNewInquiries(); });
+}
+
 function obCheckNewInquiries(){
   var banner=document.getElementById('ob-new-inquiry-banner'); if(!banner) return;
-  function _eval(){
+  function _eval(gmailLeads){
     var names={}, tels={};
     obRows.forEach(function(r){
       var nk=_obNameKey(r['顧客名']); if(nk) names[nk]=1;
       var tk=_obTelKey((r.karte&&r.karte['電話番号'])||r['電話番号']||''); if(tk) tels[tk]=1;
     });
+    // 受付・顧客DBからのpending
     var pending=(custRows||[]).filter(function(c){
       if(!c||!c.name) return false;
       var nk=_obNameKey(c.name); var tk=_obTelKey(c.tel||'');
@@ -6331,20 +6363,42 @@ function obCheckNewInquiries(){
       if(tk&&tels[tk]) return false;
       return true;
     });
+    // Gmailからのpending（OBにも受付DBにも未登録のもの）
+    (gmailLeads||[]).forEach(function(g){
+      if(!g.name) return;
+      var nk=_obNameKey(g.name); var tk=_obTelKey(g.tel||'');
+      if(nk&&names[nk]) return;
+      if(tk&&tels[tk]) return;
+      var inPend=pending.some(function(p){ return _obNameKey(p.name)===nk||(tk&&_obTelKey(p.tel||'')===tk); });
+      if(inPend) return;
+      pending.push({name:g.name,furigana:g.furigana||'',tel:g.tel||'',email:g.email||'',
+        source:g.source||'',registeredAt:g.date||'',_src:'gmail'});
+    });
     var dismissed=JSON.parse(localStorage.getItem('ob_inquiry_dismissed')||'[]');
     pending=pending.filter(function(c){ return dismissed.indexOf((c.id||c.name))<0; });
     window._obPendingInquiries=pending;
     if(!pending.length){ banner.style.display='none'; banner.innerHTML=''; return; }
+    var gCnt=pending.filter(function(p){return p._src==='gmail';}).length;
+    var srcTxt=gCnt&&(pending.length-gCnt)?'受付DB＋Gmailに':gCnt?'Gmailに':'受付・顧客DBに';
     banner.style.display='';
     banner.innerHTML='<div class="ob-newinq"><span class="ob-newinq-ic">📥</span>'
-      +'<span class="ob-newinq-txt">受付・顧客DBに <b>'+pending.length+'件</b> のオープンボード未登録の問い合わせがあります</span>'
+      +'<span class="ob-newinq-txt">'+srcTxt+' <b>'+pending.length+'件</b> のオープンボード未登録の問い合わせがあります</span>'
       +'<button class="ob-newinq-btn" onclick="obImportNewInquiries()">＋ まとめてOBに追加</button>'
+      +'<button class="ob-newinq-refresh" onclick="obRefreshGmailLeads()" title="Gmailを再確認">📧</button>'
       +'<button class="ob-newinq-x" onclick="obDismissNewInquiries()" title="今は追加しない">✕</button></div>';
   }
-  if((custRows&&custRows.length)||__custLoaded){ _eval(); }
+  function _evalWithGmail(){
+    var cached=_obGmailLeads;
+    if(cached!==null){ _eval(cached); }
+    else{
+      _eval([]); // まず受付DBだけで即時表示
+      obFetchGmailLeads(function(leads){ _eval(leads); }); // バックグラウンドでGmail追加
+    }
+  }
+  if((custRows&&custRows.length)||__custLoaded){ _evalWithGmail(); }
   else if(!window._obInquiryFetching){
     window._obInquiryFetching=true;
-    gasGet('listInfoCustomers',function(d){ window._obInquiryFetching=false; if(d&&d.list){ custRows=d.list; __custLoaded=true; } _eval(); },90000);
+    gasGet('listInfoCustomers',function(d){ window._obInquiryFetching=false; if(d&&d.list){ custRows=d.list; __custLoaded=true; } _evalWithGmail(); },90000);
   }
 }
 function obDismissNewInquiries(){
@@ -6367,8 +6421,12 @@ function obImportNewInquiries(){
       karte:{ 電話番号:c.tel||'', フリガナ:c.furigana||'', メール:c.email||'' },
       history:[{date:inquiryDate,type:'問い合わせ',content:'',staff:''}] });
     obRows.push(newRec);
-    post(Object.assign({action:'obSaveCustomer'},data,{電話番号:c.tel||'',フリガナ:c.furigana||''}));
+    // Gmail由来の場合はGAS側で受付管理・顧客情報シートにも書き込む
+    var act=c._src==='gmail'?'obSaveFromGmail':'obSaveCustomer';
+    post(Object.assign({action:act},data,{電話番号:c.tel||'',フリガナ:c.furigana||'',メール:c.email||'',郵便番号:c.zip||'',住所:c.address||''}));
   });
+  // Gmailキャッシュをクリア（追加済みが再表示されないように）
+  _obGmailLeads=null; try{ localStorage.removeItem(_GMAIL_LEADS_KEY); }catch(e){}
   obRows.forEach(function(r,i){r._row=i;});
   _obLastSaveTs=Date.now();
   obSetCache(obRows);
@@ -7348,11 +7406,13 @@ function obEditStatusInline(el,rowIdx){
   el.style.display='none'; el.parentNode.insertBefore(sel,el.nextSibling); sel.focus();
   var done=false;
   function save(){ if(done)return; done=true; var v=sel.value; sel.remove(); el.style.display=''; el.textContent=v; var nc=OB_STATUS_CLASS[v]||'ob-s0'; el.className='ob-badge '+nc;
-    // カードグリッド内の場合は左ボーダー色も即時更新
     var card=el.parentNode; while(card && !card.classList.contains('ob-card')) card=card.parentNode;
     if(card) card.setAttribute('data-sc',nc);
     obSaveField(rowIdx,'商談ステータス',v); }
-  sel.addEventListener('change',save); sel.addEventListener('blur',save);
+  function _cancelInline(){ if(done)return; done=true; sel.remove(); el.style.display=''; }
+  sel.addEventListener('change',save);
+  setTimeout(function(){ try{ if(sel.showPicker) sel.showPicker(); }catch(e){} },0);
+  setTimeout(function(){ document.addEventListener('mousedown',function _obSIOut(ev){ if(!sel.contains(ev.target)){ document.removeEventListener('mousedown',_obSIOut,true); _cancelInline(); } },true); },0);
 }
 
 // ── フローティングセル編集（行の高さを変えずに反響元/担当/サブ担当/エリア/内容/ステータスを編集） ──
@@ -7411,7 +7471,8 @@ function obFloatEdit(e,rowIdx,field,kind){
   function outside(ev){ if(!box.contains(ev.target)) commit(true); }
   if(kind==='select'||kind==='staff') ctrl.addEventListener('change',function(){ commit(true); });
   ctrl.addEventListener('keydown',function(ev){ if(ev.key==='Enter'){ ev.preventDefault(); commit(true); } else if(ev.key==='Escape'){ commit(false); } });
-  ctrl.addEventListener('blur',function(){ setTimeout(function(){ commit(true); },150); });
+  // select/staffはshowPicker()のfocus移動でblurが早期発火するためblurは使わない
+  if(kind!=='select'&&kind!=='staff') ctrl.addEventListener('blur',function(){ setTimeout(function(){ commit(true); },150); });
   setTimeout(function(){ document.addEventListener('mousedown',outside,true); },0);
 }
 
