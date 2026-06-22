@@ -609,7 +609,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-table thead th:first-child{border-radius:0}
 .ob-table thead th.cb-th{text-align:center;padding:6px 5px;font-size:.7rem;letter-spacing:.02em;line-height:1.4}
 .ob-table td{padding:8px 13px;border-bottom:1px solid #EDE9E2;color:#2B2B2B;vertical-align:middle;background:#fff;border-right:1px solid #F5F3EF;white-space:nowrap}
-.ob-table td.ob-td-hist{white-space:normal;min-width:200px}
+.ob-table td.ob-td-hist{white-space:nowrap;min-width:240px}
 .ob-table td.ob-td-name{min-width:140px;max-width:200px}
 .ob-table td.ob-td-tel{min-width:130px;white-space:nowrap}
 .ob-table tbody tr:nth-child(even) td{background:#FAFAF8}
@@ -688,6 +688,14 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-editable.empty{color:#CCC;font-style:italic}
 .ob-cell-input{border:none;border-bottom:2px solid var(--gold);background:rgba(255,248,230,.6);font-size:.82rem;font-family:inherit;color:var(--tx);padding:2px 4px;outline:none;min-width:60px;max-width:200px;border-radius:2px}
 .ob-cell-select{border:1px solid var(--gold);background:#fff;font-size:.82rem;font-family:inherit;color:var(--tx);outline:none;cursor:pointer;padding:2px 4px;border-radius:2px}
+/* 新規問い合わせバナー */
+.ob-newinq{display:flex;align-items:center;gap:10px;margin:12px 16px 0;padding:10px 14px;background:#FEF7E8;border:1px solid #F0D89A;border-radius:8px}
+.ob-newinq-ic{font-size:1.1rem;flex-shrink:0}
+.ob-newinq-txt{font-size:.84rem;color:#7A5A12;flex:1}
+.ob-newinq-btn{background:#C0A070;border:none;color:#fff;font-size:.78rem;font-weight:700;padding:6px 14px;border-radius:6px;cursor:pointer;white-space:nowrap;transition:background .15s}
+.ob-newinq-btn:hover{background:#A98A56}
+.ob-newinq-x{background:none;border:1px solid #E0CFA0;color:#A98A56;font-size:.78rem;padding:5px 9px;border-radius:6px;cursor:pointer;flex-shrink:0}
+.ob-newinq-x:hover{background:#F0E4C8}
 /* フローティングセル編集（行の高さを変えずに編集） */
 .ob-float-edit{position:fixed;z-index:10000;display:none;background:#fff;border:1px solid #C0A070;border-radius:7px;box-shadow:0 8px 28px rgba(0,0,0,.22);padding:6px}
 .ob-float-edit.show{display:block}
@@ -707,7 +715,7 @@ tr:hover .ob-del{opacity:1}
 .ob-empty-state{padding:80px 20px;text-align:center;color:#BBB;font-size:.9rem;line-height:2.2}
 
 /* 履歴チップ（一覧表示 — 全件） */
-.ob-hist-chips{display:flex;gap:4px;flex-wrap:wrap;min-width:180px;max-width:420px;align-items:center;cursor:pointer}
+.ob-hist-chips{display:flex;gap:4px;flex-wrap:nowrap;min-width:220px;align-items:center;cursor:pointer;white-space:nowrap}
 .ob-hist-chips:hover .ob-hist-add-btn{opacity:1}
 .ob-hist-chip{font-size:.76rem;padding:5px 10px;border-radius:20px;white-space:nowrap;font-weight:600;flex-shrink:0;background:#F0EDE8;color:#666;border:1px solid #E0DAD0;cursor:pointer}
 .ob-hist-chip.new{background:#2B2B2B;color:#fff;border-color:#2B2B2B}
@@ -718,7 +726,7 @@ tr:hover .ob-del{opacity:1}
 .ob-mini-tl-dot{width:9px;height:9px;border-radius:50%;background:#C0A070;flex-shrink:0;cursor:pointer}
 .ob-mini-tl-dot.last{background:#2B2B2B}
 .ob-mini-tl-line{height:2px;width:8px;background:#DDD5C8;flex-shrink:0}
-.ob-mini-tl-label{font-size:.74rem;color:#555;font-weight:600;margin-left:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.ob-mini-tl-label{font-size:.74rem;color:#555;font-weight:600;margin-left:6px;white-space:nowrap}
 /* 来場履歴インラインポップオーバー */
 #ob-appt-confirm{z-index:10001}
 #ob-appt-confirm .modal-box{padding:32px 28px;text-align:center;max-width:380px}
@@ -1571,6 +1579,10 @@ body.ws-collapsed .ob-detail{left:52px}
 .ws-sb-icon{width:20px;text-align:center;flex-shrink:0;font-size:.88rem}
 .ws-sb-label{font-size:.78rem;flex:1;overflow:hidden;text-overflow:ellipsis;color:rgba(255,255,255,.75)}
 .ws-sb-count{font-size:.62rem;background:rgba(255,255,255,.1);color:rgba(255,255,255,.45);border-radius:10px;padding:1px 6px;flex-shrink:0}
+.ws-note-del{opacity:0;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:.74rem;padding:1px 4px;border-radius:4px;flex-shrink:0;transition:opacity .12s,background .12s,color .12s}
+.ws-note-item:hover .ws-note-del{opacity:1}
+.ws-note-del:hover{background:rgba(220,38,38,.85);color:#fff}
+.ws-sidebar.collapsed .ws-note-del{display:none}
 .ws-sidebar.collapsed .ws-sb-label,.ws-sidebar.collapsed .ws-sb-count{display:none}
 .ws-sidebar.collapsed .ws-sb-item{justify-content:center;padding:7px 0;margin:1px 4px}
 .ws-sb-section{padding:10px 14px 3px;font-size:.6rem;letter-spacing:.15em;color:rgba(255,255,255,.28);font-weight:700;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;white-space:nowrap;overflow:hidden;flex-shrink:0}
@@ -1578,6 +1590,14 @@ body.ws-collapsed .ob-detail{left:52px}
 .ws-sb-section button:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.09)}
 .ws-sidebar.collapsed .ws-sb-section{display:none}
 .ws-sb-footer{flex-shrink:0;border-top:1px solid rgba(255,255,255,.07);padding:6px 0}
+.ws-online-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:6px 12px 2px}
+.ws-online-lbl{font-size:.58rem;letter-spacing:.1em;color:rgba(255,255,255,.3);text-transform:uppercase;width:100%;margin-bottom:2px}
+.ws-online-av{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;color:#fff;font-size:.56rem;font-weight:700;border:1.5px solid rgba(255,255,255,.22)}
+.ws-online-av.me{box-shadow:0 0 0 1.5px #C0A070}
+.ws-sidebar.collapsed .ws-online-lbl{display:none}
+.ws-acct-chip{margin-top:2px}
+.ws-acct-role{font-size:.56rem;padding:1px 6px;border-radius:99px;color:#fff;background:#6B7280;flex-shrink:0}
+.ws-sidebar.collapsed .ws-acct-role{display:none}
 /* Body shift when sidebar open */
 /* サイドバー開閉トランジション */
 .hub{transition:left .2s ease!important}
@@ -1636,6 +1656,15 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
 .nb-todo-check{flex-shrink:0;margin-top:4px;width:15px;height:15px;cursor:pointer;accent-color:#C0A070}
 .nb-todo-done{text-decoration:line-through;color:#AAA}
 .nb-hr{border:none;border-top:2px solid #EEE;margin:6px 0;flex:1;cursor:default}
+.nb-callout{display:flex;align-items:flex-start;gap:8px;width:100%;background:#FBF7EF;border:1px solid #ECE0CB;border-radius:8px;padding:8px 10px}
+.nb-callout-icon{flex-shrink:0;padding-top:2px;font-size:1rem;user-select:none}
+.nb-callout .nb-content{background:transparent}
+.nb-toggle-row{display:flex;align-items:flex-start;gap:4px;width:100%}
+.nb-toggle-btn{background:none;border:none;color:#888;cursor:pointer;font-size:.8rem;flex-shrink:0;padding:2px 3px;margin-top:2px;transition:transform .15s;line-height:1}
+.nb-toggle-btn.collapsed{transform:rotate(-90deg)}
+.nb-toggle-head{font-weight:600}
+.nb-toggle-body{margin-left:22px;border-left:2px solid #EEE;padding-left:10px;color:#555}
+.nb-toggle-body.hidden{display:none}
 .nb-type-btn{opacity:0;background:none;border:none;color:#999;cursor:pointer;font-size:.62rem;font-weight:700;padding:2px 4px;border-radius:3px;flex-shrink:0;margin-top:4px;transition:opacity .12s;min-width:20px;text-align:center;line-height:1}
 .nb-wrap:hover .nb-type-btn{opacity:1}
 .nb-type-btn:hover{background:#EEE;color:#333}
@@ -1888,6 +1917,14 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
     <div class="ws-sb-item" onclick="wsCreateNote()">
       <span class="ws-sb-icon">📝</span><span class="ws-sb-label">新しいノート</span>
     </div>
+    <!-- 在席中アカウント（全員） -->
+    <div id="ws-online-row" class="ws-online-row"></div>
+    <!-- ログイン中アカウント：クリックで設定（オーナーのみ実行可） -->
+    <div class="ws-sb-item ws-acct-chip" data-keep-visible onclick="showSettings()" title="設定を開く">
+      <span class="ws-sb-icon">👤</span>
+      <span class="ws-sb-label" id="ws-acct-name" style="overflow:hidden;text-overflow:ellipsis"></span>
+      <span id="ws-acct-role" class="ws-acct-role"></span>
+    </div>
   </div>
 </div>
 
@@ -1951,9 +1988,9 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
   <div class="lveil"></div>
   <!-- ヘッダー -->
   <div class="hub-header">
-    <img class="hh-logo" src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none'">
+    <img class="hh-logo" src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none';var t=document.getElementById('hh-fallback-title');if(t)t.style.display=''">
     <div style="line-height:1.2">
-      <div class="hh-title">HEARTOM LIVING<span class="hh-sub">Management Console — 社内業務統合システム</span></div>
+      <div class="hh-title"><span id="hh-fallback-title" style="display:none">HEARTOM LIVING </span><span class="hh-sub">Management Console — 社内業務統合システム</span></div>
     </div>
     <div class="hh-grow"></div>
     <div id="hubOnlineUsers" style="display:flex;align-items:center;gap:6px;margin-right:4px"></div>
@@ -1963,7 +2000,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       <div class="hh-date" id="hubClockDate"></div>
     </div>
     <!-- ログインユーザー表示 -->
-    <div id="hubUserInfo" style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:all .2s" onclick="showSettings()" title="設定を開く" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
+    <div id="hubUserInfo" data-keep-visible style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:all .2s" onclick="showSettings()" title="設定を開く" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
       <span style="font-size:1rem">👤</span>
       <div style="line-height:1.25">
         <div style="display:flex;align-items:center;gap:6px">
@@ -1974,8 +2011,6 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       </div>
     </div>
     <div class="hub-header-btnrow" style="display:flex;align-items:center;gap:8px">
-      <button onclick="openSettings('connection')" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);padding:7px 13px;border-radius:6px;font-size:.9rem;cursor:pointer;letter-spacing:.02em;white-space:nowrap;font-family:inherit;transition:all .2s;line-height:1" title="設定" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">⚙️</button>
-      <button onclick="openSettings('account')" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);padding:7px 12px;border-radius:6px;font-size:.72rem;cursor:pointer;letter-spacing:.04em;white-space:nowrap;font-family:inherit;transition:all .2s" title="アカウント管理" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">👥 アカウント</button>
       <button onclick="logout()" style="background:rgba(255,80,80,.15);border:1px solid rgba(255,80,80,.3);color:rgba(255,180,180,.9);padding:7px 14px;border-radius:6px;font-size:.74rem;cursor:pointer;letter-spacing:.04em;white-space:nowrap;font-family:inherit;transition:all .2s" onmouseover="this.style.background='rgba(255,80,80,.28)'" onmouseout="this.style.background='rgba(255,80,80,.15)'">ログアウト</button>
     </div>
   </div>
@@ -2178,6 +2213,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       </div>
     </div>
     <div class="ob-scroll" id="ob-vis-scroll">
+      <div id="ob-new-inquiry-banner" style="display:none"></div>
       <div id="ob-visitors-content" style="padding:14px 16px"><div class="ob-empty-state">読み込み中...</div></div>
     </div>
   </div>
@@ -4332,16 +4368,43 @@ function _getPresencePage(){
   if(document.getElementById('tochi-board')&&document.getElementById('tochi-board').classList.contains('show')) return '土地DB';
   return 'ハブ';
 }
+function _presenceColor(email){ return ['#4F46E5','#0891B2','#059669','#D97706','#DC2626','#7C3AED','#DB2777'][Math.abs((email||'?').charCodeAt(0))%7]; }
+function _presenceInitials(u){ return (u.name||u.email||'?').replace(/@.*$/,'').slice(0,2).toUpperCase(); }
 function _renderPresence(rows, myEmail){
-  var el=document.getElementById('hubOnlineUsers'); if(!el) return;
-  var others=rows.filter(function(r){return r.email!==myEmail;});
-  if(!others.length){ el.innerHTML=''; return; }
-  el.innerHTML='<span style="font-size:.6rem;color:rgba(255,255,255,.35);letter-spacing:.06em;margin-right:2px">閲覧中</span>'+
-    others.map(function(u){
-      var initials=(u.name||u.email||'?').replace(/@.*$/,'').slice(0,2).toUpperCase();
-      var color=['#4F46E5','#0891B2','#059669','#D97706','#DC2626'][Math.abs(u.email.charCodeAt(0))%5];
-      return '<span title="'+esc(u.name||u.email)+' ('+esc(u.page||'')+')" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:'+color+';color:#fff;font-size:.58rem;font-weight:700;border:1.5px solid rgba(255,255,255,.25)">'+initials+'</span>';
-    }).join('');
+  // 重複メールを排除し、自分を先頭に
+  var seen={}, list=[];
+  rows.forEach(function(r){ var e=(r.email||'').toLowerCase(); if(!e||seen[e]) return; seen[e]=1; list.push(r); });
+  list.sort(function(a,b){ return (a.email===myEmail)?-1:(b.email===myEmail)?1:0; });
+  // ハブヘッダー（自分以外を「閲覧中」として表示）
+  var el=document.getElementById('hubOnlineUsers');
+  if(el){
+    var others=list.filter(function(r){return (r.email||'').toLowerCase()!==myEmail;});
+    el.innerHTML=others.length?('<span style="font-size:.6rem;color:rgba(255,255,255,.35);letter-spacing:.06em;margin-right:2px">閲覧中</span>'+
+      others.map(function(u){
+        return '<span title="'+esc(u.name||u.email)+' ('+esc(u.page||'')+')" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:'+_presenceColor(u.email)+';color:#fff;font-size:.58rem;font-weight:700;border:1.5px solid rgba(255,255,255,.25)">'+_presenceInitials(u)+'</span>';
+      }).join('')):'';
+  }
+  // ワークスペースサイドバー（自分含め全員）
+  var ws=document.getElementById('ws-online-row');
+  if(ws){
+    ws.innerHTML=list.length?('<span class="ws-online-lbl">在席中 '+list.length+'人</span>'+
+      list.map(function(u){
+        var me=(u.email||'').toLowerCase()===myEmail;
+        return '<span class="ws-online-av'+(me?' me':'')+'" title="'+esc(u.name||u.email)+(u.page?' ('+esc(u.page)+')':'')+(me?' — あなた':'')+'" style="background:'+_presenceColor(u.email)+'">'+_presenceInitials(u)+'</span>';
+      }).join('')):'';
+  }
+}
+// サイドバーのアカウントチップ更新
+function wsUpdateAcctChip(){
+  var nameEl=document.getElementById('ws-acct-name'); var roleEl=document.getElementById('ws-acct-role');
+  if(!nameEl) return;
+  var nm=localStorage.getItem('admin_session_name')||localStorage.getItem('admin_session_email')||'未ログイン';
+  nameEl.textContent=nm; nameEl.title=nm;
+  if(roleEl && typeof getUserRole==='function'){
+    var role=getUserRole();
+    roleEl.textContent=role==='owner'?'オーナー':role==='full'?'フル':'一般';
+    roleEl.style.background=role==='owner'?'#9A8C76':role==='full'?'#2563EB':'#6B7280';
+  }
 }
 function checkRemoteChanges(){
   gasGet('getChangeTimes',function(r){
@@ -4820,6 +4883,11 @@ function renderTargetOptions() {
 
 // ─── 統合設定パネル ───
 function openSettings(tab){
+  // オーナー以外は設定を開けない（アカウント名は表示するが設定パネルは不可）
+  if(typeof isOwnerRole==='function' && !isOwnerRole()){
+    if(typeof toast==='function') toast('🔒 設定はオーナーのみ操作できます');
+    return;
+  }
   // 接続設定
   document.getElementById('setGasUrl').value=localStorage.getItem('admin_gas_url')||SEND_URL_DEFAULT;
   document.getElementById('setCustomerUrl').value=localStorage.getItem('admin_customer_url')||DEFAULT_CUSTOMER_URL;
@@ -6045,6 +6113,8 @@ function obNormStatus(s){
 function obStatusClassFor(r){
   var disp=obNormStatus(r['商談ステータス']||'問い合わせ');
   var sc=OB_STATUS_CLASS[disp]||'ob-s0';
+  // 「失注」を含む表記ゆれ（失注（他決）等）も確実にグレー化
+  if(disp.indexOf('失注')>=0) sc='ob-sF';
   if(sc!=='ob-sF'&&(r.history||[]).some(function(h){return /他決/.test(h.content||'');})) sc='ob-sF';
   return sc;
 }
@@ -6241,7 +6311,71 @@ function obUpdateLastUpdatedLabel(){
   el.title='次回自動更新: '+(isCacheFresh('ob_v3_ts')?Math.round((CACHE_TTL_MS-(Date.now()-ts))/60000)+'分後':'まもなく');
 }
 
-function obRenderAll(){ obRenderPipeline(); obRenderVisitors(); obRenderActive(); if(obCurrentTab==='agg') obRenderAgg(); setTimeout(obCheckPastAppointments,400); }
+function obRenderAll(){ obRenderPipeline(); obRenderVisitors(); obRenderActive(); if(obCurrentTab==='agg') obRenderAgg(); setTimeout(obCheckPastAppointments,400); setTimeout(obCheckNewInquiries,600); }
+
+// 受付/顧客DBの新規問い合わせのうち、オープンボード未登録のものを検出してバナー表示
+function _obNameKey(s){ return String(s||'').replace(/[\s　]/g,'').trim(); }
+function _obTelKey(s){ return String(s||'').replace(/[^0-9]/g,''); }
+function obCheckNewInquiries(){
+  var banner=document.getElementById('ob-new-inquiry-banner'); if(!banner) return;
+  function _eval(){
+    var names={}, tels={};
+    obRows.forEach(function(r){
+      var nk=_obNameKey(r['顧客名']); if(nk) names[nk]=1;
+      var tk=_obTelKey((r.karte&&r.karte['電話番号'])||r['電話番号']||''); if(tk) tels[tk]=1;
+    });
+    var pending=(custRows||[]).filter(function(c){
+      if(!c||!c.name) return false;
+      var nk=_obNameKey(c.name); var tk=_obTelKey(c.tel||'');
+      if(nk&&names[nk]) return false;
+      if(tk&&tels[tk]) return false;
+      return true;
+    });
+    var dismissed=JSON.parse(localStorage.getItem('ob_inquiry_dismissed')||'[]');
+    pending=pending.filter(function(c){ return dismissed.indexOf((c.id||c.name))<0; });
+    window._obPendingInquiries=pending;
+    if(!pending.length){ banner.style.display='none'; banner.innerHTML=''; return; }
+    banner.style.display='';
+    banner.innerHTML='<div class="ob-newinq"><span class="ob-newinq-ic">📥</span>'
+      +'<span class="ob-newinq-txt">受付・顧客DBに <b>'+pending.length+'件</b> のオープンボード未登録の問い合わせがあります</span>'
+      +'<button class="ob-newinq-btn" onclick="obImportNewInquiries()">＋ まとめてOBに追加</button>'
+      +'<button class="ob-newinq-x" onclick="obDismissNewInquiries()" title="今は追加しない">✕</button></div>';
+  }
+  if((custRows&&custRows.length)||__custLoaded){ _eval(); }
+  else if(!window._obInquiryFetching){
+    window._obInquiryFetching=true;
+    gasGet('listInfoCustomers',function(d){ window._obInquiryFetching=false; if(d&&d.list){ custRows=d.list; __custLoaded=true; } _eval(); },90000);
+  }
+}
+function obDismissNewInquiries(){
+  var pending=window._obPendingInquiries||[];
+  var dismissed=JSON.parse(localStorage.getItem('ob_inquiry_dismissed')||'[]');
+  pending.forEach(function(c){ var k=c.id||c.name; if(dismissed.indexOf(k)<0) dismissed.push(k); });
+  localStorage.setItem('ob_inquiry_dismissed',JSON.stringify(dismissed));
+  var banner=document.getElementById('ob-new-inquiry-banner'); if(banner){ banner.style.display='none'; banner.innerHTML=''; }
+}
+function obImportNewInquiries(){
+  var pending=window._obPendingInquiries||[];
+  if(!pending.length) return;
+  if(!confirm(pending.length+'件の新規問い合わせをオープンボードに追加します。よろしいですか？')) return;
+  var today=new Date(); var todayStr=today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2);
+  pending.forEach(function(c){
+    var inquiryDate=(c.registeredAt||'').substring(0,10)||todayStr;
+    var data={ 問い合わせ日:inquiryDate, 来場日:inquiryDate, 顧客名:c.name, 来場種別:'', エリア:'',
+      反響元:c.source||'', 担当者:'', サブ担当:'', 商談ステータス:(c.status||'問い合わせ'), 次回予定:'', 次回内容:'' };
+    var newRec=Object.assign({},data,{ _row:obRows.length, id:'tmp_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      karte:{ 電話番号:c.tel||'', フリガナ:c.furigana||'', メール:c.email||'' },
+      history:[{date:inquiryDate,type:'問い合わせ',content:'',staff:''}] });
+    obRows.push(newRec);
+    post(Object.assign({action:'obSaveCustomer'},data,{電話番号:c.tel||'',フリガナ:c.furigana||''}));
+  });
+  obRows.forEach(function(r,i){r._row=i;});
+  _obLastSaveTs=Date.now();
+  obSetCache(obRows);
+  obRenderAll();
+  toast('✅ '+pending.length+'件をオープンボードに追加しました（GAS保存中…）');
+  setTimeout(function(){ obLoad(true); },4000);
+}
 
 function obCheckPastAppointments(){
   // 来場確認モーダルはオープンボード表示中のみ（ハブ等では出さない）
@@ -6580,7 +6714,7 @@ function obRenderVisitors(){
     '<th style="min-width:64px">担当</th>'+
     '<th style="min-width:64px">サブ担当</th>'+
     '<th style="min-width:62px">エリア</th>'+
-    '<th style="min-width:160px">来場履歴</th>'+
+    '<th style="min-width:240px">来場履歴</th>'+
     '<th style="min-width:110px">次回予定日</th>'+
     '<th style="min-width:120px">内容</th>'+
     '<th style="width:40px"></th>'+
@@ -7258,6 +7392,8 @@ function obFloatEdit(e,rowIdx,field,kind){
   box.classList.add('show');
   _obFloatCtx={rowIdx:rowIdx,field:field,td:td,ctrl:ctrl,done:false};
   ctrl.focus(); if(ctrl.select) ctrl.select();
+  // セレクトはワンクリックでそのまま候補を開く（二度手間防止）
+  if((kind==='select'||kind==='staff')){ setTimeout(function(){ try{ if(ctrl.showPicker) ctrl.showPicker(); }catch(e){} },0); }
   function commit(save){
     var ctx=_obFloatCtx; if(!ctx||ctx.done) return; ctx.done=true; _obFloatCtx=null;
     document.removeEventListener('mousedown',outside,true);
@@ -11319,6 +11455,8 @@ function wsSetActiveSection(sec){
   });
   var target=document.getElementById('ws-nav-'+sec);
   if(target) target.classList.add('active');
+  if(typeof wsUpdateAcctChip==='function') wsUpdateAcctChip();
+  if(typeof presenceUpdate==='function') presenceUpdate();
 }
 function wsSetActiveCdb(id){
   document.querySelectorAll('.ws-sb-item').forEach(function(el){ el.classList.remove('active'); });
@@ -11605,6 +11743,22 @@ function wsCreateNote(){
   wsRenderSidebarNotes();
   wsOpenNote(n.id);
 }
+function wsDeleteNote(id, ev){
+  if(ev&&ev.stopPropagation) ev.stopPropagation();
+  var notes=wsLoadNotes();
+  var note=notes.find(function(n){return n.id===id;});
+  var title=note?(note.title||'無題ノート'):'このノート';
+  if(!confirm('「'+title+'」を削除しますか？この操作は取り消せません。')) return;
+  notes=notes.filter(function(n){return n.id!==id;});
+  wsSaveNotes(notes);
+  wsRenderSidebarNotes();
+  if(__wsCurrentNoteId===id){
+    __wsCurrentNoteId=null;
+    if(notes.length){ wsOpenNote(notes[0].id); }
+    else { showHub(); }
+  }
+  if(typeof toast==='function') toast('🗑 ノートを削除しました');
+}
 function wsOpenNote(id){
   var notes=wsLoadNotes();
   var note=notes.find(function(n){return n.id===id;}); if(!note) return;
@@ -11778,14 +11932,19 @@ function wsNoteAutoSave(){
       var bid=wrap.getAttribute('data-bid');
       var existB=note.blocks.find(function(b){return b.id===bid;});
       var type=existB?existB.type:'p';
-      var ta=wrap.querySelector('.nb-content');
+      var ta=wrap.querySelector('.nb-content:not([data-body])')||wrap.querySelector('.nb-content');
       var content=ta?ta.value:(existB?existB.content||'':'');
-      var checked=false;
+      var nb={id:bid,type:type,content:content,checked:false};
       if(type==='todo'){
         var cb=wrap.querySelector('.nb-todo-check');
-        checked=cb?cb.checked:(existB?!!existB.checked:false);
+        nb.checked=cb?cb.checked:(existB?!!existB.checked:false);
       }
-      blocks.push({id:bid,type:type,content:content,checked:checked});
+      if(type==='toggle'){
+        var bodyTa=wrap.querySelector('.nb-content[data-body]');
+        nb.body=bodyTa?bodyTa.value:(existB?existB.body||'':'');
+        nb.collapsed=existB?!!existB.collapsed:false;
+      }
+      blocks.push(nb);
     });
     note.blocks=blocks;
     note.updated=Date.now();
@@ -11825,6 +11984,8 @@ var WS_BLOCK_TYPES=[
   {type:'todo', icon:'☑',  label:'チェック',   desc:'チェックリスト',   ph:'TODOを入力...'},
   {type:'quote',icon:'"',   label:'引用',       desc:'引用文',           ph:'引用文...'},
   {type:'code', icon:'<>',  label:'コード',     desc:'等幅フォント',     ph:'コードを入力...'},
+  {type:'callout',icon:'💡',label:'コールアウト',desc:'強調ボックス',     ph:'重要なメモ...'},
+  {type:'toggle',icon:'▸',  label:'トグル',     desc:'折りたたみ',       ph:'トグル見出し...'},
   {type:'hr',   icon:'—',   label:'区切り線',   desc:'水平線',           ph:''},
 ];
 function wsBlockTypeInfo(type){ return WS_BLOCK_TYPES.find(function(t){return t.type===type;})||WS_BLOCK_TYPES[0]; }
@@ -11850,6 +12011,14 @@ function wsBlockHTML(b, olNum) {
       +'<input type="checkbox" class="nb-todo-check"'+(b.checked?' checked':'')+' data-bid="'+bid+'" onchange="wsNoteCheckboxChange(this)">'
       +'<textarea class="nb-content'+(b.checked?' nb-todo-done':'')+'" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea>'
       +'</div>';
+  } else if(b.type==='callout'){
+    cnt='<div class="nb-callout"><span class="nb-callout-icon">💡</span>'
+      +'<textarea class="nb-content" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea></div>';
+  } else if(b.type==='toggle'){
+    cnt='<div class="nb-toggle-row">'
+      +'<button class="nb-toggle-btn'+(b.collapsed?' collapsed':'')+'" onclick="wsToggleBlock(\''+bid+'\')" title="折りたたみ">▾</button>'
+      +'<textarea class="nb-content nb-toggle-head" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea></div>'
+      +'<textarea class="nb-content nb-toggle-body'+(b.collapsed?' hidden':'')+'" placeholder="折りたたみの内容..." rows="1" data-bid="'+bid+'" data-body="1" onkeydown="wsBlockKeydown(event,this)" oninput="wsBlockAutoGrow(this);wsNoteAutoSave()" onblur="wsNoteAutoSave()" onclick="wsBlockClick(event,this)">'+wsSafeHtml(b.body||'')+'</textarea>';
   } else {
     var cls={'h1':'nb-h1','h2':'nb-h2','h3':'nb-h3','quote':'nb-quote','code':'nb-code'}[b.type]||'';
     cnt='<textarea class="nb-content'+(cls?' '+cls:'')+'" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea>';
@@ -11870,6 +12039,15 @@ function wsNoteCheckboxChange(checkbox){
   if(ta) ta.classList.toggle('nb-todo-done', checkbox.checked);
 }
 
+function wsToggleBlock(bid){
+  var notes=wsLoadNotes();
+  var note=notes.find(function(n){return n.id===__wsCurrentNoteId;}); if(!note) return;
+  var b=note.blocks.find(function(x){return x.id===bid;}); if(!b) return;
+  b.collapsed=!b.collapsed;
+  note.updated=Date.now();
+  wsSaveNotes(notes);
+  wsRenderNote(note);
+}
 function wsDeleteBlock(bid){
   var notes=wsLoadNotes();
   var note=notes.find(function(n){return n.id===__wsCurrentNoteId;}); if(!note) return;
@@ -12015,7 +12193,7 @@ function wsRenderSidebarNotes(){
   var notes=wsLoadNotes();
   if(!notes.length){ el.innerHTML='<div class="ws-sb-item" style="opacity:.4"><span class="ws-sb-label" style="font-size:.72rem;color:rgba(255,255,255,.3)">ノートがありません</span></div>'; return; }
   el.innerHTML=notes.map(function(n){
-    return '<div class="ws-sb-item" data-note-id="'+n.id+'" draggable="true" onclick="wsOpenNote(\''+n.id+'\')" ondragstart="wsSbDragStart(event,\'note\',\''+n.id+'\')" ondragover="wsSbDragOver(event)" ondrop="wsSbDrop(event,\'note\')" style="cursor:grab"><span class="ws-sb-icon">'+(n.icon||'📝')+'</span><span class="ws-sb-label">'+wsSafeHtml(n.title||'無題ノート')+'</span></div>';
+    return '<div class="ws-sb-item ws-note-item" data-note-id="'+n.id+'" draggable="true" onclick="wsOpenNote(\''+n.id+'\')" ondragstart="wsSbDragStart(event,\'note\',\''+n.id+'\')" ondragover="wsSbDragOver(event)" ondrop="wsSbDrop(event,\'note\')" style="cursor:grab"><span class="ws-sb-icon">'+(n.icon||'📝')+'</span><span class="ws-sb-label">'+wsSafeHtml(n.title||'無題ノート')+'</span><button class="ws-note-del" title="ノートを削除" onclick="wsDeleteNote(\''+n.id+'\',event)">✕</button></div>';
   }).join('');
 }
 
@@ -12456,16 +12634,18 @@ function obLoadAllBdayData(){
 // ══ システム設定オーナーのみ ════════════════════════════
 function isOwnerRole(){
   var email=(localStorage.getItem('admin_session_email')||'').toLowerCase().trim();
-  var OWNER_EMAILS=['heartom.living@gmail.com'];
-  return OWNER_EMAILS.indexOf(email)>=0;
+  // ROLE_OWNER（heartom.living / oki.heartom）と一致すればオーナー扱い
+  return (typeof ROLE_OWNER!=='undefined' ? ROLE_OWNER : ['heartom.living@gmail.com','oki.heartom@gmail.com']).indexOf(email)>=0;
 }
 (function(){
   var origApplyRoleUI=window.applyRoleUI;
   window.applyRoleUI=function(){
     if(typeof origApplyRoleUI==='function') origApplyRoleUI.apply(this,arguments);
+    // 設定系ボタンはオーナー以外には隠す。ただしアカウント表示チップ(data-keep-visible)は常に表示
     var settingsEls=document.querySelectorAll('[data-owner-only],[onclick*="Settings"],[onclick*="settings"],[onclick*="config"]');
     settingsEls.forEach(function(el){
-      if(!isOwnerRole()) el.style.display='none';
+      if(el.hasAttribute('data-keep-visible')) return;
+      el.style.display=isOwnerRole()?'':'none';
     });
   };
 })();
