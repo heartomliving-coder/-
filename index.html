@@ -618,15 +618,15 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-vis-table tbody tr .ob-name-link{cursor:pointer}
 
 /* 顧客名リンク */
-.ob-name-link{font-family:var(--serif);font-weight:600;color:var(--charcoal);cursor:pointer;border-bottom:1px solid transparent;transition:all .15s;font-size:1.02rem}
+.ob-name-link{font-weight:700;color:var(--charcoal);cursor:pointer;border-bottom:1px solid transparent;transition:all .15s;font-size:.96rem}
 .ob-name-link:hover{color:var(--gold-d,#9A7B4B);border-bottom-color:var(--gold)}
 .ob-name-sub{font-size:.74rem;color:#7A6E60;margin-top:2px;line-height:1.3;letter-spacing:.02em}
 
 /* 月グループヘッダー（KPIダッシュボード） */
 .ob-month-hd td{padding:0;border-top:3px solid #2B2B2B;border-bottom:none;border-right:none !important;background:transparent}
 .ob-mkpi{background:#1E1E1E;padding:12px 18px 0;display:flex;flex-direction:column;gap:0}
-.ob-mkpi-top{display:flex;align-items:center;gap:12px;padding-bottom:10px;flex-wrap:wrap}
-.ob-mkpi-month{font-family:var(--serif);font-size:1.12rem;font-weight:700;color:#fff;letter-spacing:.1em;flex-shrink:0}
+.ob-mkpi-top{display:flex;align-items:center;gap:12px;padding-bottom:10px;flex-wrap:wrap;cursor:pointer;user-select:none}
+.ob-mkpi-month{font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:.08em;flex-shrink:0}
 .ob-mkpi-total{background:rgba(255,255,255,.15);color:#fff;font-size:.78rem;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:.04em}
 .ob-mkpi-add{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.75);padding:3px 11px;border-radius:3px;font-size:.64rem;cursor:pointer;transition:all .12s;margin-left:auto;white-space:nowrap}
 .ob-mkpi-add:hover{background:rgba(255,255,255,.22);color:#fff}
@@ -645,29 +645,34 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-mkpi-staff-row{display:flex;align-items:center;gap:6px;padding:7px 18px;background:rgba(0,0,0,.2);flex-wrap:wrap}
 .ob-mkpi-staff-lbl{font-size:.68rem;color:rgba(255,255,255,.65);letter-spacing:.06em;text-transform:uppercase;flex-shrink:0}
 .ob-mkpi-staff-chip{font-size:.74rem;font-weight:700;color:rgba(255,255,255,.9);background:rgba(255,255,255,.1);border-radius:20px;padding:2px 9px;white-space:nowrap}
+/* KPI折りたたみ */
+.ob-mkpi-toggle{font-size:.82rem;color:rgba(255,255,255,.55);transition:transform .22s;display:inline-block;line-height:1;margin-left:6px}
+.ob-mkpi.collapsed .ob-mkpi-kpis,.ob-mkpi.collapsed .ob-mkpi-staff-row{display:none}
+.ob-mkpi.collapsed .ob-mkpi-toggle{transform:rotate(-90deg)}
 /* 月グループ行（KPIの下の補助行は廃止） */
-.ob-month-label{font-family:var(--serif);font-size:1.05rem;color:#2B2B2B;font-weight:700;margin-right:14px;letter-spacing:.09em}
+.ob-month-label{font-size:1rem;color:#2B2B2B;font-weight:700;margin-right:14px;letter-spacing:.07em}
 .ob-sum-chips{display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap}
 .ob-sc{display:inline-flex;align-items:baseline;gap:2px;background:rgba(255,255,255,.55);border:1px solid rgba(0,0,0,.07);border-radius:20px;padding:1px 8px}
 .ob-sc .sl{font-size:.7rem;color:#777;letter-spacing:.03em}
 .ob-sc .sv{font-size:.84rem;font-weight:800;color:#2B2B2B}
 .ob-sc .sp{font-size:.7rem;color:#888}
 
-/* ステータスバッジ */
-.ob-badge{display:inline-block;padding:5px 12px;border-radius:20px;font-size:.82rem;font-weight:700;letter-spacing:.04em;white-space:nowrap;cursor:pointer;transition:opacity .15s}
-.ob-badge:hover{opacity:.8}
-.ob-s0{background:#FEF9EC;color:#92600E;border:1px solid #F5DFA0}
-.ob-s1{background:#F0EEFF;color:#5B21B6;border:1px solid #D4C8F8}
-.ob-s2{background:#EDFAF3;color:#065F46;border:1px solid #A7DFBE}
-.ob-s3{background:#EBF4FF;color:#1E40AF;border:1px solid #BFDBFE}
-.ob-s4{background:#FFF0F0;color:#991B1B;border:1px solid #FEC9C9}
-.ob-s5{background:#FEF0F8;color:#9D174D;border:1px solid #F9C2DC}
-.ob-s6{background:#FFF4EB;color:#9A3412;border:1px solid #FDC9A0}
-.ob-s7{background:#ECFDF5;color:#065F46;border:1px solid #6EE7B7}
-.ob-s8{background:#F4F5F7;color:#6B7280;border:1px solid #D1D5DB}
-.ob-s9{background:#FEF3F2;color:#B91C1C;border:1px solid #FECACA}
-.ob-sP{background:#ECFDF5;color:#166534;border:1px solid #86EFAC}
-.ob-sF{background:#F8F9FB;color:#9CA3AF;border:1px solid #E5E7EB}
+/* ステータスバッジ（ドット＋テキスト） */
+.ob-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 0;font-size:.78rem;font-weight:600;letter-spacing:.02em;white-space:nowrap;cursor:pointer;transition:opacity .15s}
+.ob-badge:hover{opacity:.7}
+.ob-badge::before{content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0;background:currentColor}
+.ob-s0{color:#92600E}
+.ob-s1{color:#5B21B6}
+.ob-s2{color:#065F46}
+.ob-s3{color:#1E40AF}
+.ob-s4{color:#991B1B}
+.ob-s5{color:#9D174D}
+.ob-s6{color:#9A3412}
+.ob-s7{color:#059669}
+.ob-s8{color:#6B7280}
+.ob-s9{color:#B91C1C}
+.ob-sP{color:#166534}
+.ob-sF{color:#9CA3AF}
 /* 顧客分類バッジ */
 .ob-cls-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.68rem;font-weight:700;letter-spacing:.04em;white-space:nowrap}
 .ob-cls-miKomi{background:#FEF9EC;color:#92400E;border:1px solid #FDE68A}
@@ -703,6 +708,11 @@ tr:hover .ob-del{opacity:1}
 .ob-hist-chip.new{background:#2B2B2B;color:#fff;border-color:#2B2B2B}
 .ob-hist-add-btn{font-size:.7rem;padding:2px 8px;border-radius:20px;border:1px dashed #C0A070;color:#C0A070;background:none;cursor:pointer;font-weight:700;opacity:0;transition:opacity .15s;white-space:nowrap;flex-shrink:0}
 .ob-hist-add-btn:hover{background:#C0A070;color:#fff}
+/* ミニタイムライン（来場履歴列） */
+.ob-mini-tl{display:flex;align-items:center;flex-wrap:nowrap;gap:0}
+.ob-mini-tl-dot{width:9px;height:9px;border-radius:50%;background:#C0A070;flex-shrink:0;cursor:pointer}
+.ob-mini-tl-dot.last{background:#2B2B2B}
+.ob-mini-tl-line{height:2px;width:8px;background:#DDD5C8;flex-shrink:0}
 /* 来場履歴インラインポップオーバー */
 #ob-appt-confirm{z-index:10001}
 #ob-appt-confirm .modal-box{padding:32px 28px;text-align:center;max-width:380px}
@@ -6529,17 +6539,18 @@ function obRenderVisitors(){
     });
   });
 
-  var COL=12;
+  var COL=13;
   var html=aggHtml+'<table class="ob-table ob-vis-table"><thead><tr>'+
     '<th class="ob-rn" style="width:28px">#</th>'+
     '<th style="min-width:84px">来場日</th>'+
     '<th style="min-width:80px">反響元</th>'+
-    '<th style="min-width:160px">顧客名 / 電話番号</th>'+
+    '<th style="min-width:120px">顧客名</th>'+
+    '<th style="min-width:120px">フリガナ / 電話</th>'+
     '<th style="min-width:90px">ステータス</th>'+
     '<th style="min-width:64px">担当</th>'+
     '<th style="min-width:64px">サブ担当</th>'+
     '<th style="min-width:62px">エリア</th>'+
-    '<th style="min-width:200px">来場履歴</th>'+
+    '<th style="min-width:160px">来場履歴</th>'+
     '<th style="min-width:110px">次回予定日</th>'+
     '<th style="min-width:120px">内容</th>'+
     '<th style="width:40px"></th>'+
@@ -6575,10 +6586,11 @@ function obRenderVisitors(){
 
     html+='<tr class="ob-month-hd"><td colspan="'+COL+'">'+
       '<div class="ob-mkpi">'+
-        '<div class="ob-mkpi-top">'+
+        '<div class="ob-mkpi-top" onclick="this.parentNode.classList.toggle(\'collapsed\')">'+
           '<span class="ob-mkpi-month">'+lbl+'</span>'+
           '<span class="ob-mkpi-total">'+mr.length+'件</span>'+
           '<button class="ob-mkpi-add" onclick="obQuickAddVisitor(\''+ym+'\');event.stopPropagation()">＋ 追加</button>'+
+          '<span class="ob-mkpi-toggle">▾</span>'+
         '</div>'+
         '<div class="ob-mkpi-kpis">'+kpiTiles+'</div>'+
         (staffChipsHtml?'<div class="ob-mkpi-staff-row"><span class="ob-mkpi-staff-lbl">担当</span>'+staffChipsHtml+'</div>':'')+
@@ -6619,12 +6631,14 @@ function obRenderVisitors(){
           (r['反響元']?'<span class="ob-tipo-chip" style="pointer-events:none">'+esc(r['反響元'])+'</span>':'<span style="color:#CCC">—</span>')+
         '</td>'+
         '<td class="ob-td-name">'+
-          '<span class="ob-name-link">'+esc(r['顧客名']||'—')+'</span>'+
-          (kana?'<div class="ob-name-sub">'+esc(kana)+'</div>':'')+
-          (tel?'<div class="ob-name-sub" style="color:#7B6248;font-family:monospace;letter-spacing:.03em;margin-top:2px">📞 '+esc(tel)+'</div>':'')+
+          '<span class="ob-name-link" onclick="obOpenDetail('+r._row+');event.stopPropagation()">'+esc(r['顧客名']||'—')+'</span>'+
+        '</td>'+
+        '<td style="font-size:.75rem;color:#888;white-space:nowrap">'+
+          (kana?'<div>'+esc(kana)+'</div>':'')+
+          (tel?'<div style="color:#7B6248;font-family:monospace;margin-top:1px">📞 '+esc(tel)+'</div>':'<span style="color:#CCC">—</span>')+
         '</td>'+
         '<td onclick="event.stopPropagation()" style="white-space:nowrap">'+
-          '<span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+');event.stopPropagation()" style="cursor:pointer;font-size:.7rem;padding:3px 9px">'+esc(dispStatus)+'</span>'+
+          '<span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+');event.stopPropagation()">'+esc(dispStatus)+'</span>'+
         '</td>'+
         '<td style="white-space:nowrap">'+
           '<div style="font-size:.8rem;font-weight:700;color:#2B2B2B">'+esc(obSanitizeVal(r['担当者']||''))+'</div>'+
@@ -6632,7 +6646,7 @@ function obRenderVisitors(){
         '<td style="white-space:nowrap;font-size:.76rem;color:#888">'+esc(obSanitizeVal(r['サブ担当']||''))+'</td>'+
         '<td style="font-size:.76rem">'+areaHtml+'</td>'+
         '<td class="ob-td-hist" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()" style="cursor:pointer">'+
-          '<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div>'+
+          '<div class="ob-hist-chips">'+obMiniTl(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div>'+
         '</td>'+
         '<td onclick="obNextPopOpen(event,'+r._row+');event.stopPropagation()" class="ob-td-next" style="cursor:pointer" title="クリックして次回予定を設定">'+
           '<div class="'+(nextCls!=='none'?'ob-card-next '+nextCls:'')+'">'+
@@ -6698,6 +6712,32 @@ function obHistChips(r){
     return '<span class="ob-hist-chip'+(i===last?' new':'')+'" title="'+esc(title)+'">'+esc(lbl)+'</span>';
   });
   return chips.join('');
+}
+
+function obMiniTl(r){
+  var inquiryDate=obNormDate(r['問い合わせ日']||'');
+  var h=obDedupHistory(r.history||[]).filter(function(item){
+    if(item.type==='面談') return false;
+    var iDate=obNormDate(item.date||'');
+    var content=String(item.content||'').trim();
+    var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0||OB_SOURCES.indexOf(content)>=0||!content;
+    if(inquiryDate&&iDate===inquiryDate&&isGeneric) return false;
+    return true;
+  });
+  if(!h.length) return '<span style="color:#DDD;font-size:.72rem">—</span>';
+  var last=h.length-1;
+  var out='<div class="ob-mini-tl">';
+  h.forEach(function(item,i){
+    var d=item.date?obNormDate(item.date):'';
+    var p=d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    var shortD=p?parseInt(p[2])+'月'+parseInt(p[3])+'日':'';
+    var content=String(item.content||'').trim();
+    var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0||OB_SOURCES.indexOf(content)>=0;
+    var lbl=(shortD?shortD+' ':'')+(item.type||'')+(content&&!isGeneric?'・'+content:'');
+    if(i>0) out+='<div class="ob-mini-tl-line"></div>';
+    out+='<div class="ob-mini-tl-dot'+(i===last?' last':'')+'" title="'+esc(lbl)+'"></div>';
+  });
+  return out+'</div>';
 }
 
 function obSC(l,v,extra){return '<span class="ob-sc"><span class="sl">'+l+'</span><span class="sv">'+v+'</span>'+(extra?'<span class="sp">'+extra+'</span>':'')+'</span>';}
