@@ -688,6 +688,11 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-editable.empty{color:#CCC;font-style:italic}
 .ob-cell-input{border:none;border-bottom:2px solid var(--gold);background:rgba(255,248,230,.6);font-size:.82rem;font-family:inherit;color:var(--tx);padding:2px 4px;outline:none;min-width:60px;max-width:200px;border-radius:2px}
 .ob-cell-select{border:1px solid var(--gold);background:#fff;font-size:.82rem;font-family:inherit;color:var(--tx);outline:none;cursor:pointer;padding:2px 4px;border-radius:2px}
+/* フローティングセル編集（行の高さを変えずに編集） */
+.ob-float-edit{position:fixed;z-index:10000;display:none;background:#fff;border:1px solid #C0A070;border-radius:7px;box-shadow:0 8px 28px rgba(0,0,0,.22);padding:6px}
+.ob-float-edit.show{display:block}
+.ob-float-edit select,.ob-float-edit input{font-size:.85rem;font-family:inherit;color:#2B2B2B;border:1px solid #DDD5C8;border-radius:5px;padding:5px 8px;outline:none;min-width:140px;background:#fff}
+.ob-float-edit select:focus,.ob-float-edit input:focus{border-color:#C0A070}
 
 /* チェックボックス */
 .ob-cb{width:16px;height:16px;cursor:pointer;accent-color:var(--charcoal);display:block;margin:0 auto}
@@ -713,6 +718,7 @@ tr:hover .ob-del{opacity:1}
 .ob-mini-tl-dot{width:9px;height:9px;border-radius:50%;background:#C0A070;flex-shrink:0;cursor:pointer}
 .ob-mini-tl-dot.last{background:#2B2B2B}
 .ob-mini-tl-line{height:2px;width:8px;background:#DDD5C8;flex-shrink:0}
+.ob-mini-tl-label{font-size:.74rem;color:#555;font-weight:600;margin-left:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
 /* 来場履歴インラインポップオーバー */
 #ob-appt-confirm{z-index:10001}
 #ob-appt-confirm .modal-box{padding:32px 28px;text-align:center;max-width:380px}
@@ -6030,8 +6036,27 @@ function obClsBadge(cls){
 // ステータス表示正規化（初回接触→問い合わせ）
 function obNormStatus(s){
   if(!s) return '問い合わせ';
+  s=String(s).trim(); // 末尾空白などで色分けが外れるのを防ぐ
+  if(!s) return '問い合わせ';
   if(s==='初回接触') return '問い合わせ';
   return s;
+}
+// ステータス→色クラス（共通化）
+function obStatusClassFor(r){
+  var disp=obNormStatus(r['商談ステータス']||'問い合わせ');
+  var sc=OB_STATUS_CLASS[disp]||'ob-s0';
+  if(sc!=='ob-sF'&&(r.history||[]).some(function(h){return /他決/.test(h.content||'');})) sc='ob-sF';
+  return sc;
+}
+// リストビューの編集可能セルの表示HTML（編集後の再描画にも使用）
+function obListCellHtml(r,field){
+  if(field==='反響元') return r['反響元']?'<span class="ob-tipo-chip">'+esc(obSanitizeVal(r['反響元']))+'</span>':'<span style="color:#CCC">—</span>';
+  if(field==='商談ステータス'){ var sc=obStatusClassFor(r); return '<span class="ob-badge '+sc+'">'+esc(obNormStatus(r['商談ステータス']||'問い合わせ'))+'</span>'; }
+  if(field==='担当者'){ var v=esc(obSanitizeVal(r['担当者']||'')); return '<div style="font-size:.8rem;font-weight:700;color:#2B2B2B">'+(v||'<span style="color:#CCC;font-weight:400">—</span>')+'</div>'; }
+  if(field==='サブ担当'){ var v2=esc(obSanitizeVal(r['サブ担当']||'')); return v2||'<span style="color:#CCC">—</span>'; }
+  if(field==='エリア') return r['エリア']?obSanitizeVal(r['エリア']).split(',').filter(Boolean).map(function(m){return '<span class="ob-area-tag">'+esc(m.trim())+'</span>';}).join(' '):'<span style="color:#CCC">—</span>';
+  if(field==='次回内容') return r['次回内容']?esc(obSanitizeVal(r['次回内容'])):'<span style="color:#CCC;font-style:italic">—</span>';
+  return '';
 }
 
 // FALSE/TRUEの文字列を空として扱う
@@ -6219,6 +6244,9 @@ function obUpdateLastUpdatedLabel(){
 function obRenderAll(){ obRenderPipeline(); obRenderVisitors(); obRenderActive(); if(obCurrentTab==='agg') obRenderAgg(); setTimeout(obCheckPastAppointments,400); }
 
 function obCheckPastAppointments(){
+  // 来場確認モーダルはオープンボード表示中のみ（ハブ等では出さない）
+  var _ob=document.getElementById('openboard');
+  if(!_ob||!_ob.classList.contains('show')) return;
   var today=new Date(); today.setHours(0,0,0,0);
   var checked=JSON.parse(localStorage.getItem('ob_appt_checked')||'{}');
   for(var i=0;i<obRows.length;i++){
@@ -6251,7 +6279,9 @@ function obApptConfirm(result){
   localStorage.setItem('ob_appt_checked',JSON.stringify(checked));
   m.classList.remove('show');
   if(result==='skip'){ setTimeout(obCheckPastAppointments,1000); return; }
-  var content=result==='visited'?(r['次回内容']||'来場'):'キャンセル';
+  // 来場履歴には次回予定の内容（種別＋内容）をそのまま記録する
+  var _nextLabel=((obSanitizeVal(r['次回種別']||''))+' '+(obSanitizeVal(r['次回内容']||''))).trim();
+  var content=result==='visited'?(_nextLabel||'来場'):('キャンセル'+(_nextLabel?'（'+_nextLabel+'）':''));
   if(!r.history) r.history=[];
   r.history.push({date:dateStr,type:'来場',content:content,staff:r['担当者']||''});
   r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
@@ -6601,8 +6631,7 @@ function obRenderVisitors(){
     mr.forEach(function(r){ monthN++;
       var rawStatus=r['商談ステータス']||'問い合わせ';
       var dispStatus=obNormStatus(rawStatus);
-      var sc=OB_STATUS_CLASS[rawStatus]||OB_STATUS_CLASS[dispStatus]||'ob-s0';
-      if(sc!=='ob-sF'&&(r.history||[]).some(function(h){return /他決/.test(h.content||'');})) sc='ob-sF';
+      var sc=obStatusClassFor(r);
       var nextRaw=r['次回予定']?obNormDate(r['次回予定']):'';
       var nextCls='none'; var nextAlarm='';
       if(nextRaw&&nextRaw.length>=10){
@@ -6627,8 +6656,8 @@ function obRenderVisitors(){
         '<td style="font-size:.76rem;color:#888;white-space:nowrap">'+
           (visitDateDisp?obFmtDate(visitDateDisp):'<span style="color:#DDD">—</span>')+
         '</td>'+
-        '<td>'+
-          (r['反響元']?'<span class="ob-tipo-chip" style="pointer-events:none">'+esc(r['反響元'])+'</span>':'<span style="color:#CCC">—</span>')+
+        '<td style="cursor:pointer" onclick="obFloatEdit(event,'+r._row+',\'反響元\',\'select\')">'+
+          obListCellHtml(r,'反響元')+
         '</td>'+
         '<td class="ob-td-name">'+
           '<span class="ob-name-link" onclick="obOpenDetail('+r._row+');event.stopPropagation()">'+esc(r['顧客名']||'—')+'</span>'+
@@ -6637,14 +6666,14 @@ function obRenderVisitors(){
           (kana?'<div>'+esc(kana)+'</div>':'')+
           (tel?'<div style="color:#7B6248;font-family:monospace;margin-top:1px">📞 '+esc(tel)+'</div>':'<span style="color:#CCC">—</span>')+
         '</td>'+
-        '<td onclick="event.stopPropagation()" style="white-space:nowrap">'+
-          '<span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+');event.stopPropagation()">'+esc(dispStatus)+'</span>'+
+        '<td style="white-space:nowrap;cursor:pointer" onclick="obFloatEdit(event,'+r._row+',\'商談ステータス\',\'select\')">'+
+          obListCellHtml(r,'商談ステータス')+
         '</td>'+
-        '<td style="white-space:nowrap">'+
-          '<div style="font-size:.8rem;font-weight:700;color:#2B2B2B">'+esc(obSanitizeVal(r['担当者']||''))+'</div>'+
+        '<td style="white-space:nowrap;cursor:pointer" onclick="obFloatEdit(event,'+r._row+',\'担当者\',\'staff\')">'+
+          obListCellHtml(r,'担当者')+
         '</td>'+
-        '<td style="white-space:nowrap;font-size:.76rem;color:#888">'+esc(obSanitizeVal(r['サブ担当']||''))+'</td>'+
-        '<td style="font-size:.76rem">'+areaHtml+'</td>'+
+        '<td style="white-space:nowrap;font-size:.76rem;color:#888;cursor:pointer" onclick="obFloatEdit(event,'+r._row+',\'サブ担当\',\'staff\')">'+obListCellHtml(r,'サブ担当')+'</td>'+
+        '<td style="font-size:.76rem;cursor:pointer" onclick="obFloatEdit(event,'+r._row+',\'エリア\',\'area\')">'+obListCellHtml(r,'エリア')+'</td>'+
         '<td class="ob-td-hist" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()" style="cursor:pointer">'+
           '<div class="ob-hist-chips">'+obMiniTl(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">＋</button></div>'+
         '</td>'+
@@ -6655,8 +6684,8 @@ function obRenderVisitors(){
               '<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>')+
           '</div>'+
         '</td>'+
-        '<td style="padding:4px 8px;font-size:.78rem;color:#555">'+
-          (r['次回内容']?esc(r['次回内容']):'<span style="color:#CCC;font-style:italic">—</span>')+
+        '<td style="padding:4px 8px;font-size:.78rem;color:#555;cursor:pointer" onclick="obFloatEdit(event,'+r._row+',\'次回内容\',\'text\')">'+
+          obListCellHtml(r,'次回内容')+
         '</td>'+
         '<td style="padding:4px 6px;text-align:center" onclick="event.stopPropagation()">'+
           '<button class="ob-del" onclick="obConfirmDel('+r._row+');event.stopPropagation()" title="削除">✕</button>'+
@@ -6727,6 +6756,7 @@ function obMiniTl(r){
   if(!h.length) return '<span style="color:#DDD;font-size:.72rem">—</span>';
   var last=h.length-1;
   var out='<div class="ob-mini-tl">';
+  var lastLbl='';
   h.forEach(function(item,i){
     var d=item.date?obNormDate(item.date):'';
     var p=d.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -6734,10 +6764,14 @@ function obMiniTl(r){
     var content=String(item.content||'').trim();
     var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0||OB_SOURCES.indexOf(content)>=0;
     var lbl=(shortD?shortD+' ':'')+(item.type||'')+(content&&!isGeneric?'・'+content:'');
+    if(i===last) lastLbl=lbl;
     if(i>0) out+='<div class="ob-mini-tl-line"></div>';
     out+='<div class="ob-mini-tl-dot'+(i===last?' last':'')+'" title="'+esc(lbl)+'"></div>';
   });
-  return out+'</div>';
+  out+='</div>';
+  // 最新履歴のラベルをテキストで併記（来場確認の反映を見やすく）
+  if(lastLbl) out+='<span class="ob-mini-tl-label" title="'+esc(lastLbl)+'">'+esc(lastLbl)+'</span>';
+  return out;
 }
 
 function obSC(l,v,extra){return '<span class="ob-sc"><span class="sl">'+l+'</span><span class="sv">'+v+'</span>'+(extra?'<span class="sp">'+extra+'</span>':'')+'</span>';}
@@ -7185,6 +7219,64 @@ function obEditStatusInline(el,rowIdx){
     if(card) card.setAttribute('data-sc',nc);
     obSaveField(rowIdx,'商談ステータス',v); }
   sel.addEventListener('change',save); sel.addEventListener('blur',save);
+}
+
+// ── フローティングセル編集（行の高さを変えずに反響元/担当/サブ担当/エリア/内容/ステータスを編集） ──
+var _obFloatCtx=null;
+function _obFloatEditEl(){
+  var el=document.getElementById('ob-float-edit');
+  if(!el){ el=document.createElement('div'); el.id='ob-float-edit'; el.className='ob-float-edit'; document.body.appendChild(el); }
+  return el;
+}
+function obFloatEdit(e,rowIdx,field,kind){
+  if(e&&e.stopPropagation) e.stopPropagation();
+  var r=obRows[rowIdx]; if(!r) return;
+  var td=(e&&e.currentTarget)?e.currentTarget:null;
+  if(kind==='area'){
+    obAreaPickerOpen(td||document.body,obSanitizeVal(r['エリア']||''),function(nv){
+      obSaveField(rowIdx,'エリア',nv);
+      if(td) td.innerHTML=obListCellHtml(obRows[rowIdx],'エリア');
+    });
+    return;
+  }
+  var box=_obFloatEditEl();
+  var cur=obSanitizeVal(r[field]||'');
+  if(kind==='select'||kind==='staff'){
+    var opts=kind==='staff'?getStaffList():(field==='反響元'?OB_SOURCES:OB_STATUS_LIST);
+    var emptyOpt=(field==='商談ステータス')?'':'<option value="">—</option>';
+    box.innerHTML='<select>'+emptyOpt+opts.map(function(o){return '<option'+(o===cur?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select>';
+  } else {
+    box.innerHTML='<input type="text" value="'+esc(cur).replace(/"/g,'&quot;')+'">';
+  }
+  var ctrl=box.firstChild;
+  if(td){
+    var rect=td.getBoundingClientRect();
+    box.style.left=Math.min(rect.left,window.innerWidth-210)+'px';
+    var top=rect.bottom+4; if(top+70>window.innerHeight) top=Math.max(8,rect.top-70);
+    box.style.top=top+'px';
+  }
+  box.classList.add('show');
+  _obFloatCtx={rowIdx:rowIdx,field:field,td:td,ctrl:ctrl,done:false};
+  ctrl.focus(); if(ctrl.select) ctrl.select();
+  function commit(save){
+    var ctx=_obFloatCtx; if(!ctx||ctx.done) return; ctx.done=true; _obFloatCtx=null;
+    document.removeEventListener('mousedown',outside,true);
+    if(save){
+      var v=ctx.ctrl.value;
+      obSaveField(ctx.rowIdx,ctx.field,v);
+      if(ctx.td) ctx.td.innerHTML=obListCellHtml(obRows[ctx.rowIdx],ctx.field);
+      if(ctx.field==='商談ステータス'&&ctx.td){
+        var tr=ctx.td.closest('tr'); if(tr) tr.setAttribute('data-sc',obStatusClassFor(obRows[ctx.rowIdx]));
+        if(ctx.rowIdx===obDetailRow){var db=document.getElementById('ob-det-badge'); if(db){db.textContent=obNormStatus(v);db.className='ob-badge '+obStatusClassFor(obRows[ctx.rowIdx]);}}
+      }
+    }
+    box.classList.remove('show'); box.innerHTML='';
+  }
+  function outside(ev){ if(!box.contains(ev.target)) commit(true); }
+  if(kind==='select'||kind==='staff') ctrl.addEventListener('change',function(){ commit(true); });
+  ctrl.addEventListener('keydown',function(ev){ if(ev.key==='Enter'){ ev.preventDefault(); commit(true); } else if(ev.key==='Escape'){ commit(false); } });
+  ctrl.addEventListener('blur',function(){ setTimeout(function(){ commit(true); },150); });
+  setTimeout(function(){ document.addEventListener('mousedown',outside,true); },0);
 }
 
 function obUpdateNewAreaDisplay(){
@@ -8279,7 +8371,7 @@ function obHistPopSave(){
   obHistPopRenderList(r);
   var tds = document.querySelectorAll('tr[data-row="'+rowIdx+'"] td');
   tds.forEach(function(td){ if(td.querySelector('.ob-hist-chips')){
-    td.innerHTML='<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+rowIdx+');event.stopPropagation()">＋</button></div>';
+    td.innerHTML='<div class="ob-hist-chips">'+obMiniTl(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+rowIdx+');event.stopPropagation()">＋</button></div>';
   }});
   post({action:'obAddHistory',id:r.id,row:rowIdx,date:date,type:type,content:content,staff:staff});
   document.getElementById('ob-hist-pop-content').value='';
@@ -8394,7 +8486,7 @@ function obHistPopDel(key){
   obHistPopRenderList(r);
   var tds2 = document.querySelectorAll('tr[data-row="'+rowIdx+'"] td');
   tds2.forEach(function(td){ if(td.querySelector('.ob-hist-chips')){
-    td.innerHTML='<div class="ob-hist-chips">'+obHistChips(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+rowIdx+');event.stopPropagation()">＋</button></div>';
+    td.innerHTML='<div class="ob-hist-chips">'+obMiniTl(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+rowIdx+');event.stopPropagation()">＋</button></div>';
   }});
   toast('削除しました');
 }
