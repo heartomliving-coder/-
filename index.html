@@ -4623,11 +4623,11 @@ function hubRenderRecent(){
   var el=document.getElementById('hubRecentList'); if(!el) return;
   if(!obRows.length){ el.innerHTML='<div class="hub-empty-mini">データなし（OBを読み込んでください）</div>'; return; }
   var recent=obRows.slice().sort(function(a,b){
-    var da=obNormDate(a['来場日']||''),db=obNormDate(b['来場日']||'');
+    var da=obNormDate(a['問い合わせ日']||a['来場日']||''),db=obNormDate(b['問い合わせ日']||b['来場日']||'');
     return db>da?1:db<da?-1:0;
   }).slice(0,10);
   el.innerHTML=recent.map(function(r){
-    var d=r['来場日']?obFmtDate(obNormDate(r['来場日'])):'—';
+    var d=obFmtDate(obNormDate(r['問い合わせ日']||r['来場日']||''))||'—';
     var sc=OB_STATUS_CLASS[r['商談ステータス']]||'ob-s0';
     return '<div class="hub-rec-row" onclick="enterOpenBoard()">'+
       '<span class="hub-rec-date">'+esc(d)+'</span>'+
@@ -4768,9 +4768,9 @@ function hubBuildActivityFeed(force, showAll){
   var MAX = hubActShowAll ? 200 : 40;
   var items = [];
 
-  // OBデータ（来場日で追加）
+  // OBデータ（問い合わせ日で追加）
   (obRows||[]).forEach(function(r){
-    var d=r['来場日']||''; var n=r['顧客名']||'';
+    var d=r['問い合わせ日']||r['来場日']||''; var n=r['顧客名']||'';
     if(!d||!n) return;
     items.push({type:'ob',badge:'🏠 OB',cls:'ob',name:n,sub:r['反響元']||r['来場種別']||'',date:d,sort:d});
   });
@@ -6061,7 +6061,7 @@ var OB_STATUS_LIST = ['問い合わせ','見学会前','無料相談前','勉強
   'ヒアリング前','プレゼン前','中長期フォロー','返信なし','パートナー検討中','パートナー契約済','失注'];
 var OB_EVENT_TYPES = ['完成見学会','オンライン見学会','無料相談会','デザインセミナー',
   'casa資料請求','trip資料請求','カナマルハウス','電話','飛び込み'];
-var OB_SOURCES = ['HP','電話','家づくり学校','FC','友人紹介','Instagram','ポータルサイト','その他'];
+var OB_SOURCES = ['HP','HP反響','電話','家づくり学校','FC','友人紹介','Instagram','ポータルサイト','完成見学会','無料相談会','デザインセミナー','チラシ','紹介','その他'];
 var OB_HIST_TYPES = ['来場','電話','オンライン','打ち合わせ','現地見学','プレゼン','その他'];
 var OB_HURDLES = [
   {key:'H_予算',icon:'💰',label:'予算'},
@@ -6281,7 +6281,7 @@ function obLoad(silent, force){
     if(obDetailKey && document.getElementById('ob-detail').classList.contains('show')){
       var newIdx=-1;
       for(var i=0;i<obRows.length;i++){
-        if(obRows[i]['顧客名']===obDetailKey.name && obRows[i]['来場日']===obDetailKey.date){ newIdx=i; break; }
+        if(obRows[i]['顧客名']===obDetailKey.name && (obRows[i]['問い合わせ日']||obRows[i]['来場日']||'')===(obDetailKey.date)){ newIdx=i; break; }
       }
       if(newIdx>=0){ obDetailRow=newIdx; }
       else { obCloseDetail(); toast('⚠️ 表示中の顧客データが見つかりません（削除または変更された可能性があります）'); }
@@ -6784,7 +6784,7 @@ function obRenderVisitors(){
   var COL=13;
   var html=aggHtml+'<table class="ob-table ob-vis-table"><thead><tr>'+
     '<th class="ob-rn" style="width:28px">#</th>'+
-    '<th style="min-width:84px">来場日</th>'+
+    '<th style="min-width:84px">問い合わせ日</th>'+
     '<th style="min-width:80px">反響元</th>'+
     '<th style="min-width:120px">顧客名</th>'+
     '<th style="min-width:120px">フリガナ / 電話</th>'+
@@ -6866,7 +6866,7 @@ function obRenderVisitors(){
       html+='<tr data-sc="'+sc+'" data-row="'+r._row+'">'+
         '<td class="ob-rn">'+monthN+'</td>'+
         '<td style="font-size:.76rem;color:#888;white-space:nowrap">'+
-          (visitDateDisp?obFmtDate(visitDateDisp):'<span style="color:#DDD">—</span>')+
+          (inquiryDate?obFmtDate(inquiryDate):'<span style="color:#DDD">—</span>')+
         '</td>'+
         '<td style="cursor:pointer" onclick="obFloatEdit(event,'+r._row+',\'反響元\',\'select\')">'+
           obListCellHtml(r,'反響元')+
@@ -7203,7 +7203,7 @@ function obRenderAgg(){
 
   // 年リスト（正規化後）
   var years={};
-  obRows.forEach(function(r){ var y=obNormDate(r['来場日']||'').substring(0,4); if(y&&y.length===4) years[y]=true; });
+  obRows.forEach(function(r){ var y=obNormDate(r['問い合わせ日']||r['来場日']||'').substring(0,4); if(y&&y.length===4) years[y]=true; });
   var yearList=Object.keys(years).sort().reverse();
   var selY=el.querySelector('.ob-agg-year-sel');
   var curY=(selY&&selY.value)?selY.value:(yearList[0]||'');
@@ -7212,9 +7212,9 @@ function obRenderAgg(){
   var monthly={};
   for(var m=1;m<=12;m++) monthly[('0'+m).slice(-2)]={問合:0,完成:0,オンライン:0,無料:0,デザ:0,casa:0,trip:0,他:0,P:0};
 
-  obRows.filter(function(r){ return obNormDate(r['来場日']||'').substring(0,4)===curY; })
+  obRows.filter(function(r){ return obNormDate(r['問い合わせ日']||r['来場日']||'').substring(0,4)===curY; })
   .forEach(function(r){
-    var nd=obNormDate(r['来場日']||'');
+    var nd=obNormDate(r['問い合わせ日']||r['来場日']||'');
     var mm=nd.substring(5,7); if(!mm||!monthly[mm]) return;
     monthly[mm].問合++;
     var t=r['来場種別']||'';
@@ -7249,7 +7249,7 @@ function obRenderAgg(){
 
   // 担当者別集計（除外スタッフを除く）
   var staffAgg={};
-  obRows.filter(function(r){return obNormDate(r['来場日']||'').substring(0,4)===curY;})
+  obRows.filter(function(r){return obNormDate(r['問い合わせ日']||r['来場日']||'').substring(0,4)===curY;})
   .forEach(function(r){
     var s=r['担当者']||'未設定';
     if(OB_EXCLUDED_STAFF.indexOf(s)>=0) return;
@@ -8025,13 +8025,13 @@ function obSaveNew(){
 function obOpenDetail(rowIdx){
   var r=obRows[rowIdx]; if(!r) return;
   obDetailRow=rowIdx;
-  obDetailKey={name:r['顧客名']||'',date:r['来場日']||''};
+  obDetailKey={name:r['顧客名']||'',date:r['問い合わせ日']||r['来場日']||''};
   // 履歴追加フォームの日付を今日に自動セット
   var tdInp=document.getElementById('tl-date');
   if(tdInp){ var t=new Date(); tdInp.value=t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2); }
   document.getElementById('ob-det-name').textContent=r['顧客名']||'—';
   var sub=[];
-  if(r['来場日']) sub.push(obFmtDate(obNormDate(r['来場日']))+' 受付');
+  var _detDate=r['問い合わせ日']||r['来場日']||''; if(_detDate) sub.push(obFmtDate(obNormDate(_detDate))+' 受付');
   var staffStr=r['担当者']||(r['サブ担当']?'':'');
   if(r['サブ担当']) staffStr+=(staffStr?' / ':'')+r['サブ担当'];
   if(staffStr) sub.push('担当: '+staffStr);
@@ -11283,7 +11283,7 @@ function gsearchRun(){
     var n=(r['顧客名']||'').toLowerCase(); var tel=(r['電話']||'').toLowerCase();
     var area=(r['エリア']||'').toLowerCase(); var st=(r['商談ステータス']||'');
     if(n.indexOf(q)>=0||tel.indexOf(q)>=0||area.indexOf(q)>=0){
-      results.push({type:'ob',icon:'🏠',name:r['顧客名']||'',sub:r['来場日']||''+' '+st, row:r._row});
+      results.push({type:'ob',icon:'🏠',name:r['顧客名']||'',sub:(r['問い合わせ日']||r['来場日']||'')+' '+st, row:r._row});
     }
   });
   // MTG検索
