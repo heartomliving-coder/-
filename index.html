@@ -6438,12 +6438,11 @@ function obImportNewInquiries(){
     var data={ 問い合わせ日:inquiryDate, 来場日:inquiryDate, 顧客名:c.name, 来場種別:'', エリア:'',
       反響元:c.source||'', 担当者:'', サブ担当:'', 商談ステータス:(c.status||'問い合わせ'), 次回予定:'', 次回内容:'' };
     var newRec=Object.assign({},data,{ _row:obRows.length, id:'tmp_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-      karte:{ 電話番号:c.tel||'', フリガナ:c.furigana||'', メール:c.email||'' },
+      karte:{ 電話番号:c.tel||'', フリガナ:c.furigana||'', メールアドレス:c.email||'' },
       history:[{date:inquiryDate,type:'問い合わせ',content:'',staff:''}] });
     obRows.push(newRec);
     // Gmail由来の場合はGAS側で受付管理・顧客情報シートにも書き込む
-    var act=c._src==='gmail'?'obSaveFromGmail':'obSaveCustomer';
-    post(Object.assign({action:act},data,{電話番号:c.tel||'',フリガナ:c.furigana||'',メール:c.email||'',郵便番号:c.zip||'',住所:c.address||''}));
+    post(Object.assign({action:'obSaveCustomer'},data,{karte:{電話番号:c.tel||'',フリガナ:c.furigana||'',メールアドレス:c.email||'',住所:c.address||''}}));
   });
   // Gmailキャッシュをクリア（追加済みが再表示されないように）
   _obGmailLeads=null; try{ localStorage.removeItem(_GMAIL_LEADS_KEY); }catch(e){}
@@ -6787,7 +6786,7 @@ function obRenderVisitors(){
     '<th style="min-width:84px">問い合わせ日</th>'+
     '<th style="min-width:80px">反響元</th>'+
     '<th style="min-width:120px">顧客名</th>'+
-    '<th style="min-width:120px">フリガナ / 電話</th>'+
+    '<th style="min-width:140px">フリガナ / 電話 / メール</th>'+
     '<th style="min-width:90px">ステータス</th>'+
     '<th style="min-width:64px">担当</th>'+
     '<th style="min-width:64px">サブ担当</th>'+
@@ -6856,6 +6855,7 @@ function obRenderVisitors(){
       var k=r.karte||{};
       var kana=obSanitizeVal(k['フリガナ']||'');
       var tel=obSanitizeVal(k['電話番号']||'');
+      var email=obSanitizeVal(k['メールアドレス']||k['メール']||'');
       // 来場日: 履歴の最初の「来場」type優先、なければ来場日フィールド、なければ問い合わせ日
       var histForDate=obDedupHistory(r.history||[]);
       var firstVisitH=null;
@@ -6876,7 +6876,8 @@ function obRenderVisitors(){
         '</td>'+
         '<td style="font-size:.75rem;color:#888;white-space:nowrap">'+
           (kana?'<div>'+esc(kana)+'</div>':'')+
-          (tel?'<div style="color:#7B6248;font-family:monospace;margin-top:1px">📞 '+esc(tel)+'</div>':'<span style="color:#CCC">—</span>')+
+          (tel?'<div style="color:#7B6248;font-family:monospace;margin-top:1px">📞 '+esc(tel)+'</div>':(!kana&&!email?'<span style="color:#CCC">—</span>':''))+
+          (email?'<div style="color:#5B7FA6;font-size:.7rem;margin-top:1px;overflow:hidden;text-overflow:ellipsis;max-width:160px">✉ '+esc(email)+'</div>':'')+
         '</td>'+
         '<td style="white-space:nowrap;cursor:pointer" onclick="obFloatEdit(event,'+r._row+',\'商談ステータス\',\'select\')">'+
           obListCellHtml(r,'商談ステータス')+
