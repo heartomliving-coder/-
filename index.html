@@ -6600,7 +6600,7 @@ function obRenderVisitors(){
     if(fStaff && r['担当者']!==fStaff && r['サブ担当']!==fStaff) return false;
     if(fQ){
       var k=r.karte||{};
-      var hay=((r['顧客名']||'')+' '+(k['フリガナ']||'')+' '+(k['電話番号']||'')+' '+(r['反響元']||'')+' '+(r['エリア']||'')+' '+(k['住所']||'')).toLowerCase();
+      var hay=((r['顧客名']||'')+' '+(k['フリガナ']||r['フリガナ']||'')+' '+(k['電話番号']||r['電話番号']||'')+' '+(r['反響元']||'')+' '+(r['エリア']||'')+' '+(k['住所']||r['住所']||'')).toLowerCase();
       if(hay.indexOf(fQ)<0) return false;
     }
     if(obStatusFilter && (r['商談ステータス']||'問い合わせ')!==obStatusFilter) return false;
@@ -6853,9 +6853,9 @@ function obRenderVisitors(){
         else{nextCls='ok';}
       }
       var k=r.karte||{};
-      var kana=obSanitizeVal(k['フリガナ']||'');
-      var tel=obSanitizeVal(k['電話番号']||'');
-      var email=obSanitizeVal(k['メールアドレス']||k['メール']||'');
+      var kana=obSanitizeVal(k['フリガナ']||r['フリガナ']||'');
+      var tel=obSanitizeVal(k['電話番号']||r['電話番号']||'');
+      var email=obSanitizeVal(k['メールアドレス']||k['メール']||r['メール']||r['メールアドレス']||'');
       // 来場日: 履歴の最初の「来場」type優先、なければ来場日フィールド、なければ問い合わせ日
       var histForDate=obDedupHistory(r.history||[]);
       var firstVisitH=null;
@@ -7053,7 +7053,7 @@ function obRenderActive(){
     var lastH=hist.length?hist[hist.length-1]:null;
     var lastLbl=lastH?('🕐 最終接触: '+obFmtDate(obNormDate(lastH.date||''))+(lastH.type?'・'+esc(lastH.type):'')):'';
     var k=r.karte||{};
-    var tel=obSanitizeVal(k['電話番号']||'');
+    var tel=obSanitizeVal(k['電話番号']||r['電話番号']||'');
     var pGoalRaw=r['P申込目標日']?obNormDate(r['P申込目標日']):'';
     var clsBadge=obClsBadge(r['顧客分類']||'');
     var inquiryDate=obSanitizeVal(r['問い合わせ日']||r['来場日']||'');
@@ -8324,7 +8324,9 @@ function obRenderDetInfo(){
   var r=obRows[obDetailRow]; if(!r) return;
   var g=document.getElementById('ob-det-info-grid');
   var k=r.karte||{};
-  function gv(key){ return key.indexOf('karte.')===0 ? (k[key.slice(6)]||'') : (r[key]||''); }
+  // karte.* はkarte内を優先し、旧形式（トップレベル保存）にもフォールバック
+  var _TOP_ALIAS={'フリガナ':'フリガナ','電話番号':'電話番号','メールアドレス':'メール','住所':'住所','郵便番号':'郵便番号'};
+  function gv(key){ if(key.indexOf('karte.')===0){ var f=key.slice(6); return k[f]||r[_TOP_ALIAS[f]]||r[f]||''; } return r[key]||''; }
   // 顧客情報（連絡先＝カルテ） + 案件情報。全項目クリックで編集可能。
   var fields=[
     {sec:'顧客情報'},
