@@ -604,7 +604,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 
 /* テーブル共通 */
 .ob-scroll{flex:1;overflow:auto}
-.ob-table{width:100%;border-collapse:collapse;font-size:.93rem}
+.ob-table{width:100%;border-collapse:collapse;font-size:.93rem;min-width:1000px}
 .ob-table thead th{background:#1E1E1E;color:rgba(255,255,255,.82);font-size:.7rem;font-weight:700;letter-spacing:.1em;padding:10px 13px;text-align:left;position:sticky;top:0;z-index:3;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);text-transform:uppercase}
 .ob-table thead th:first-child{border-radius:0}
 .ob-table thead th.cb-th{text-align:center;padding:6px 5px;font-size:.7rem;letter-spacing:.02em;line-height:1.4}
@@ -3077,7 +3077,6 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
     <div class="st-wrap">
       <nav class="st-nav">
         <button class="st-tab on"  id="stab-connection" onclick="showSettingsTab('connection')">🔗<br>接続</button>
-        <button class="st-tab"     id="stab-supabase"   onclick="showSettingsTab('supabase')">🗄<br>DB</button>
         <button class="st-tab"     id="stab-event"      onclick="showSettingsTab('event')">📅<br>イベント</button>
         <button class="st-tab"     id="stab-staff"      onclick="showSettingsTab('staff')">👤<br>担当者</button>
         <button class="st-tab"     id="stab-terminal"   onclick="showSettingsTab('terminal')">🪑<br>端末</button>
@@ -3105,39 +3104,6 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
           <button class="st-save" onclick="saveConnectionSettings()">保存する</button>
         </div>
 
-        <!-- Supabase設定 -->
-        <div class="st-pane" id="tab-supabase">
-          <div class="st-sec">🗄 Supabase データベース設定</div>
-          <div style="font-size:.8rem;color:#666;margin-bottom:12px;line-height:1.6">
-            データをSupabaseに保存すると、複数端末でリアルタイム同期が可能になります。<br>
-            <a href="https://supabase.com" target="_blank" style="color:#3B82F6">supabase.com</a> でプロジェクトを作成し、
-            <strong>Project Settings → API → service_role key</strong> を設定してください。
-          </div>
-          <div id="sb-status-banner" style="padding:8px 12px;border-radius:6px;font-size:.8rem;margin-bottom:14px;display:none"></div>
-          <div class="st-row">
-            <label>Supabase URL</label>
-            <input id="setSbUrl" placeholder="https://xxxxxxxxxxxx.supabase.co" style="font-family:monospace;font-size:.82rem">
-            <div class="hint">Project Settings > API > Project URL</div>
-          </div>
-          <div class="st-row">
-            <label>Service Role Key</label>
-            <input id="setSbKey" type="password" placeholder="eyJhbGci..." style="font-family:monospace;font-size:.82rem">
-            <div class="hint">Project Settings > API > service_role （⚠️GAS側のScript Propertiesに保存されます。フロントエンドに公開されません）</div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-            <button class="st-save" onclick="sbSaveAndTest()">💾 保存してテスト</button>
-            <button class="hbtn" onclick="sbTestOnly()">🔌 接続テスト</button>
-          </div>
-          <div id="sb-test-result" style="margin-top:10px;font-size:.82rem;min-height:1.5em"></div>
-
-          <div class="st-sec" style="margin-top:20px">📋 セットアップ手順</div>
-          <ol style="font-size:.8rem;color:#555;line-height:2;margin:0;padding-left:20px">
-            <li><a href="https://supabase.com/dashboard" target="_blank" style="color:#3B82F6">Supabaseダッシュボード</a>でNew Projectを作成</li>
-            <li>SQL Editor で <code style="background:#F3F4F6;padding:1px 4px;border-radius:3px">supabase_schema.sql</code> を実行</li>
-            <li>上のURL・Service Role Keyを入力して「保存してテスト」</li>
-            <li>GASを再デプロイ後、「データ移行」タブから既存データを移行</li>
-          </ol>
-        </div>
 
         <!-- イベント設定 -->
         <div class="st-pane" id="tab-event">
@@ -3260,14 +3226,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
             </button>
           </div>
 
-          <div class="st-sec">🗄 Supabaseへのデータ移行</div>
-          <div style="font-size:.8rem;color:#666;margin-bottom:10px">
-            既存のOB・着工管理・MTGデータをSupabaseへ一括移行します。Supabase設定が完了してから実行してください。
-          </div>
-          <button class="st-save" onclick="dtMigrateToSupabase()">🚀 Supabaseへ全データ移行</button>
-          <div id="dt-migrate-result" style="margin-top:10px;font-size:.82rem;min-height:1.5em"></div>
-
-          <div class="st-sec" style="margin-top:16px">🧹 キャッシュ管理</div>
+          <div class="st-sec">🧹 キャッシュ管理</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="hbtn" onclick="dtClearOBCache()">OBキャッシュクリア</button>
             <button class="hbtn" onclick="dtClearKJCache()">KJキャッシュクリア</button>
@@ -3278,7 +3237,6 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
           <div class="st-sec" style="margin-top:16px">🔌 接続テスト</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="hbtn" onclick="dtTestGAS()">GAS接続テスト</button>
-            <button class="hbtn" onclick="dtTestSupabase()">Supabase接続テスト</button>
             <button class="hbtn" onclick="dtTestCalendar()">Googleカレンダーテスト</button>
             <button class="hbtn" onclick="dtTestChatwork()">Chatworkテスト</button>
           </div>
@@ -3554,8 +3512,6 @@ function applyRoleUI(){
   if(datatoolsTab) datatoolsTab.style.display = isFullAccess() ? '' : 'none';
   var connectionTab = document.getElementById('stab-connection');
   if(connectionTab) connectionTab.style.display = isFullAccess() ? '' : 'none';
-  var supabaseTab = document.getElementById('stab-supabase');
-  if(supabaseTab) supabaseTab.style.display = isOwner() ? '' : 'none';
   // 削除ボタン（フルアクセス以上のみ）
   document.querySelectorAll('.ob-del,.ob-vis-card-act.del,.kj-del-btn').forEach(function(el){
     el.style.display = isFullAccess() ? '' : 'none';
@@ -4341,9 +4297,14 @@ function initSyncPoll(){
   // 同時編集者表示：60秒ごとにpresenceを更新・表示
   presenceUpdate();
   window.__presenceTimer=setInterval(presenceUpdate,60000);
+  // 変更シグナルポーリング：20秒ごと（~1-2MB/月）
+  sbPollChanges();
+  window.__sbChangePollTimer=setInterval(sbPollChanges,20000);
 }
 
-// ─── 同時編集者表示 ─────────────────────────────────────────
+// ─── 同時編集者表示（Supabase presence専用 / データ保存はDrive JSON）─────
+var _sbChangeSig = {}; // 最後に確認した change_signals タイムスタンプ
+
 function presenceUpdate(){
   var sbUrl=localStorage.getItem('sb_url');
   var sbKey=localStorage.getItem('sb_key');
@@ -4351,20 +4312,43 @@ function presenceUpdate(){
   var name=localStorage.getItem('admin_session_name')||email||'';
   if(!sbUrl||!sbKey||!email) return;
   var page=_getPresencePage();
-  // 自分の存在をupsert（user_presenceテーブルが必要）
+  // 詳細パネルで開いているレコードのIDを記録（誰が同じレコードを見ているか判定用）
+  var detailId='';
+  if(obDetailRow>=0 && obRows[obDetailRow]) detailId=obRows[obDetailRow].id||'';
   fetch(sbUrl+'/rest/v1/user_presence',{
     method:'POST',
     headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
-    body:JSON.stringify({email:email,name:name,page:page,updated_at:new Date().toISOString()})
+    body:JSON.stringify({email:email,name:name,page:page,detail_id:detailId,updated_at:new Date().toISOString()})
   }).then(function(){
-    // 全アクティブユーザーを取得（5分以内）
     var cutoff=new Date(Date.now()-5*60*1000).toISOString();
-    return fetch(sbUrl+'/rest/v1/user_presence?updated_at=gte.'+cutoff+'&select=email,name,page',{
+    return fetch(sbUrl+'/rest/v1/user_presence?updated_at=gte.'+cutoff+'&select=email,name,page,detail_id',{
       headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey,'Accept':'application/json'}
     });
   }).then(function(r){return r.json();}).then(function(rows){
     if(!Array.isArray(rows)) return;
-    _renderPresence(rows, email);
+    _renderPresence(rows, email, detailId);
+  }).catch(function(){});
+}
+
+// 軽量変更シグナルポーリング（change_signals テーブルのタイムスタンプのみ取得）
+// 月間帯域: ~1-2MB（データ本体は取得しない）
+function sbPollChanges(){
+  var sbUrl=localStorage.getItem('sb_url');
+  var sbKey=localStorage.getItem('sb_key');
+  if(!sbUrl||!sbKey) return;
+  fetch(sbUrl+'/rest/v1/change_signals?select=table_name,updated_at',{
+    headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey,'Accept':'application/json'}
+  }).then(function(r){return r.json();}).then(function(rows){
+    if(!Array.isArray(rows)) return;
+    rows.forEach(function(sig){
+      var prev=_sbChangeSig[sig.table_name];
+      _sbChangeSig[sig.table_name]=sig.updated_at;
+      if(!prev||prev===sig.updated_at) return; // 初回 or 変化なし
+      // 変化検知 → Drive JSONから再取得（GAS経由）
+      if(sig.table_name==='ob') obLoad(true);
+      if(sig.table_name==='kj') { if(typeof kjLoad==='function') kjLoad(true); }
+      if(sig.table_name==='mtg') { if(typeof mtgLoad==='function') mtgLoad(true); }
+    });
   }).catch(function(){});
 }
 function _getPresencePage(){
@@ -4377,15 +4361,32 @@ function _getPresencePage(){
 }
 function _presenceColor(email){ return ['#4F46E5','#0891B2','#059669','#D97706','#DC2626','#7C3AED','#DB2777'][Math.abs((email||'?').charCodeAt(0))%7]; }
 function _presenceInitials(u){ return (u.name||u.email||'?').replace(/@.*$/,'').slice(0,2).toUpperCase(); }
-function _renderPresence(rows, myEmail){
+function _renderPresence(rows, myEmail, myDetailId){
   // 重複メールを排除し、自分を先頭に
   var seen={}, list=[];
   rows.forEach(function(r){ var e=(r.email||'').toLowerCase(); if(!e||seen[e]) return; seen[e]=1; list.push(r); });
   list.sort(function(a,b){ return (a.email===myEmail)?-1:(b.email===myEmail)?1:0; });
+  var others=list.filter(function(r){return (r.email||'').toLowerCase()!==myEmail;});
+
+  // ── 同じレコードを同時編集中の警告 ──────────────────────────
+  var coEdit=myDetailId?others.filter(function(u){return u.detail_id===myDetailId;}):[];
+  var warnEl=document.getElementById('ob-co-edit-warn');
+  if(!warnEl){
+    warnEl=document.createElement('div');
+    warnEl.id='ob-co-edit-warn';
+    warnEl.style.cssText='position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:99999;background:#FEF3C7;border:1.5px solid #F59E0B;border-radius:8px;padding:8px 18px;font-size:.84rem;font-weight:600;color:#92400E;box-shadow:0 4px 16px rgba(0,0,0,.15);display:none';
+    document.body.appendChild(warnEl);
+  }
+  if(coEdit.length){
+    warnEl.textContent='⚠️ '+coEdit.map(function(u){return u.name||u.email;}).join('・')+' さんが同じレコードを編集中です';
+    warnEl.style.display='block';
+  } else {
+    warnEl.style.display='none';
+  }
+
   // ハブヘッダー（自分以外を「閲覧中」として表示）
   var el=document.getElementById('hubOnlineUsers');
   if(el){
-    var others=list.filter(function(r){return (r.email||'').toLowerCase()!==myEmail;});
     el.innerHTML=others.length?('<span style="font-size:.6rem;color:rgba(255,255,255,.35);letter-spacing:.06em;margin-right:2px">閲覧中</span>'+
       others.map(function(u){
         return '<span title="'+esc(u.name||u.email)+' ('+esc(u.page||'')+')" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:'+_presenceColor(u.email)+';color:#fff;font-size:.58rem;font-weight:700;border:1.5px solid rgba(255,255,255,.25)">'+_presenceInitials(u)+'</span>';
@@ -4401,6 +4402,23 @@ function _renderPresence(rows, myEmail){
       }).join('')):'';
   }
 }
+// 同時編集コンフリクト処理
+function obHandleConflict_(){
+  var confirmed=confirm('⚠️ 他のユーザーがこのレコードを保存しました。\n\n最新データを読み込みますか？\n（OK = 最新を読み込む / キャンセル = 強制上書き保存）');
+  if(confirmed){
+    // 最新データを再読み込み
+    localStorage.removeItem('ob_v3_ts');
+    obLoad(false);
+    toast('最新データを読み込みました');
+  } else {
+    // 強制上書き：_v を無効化して再保存
+    var r=obRows[obDetailRow]; if(!r) return;
+    r['_v']=-1; // サーバー側でスキップさせる特殊値
+    post({action:'obSaveKarte',id:r.id,row:obDetailRow,karte:r.karte||{}});
+    toast('強制上書き保存しました');
+  }
+}
+
 // サイドバーのアカウントチップ更新
 function wsUpdateAcctChip(){
   var nameEl=document.getElementById('ws-acct-name'); var roleEl=document.getElementById('ws-acct-role');
@@ -4928,23 +4946,9 @@ function openSettings(tab){
   // GASから設定を読み込んで各フィールドを自動補完
   gasGet('getSettingsAll', function(d){
     if(!d||!d.ok) return;
-    // Supabase設定
-    var sbUrlEl = document.getElementById('setSbUrl');
-    var sbKeyEl = document.getElementById('setSbKey');
-    if(sbUrlEl && d.sbUrl && !sbUrlEl.value) sbUrlEl.value = d.sbUrl;
-    if(sbKeyEl && d.sbKey && !sbKeyEl.value) sbKeyEl.value = d.sbKey;
+    // Supabase接続情報（プレゼンス・変更通知専用。データ保存はDriveJSON）
     if(d.sbUrl) localStorage.setItem('sb_url', d.sbUrl);
     if(d.sbKey) localStorage.setItem('sb_key', d.sbKey);
-    var sbBanner = document.getElementById('sb-status-banner');
-    if(sbBanner){
-      if(d.hasSbUrl && d.hasSbKey){
-        sbBanner.textContent='✅ Supabase設定済み（'+d.sbUrlPreview+')';
-        sbBanner.style.background='#F0FDF4'; sbBanner.style.color='#15803D'; sbBanner.style.display='block';
-      } else {
-        sbBanner.textContent='⚠️ Supabase未設定 — URL・Keyを入力して保存してください';
-        sbBanner.style.background='#FFFBEB'; sbBanner.style.color='#92400E'; sbBanner.style.display='block';
-      }
-    }
     // Chatwork設定
     var cwRoomEl  = document.getElementById('stMtgCwRoom');
     var cwTmplEl  = document.getElementById('stMtgCwTemplate');
@@ -5286,37 +5290,10 @@ function obAddPendingAccounts(){
 }
 
 function showSettingsTab(name){
-  ['connection','supabase','event','staff','terminal','display','datatools','mtgcw','auditlog','account'].forEach(function(t){
+  ['connection','event','staff','terminal','display','datatools','mtgcw','auditlog','account'].forEach(function(t){
     var pane=document.getElementById('tab-'+t); if(pane) pane.classList.toggle('show', t===name);
     var btn=document.getElementById('stab-'+t);
     if(btn) btn.classList.toggle('on', t===name);
-  });
-}
-
-// ── Supabase settings ──────────────────────────────────────
-function sbSaveAndTest(){
-  var url=(document.getElementById('setSbUrl')||{}).value||'';
-  var key=(document.getElementById('setSbKey')||{}).value||'';
-  url=url.trim(); key=key.trim();
-  var el=document.getElementById('sb-test-result');
-  if(!url||!key){if(el)el.textContent='❌ URLとService Role Keyを入力してください';return;}
-  if(el){el.textContent='⏳ 保存中...';el.style.color='#888';}
-  post({action:'sbSaveSettings',gasKey:adminKey(),supabaseUrl:url,supabaseKey:key});
-  setTimeout(function(){
-    sbTestOnly(url,key);
-  },2000);
-}
-function sbTestOnly(urlArg,keyArg){
-  var el=document.getElementById('sb-test-result');
-  if(el){el.textContent='⏳ 接続テスト中...';el.style.color='#888';}
-  gasGet('sbTestConnection',function(d){
-    if(!d){if(el){el.textContent='❌ GAS接続エラー（GASが応答しませんでした）';el.style.color='#EF4444';} return;}
-    if(d.ok){
-      if(el){el.textContent='✅ Supabase接続成功！';el.style.color='#22C55E';}
-      toast('Supabase接続OK！');
-    } else {
-      if(el){el.textContent='❌ Supabase接続失敗: '+(d.error||'不明なエラー');el.style.color='#EF4444';}
-    }
   });
 }
 
@@ -5349,20 +5326,6 @@ function dtSyncBdays(){
     else toast('誕生日同期失敗');
   },90000);
 }
-function dtMigrateToSupabase(){
-  var el=document.getElementById('dt-migrate-result');
-  if(el){el.textContent='⏳ Supabaseへ移行中...この処理には1〜2分かかることがあります';el.style.color='#888';}
-  gasGet('sbMigrateAll',function(d){
-    if(!d){if(el){el.textContent='❌ GASが応答しませんでした';el.style.color='#EF4444';} return;}
-    if(d.ok){
-      var msg='✅ 移行完了！\nOB: '+(d.ob||0)+'件\nKJ: '+(d.kj||0)+'件\nMTG: '+(d.mtg||0)+'件';
-      if(el){el.textContent=msg;el.style.color='#22C55E';}
-      toast('Supabase移行完了！');
-    } else {
-      if(el){el.textContent='❌ 移行失敗: '+(d.error||'不明');el.style.color='#EF4444';}
-    }
-  },120000);
-}
 function dtClearOBCache(){
   localStorage.removeItem('cache_ob'); obRows=null;
   var el=document.getElementById('dt-cache-result'); if(el)el.textContent='OBキャッシュをクリアしました';
@@ -5385,15 +5348,6 @@ function dtTestGAS(){
   gasGet('ping',function(d){
     if(d&&d.pong){if(el){el.textContent='✅ GAS接続OK';el.style.color='#22C55E';}}
     else{if(el){el.textContent='❌ GAS接続失敗';el.style.color='#EF4444';}}
-  });
-}
-function dtTestSupabase(){
-  var el=document.getElementById('dt-test-result');
-  if(el){el.textContent='⏳ Supabase接続テスト中...';el.style.color='#888';}
-  gasGet('sbTestConnection',function(d){
-    if(!d){if(el){el.textContent='❌ GASが応答しません';el.style.color='#EF4444';} return;}
-    if(d.ok){if(el){el.textContent='✅ Supabase接続OK';el.style.color='#22C55E';}}
-    else{if(el){el.textContent='❌ Supabase接続失敗: '+(d.error||'未設定かもしれません');el.style.color='#EF4444';}}
   });
 }
 function dtTestCalendar(){
@@ -5440,29 +5394,6 @@ function openBoard(){
   window.location.href = '?view=board';
 }
 
-// Supabaseから直接読み込み（GASより高速: ~200ms vs 15-30sec）
-function sbDirectRead(table, cb) {
-  var url = localStorage.getItem('sb_url');
-  var key = localStorage.getItem('sb_key');
-  if (!url || !key) { cb(null); return; }
-  var ctrl = window.AbortController ? new AbortController() : null;
-  var tid = setTimeout(function(){ if(ctrl) ctrl.abort(); }, 8000);
-  fetch(url + '/rest/v1/' + table + '?select=data&order=updated_at.desc&limit=2000', {
-    headers: { 'apikey': key, 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' },
-    signal: ctrl ? ctrl.signal : undefined
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(rows){
-    clearTimeout(tid);
-    if (!Array.isArray(rows)) { cb(null); return; }
-    cb(rows.map(function(r){
-      var d = r.data;
-      if (typeof d === 'string') { try { d = JSON.parse(d); } catch(e){} }
-      return d || {};
-    }));
-  })
-  .catch(function(){ clearTimeout(tid); cb(null); });
-}
 
 // timeout: ms (poll系は8秒, 大量データは60秒, それ以外は45秒)
 function gasGet(action,cb,timeout){
@@ -6061,7 +5992,7 @@ var OB_STATUS_LIST = ['問い合わせ','見学会前','無料相談前','勉強
   'ヒアリング前','プレゼン前','中長期フォロー','返信なし','パートナー検討中','パートナー契約済','失注'];
 var OB_EVENT_TYPES = ['完成見学会','オンライン見学会','無料相談会','デザインセミナー',
   'casa資料請求','trip資料請求','カナマルハウス','電話','飛び込み'];
-var OB_SOURCES = ['HP','HP反響','電話','家づくり学校','FC','友人紹介','Instagram','ポータルサイト','完成見学会','無料相談会','デザインセミナー','チラシ','紹介','その他'];
+var OB_SOURCES = ['HP','HP反響','電話','家づくり学校','FC','友人紹介','Instagram','ポータルサイト','完成見学会','無料相談会','デザインセミナー','チラシ','紹介','casa資料請求','trip資料請求','その他'];
 var OB_HIST_TYPES = ['来場','電話','オンライン','打ち合わせ','現地見学','プレゼン','その他'];
 var OB_HURDLES = [
   {key:'H_予算',icon:'💰',label:'予算'},
@@ -6295,24 +6226,17 @@ function obLoad(silent, force){
     // ハブが表示中なら活動ログも更新
     if(document.getElementById('hub').classList.contains('show')) hubBuildActivityFeed();
   }
-  // Supabase優先→失敗時GASフォールバック
-  sbDirectRead('ob_customers', function(sbRows) {
-    if (sbRows && sbRows.length) {
-      __obLoading = false;
-      _applyObRows(sbRows);
-    } else {
-      gasGet('obGetData', function(d) {
-        __obLoading = false;
-        if (!d || d.error) {
-          var errMsg = (d && d.error) ? d.error : '通信エラー';
-          if (!cached.length) {
-            document.getElementById('ob-visitors-content').innerHTML = '<div class="ob-empty-state">❌ データ取得エラー: ' + errMsg + '<br><button class="hbtn" style="margin-top:14px" onclick="obLoad()">🔄 再読み込み</button></div>';
-          } else if (!silent) { toast('⚠️ データ取得エラー。キャッシュを表示中。'); }
-          return;
-        }
-        _applyObRows(d.rows || []);
-      });
+  // GAS経由でDrive JSONから取得
+  gasGet('obGetData', function(d) {
+    __obLoading = false;
+    if (!d || d.error) {
+      var errMsg = (d && d.error) ? d.error : '通信エラー';
+      if (!cached.length) {
+        document.getElementById('ob-visitors-content').innerHTML = '<div class="ob-empty-state">❌ データ取得エラー: ' + errMsg + '<br><button class="hbtn" style="margin-top:14px" onclick="obLoad()">🔄 再読み込み</button></div>';
+      } else if (!silent) { toast('⚠️ データ取得エラー。キャッシュを表示中。'); }
+      return;
     }
+    _applyObRows(d.rows || []);
   });
 }
 
@@ -6387,7 +6311,7 @@ function obCheckNewInquiries(){
       var inPend=pending.some(function(p){ return _obNameKey(p.name)===nk||(tk&&_obTelKey(p.tel||'')===tk); });
       if(inPend) return;
       pending.push({name:g.name,furigana:g.furigana||'',tel:g.tel||'',email:g.email||'',
-        source:g.source||'',registeredAt:g.date||'',_src:'gmail'});
+        address:g.address||'',zip:g.zip||'',source:g.source||'',registeredAt:g.date||'',_src:'gmail'});
     });
     var dismissed=JSON.parse(localStorage.getItem('ob_inquiry_dismissed')||'[]');
     pending=pending.filter(function(c){ return dismissed.indexOf((c.id||c.name))<0; });
@@ -6438,11 +6362,11 @@ function obImportNewInquiries(){
     var data={ 問い合わせ日:inquiryDate, 来場日:inquiryDate, 顧客名:c.name, 来場種別:'', エリア:'',
       反響元:c.source||'', 担当者:'', サブ担当:'', 商談ステータス:(c.status||'問い合わせ'), 次回予定:'', 次回内容:'' };
     var newRec=Object.assign({},data,{ _row:obRows.length, id:'tmp_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-      karte:{ 電話番号:c.tel||'', フリガナ:c.furigana||'', メールアドレス:c.email||'' },
+      karte:{ 電話番号:c.tel||'', フリガナ:c.furigana||'', メールアドレス:c.email||'', 住所:c.address||'', 郵便番号:c.zip||'' },
       history:[{date:inquiryDate,type:'問い合わせ',content:'',staff:''}] });
     obRows.push(newRec);
     // Gmail由来の場合はGAS側で受付管理・顧客情報シートにも書き込む
-    post(Object.assign({action:'obSaveCustomer'},data,{karte:{電話番号:c.tel||'',フリガナ:c.furigana||'',メールアドレス:c.email||'',住所:c.address||''}}));
+    post(Object.assign({action:'obSaveCustomer'},data,{karte:{電話番号:c.tel||'',フリガナ:c.furigana||'',メールアドレス:c.email||'',住所:c.address||'',郵便番号:c.zip||''}}));
   });
   // Gmailキャッシュをクリア（追加済みが再表示されないように）
   _obGmailLeads=null; try{ localStorage.removeItem(_GMAIL_LEADS_KEY); }catch(e){}
@@ -8314,9 +8238,11 @@ function obSaveDetBirthday(){
     if(el) r.karte[bd.key]=el.value||'';
   });
   obSetCache(obRows);
-  post({action:'obSaveKarte',id:(obRows[obDetailRow]?obRows[obDetailRow].id:''),row:obDetailRow,karte:r.karte});
-  toast('誕生日を保存しました');
-  obRenderDetBirthday();
+  post({action:'obSaveKarte',id:r.id,row:obDetailRow,karte:r.karte,_v:r['_v']||0}, function(d){
+    if(d&&d.conflict){ obHandleConflict_(); return; }
+    toast('誕生日を保存しました');
+    obRenderDetBirthday();
+  });
 }
 
 // 基本情報
@@ -8798,8 +8724,10 @@ function obSaveKarteForm(){
     karte[f.key]=el?el.value:'';
   });
   r.karte=karte; obSetCache(obRows);
-  post({action:'obSaveKarte',id:(obRows[obDetailRow]?obRows[obDetailRow].id:''),row:obDetailRow,karte:karte});
-  toast('カルテを保存しました');
+  post({action:'obSaveKarte',id:r.id,row:obDetailRow,karte:karte,_v:r['_v']||0}, function(d){
+    if(d&&d.conflict){ obHandleConflict_(); return; }
+    toast('カルテを保存しました');
+  });
 }
 
 // ── 名前正規化・関連DB検索ヘルパー ──────────────────────────────
@@ -9285,22 +9213,16 @@ function kjLoad(silent, force){
     if(silent && kjRows.length>prevLen) toast('🔔 着工管理 新規 '+(kjRows.length-prevLen)+'件');
     hubUpdateBadges();
   }
-  sbDirectRead('kj_projects', function(sbRows) {
-    if (sbRows && sbRows.length) {
-      _applyKjRows(sbRows);
-    } else {
-      gasGet('kjGetData', function(d) {
-        if (!d || d.error) {
-          __kjLoading = false;
-          var errMsg=(d&&d.error)?d.error:'通信エラー';
-          if(!cached.length){
-            document.getElementById('kj-list-content').innerHTML='<div class="kj-empty">❌ データ取得エラー: '+errMsg+'<br><button class="hbtn" style="margin-top:12px" onclick="kjLoad()">🔄 再読み込み</button></div>';
-          } else if(!silent){ toast('⚠️ 着工管理データ取得エラー。キャッシュを表示中。'); }
-          return;
-        }
-        _applyKjRows(d.rows || []);
-      });
+  gasGet('kjGetData', function(d) {
+    if (!d || d.error) {
+      __kjLoading = false;
+      var errMsg=(d&&d.error)?d.error:'通信エラー';
+      if(!cached.length){
+        document.getElementById('kj-list-content').innerHTML='<div class="kj-empty">❌ データ取得エラー: '+errMsg+'<br><button class="hbtn" style="margin-top:12px" onclick="kjLoad()">🔄 再読み込み</button></div>';
+      } else if(!silent){ toast('⚠️ 着工管理データ取得エラー。キャッシュを表示中。'); }
+      return;
     }
+    _applyKjRows(d.rows || []);
   });
 }
 
