@@ -6427,10 +6427,8 @@ function obApptConfirm(result){
   _obLastSaveTs=Date.now();
   obSetCache(obRows);
   obRenderVisitors();
-  post({action:'obAddHistory',id:r.id,row:rowIdx,date:dateStr,type:'来場',content:content,staff:r['担当者']||''});
-  obSaveField(rowIdx,'次回予定','');
-  obSaveField(rowIdx,'次回種別','');
-  obSaveField(rowIdx,'次回内容','');
+  // 履歴追加と次回予定クリアを1回のGAS呼び出しでアトミックに実行（race condition防止）
+  post({action:'obConfirmVisit',id:r.id,row:rowIdx,date:dateStr,type:'来場',content:content,staff:r['担当者']||''});
   toast(result==='visited'?'✅ 来場履歴に追加・次回予定をクリアしました':'📋 キャンセルとして記録・次回予定をクリアしました');
   setTimeout(obCheckPastAppointments,600);
 }
