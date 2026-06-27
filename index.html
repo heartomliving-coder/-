@@ -3872,8 +3872,15 @@ function enterReception(){
   }
 }
 
+function _hideAllBoards(){
+  ['hub','openboard','kojiboard','tochiboard','mtgboard','custboard','app'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.classList.remove('show');
+  });
+  var cdb=document.getElementById('customdbboard'); if(cdb) cdb.classList.remove('show');
+  var nb=document.getElementById('notesboard'); if(nb) nb.classList.remove('show');
+}
 function enterOpenBoard(){
-  document.getElementById('hub').classList.remove('show');
+  _hideAllBoards();
   document.getElementById('openboard').classList.add('show');
   obLoadExclStaff();
   obLoad();
@@ -3884,8 +3891,7 @@ function enterOpenBoard(){
 }
 
 function enterMtgBoard(){
-  document.getElementById('hub').classList.remove('show');
-  document.getElementById('openboard').classList.remove('show');
+  _hideAllBoards();
   document.getElementById('mtgboard').classList.add('show');
   wsSetActiveSection('mtg');
   mtgLoad();
@@ -3902,14 +3908,7 @@ function enterMtgBoard(){
 }
 
 function showHub(){
-  document.getElementById('openboard').classList.remove('show');
-  document.getElementById('kojiboard').classList.remove('show');
-  document.getElementById('tochiboard').classList.remove('show');
-  document.getElementById('mtgboard').classList.remove('show');
-  document.getElementById('custboard').classList.remove('show');
-  document.getElementById('app').classList.remove('show');
-  var cdb=document.getElementById('customdbboard'); if(cdb) cdb.classList.remove('show');
-  var nb=document.getElementById('notesboard'); if(nb) nb.classList.remove('show');
+  _hideAllBoards();
   document.getElementById('hub').classList.add('show');
   wsSetActiveSection('hub');
   hubUpdateBadges();
@@ -4096,7 +4095,7 @@ if(!window.__bdaySyncTimer){
 }
 
 function enterKojiBoard(){
-  document.getElementById('hub').classList.remove('show');
+  _hideAllBoards();
   document.getElementById('kojiboard').classList.add('show');
   wsSetActiveSection('kj');
   kjLoad();
@@ -6900,7 +6899,7 @@ function obMiniTl(r){
     var shortD=p?parseInt(p[2])+'月'+parseInt(p[3])+'日':'';
     var content=String(item.content||'').trim();
     var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0||OB_SOURCES.indexOf(content)>=0;
-    var lbl=(shortD?shortD+' ':'')+(item.type||'')+(content&&!isGeneric?'・'+content:'');
+    var lbl=(shortD?shortD+' ':'')+(item.type||'')+(content&&!isGeneric&&content!==item.type?'・'+content:'');
     if(i===last) lastLbl=lbl;
     if(i>0) out+='<div class="ob-mini-tl-line"></div>';
     out+='<div class="ob-mini-tl-dot'+(i===last?' last':'')+'" title="'+esc(lbl)+'"></div>';
@@ -9872,7 +9871,7 @@ function tochiSetCache(rows){ try{localStorage.setItem('tc_v1',JSON.stringify(ro
 var __tcLastUpdated = 0;
 
 function enterTochiBoard(){
-  document.getElementById('hub').classList.remove('show');
+  _hideAllBoards();
   document.getElementById('tochiboard').classList.add('show');
   wsSetActiveSection('tochi');
   var cached=tochiGetCache();
@@ -10277,8 +10276,7 @@ function custBoardTab(tab){
 }
 
 function enterCustBoard(){
-  document.getElementById('hub').classList.remove('show');
-  document.getElementById('openboard').classList.remove('show');
+  _hideAllBoards();
   document.getElementById('custboard').classList.add('show');
   wsSetActiveSection('cust');
   custLoad();
