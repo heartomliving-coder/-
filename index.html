@@ -149,6 +149,9 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,1
 .bar .newbtn{background:var(--charcoal);color:#fff;border:none;border-radius:2px;padding:15px 24px;font-size:1rem;font-weight:700;letter-spacing:.06em;cursor:pointer;flex-shrink:0;transition:background .18s}
 .bar .newbtn:hover{background:#000}
 .bar .newbtn:active{opacity:.85}
+.bar .drink-newbtn{background:#1a3520;color:#7ec87e;border:1.5px solid #3a6a3a;border-radius:2px;padding:14px 20px;font-size:.9rem;font-weight:700;letter-spacing:.04em;cursor:pointer;flex-shrink:0;transition:all .18s}
+.bar .drink-newbtn:hover{background:#22441e;border-color:#4a8a4a}
+.bar .drink-newbtn:active{opacity:.85}
 .bar input{flex:1;min-width:200px;padding:14px 16px;border:1px solid var(--bd2);border-radius:2px;font-size:1rem;background:#fff;color:var(--tx);outline:none}
 .bar input:focus{border-color:var(--charcoal)}
 .bar .rl{background:#fff;border:1px solid var(--bd2);border-radius:2px;padding:13px 18px;font-size:.85rem;font-weight:600;cursor:pointer;color:var(--tx2);flex-shrink:0}
@@ -2811,6 +2814,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
     <section class="ws-right">
       <div class="bar">
         <button class="newbtn" onclick="sendNew()">＋ 新規のお客様を送信</button>
+        <button class="drink-newbtn" onclick="sendNewDrink()">🍵 新規ドリンクオーダー</button>
         <span class="target">送信先
           <select id="target" onchange="saveTarget()"></select>
         </span>
@@ -3053,7 +3057,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       <div class="fp-sec">お客様へ通知</div>
       <button class="fp-btn" onclick="sendCommand(__fsScreenId,'toast','スタッフがまもなく伺います')">🔔 まもなく伺います</button>
       <button class="fp-btn" onclick="sendCommand(__fsScreenId,'toast','資料をお持ちします')">🔔 資料をお持ちします</button>
-      <button class="fp-btn" onclick="sendCommand(__fsScreenId,'toast','お飲み物はいかがですか？')">🔔 お飲み物はいかがですか</button>
+      <button class="fp-btn" onclick="sendCommand(__fsScreenId,'drinkPrompt',{})">🔔 お飲み物はいかがですか</button>
 
       <div class="fp-sec">ドリンク注文</div>
       <button class="fp-btn" onclick="sendDrinkMenu()" style="background:#1a2e1a;border-color:#2d5a2d;color:#7ec87e">🍵 ドリンクメニューを送信</button>
@@ -5531,6 +5535,17 @@ function sendNew(){
 
   post({action:'pushSession',isNew:true,screen:tg,staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',customer:{}});
   toast('新規のお客様の入力画面を 受付'+screenLabel(tg)+' に送信しました');
+  setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
+}
+
+function sendNewDrink(){
+  var tg=getTarget();
+  openFsMonitor(tg, true);
+  post({action:'pushSession',isNew:true,screen:tg,drinkFirst:true,staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',customer:{}}, function(){
+    sendCommand(tg,'drinkMenu',{});
+  });
+  startDrinkOrderPoll();
+  toast('🍵 新規ドリンク注文画面を 受付'+screenLabel(tg)+' に送信しました');
   setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
 }
 
