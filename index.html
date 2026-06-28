@@ -471,6 +471,24 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .st-fsbtn.on{background:var(--charcoal);border-color:var(--charcoal);color:#fff}
 .st-logout{width:100%;padding:13px;border:1px solid #B4524A;border-radius:2px;background:#fff;color:#B4524A;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:10px;transition:all .18s}
 .st-logout:hover{background:#B4524A;color:#fff}
+/* DBロック設定 */
+.dbl-item{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border:1px solid var(--bd);border-radius:6px;margin-bottom:8px;background:#FAFAF8}
+.dbl-label{font-size:.88rem;font-weight:700;color:var(--charcoal)}
+.dbl-sub{font-size:.72rem;color:#888;margin-top:2px}
+.dbl-toggle{position:relative;width:46px;height:26px;flex-shrink:0}
+.dbl-toggle input{opacity:0;width:0;height:0;position:absolute}
+.dbl-slider{position:absolute;cursor:pointer;inset:0;background:#CCC;border-radius:26px;transition:.2s}
+.dbl-slider::before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.dbl-toggle input:checked+.dbl-slider{background:#C0392B}
+.dbl-toggle input:checked+.dbl-slider::before{transform:translateX(20px)}
+/* DBロック拒否モーダル */
+.lock-denied-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:center;justify-content:center}
+.lock-denied-modal.show{display:flex}
+.lock-denied-box{background:#fff;border-radius:8px;padding:32px 36px;max-width:340px;text-align:center;box-shadow:0 16px 60px rgba(0,0,0,.3)}
+.lock-denied-icon{font-size:2.5rem;margin-bottom:12px}
+.lock-denied-title{font-weight:800;font-size:1rem;color:#C0392B;margin-bottom:8px;letter-spacing:.04em}
+.lock-denied-msg{font-size:.84rem;color:#666;line-height:1.6;margin-bottom:20px}
+.lock-denied-ok{width:100%;padding:11px;border:none;border-radius:4px;background:var(--charcoal);color:#fff;font-size:.9rem;font-weight:700;cursor:pointer}
 .st-account-info{font-size:.88rem;color:var(--tx2);line-height:1.9;background:var(--sf);border:1px solid var(--bd);border-radius:2px;padding:12px 15px;margin-bottom:14px}
 
 /* ─────────── スタッフ管理モーダル ─────────── */
@@ -3131,7 +3149,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
         <button class="st-tab"     id="stab-datatools"  onclick="showSettingsTab('datatools')">🔧<br>管理</button>
         <button class="st-tab"     id="stab-mtgcw"      onclick="showSettingsTab('mtgcw')">💬<br>MTG</button>
         <button class="st-tab"     id="stab-auditlog"   onclick="showSettingsTab('auditlog');loadAuditLog()">📜<br>監査ログ</button>
-        <button class="st-tab"     id="stab-account"    onclick="showSettingsTab('account')">🔓<br>アカウント</button>
+        <button class="st-tab"     id="stab-account"    onclick="showSettingsTab('account');renderDbLockSettings()">🔓<br>アカウント</button>
       </nav>
       <div class="st-body">
 
@@ -3375,6 +3393,10 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
             <button class="save" style="padding:7px 14px;font-size:.85rem;white-space:nowrap" onclick="addAdminEmailFromUI()">追加</button>
           </div>
           <div id="adminEmailMsg" style="margin-top:6px;font-size:.8rem;min-height:1em"></div>
+
+          <div class="st-sec" style="margin-top:20px">🔒 DBアクセス制限 <span style="font-size:.72rem;font-weight:400;color:#999">（オーナーのみ設定可）</span></div>
+          <div style="font-size:.78rem;color:#666;margin-bottom:10px">ロックをONにしたセクションはオーナー権限のみアクセスできます。スタッフがアクセスしようとすると制限メッセージが表示されます。</div>
+          <div id="dbLockBody"></div>
 
           <div class="st-sec" style="margin-top:20px">追加予定アカウント</div>
           <div style="font-size:.8rem;color:#666;margin-bottom:8px">以下のアカウントをまだ追加していない場合は「一括追加」で登録してください。</div>
@@ -3927,6 +3949,7 @@ function _hideAllBoards(){
   var nb=document.getElementById('notesboard'); if(nb) nb.classList.remove('show');
 }
 function enterOpenBoard(){
+  if(!checkBoardAccess('ob')) return;
   _hideAllBoards();
   document.getElementById('openboard').classList.add('show');
   obLoadExclStaff();
@@ -3938,6 +3961,7 @@ function enterOpenBoard(){
 }
 
 function enterMtgBoard(){
+  if(!checkBoardAccess('mtg')) return;
   _hideAllBoards();
   document.getElementById('mtgboard').classList.add('show');
   wsSetActiveSection('mtg');
@@ -4142,6 +4166,7 @@ if(!window.__bdaySyncTimer){
 }
 
 function enterKojiBoard(){
+  if(!checkBoardAccess('kj')) return;
   _hideAllBoards();
   document.getElementById('kojiboard').classList.add('show');
   wsSetActiveSection('kj');
@@ -10084,6 +10109,7 @@ function tochiSetCache(rows){ try{localStorage.setItem('tc_v1',JSON.stringify(ro
 var __tcLastUpdated = 0;
 
 function enterTochiBoard(){
+  if(!checkBoardAccess('tochi')) return;
   _hideAllBoards();
   document.getElementById('tochiboard').classList.add('show');
   wsSetActiveSection('tochi');
@@ -10489,6 +10515,7 @@ function custBoardTab(tab){
 }
 
 function enterCustBoard(){
+  if(!checkBoardAccess('cust')) return;
   _hideAllBoards();
   document.getElementById('custboard').classList.add('show');
   wsSetActiveSection('cust');
@@ -12932,6 +12959,74 @@ function isOwnerRole(){
 
 // ════════════════════════════════════════════════════════
 
+/* ── DBアクセスロック ─────────────────────────────── */
+var DB_LOCK_KEY = 'db_lock_settings';
+var DB_LOCK_BOARDS = [
+  {id:'ob',   label:'OBボード',   sub:'来場履歴・顧客管理・オープンボード'},
+  {id:'kj',   label:'着工管理',   sub:'着工スケジュール・工程管理'},
+  {id:'cust', label:'顧客DB',     sub:'マスター顧客データベース'},
+  {id:'tochi',label:'土地DB',     sub:'土地情報・不動産台帳'},
+  {id:'mtg',  label:'営業MTG',    sub:'面談記録・商談管理'}
+];
+
+function getDbLocks(){
+  try{ return JSON.parse(localStorage.getItem(DB_LOCK_KEY)||'{}'); }catch(e){ return {}; }
+}
+
+function checkBoardAccess(boardId){
+  var locks = getDbLocks();
+  if(!locks[boardId]) return true;
+  if(isOwner()) return true;
+  showLockDenied(boardId);
+  return false;
+}
+
+function showLockDenied(boardId){
+  var labels = {ob:'OBボード',kj:'着工管理',cust:'顧客DB',tochi:'土地DB',mtg:'営業MTG'};
+  var el = document.getElementById('lockDeniedLabel');
+  if(el) el.textContent = labels[boardId]||boardId;
+  var m = document.getElementById('lockDeniedModal');
+  if(m) m.classList.add('show');
+}
+
+function closeLockDenied(){
+  var m = document.getElementById('lockDeniedModal');
+  if(m) m.classList.remove('show');
+}
+
+function renderDbLockSettings(){
+  var el = document.getElementById('dbLockBody');
+  if(!el) return;
+  if(!isOwner()){ el.innerHTML='<div style="font-size:.82rem;color:#999;padding:12px 0">オーナーのみ設定できます</div>'; return; }
+  var locks = getDbLocks();
+  el.innerHTML = DB_LOCK_BOARDS.map(function(b){
+    var checked = locks[b.id] ? 'checked' : '';
+    return '<div class="dbl-item">'+
+      '<div><div class="dbl-label">'+b.label+'</div><div class="dbl-sub">'+b.sub+'</div></div>'+
+      '<label class="dbl-toggle"><input type="checkbox" '+checked+' onchange="toggleDbLock(\''+b.id+'\',this.checked)"><span class="dbl-slider"></span></label>'+
+      '</div>';
+  }).join('');
+}
+
+function toggleDbLock(boardId, locked){
+  var locks = getDbLocks();
+  if(locked) locks[boardId]=true; else delete locks[boardId];
+  localStorage.setItem(DB_LOCK_KEY, JSON.stringify(locks));
+  var msg = (locked?'🔒 ':'🔓 ') + ({ob:'OBボード',kj:'着工管理',cust:'顧客DB',tochi:'土地DB',mtg:'営業MTG'}[boardId]||boardId) + (locked?' をオーナー限定にしました':' のロックを解除しました');
+  toast(msg);
+}
+
 </script>
+
+<!-- DBロック拒否モーダル -->
+<div class="lock-denied-modal" id="lockDeniedModal" onclick="closeLockDenied()">
+  <div class="lock-denied-box" onclick="event.stopPropagation()">
+    <div class="lock-denied-icon">🔒</div>
+    <div class="lock-denied-title">アクセス制限</div>
+    <div class="lock-denied-msg"><strong id="lockDeniedLabel"></strong> はオーナーのみアクセスできます。<br>オーナーにお問い合わせください。</div>
+    <button class="lock-denied-ok" onclick="closeLockDenied()">閉じる</button>
+  </div>
+</div>
+
 </body>
 </html>
