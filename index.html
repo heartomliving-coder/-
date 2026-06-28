@@ -454,6 +454,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ci .url-btn{flex-shrink:0;background:#fff;border:1.5px solid var(--charcoal);color:var(--charcoal);border-radius:2px;padding:14px 14px;font-size:.82rem;font-weight:700;letter-spacing:.04em;cursor:pointer;line-height:1.3;text-align:center;min-width:100px;transition:all .18s;margin-right:8px}
 .ci .url-btn:hover{background:var(--charcoal);color:#fff}
 .ci .url-btn:active{opacity:.85;transform:scale(.98)}
+.ci .drink-btn{flex-shrink:0;background:#1a2e1a;border:1.5px solid #3a6a3a;color:#7ec87e;border-radius:2px;padding:14px 14px;font-size:.82rem;font-weight:700;letter-spacing:.04em;cursor:pointer;line-height:1.3;text-align:center;min-width:100px;transition:all .18s;margin-right:8px}
+.ci .drink-btn:hover{background:#3a6a3a;color:#fff}
+.ci .drink-btn:active{opacity:.85;transform:scale(.98)}
 .url-display{background:var(--sf);border:1px solid var(--bd2);border-radius:3px;padding:14px 16px;font-size:.82rem;word-break:break-all;color:var(--tx2);margin-bottom:14px;line-height:1.6;font-family:monospace}
 .url-copy-btn{width:100%;padding:14px;border:none;border-radius:2px;background:var(--charcoal);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:.06em;margin-bottom:12px}
 .url-copy-btn:hover{background:#000}
@@ -5467,6 +5470,7 @@ function renderList(){
       (c.address?'<div class="mt"><span class="lb">住所</span>'+esc((c.postalCode?'〒'+c.postalCode+' ':'')+c.address)+'</div>':'')+
       '</div>'+
       '<button class="url-btn" onclick="issueOnlineUrl('+idx+')" title="オンライン商談用URLを発行">🔗 URL発行<small style="display:block;font-size:.6rem;font-weight:400;margin-top:2px;opacity:.8">オンライン</small></button>'+
+      '<button class="drink-btn" onclick="sendCustomerDrink('+idx+')" title="先にドリンクを注文してもらう">🍵 ドリンク注文<small style="display:block;font-size:.6rem;font-weight:400;margin-top:2px">先にオーダー</small></button>'+
       '<button class="send" onclick="sendCustomer('+idx+')">このお客様で送信<small>お客様画面へ</small></button></div>';
   }).join('');
 }
@@ -5501,6 +5505,21 @@ function sendCustomer(idx){
     customer:{name:c.name||'',furigana:c.furigana||'',tel:c.tel||'',email:c.email||'',postalCode:c.postalCode||'',address:c.address||'',masterId:masterId,threadId:(c.threadId&&c.threadId.indexOf('notion_')!==0)?c.threadId:''}};
   post(payload);
   toast((c.name||'お客様')+' 様 を 受付'+screenLabel(tg)+' に送信しました');
+  setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
+}
+
+function sendCustomerDrink(idx){
+  var c=__all[idx]; if(!c)return;
+  var masterId=(c.dbSource==='master')?(c.id||''):'';
+  var tg=getTarget();
+  openFsMonitor(tg, true);
+  var payload={action:'pushSession',isNew:false,screen:tg,drinkFirst:true,staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',
+    customer:{name:c.name||'',furigana:c.furigana||'',tel:c.tel||'',email:c.email||'',postalCode:c.postalCode||'',address:c.address||'',masterId:masterId,threadId:(c.threadId&&c.threadId.indexOf('notion_')!==0)?c.threadId:''}};
+  post(payload, function(){
+    sendCommand(tg,'drinkMenu',{});
+  });
+  startDrinkOrderPoll();
+  toast('🍵 '+( c.name||'お客様')+' 様 のドリンク注文画面を 受付'+screenLabel(tg)+' に送信しました');
   setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
 }
 
