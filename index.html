@@ -945,8 +945,10 @@ tr:hover .ob-del{opacity:1}
 .ob-agg-table .hi{color:#166534;font-weight:700}
 
 /* ─── 顧客詳細画面 ─── */
-.ob-detail{position:fixed;top:0;left:0;right:0;bottom:0;z-index:60;display:none;flex-direction:column;background:#F7F6F3;transition:left .2s ease}
-.ob-detail.show{display:flex}
+.ob-det-backdrop{position:fixed;inset:0;z-index:59;background:rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s ease}
+.ob-det-backdrop.show{opacity:1;pointer-events:auto}
+.ob-detail{position:fixed;top:0;right:0;bottom:0;width:560px;max-width:100vw;z-index:60;display:flex;flex-direction:column;background:#F7F6F3;box-shadow:-4px 0 32px rgba(0,0,0,.15);transform:translateX(100%);transition:transform .25s ease;visibility:hidden}
+.ob-detail.show{transform:translateX(0);visibility:visible}
 /* OB基本情報セクション並び替え */
 .ob-info-sec{transition:outline .15s,opacity .15s}
 .ob-info-layout-editing .ob-info-sec{cursor:grab;outline:2px dashed rgba(154,140,118,.3);outline-offset:4px;border-radius:8px;padding:6px}
@@ -959,8 +961,6 @@ tr:hover .ob-del{opacity:1}
 .ob-detail .ob-det-pane .hbtn:hover{background:#F5F3EF;border-color:#C0A070;color:#222}
 .ob-detail .ob-det-pane .hbtn.primary{background:#2B2B2B;border-color:#2B2B2B;color:#fff}
 .ob-detail .ob-det-pane .hbtn.primary:hover{background:#444;border-color:#444}
-body.ws-open .ob-detail{left:240px}
-body.ws-collapsed .ob-detail{left:52px}
 .ob-det-hd{flex-shrink:0;background:#2B2B2B;color:#fff;padding:max(16px,env(safe-area-inset-top)) 24px 0;display:flex;flex-direction:column}
 .ob-det-top{display:flex;align-items:center;gap:14px;padding-bottom:14px}
 .ob-det-back{background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);padding:7px 14px;border-radius:3px;font-size:.75rem;font-weight:700;cursor:pointer;letter-spacing:.08em;transition:all .15s;flex-shrink:0}
@@ -1415,8 +1415,7 @@ body.ws-collapsed .ob-detail{left:52px}
   /* OBボード */
   .ob-det-pane{padding:12px 14px}
   .ob-info-grid{grid-template-columns:1fr}
-  .ob-detail{width:100%!important;right:-100%!important}
-  .ob-detail.show{right:0!important}
+  .ob-detail{width:100%!important}
   /* KJ詳細 */
   .kj-detail{width:100vw!important;right:-100vw!important}
   .kj-detail.show{right:0!important}
@@ -2438,10 +2437,11 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
 </div>
 
 <!-- ─── 顧客詳細画面 ─── -->
+<div class="ob-det-backdrop" id="obDetBackdrop" onclick="obCloseDetail()"></div>
 <div id="ob-detail" class="ob-detail">
   <div class="ob-det-hd">
     <div class="ob-det-top">
-      <button class="ob-det-back" onclick="obCloseDetail()">‹ 一覧へ戻る</button>
+      <button class="ob-det-back" onclick="obCloseDetail()">✕ 閉じる</button>
       <div style="flex:1">
         <div id="ob-det-name" class="ob-det-name" title="クリックして名前を編集" onclick="obEditDetName()" style="cursor:pointer">—</div>
         <div id="ob-det-sub" class="ob-det-sub"></div>
@@ -8071,6 +8071,7 @@ function obOpenDetail(rowIdx){
   var tlEl = document.getElementById('ob-cust-timeline');
   if(tlEl) tlEl.innerHTML = buildCustomerTimeline(r);
   document.getElementById('ob-detail').classList.add('show');
+  document.getElementById('obDetBackdrop').classList.add('show');
   document.getElementById('ob-detail').scrollTop=0;
   obInfoRestoreLayout();
   // 来場日当日なら面談報告タブを自動表示
@@ -8091,6 +8092,7 @@ function obOpenDetailTab(row, tab){
 
 function obCloseDetail(){
   document.getElementById('ob-detail').classList.remove('show');
+  document.getElementById('obDetBackdrop').classList.remove('show');
   obDetailRow=-1;
   obDetailKey=null;
 }
