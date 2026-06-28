@@ -2100,7 +2100,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
         <div class="hub-quick">
           <button class="hub-quick-btn" onclick="if(!_hubLayoutEditing){enterOpenBoard();setTimeout(obAddCustomer,500)}">＋ 顧客登録</button>
           <button class="hub-quick-btn" onclick="if(!_hubLayoutEditing){enterOpenBoard();setTimeout(function(){obDetTab('mendan');},600)}">＋ 面談報告</button>
-          <button class="hub-quick-btn" onclick="if(!_hubLayoutEditing){enterOpenBoard();setTimeout(function(){obSwitchTab('cust');},500)}">👥 顧客DB</button>
+          <button class="hub-quick-btn" onclick="if(!_hubLayoutEditing){enterCustBoard()}">👥 顧客DB</button>
           <button class="hub-quick-btn" onclick="if(!_hubLayoutEditing)openGlobalSearch()">🔍 横断検索 <kbd style="font-size:.6rem;opacity:.5">⌘K</kbd></button>
           <button class="hub-quick-btn" onclick="if(!_hubLayoutEditing)openNotifPanel()">🔔 通知 <span id="notifBadge" style="background:#EF4444;color:#fff;border-radius:50%;width:16px;height:16px;font-size:.6rem;display:none;align-items:center;justify-content:center;margin-left:4px"></span></button>
         </div>
@@ -2188,7 +2188,6 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       <button class="ob-tab" data-tab="active" onclick="obSwitchTab('active')">🔥 直近案件</button>
       <button class="ob-tab" data-tab="agg" onclick="obSwitchTab('agg')">📊 集計</button>
       <span class="ob-tab-sep"></span>
-      <button class="ob-tab ob-tab-nav" data-tab="cust" onclick="obSwitchTab('cust')">👥 顧客DB</button>
     </div>
     <div class="ob-hd-tools">
       <span id="ob-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
@@ -2263,16 +2262,6 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
     <div class="ob-agg-body" id="ob-agg-content"><div class="ob-empty-state">読み込み中...</div></div>
   </div>
 
-  <!-- 顧客DB（OBボード内埋め込み） -->
-  <div class="ob-pane" data-tab="cust">
-    <div style="padding:14px 16px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-        <input type="text" id="ob-cust-q" placeholder="顧客名・電話・メールで検索…" oninput="obRenderCustTab()" style="flex:1;min-width:180px;border:1px solid #E0DDD8;border-radius:6px;padding:7px 12px;font-size:.82rem;outline:none">
-        <span id="ob-cust-count" style="font-size:.75rem;color:#999"></span>
-      </div>
-      <div id="ob-cust-content"><div class="ob-empty-state">読み込み中...</div></div>
-    </div>
-  </div>
 
 </div>
 
@@ -3062,7 +3051,11 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       <button class="fp-btn" onclick="sendCommand(__fsScreenId,'toast','スタッフがまもなく伺います')">🔔 まもなく伺います</button>
       <button class="fp-btn" onclick="sendCommand(__fsScreenId,'toast','資料をお持ちします')">🔔 資料をお持ちします</button>
       <button class="fp-btn" onclick="sendCommand(__fsScreenId,'toast','お飲み物はいかがですか？')">🔔 お飲み物はいかがですか</button>
-      
+
+      <div class="fp-sec">ドリンク注文</div>
+      <button class="fp-btn" onclick="sendDrinkMenu()" style="background:#1a2e1a;border-color:#2d5a2d;color:#7ec87e">🍵 ドリンクメニューを送信</button>
+      <div id="drinkOrderPanel" style="display:none;margin-top:8px;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:10px;font-size:.8rem"></div>
+
       <div id="cmdFeedback" class="cmd-feedback" style="display:none"></div>
 
       <div class="fp-hint">お客様の入力状況をリアルタイムで表示しています。プレビュー画面の項目を直接入力・選択すると、遠隔でお客様の端末に反映されます。</div>
@@ -5620,6 +5613,67 @@ function closeFsMonitor() {
   __fsScreenId = null;
   var fr=document.getElementById('previewFrame'); if(fr) fr.src='about:blank';
   document.getElementById('fsMonitor').classList.add('hide');
+  stopDrinkOrderPoll();
+}
+
+/* ── ドリンク注文 ─────────────────── */
+var _drinkPollTimer = null;
+var _drinkOrderSent = {};
+
+function sendDrinkMenu() {
+  if (!__fsScreenId) return;
+  sendCommand(__fsScreenId, 'drinkMenu', {});
+  toast('🍵 ドリンクメニューをタブレットへ送信しました');
+  startDrinkOrderPoll();
+}
+
+function startDrinkOrderPoll() {
+  stopDrinkOrderPoll();
+  _drinkPollTimer = setInterval(function(){ fetchDrinkOrders(); }, 5000);
+  fetchDrinkOrders();
+}
+
+function stopDrinkOrderPoll() {
+  if (_drinkPollTimer) { clearInterval(_drinkPollTimer); _drinkPollTimer = null; }
+}
+
+function fetchDrinkOrders() {
+  gasGet({action:'pollDrinkOrders'}, function(d) {
+    if (!d || !d.orders) return;
+    renderDrinkOrders(d.orders);
+  });
+}
+
+function renderDrinkOrders(orders) {
+  var panel = document.getElementById('drinkOrderPanel');
+  if (!panel) return;
+  var relevant = orders.filter(function(o){ return String(o.screen) === String(__fsScreenId); });
+  if (relevant.length === 0) { panel.style.display='none'; return; }
+  panel.style.display='block';
+  var html = '<div style="color:#C0A070;font-weight:700;margin-bottom:6px;font-size:.75rem;letter-spacing:.08em">📋 受信した注文</div>';
+  relevant.forEach(function(o) {
+    html += '<div style="margin-bottom:8px">';
+    html += '<div style="color:#888;font-size:.65rem;margin-bottom:4px">受信: '+( o.submittedAt||'')+'</div>';
+    if (o.order && o.order.length > 0) {
+      o.order.forEach(function(item) {
+        var tLabel = item.temp==='hot'?'🔴HOT':item.temp==='ice'?'🔵ICE':'';
+        html += '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #2a2a2a">';
+        html += '<span style="color:#E8E3DA;flex:1">'+item.ja+'</span>';
+        if(tLabel) html += '<span style="font-size:.65rem">'+tLabel+'</span>';
+        html += '<span style="color:#C0A070;font-weight:700">×'+item.qty+'</span>';
+        html += '</div>';
+      });
+    }
+    html += '<button onclick="clearDrinkOrder(\''+String(o.screen)+'\')" style="margin-top:6px;background:#333;border:1px solid #555;color:#aaa;border-radius:4px;padding:4px 10px;font-size:.7rem;cursor:pointer;width:100%">✓ 対応済み</button>';
+    html += '</div>';
+  });
+  panel.innerHTML = html;
+}
+
+function clearDrinkOrder(screen) {
+  gasPost({action:'clearDrinkOrder', screen:screen}, function(){
+    fetchDrinkOrders();
+  });
 }
 
 // ★ お客様画面（iframe）からの直接遠隔入力コマンドを受信（プロンプトなし）
