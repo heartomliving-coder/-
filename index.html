@@ -2206,7 +2206,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
       <select id="ob-filter-month" onchange="obRenderVisitors()" style="width:72px"></select>
       <label style="font-size:.7rem;color:#888;font-weight:700;letter-spacing:.06em">担当</label>
       <select id="ob-vis-staff" onchange="obRenderVisitors()" style="width:96px"></select>
-      <input type="text" id="ob-vis-q" placeholder="🔍 顧客名 / 電話 / 反響元..." style="min-width:180px;flex:1" oninput="obRenderVisitors()">
+      <input type="text" id="ob-vis-q" placeholder="🔍 顧客名 / 電話 / 問い合わせ元..." style="min-width:180px;flex:1" oninput="obRenderVisitors()">
       <select id="ob-vis-sort" onchange="obRenderVisitors()" style="width:100px" title="並び順">
         <option value="desc" selected>新しい順</option>
         <option value="asc">古い順</option>
@@ -2666,7 +2666,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
 <div id="ob-next-pop">
   <div class="ob-hist-pop-title">🗓 次回予定 <span id="ob-next-pop-name" style="font-weight:400;font-size:.82rem;color:#888"></span></div>
   <div class="ob-hist-pop-row">
-    <input type="date" id="ob-next-pop-date" onkeydown="if(event.key==='Enter')obNextPopSave()">
+    <input type="datetime-local" id="ob-next-pop-date" onkeydown="if(event.key==='Enter')obNextPopSave()">
     <input type="text" class="pop-content" id="ob-next-pop-type" placeholder="例）来場・FP相談・現地見学..." onkeydown="if(event.key==='Enter')obNextPopSave()">
   </div>
   <div class="ob-hist-pop-btns">
@@ -2719,7 +2719,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
           </select>
         </div>
         <div class="ob-fld">
-          <label>反響元</label>
+          <label>問い合わせ元</label>
           <select id="obNewSource">
             <option value="">—</option>
             <option>HP</option><option>電話</option><option>家づくり学校</option>
@@ -4642,18 +4642,28 @@ function hubRenderEvMini(){
 function hubRenderRecent(){
   var el=document.getElementById('hubRecentList'); if(!el) return;
   if(!obRows.length){ el.innerHTML='<div class="hub-empty-mini">データなし（OBを読み込んでください）</div>'; return; }
-  var recent=obRows.slice().sort(function(a,b){
-    var da=obNormDate(a['問い合わせ日']||a['来場日']||''),db=obNormDate(b['問い合わせ日']||b['来場日']||'');
-    return db>da?1:db<da?-1:0;
+  var today=new Date(); today.setHours(0,0,0,0);
+  var recent=obRows.slice().filter(function(r){ return r['次回予定']; }).sort(function(a,b){
+    var da=obNormDate(a['次回予定']||''),db=obNormDate(b['次回予定']||'');
+    var ta=da?Math.abs(new Date(da+'T00:00:00')-today):Infinity;
+    var tb=db?Math.abs(new Date(db+'T00:00:00')-today):Infinity;
+    return ta-tb;
   }).slice(0,10);
+  if(!recent.length){
+    recent=obRows.slice().sort(function(a,b){
+      var da=obNormDate(a['問い合わせ日']||a['来場日']||''),db=obNormDate(b['問い合わせ日']||b['来場日']||'');
+      return db>da?1:db<da?-1:0;
+    }).slice(0,10);
+  }
   el.innerHTML=recent.map(function(r){
-    var d=obFmtDate(obNormDate(r['問い合わせ日']||r['来場日']||''))||'—';
+    var raw=r['次回予定']||r['問い合わせ日']||r['来場日']||'';
+    var d=raw?obFmtDateTime(raw):'—';
     var sc=OB_STATUS_CLASS[r['商談ステータス']]||'ob-s0';
     return '<div class="hub-rec-row" onclick="enterOpenBoard()">'+
       '<span class="hub-rec-date">'+esc(d)+'</span>'+
       '<span class="hub-rec-name">'+esc(r['顧客名']||'—')+'</span>'+
       (r['担当者']?'<span class="hub-rec-staff">'+esc(r['担当者'])+'</span>':'')+
-      (r['来場種別']?'<span class="hub-rec-src">'+esc(r['来場種別'])+'</span>':'')+
+      (r['次回種別']||r['来場種別']?'<span class="hub-rec-src">'+esc(r['次回種別']||r['来場種別'])+'</span>':'')+
     '</div>';
   }).join('');
 }
@@ -6386,12 +6396,13 @@ function obCheckPastAppointments(){
   if(!_ob||!_ob.classList.contains('show')) return;
   var today=new Date(); today.setHours(0,0,0,0);
   var checked=JSON.parse(localStorage.getItem('ob_appt_checked')||'{}');
+  var skipped=JSON.parse(sessionStorage.getItem('ob_appt_skip')||'{}');
   for(var i=0;i<obRows.length;i++){
     var r=obRows[i]; if(!r||!r.id||!r['次回予定']) continue;
     var nd=obNormDate(r['次回予定']); if(!nd||nd.length<10) continue;
     var nDate=new Date(nd+'T00:00:00'); if(nDate>=today) continue;
     var key=r.id+'_'+nd;
-    if(checked[key]) continue;
+    if(checked[key]||skipped[key]) continue;
     _obShowApptConfirm(i,nd,r['次回内容']||'');
     return;
   }
@@ -6412,10 +6423,15 @@ function obApptConfirm(result){
   for(var i=0;i<obRows.length;i++){ if(obRows[i].id===rowId){ rowIdx=i; break; } }
   var r=obRows[rowIdx]; if(!r) return;
   var checked=JSON.parse(localStorage.getItem('ob_appt_checked')||'{}');
+  m.classList.remove('show');
+  if(result==='skip'){
+    var sess=JSON.parse(sessionStorage.getItem('ob_appt_skip')||'{}');
+    sess[r.id+'_'+dateStr]=true;
+    sessionStorage.setItem('ob_appt_skip',JSON.stringify(sess));
+    setTimeout(obCheckPastAppointments,1000); return;
+  }
   checked[r.id+'_'+dateStr]=result;
   localStorage.setItem('ob_appt_checked',JSON.stringify(checked));
-  m.classList.remove('show');
-  if(result==='skip'){ setTimeout(obCheckPastAppointments,1000); return; }
   // 来場履歴には次回予定の内容（種別＋内容）をそのまま記録する
   var _nextLabel=((obSanitizeVal(r['次回種別']||''))+' '+(obSanitizeVal(r['次回内容']||''))).trim();
   var content=result==='visited'?(_nextLabel||'来場'):('キャンセル'+(_nextLabel?'（'+_nextLabel+'）':''));
@@ -6708,7 +6724,7 @@ function obRenderVisitors(){
   var html=aggHtml+'<table class="ob-table ob-vis-table"><thead><tr>'+
     '<th class="ob-rn" style="width:28px">#</th>'+
     '<th style="min-width:84px">問い合わせ日</th>'+
-    '<th style="min-width:80px">反響元</th>'+
+    '<th style="min-width:80px">問い合わせ元</th>'+
     '<th style="min-width:120px">顧客名</th>'+
     '<th style="min-width:140px">フリガナ / 電話 / メール</th>'+
     '<th style="min-width:90px">ステータス</th>'+
@@ -7234,6 +7250,11 @@ function obFmtDate(s){
   var p=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
   if(!p) return esc(s);
   return parseInt(p[1])+'年'+parseInt(p[2])+'月'+parseInt(p[3])+'日';
+}
+function obFmtDateTime(s){
+  var base=obFmtDate(obNormDate(s));
+  var m=String(s).match(/T(\d{2}:\d{2})/);
+  return m?base+' '+m[1]:base;
 }
 
 function _obMoveToNextCell(currentEl, dir){
@@ -8265,7 +8286,7 @@ function obRenderDetInfo(){
     {key:'来場日',label:'初回来場日',type:'date'},
     {key:'来場種別',label:'来場種別',type:'sel',opts:OB_EVENT_TYPES},
     {key:'エリア',label:'エリア',type:'area-multi'},
-    {key:'反響元',label:'反響元',type:'sel',opts:OB_SOURCES},
+    {key:'反響元',label:'問い合わせ元',type:'sel',opts:OB_SOURCES},
     {key:'担当者',label:'担当者',type:'staff'},
     {key:'サブ担当',label:'サブ担当',type:'staff'},
     {key:'商談ステータス',label:'商談ステータス',type:'sel',opts:OB_STATUS_LIST},
@@ -8577,7 +8598,8 @@ function obNextPopOpen(e, rowIdx){
   var r = obRows[rowIdx]; if(!r) return;
   var pop = document.getElementById('ob-next-pop');
   document.getElementById('ob-next-pop-name').textContent = r['顧客名']||'';
-  document.getElementById('ob-next-pop-date').value = obNormDate(r['次回予定']||'')||'';
+  var _nv=r['次回予定']||'';
+  document.getElementById('ob-next-pop-date').value=_nv.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)?_nv.substring(0,16):(obNormDate(_nv)||'');
   var typeEl=document.getElementById('ob-next-pop-type'); if(typeEl) typeEl.value=r['次回種別']||'';
   var rect = e.currentTarget ? e.currentTarget.getBoundingClientRect() : {left:e.clientX,bottom:e.clientY,top:e.clientY};
   pop.style.left = Math.min(rect.left, window.innerWidth-300)+'px';
@@ -8626,13 +8648,13 @@ function _obNextPopUpdateCell(rowIdx){
   }
   var alarm=nextCls==='over'?'⚠ ':nextCls==='warn'?'🔔 ':'';
   var typeTag=r['次回種別']?'<span class="ob-hist-chip" style="font-size:.68rem;padding:2px 7px;margin-right:4px">'+esc(r['次回種別'])+'</span>':'';
-  var dateDisp=nextRaw?typeTag+'<span style="color:#166534;font-weight:700">'+alarm+obFmtDate(nextRaw)+'</span>':'<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>';
+  var dateDisp=nextRaw?typeTag+'<span style="color:#166534;font-weight:700">'+alarm+obFmtDateTime(r['次回予定']||nextRaw)+'</span>':'<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>';
   var tableHtml='<div class="'+(nextCls!=='none'?'ob-card-next '+nextCls:'')+'">'+dateDisp+'</div>';
   // テーブルビュー更新
   var cell=document.querySelector('tr[data-row="'+rowIdx+'"] .ob-td-next');
   if(cell) cell.innerHTML=tableHtml;
   // カードビュー更新
-  var nextLbl=nextRaw?((r['次回種別']?'<span class="ob-hist-chip" style="font-size:.65rem;padding:1px 6px;margin-right:4px;vertical-align:middle">'+esc(r['次回種別'])+'</span>':'')+'📅 '+obFmtDate(nextRaw)+(r['次回内容']?' — '+esc(r['次回内容']):'')):'';
+  var nextLbl=nextRaw?((r['次回種別']?'<span class="ob-hist-chip" style="font-size:.65rem;padding:1px 6px;margin-right:4px;vertical-align:middle">'+esc(r['次回種別'])+'</span>':'')+'📅 '+obFmtDateTime(r['次回予定']||nextRaw)+(r['次回内容']?' — '+esc(r['次回内容']):'')):'';
   var cardNext=document.querySelector('[data-row="'+rowIdx+'"] .ob-card-next');
   if(cardNext){
     if(nextLbl){cardNext.className='ob-card-next '+nextCls;cardNext.innerHTML=nextLbl;}
