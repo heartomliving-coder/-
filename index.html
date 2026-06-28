@@ -424,6 +424,23 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .fp-hint{font-size:.72rem;color:#9A9286;line-height:1.6;background:rgba(255,255,255,.05);border:1px solid #333333;border-radius:6px;padding:10px 12px}
 .fp-danger{border-color:#6e4a44;color:#E0917F}
 .fp-danger:hover{background:#B4524A;border-color:#B4524A;color:#fff}
+/* ドリンク注文バナー */
+.drink-order-banner{display:none;position:absolute;top:0;left:0;right:310px;z-index:20;background:linear-gradient(135deg,#1a3a1a,#0e260e);border-bottom:2px solid #4a8a4a;padding:18px 24px;animation:dob-in .3s ease}
+.drink-order-banner.show{display:block}
+@keyframes dob-in{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.dob-hd{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.dob-icon{font-size:1.8rem;animation:dob-pulse 1s ease infinite alternate}
+@keyframes dob-pulse{from{transform:scale(1)}to{transform:scale(1.2)}}
+.dob-title{color:#7ec87e;font-size:1.1rem;font-weight:800;letter-spacing:.06em;flex:1}
+.dob-time{color:rgba(255,255,255,.35);font-size:.72rem}
+.dob-items{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.dob-chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:6px 14px;color:#E8E3DA;font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:6px}
+.dob-chip .dob-qty{color:#E6B840;font-weight:800}
+.dob-chip .dob-temp{font-size:.68rem;padding:2px 6px;border-radius:3px;font-weight:700}
+.dob-chip .dob-temp.hot{background:rgba(220,60,40,.3);color:#ff8070}
+.dob-chip .dob-temp.ice{background:rgba(40,120,220,.3);color:#70b0ff}
+.dob-done-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);border-radius:4px;padding:8px 18px;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .15s}
+.dob-done-btn:hover{background:#4a8a4a;border-color:#4a8a4a;color:#fff}
 /* お客様入力プレビュー（iframe） */
 .preview-frame{width:100%;height:100%;border:0;background:#fff;display:block}
 .preview-frame.hide{display:none}
@@ -3057,7 +3074,16 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
     <div class="fsm-stat" id="fsmStat">待機中</div>
     <button class="fsm-close" onclick="closeFsMonitor()">✕ 閉じる</button>
   </div>
-  <div class="fsm-body">
+  <div class="fsm-body" style="position:relative">
+    <div class="drink-order-banner" id="drinkOrderBanner">
+      <div class="dob-hd">
+        <span class="dob-icon">🍵</span>
+        <span class="dob-title">ドリンク注文が届きました！</span>
+        <span class="dob-time" id="dobTime"></span>
+      </div>
+      <div class="dob-items" id="dobItems"></div>
+      <button class="dob-done-btn" onclick="clearDrinkOrderBanner()">✓ 対応済み（バナーを閉じる）</button>
+    </div>
     <div class="pdf-wrap" id="pdfWrap">
       <iframe id="previewFrame" class="preview-frame" title="お客様入力プレビュー"></iframe>
       <div class="preview-idle" id="previewIdle">お客様の入力を待っています…</div>
@@ -5588,9 +5614,7 @@ function clearScreen(screen){
   post({action:'clearSession',screen:tg});
   toast('受付'+screenLabel(tg)+' を待機に戻しました');
   if(__fsScreenId === String(tg)) closeFsMonitor();
-  // 待機に戻したら自動的にハブへ戻る（受付管理画面が再表示されないように）
-  if(!isBoardView) setTimeout(function(){ showHub(); }, 800);
-  else setTimeout(function(){ pollBoard(); }, 1200);
+  setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); }, 1200);
 }
 
 var __lastCmdSent = 0; // 遠隔コマンド送信タイムスタンプ（heartomPreview消去バグ防止用）
@@ -5697,36 +5721,68 @@ function stopDrinkOrderPoll() {
 }
 
 function fetchDrinkOrders() {
-  gasGet({action:'pollDrinkOrders'}, function(d) {
+  gasGet('pollDrinkOrders', function(d) {
     if (!d || !d.orders) return;
     renderDrinkOrders(d.orders);
   });
 }
 
+var _lastDrinkOrderKey = '';
 function renderDrinkOrders(orders) {
   var panel = document.getElementById('drinkOrderPanel');
-  if (!panel) return;
+  var banner = document.getElementById('drinkOrderBanner');
   var relevant = orders.filter(function(o){ return String(o.screen) === String(__fsScreenId); });
-  if (relevant.length === 0) { panel.style.display='none'; return; }
-  panel.style.display='block';
-  var html = '<div style="color:#C0A070;font-weight:700;margin-bottom:6px;font-size:.75rem;letter-spacing:.08em">📋 受信した注文</div>';
-  relevant.forEach(function(o) {
-    html += '<div style="margin-bottom:8px">';
-    html += '<div style="color:#888;font-size:.65rem;margin-bottom:4px">受信: '+( o.submittedAt||'')+'</div>';
-    if (o.order && o.order.length > 0) {
-      o.order.forEach(function(item) {
-        var tLabel = item.temp==='hot'?'🔴HOT':item.temp==='ice'?'🔵ICE':'';
-        html += '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #2a2a2a">';
-        html += '<span style="color:#E8E3DA;flex:1">'+item.ja+'</span>';
-        if(tLabel) html += '<span style="font-size:.65rem">'+tLabel+'</span>';
-        html += '<span style="color:#C0A070;font-weight:700">×'+item.qty+'</span>';
-        html += '</div>';
+
+  /* サイドパネル（小） */
+  if (panel) {
+    if (relevant.length === 0) { panel.style.display='none'; }
+    else {
+      panel.style.display='block';
+      var ph = '<div style="color:#7ec87e;font-weight:700;margin-bottom:6px;font-size:.75rem;letter-spacing:.08em">📋 受信した注文</div>';
+      relevant.forEach(function(o) {
+        ph += '<div style="margin-bottom:8px">';
+        ph += '<div style="color:#666;font-size:.62rem;margin-bottom:4px">受信: '+(o.submittedAt||'')+'</div>';
+        if(o.order&&o.order.length>0){
+          o.order.forEach(function(item){
+            var tl=item.temp==='hot'?'🔴':item.temp==='ice'?'🔵':'';
+            ph+='<div style="display:flex;align-items:center;gap:5px;padding:3px 0;border-bottom:1px solid #2a2a2a">';
+            ph+='<span style="color:#E8E3DA;flex:1;font-size:.8rem">'+esc(item.ja)+'</span>';
+            ph+=tl+'<span style="color:#E6B840;font-weight:700;font-size:.8rem">×'+item.qty+'</span>';
+            ph+='</div>';
+          });
+        }
+        ph+='<button onclick="clearDrinkOrder(\''+String(o.screen)+'\')" style="margin-top:6px;background:#333;border:1px solid #4a8a4a;color:#7ec87e;border-radius:4px;padding:4px 10px;font-size:.7rem;cursor:pointer;width:100%">✓ 対応済み</button>';
+        ph+='</div>';
       });
+      panel.innerHTML = ph;
     }
-    html += '<button onclick="clearDrinkOrder(\''+String(o.screen)+'\')" style="margin-top:6px;background:#333;border:1px solid #555;color:#aaa;border-radius:4px;padding:4px 10px;font-size:.7rem;cursor:pointer;width:100%">✓ 対応済み</button>';
-    html += '</div>';
-  });
-  panel.innerHTML = html;
+  }
+
+  /* 大バナー：新しい注文が届いたとき */
+  if (!banner) return;
+  if (relevant.length === 0) { banner.classList.remove('show'); _lastDrinkOrderKey=''; return; }
+  var o = relevant[0];
+  var key = String(o.screen)+'|'+(o.submittedAt||'');
+  if (key === _lastDrinkOrderKey) return; /* 既に表示済み */
+  _lastDrinkOrderKey = key;
+  var dobItems = document.getElementById('dobItems');
+  var dobTime = document.getElementById('dobTime');
+  if(dobTime) dobTime.textContent = o.submittedAt||'';
+  if(dobItems && o.order && o.order.length>0){
+    dobItems.innerHTML = o.order.map(function(item){
+      var tempCls = item.temp==='hot'?'hot':item.temp==='ice'?'ice':'';
+      var tempLbl = item.temp==='hot'?'HOT':item.temp==='ice'?'ICE':'';
+      return '<div class="dob-chip">'+esc(item.ja)+(tempLbl?'<span class="dob-temp '+tempCls+'">'+tempLbl+'</span>':'')+'<span class="dob-qty">×'+item.qty+'</span></div>';
+    }).join('');
+  }
+  banner.classList.add('show');
+}
+
+function clearDrinkOrderBanner() {
+  var banner = document.getElementById('drinkOrderBanner');
+  if(banner) banner.classList.remove('show');
+  clearDrinkOrder(__fsScreenId);
+  _lastDrinkOrderKey = '';
 }
 
 function clearDrinkOrder(screen) {
