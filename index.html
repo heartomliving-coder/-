@@ -11683,46 +11683,33 @@ function wsSavePref(p){ localStorage.setItem(WS_KEY_PREF,JSON.stringify(p)); }
 
 // ── 初期化 ────────────────────────────────────────────
 function wsInit(){
-  var pref=wsLoadPref();
   var sb=document.getElementById('ws-sidebar');
   if(!sb) return;
-  sb.classList.add('show');
-  if(pref.collapsed){
-    sb.classList.add('collapsed');
-    document.body.classList.add('ws-collapsed');
-    document.body.classList.remove('ws-open');
-  } else {
-    document.body.classList.add('ws-open');
-    document.body.classList.remove('ws-collapsed');
-  }
   wsRenderSidebarCdbs();
   wsRenderSidebarNotes();
   // ⌘K / Ctrl+K で検索
   document.addEventListener('keydown',function(e){
     if((e.metaKey||e.ctrlKey)&&e.key==='k'){
       e.preventDefault();
+      document.getElementById('ws-sidebar').classList.add('show');
+      document.body.classList.add('ws-open');
       wsFocusSearch();
     }
   });
 }
-function wsShow(){ var sb=document.getElementById('ws-sidebar'); if(sb) sb.classList.add('show'); }
-function wsHide(){ var sb=document.getElementById('ws-sidebar'); if(sb){ sb.classList.remove('show'); document.body.classList.remove('ws-open','ws-collapsed'); } }
-
-function wsToggleCollapse(){
+function wsShow(){
   var sb=document.getElementById('ws-sidebar');
-  var pref=wsLoadPref();
-  var isNowCollapsed=sb.classList.toggle('collapsed');
-  if(isNowCollapsed){
-    document.body.classList.add('ws-collapsed');
-    document.body.classList.remove('ws-open');
-    pref.collapsed=true;
-  } else {
-    document.body.classList.add('ws-open');
-    document.body.classList.remove('ws-collapsed');
-    pref.collapsed=false;
-  }
-  wsSavePref(pref);
+  if(!sb) return;
+  sb.classList.remove('collapsed');
+  sb.classList.add('show');
+  document.body.classList.add('ws-open');
+  document.body.classList.remove('ws-collapsed');
 }
+function wsHide(){
+  var sb=document.getElementById('ws-sidebar');
+  if(sb){ sb.classList.remove('show','collapsed'); document.body.classList.remove('ws-open','ws-collapsed'); }
+}
+function wsToggleCollapse(){ wsHide(); }
 
 // ── アクティブセクションをサイドバーに反映 ─────────────
 function wsSetActiveSection(sec){
