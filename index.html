@@ -1662,18 +1662,10 @@ tr:hover .ob-del{opacity:1}
 .ws-acct-chip{margin-top:2px}
 .ws-acct-role{font-size:.56rem;padding:1px 6px;border-radius:99px;color:#fff;background:#6B7280;flex-shrink:0}
 .ws-sidebar.collapsed .ws-acct-role{display:none}
-/* Body shift when sidebar open */
-/* サイドバー開閉トランジション */
-.hub{transition:left .2s ease!important}
-.ob,.kj,.mtg,#kojiboard,#tochiboard,#custboard,#notesboard,#customdbboard{transition:margin-left .2s ease,width .2s ease}
-/* サイドバー開いた時のレイアウトシフト */
-body.ws-open .hub{left:240px!important}
-body.ws-open .app.show{margin-left:240px;width:calc(100vw - 240px)}
-body.ws-open .ob,body.ws-open .kj,body.ws-open #kojiboard,body.ws-open #tochiboard,body.ws-open .mtg,body.ws-open #custboard,body.ws-open #notesboard,body.ws-open #customdbboard{margin-left:240px;width:calc(100vw - 240px)}
-/* サイドバー折りたたみ時 */
-body.ws-collapsed .hub{left:52px!important}
-body.ws-collapsed .app.show{margin-left:52px;width:calc(100vw - 52px)}
-body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws-collapsed #tochiboard,body.ws-collapsed .mtg,body.ws-collapsed #custboard,body.ws-collapsed #notesboard,body.ws-collapsed #customdbboard{margin-left:52px;width:calc(100vw - 52px)}
+/* サイドバーはオーバーレイ方式 — メインコンテンツは一切動かさない */
+/* バックドロップ */
+#ws-backdrop{display:none;position:fixed;inset:0;z-index:340;background:rgba(0,0,0,.35);backdrop-filter:blur(1px)}
+body.ws-open #ws-backdrop{display:block}
 
 /* ── カスタムDB ──────────────────────────────────────── */
 #customdbboard{display:none;flex-direction:column;height:100dvh;overflow:hidden;background:#F7F6F3}
@@ -1932,6 +1924,7 @@ body.ws-collapsed .ob,body.ws-collapsed .kj,body.ws-collapsed #kojiboard,body.ws
 </div>
 
 <!-- ══ Notionワークスペース サイドバー ══ -->
+<div id="ws-backdrop" onclick="wsHide()"></div>
 <div id="ws-sidebar" class="ws-sidebar">
   <div class="ws-sb-top">
     <span style="font-size:1rem;margin-right:2px">🏠</span>
@@ -11713,6 +11706,7 @@ function wsInit(){
   });
 }
 function wsShow(){ var sb=document.getElementById('ws-sidebar'); if(sb) sb.classList.add('show'); }
+function wsHide(){ var sb=document.getElementById('ws-sidebar'); if(sb){ sb.classList.remove('show'); document.body.classList.remove('ws-open','ws-collapsed'); } }
 
 function wsToggleCollapse(){
   var sb=document.getElementById('ws-sidebar');
