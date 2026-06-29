@@ -5531,11 +5531,12 @@ function renderList(){
     var addr=c.address?esc(c.address):'—';
     return '<tr>'+
       '<td class="ct-date">'+esc(dateJa)+'</td>'+
-      '<td><div class="ct-name">'+src+esc(c.name||'(名前未抽出)')+(c.name?' 様':'')+'</div>'+(c.furigana?'<div class="ct-kana">'+esc(c.furigana)+'</div>':'')+'</td>'+
-      '<td class="ct-mono">'+esc(c.tel||'—')+'</td>'+
-      '<td class="ct-email" title="'+esc(c.email||'')+'">'+esc(c.email||'—')+'</td>'+
+      '<td class="ct-name">'+src+esc(c.name||'(名前未抽出)')+(c.name?' 様':'')+'</td>'+
+      '<td class="ct-kana">'+esc(c.furigana||'—')+'</td>'+
       '<td class="ct-mono">'+zip+'</td>'+
       '<td class="ct-addr" title="'+esc(c.address||'')+'">'+addr+'</td>'+
+      '<td class="ct-mono">'+esc(c.tel||'—')+'</td>'+
+      '<td class="ct-email" title="'+esc(c.email||'')+'">'+esc(c.email||'—')+'</td>'+
       '<td><div class="ct-ops">'+
         '<button class="ct-btn ct-btn-send" onclick="sendCustomer('+idx+')">▶ 送信</button>'+
         '<button class="ct-btn ct-btn-drink" onclick="sendCustomerDrink('+idx+')" title="先にドリンクオーダー">🍵 ドリンク</button>'+
@@ -5544,7 +5545,7 @@ function renderList(){
     '</tr>';
   }).join('');
   el.innerHTML='<table class="cust-tbl"><thead><tr>'+
-    '<th>登録日</th><th>氏名</th><th>電話番号</th><th>メールアドレス</th><th>郵便番号</th><th>住所</th><th>操作</th>'+
+    '<th>登録日</th><th>氏名</th><th>氏名（フリガナ）</th><th>郵便番号</th><th>住所</th><th>電話番号</th><th>メールアドレス</th><th>操作</th>'+
     '</tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
