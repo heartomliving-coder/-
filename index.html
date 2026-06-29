@@ -1618,6 +1618,9 @@ tr:hover .ob-del{opacity:1}
 .hub-act-date{color:rgba(255,255,255,.3);white-space:nowrap;font-size:.67rem}
 
 /* ── Notionワークスペース サイドバー ─────────────────────── */
+#ws-open-btn{position:fixed;top:12px;left:12px;z-index:330;background:#191919;color:rgba(255,255,255,.7);border:none;border-radius:6px;width:34px;height:34px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);transition:opacity .15s}
+#ws-open-btn:hover{color:#fff;background:#2a2a2a}
+body.ws-open #ws-open-btn{display:none}
 .ws-sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:#191919;color:rgba(255,255,255,.85);display:none;flex-direction:column;z-index:350;overflow:hidden;transition:width .2s ease;user-select:none}
 .ws-sidebar.show{display:flex}
 .ws-sidebar.collapsed{width:52px}
@@ -1924,6 +1927,7 @@ body.ws-open #ws-backdrop{display:block}
 </div>
 
 <!-- ══ Notionワークスペース サイドバー ══ -->
+<button id="ws-open-btn" onclick="wsShow()" title="メニューを開く">☰</button>
 <div id="ws-backdrop" onclick="wsHide()"></div>
 <div id="ws-sidebar" class="ws-sidebar">
   <div class="ws-sb-top">
