@@ -1618,8 +1618,8 @@ tr:hover .ob-del{opacity:1}
 .hub-act-date{color:rgba(255,255,255,.3);white-space:nowrap;font-size:.67rem}
 
 /* ── Notionワークスペース サイドバー ─────────────────────── */
-#ws-open-btn{position:fixed;top:12px;left:12px;z-index:330;background:#191919;color:rgba(255,255,255,.7);border:none;border-radius:6px;width:34px;height:34px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);transition:opacity .15s}
-#ws-open-btn:hover{color:#fff;background:#2a2a2a}
+#ws-open-btn{background:none;border:none;color:rgba(255,255,255,.55);cursor:pointer;font-size:1.2rem;width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+#ws-open-btn:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.9)}
 body.ws-open #ws-open-btn{display:none}
 .ws-sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:#191919;color:rgba(255,255,255,.85);display:none;flex-direction:column;z-index:350;overflow:hidden;transition:width .2s ease;user-select:none}
 .ws-sidebar.show{display:flex}
@@ -1927,7 +1927,6 @@ body.ws-open #ws-backdrop{display:block}
 </div>
 
 <!-- ══ Notionワークスペース サイドバー ══ -->
-<button id="ws-open-btn" onclick="wsShow()" title="メニューを開く">☰</button>
 <div id="ws-backdrop" onclick="wsHide()"></div>
 <div id="ws-sidebar" class="ws-sidebar">
   <div class="ws-sb-top">
@@ -2049,6 +2048,7 @@ body.ws-open #ws-backdrop{display:block}
   <div class="lveil"></div>
   <!-- ヘッダー -->
   <div class="hub-header">
+    <button id="ws-open-btn" onclick="wsShow()" title="メニューを開く">☰</button>
     <img class="hh-logo" src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM LIVING" onerror="this.style.display='none';var t=document.getElementById('hh-fallback-title');if(t)t.style.display=''">
     <div style="line-height:1.2">
       <div class="hh-title"><span id="hh-fallback-title" style="display:none">HEARTOM LIVING </span><span class="hh-sub">Management Console — 社内業務統合システム</span></div>
