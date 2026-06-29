@@ -5595,7 +5595,7 @@ function sendCustomerDrink(idx){
   openFsMonitor(tg, true);
   var payload={action:'pushSession',isNew:false,screen:tg,drinkFirst:true,staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',
     customer:{name:c.name||'',furigana:c.furigana||'',tel:c.tel||'',email:c.email||'',postalCode:c.postalCode||'',address:c.address||'',masterId:masterId,threadId:(c.threadId&&c.threadId.indexOf('notion_')!==0)?c.threadId:''}};
-  post(payload);
+  post(payload, function(){ sendCommand(tg,'drinkFirst',{name:c.name||''}); });
   startDrinkOrderPoll();
   toast('🍵 '+( c.name||'お客様')+' 様 のドリンク注文画面を 受付'+screenLabel(tg)+' に送信しました');
   setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
@@ -5615,7 +5615,7 @@ function sendNew(){
 function sendNewDrink(){
   var tg=getTarget();
   openFsMonitor(tg, true);
-  post({action:'pushSession',isNew:true,screen:tg,drinkFirst:true,staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',customer:{}});
+  post({action:'pushSession',isNew:true,screen:tg,drinkFirst:true,staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',customer:{}}, function(){ sendCommand(tg,'drinkFirst',{name:''}); });
   startDrinkOrderPoll();
   toast('🍵 新規ドリンク注文画面を 受付'+screenLabel(tg)+' に送信しました');
   setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
@@ -5647,6 +5647,7 @@ function sendCommand(screen, type, payload) {
   if(type==='setValue') { cmd.field = payload.field; cmd.value = payload.value; }
   if(type==='setChip') { cmd.field = payload.field; cmd.value = payload.value; }
   if(type==='setImg') { cmd.field = payload.field; cmd.value = payload.value; }
+  if(type==='drinkFirst') { cmd.name = (payload&&payload.name)||''; }
 
   // ★ コマンド送信時刻を記録（updateFsMonitorのheartomPreview上書きを10秒間防ぐ）
   __lastCmdSent = Date.now();
