@@ -5696,6 +5696,7 @@ function openFsMonitor(n, delayIframe) {
   var u=customerUrl(); var fr=document.getElementById('previewFrame');
   document.getElementById('fsMonitor').classList.remove('hide');
   updateFsMonitor(__lastSessions, __lastMonitors);
+  startDrinkOrderPoll();
   // delayIframe=true: 新規セッション送信直後のため、GASが更新されるまで1.8秒待ってからiframeを読み込む
   // これにより「旧データが一瞬表示される」バグを防ぐ
   if(fr){
@@ -7096,8 +7097,7 @@ function obMiniTl(r){
   });
   if(!h.length) return '<span style="color:#DDD;font-size:.72rem">—</span>';
   var last=h.length-1;
-  var out='<div class="ob-mini-tl">';
-  var lastLbl='';
+  var out='<div style="display:flex;flex-direction:column;gap:2px">';
   h.forEach(function(item,i){
     var d=item.date?obNormDate(item.date):'';
     var p=d.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -7105,13 +7105,13 @@ function obMiniTl(r){
     var content=String(item.content||'').trim();
     var isGeneric=OB_GENERIC_HIST.indexOf(content.toLowerCase())>=0||OB_SOURCES.indexOf(content)>=0;
     var lbl=(shortD?shortD+' ':'')+(item.type||'')+(content&&!isGeneric&&content!==item.type?'・'+content:'');
-    if(i===last) lastLbl=lbl;
-    if(i>0) out+='<div class="ob-mini-tl-line"></div>';
-    out+='<div class="ob-mini-tl-dot'+(i===last?' last':'')+'" title="'+esc(lbl)+'"></div>';
+    var dotColor=i===last?'#2B2B2B':'#C0A070';
+    out+='<div style="display:flex;align-items:center;gap:5px;white-space:nowrap">'+
+      '<span style="width:7px;height:7px;border-radius:50%;background:'+dotColor+';flex-shrink:0;display:inline-block"></span>'+
+      '<span style="font-size:.72rem;color:#555;font-weight:600">'+esc(lbl)+'</span>'+
+    '</div>';
   });
   out+='</div>';
-  // 最新履歴のラベルをテキストで併記（来場確認の反映を見やすく）
-  if(lastLbl) out+='<span class="ob-mini-tl-label" title="'+esc(lastLbl)+'">'+esc(lastLbl)+'</span>';
   return out;
 }
 
