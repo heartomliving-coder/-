@@ -6925,7 +6925,6 @@ function obRenderVisitors(){
     '<th style="min-width:62px">エリア</th>'+
     '<th style="min-width:240px">来場履歴</th>'+
     '<th style="min-width:110px">次回予定日</th>'+
-    '<th style="min-width:120px">内容</th>'+
     '<th style="width:40px"></th>'+
     '</tr></thead><tbody>';
 
@@ -7028,9 +7027,6 @@ function obRenderVisitors(){
               '<span style="color:#166534;font-weight:700">'+nextAlarm+obFmtDate(nextRaw)+'</span>':
               '<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>')+
           '</div>'+
-        '</td>'+
-        '<td style="padding:4px 8px;font-size:.78rem;color:#555;cursor:pointer" onclick="obFloatEdit(event,'+r._row+',\'次回内容\',\'text\');event.stopPropagation()">'+
-          obListCellHtml(r,'次回内容')+
         '</td>'+
         '<td style="padding:4px 6px;text-align:center" onclick="event.stopPropagation()">'+
           '<button class="ob-del" onclick="obConfirmDel('+r._row+');event.stopPropagation()" title="削除">✕</button>'+
