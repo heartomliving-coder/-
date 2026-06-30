@@ -3288,6 +3288,20 @@ body.ws-open #ws-backdrop{display:block}
             </button>
           </div>
 
+          <div class="st-sec" style="margin-top:16px">📊 スプレッドシートバックアップ</div>
+          <div style="font-size:.78rem;color:#888;margin-bottom:8px">JSONと同時にスプレッドシートにもミラー保存。個別保存は自動反映。</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="hbtn" onclick="obFullSyncToSheetAction()" style="padding:10px;text-align:left">
+              <div style="font-size:.88rem;font-weight:700">📤 全件をシートへ同期</div>
+              <div style="font-size:.72rem;color:#888;margin-top:2px">現在の全データをスプレッドシートに書き出す</div>
+            </button>
+            <button class="hbtn" onclick="obRestoreFromSheetAction()" style="padding:10px;text-align:left;border-color:#F59E0B;color:#92400E">
+              <div style="font-size:.88rem;font-weight:700">⚠️ シートから復元</div>
+              <div style="font-size:.72rem;color:#888;margin-top:2px">スプレッドシートのデータでJSONを上書き復元</div>
+            </button>
+          </div>
+          <div id="ob-sheet-result" style="margin-top:8px;font-size:.8rem;min-height:1em"></div>
+
           <div class="st-sec">🧹 キャッシュ管理</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="hbtn" onclick="dtClearOBCache()">OBキャッシュクリア</button>
@@ -8091,6 +8105,31 @@ function obCleanData(){
     if(!d||d.error){ toast('❌ エラー: '+(d?d.error:'不明')); return; }
     toast('✅ クリーニング完了: '+d.fixed+'件修正');
     obLoad();
+  });
+}
+
+// ── スプレッドシートバックアップ ──
+function obFullSyncToSheetAction(){
+  var el=document.getElementById('ob-sheet-result');
+  if(el) el.textContent='同期中...';
+  toast('📤 スプレッドシートへ全件同期中...');
+  gasGet('obFullSyncToSheet',function(d){
+    if(!d||d.error){ toast('❌ エラー: '+(d?d.error:'不明')); if(el) el.style.color='#EF4444'; if(el) el.textContent='❌ エラー: '+(d?d.error:'不明'); return; }
+    toast('✅ スプレッドシートへ同期完了: '+d.count+'件');
+    if(el){ el.style.color='#22C55E'; el.textContent='✅ '+d.count+'件を同期しました（'+(new Date().toLocaleTimeString('ja-JP'))+'）'; }
+  });
+}
+function obRestoreFromSheetAction(){
+  if(!confirm('⚠️ スプレッドシートのデータでJSONを上書きします。\n現在のJSONデータが失われます。\n本当に復元しますか？')) return;
+  var el=document.getElementById('ob-sheet-result');
+  if(el) el.textContent='復元中...';
+  toast('⚠️ スプレッドシートから復元中...');
+  gasGet('obRestoreFromSheet',function(d){
+    if(!d||d.error){ toast('❌ エラー: '+(d?d.error:'不明')); if(el) el.style.color='#EF4444'; if(el) el.textContent='❌ エラー: '+(d?d.error:'不明'); return; }
+    toast('✅ 復元完了: '+d.count+'件');
+    if(el){ el.style.color='#22C55E'; el.textContent='✅ '+d.count+'件を復元しました。'; }
+    localStorage.removeItem('ob_v3_ts');
+    obLoad(false,true);
   });
 }
 
