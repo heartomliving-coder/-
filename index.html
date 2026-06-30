@@ -6860,7 +6860,7 @@ function obRenderVisitors(){
           else if(_diff<=3){nextCls='warn';nextAlarm='🔔 ';}
           else{nextCls='ok';}
         }
-        var nextLbl=nextRaw?(nextAlarm+obFmtDate(nextRaw)+(r['次回内容']?' '+esc(r['次回内容']):'')):'次回予定なし';
+        var nextLbl=nextRaw?(nextAlarm+obFmtDateTime(nextRaw)+(r['次回内容']?' '+esc(r['次回内容']):'')):'次回予定なし';
         // 最新履歴
         var histArr=Array.isArray(r.history)?r.history.slice().sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;}):[];
         var latestH=histArr.length?histArr[histArr.length-1]:{};
@@ -7025,7 +7025,7 @@ function obRenderVisitors(){
         '<td onclick="obNextPopOpen(event,'+r._row+');event.stopPropagation()" class="ob-td-next" style="cursor:pointer" title="クリックして次回予定を設定">'+
           '<div class="'+(nextCls!=='none'?'ob-card-next '+nextCls:'')+'">'+
             (nextRaw?((r['次回内容']||r['次回種別'])?'<span class="ob-hist-chip" style="font-size:.68rem;padding:2px 7px;margin-right:4px">'+esc(r['次回内容']||r['次回種別'])+'</span>':'')+
-              '<span style="color:#166534;font-weight:700">'+nextAlarm+obFmtDate(nextRaw)+'</span>':
+              '<span style="color:#166534;font-weight:700">'+nextAlarm+obFmtDateTime(nextRaw)+'</span>':
               '<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>')+
           '</div>'+
         '</td>'+
@@ -7171,7 +7171,7 @@ function obRenderActive(){
       var diffLbl=diff<0?('⚠ '+Math.abs(diff)+'日超過'):diff===0?'本日':diff+'日後';
       var _nc7=r['次回内容']||r['次回種別']||'';
       nextLbl=(_nc7?'<span class="ob-hist-chip" style="font-size:.65rem;padding:1px 6px;margin-right:4px;vertical-align:middle">'+esc(_nc7)+'</span>':'')+
-        '📅 '+obFmtDate(nextRaw)+' <small>('+diffLbl+')</small>';
+        '📅 '+obFmtDateTime(nextRaw)+' <small>('+diffLbl+')</small>';
       if(diff<0) nextCls='over';
       else if(diff<=3) nextCls='warn';
       else nextCls='ok';
