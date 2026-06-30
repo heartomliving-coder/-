@@ -8693,6 +8693,7 @@ function obAddHistoryItem(){
   if(!r.history) r.history=[];
   r.history.push({date:date,type:type,content:content,staff:staff});
   r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+  _obLastSaveTs=Date.now();
   obSetCache(obRows);
   obRenderDetHistory();
   obRenderVisitors();
@@ -8802,6 +8803,7 @@ function obHistPopSave(){
   }
   r.history.push({date:date,type:type,content:content,staff:staff});
   r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+  _obLastSaveTs=Date.now();
   obSetCache(obRows);
   obHistPopRenderList(r);
   var tds = document.querySelectorAll('tr[data-row="'+rowIdx+'"] td');
