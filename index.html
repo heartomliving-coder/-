@@ -6391,9 +6391,8 @@ function obLoad(silent, force){
     var userEditing = _obAreaPickerOpen || (ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
       (document.getElementById('ob-detail').contains(ae) || document.getElementById('ob-visitors-content').contains(ae) || document.getElementById('ob-active-content').contains(ae) || document.getElementById('ob-hist-pop').contains(ae) || document.getElementById('ob-next-pop').contains(ae)));
     // フェッチ中にユーザーが保存した場合、または最近保存した場合は古いGASデータで上書きしない
-    // （保存後45秒以内は GAS がまだ処理中の可能性があるため）
-    // 手動更新（silent=false）の場合は保護をスキップし必ず最新データを適用する
-    var _recentSave = silent && _obLastSaveTs > 0 && (Date.now() - _obLastSaveTs) < 120000;
+    // 手動更新でも30秒以内の保存は保護する（更新ボタン連打で消えるバグ対策）
+    var _recentSave = _obLastSaveTs > 0 && (Date.now() - _obLastSaveTs) < 30000;
     if(_obLastSaveTs !== _saveTsAtFetchStart || _recentSave){
       obSetCache(obRows);
       __obLastUpdated=Date.now();
@@ -7553,7 +7552,7 @@ function obStartEdit(el){
       var dir=(e.shiftKey&&e.key==='Tab')?-1:1;
       _obMoveToNextCell(el,dir);
     }
-    if(e.key==='Escape'){el.textContent=val||'';}
+    if(e.key==='Escape'){done3=true; el.textContent=val||'';}
   });
 }
 
@@ -7707,7 +7706,9 @@ function obSaveField(row,field,value){
     else obRows[row][field]=value;
   }
   obSetCache(obRows);
-  post({action:'obUpdateField',id:(obRows[row]?obRows[row].id:''),row:row,field:field,value:value});
+  post({action:'obUpdateField',id:(obRows[row]?obRows[row].id:''),row:row,field:field,value:value},function(res){
+    if(!res||res.error){ toast('⚠️ 保存エラー: '+(res&&res.error||'通信失敗')+'（再入力してください）'); }
+  });
   if(field==='商談ステータス' && value==='パートナー契約済'){
     kjAutoAddFromOB(obRows[row]);
     tochiAutoAddFromOB(obRows[row]); // 土地DBにも自動追加
@@ -8483,9 +8484,9 @@ function obRenderDetInfo(){
   // 顧客情報（連絡先＝カルテ） + 案件情報。全項目クリックで編集可能。
   var fields=[
     {sec:'顧客情報'},
-    {key:'karte.フリガナ',label:'フリガナ',type:'text'},
+    {key:'karte.フリガナ',label:'フリガナ',type:'text',full:true},
     {key:'karte.電話番号',label:'電話番号',type:'text'},
-    {key:'karte.メールアドレス',label:'メールアドレス',type:'text'},
+    {key:'karte.メールアドレス',label:'メールアドレス',type:'text',full:true},
     {key:'karte.住所',label:'住所',type:'text',full:true},
     {sec:'案件情報'},
     {key:'問い合わせ日',label:'問い合わせ日',type:'date'},
