@@ -721,26 +721,28 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-badge:hover{background:color-mix(in srgb,currentColor 18%,#fff);box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .ob-badge::before{content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0;background:currentColor}
 @supports not (background:color-mix(in srgb,red 10%,#fff)){.ob-badge{background:#FAF8F5;border-color:#E5E0D8}}
-.ob-s0{color:#92600E}
-.ob-s1{color:#5B21B6}
-.ob-s2{color:#065F46}
-.ob-s3{color:#1E40AF}
-.ob-s4{color:#991B1B}
-.ob-s5{color:#9D174D}
-.ob-s6{color:#9A3412}
-.ob-s7{color:#059669}
-.ob-s8{color:#6B7280}
-.ob-s9{color:#B91C1C}
-.ob-sP{color:#166534}
-.ob-sF{color:#9CA3AF}
+/* 商談ステータス：s0→s7は問い合わせ〜プレゼン前の商談フェーズをアースカラーの濃淡で表現。
+   s8/s9は停滞系、sPは成約(深緑)、sFは失注(無彩色)で意味づけ */
+.ob-s0{color:#AD9868}
+.ob-s1{color:#9C8465}
+.ob-s2{color:#8C8F6E}
+.ob-s3{color:#748592}
+.ob-s4{color:#A8826B}
+.ob-s5{color:#93798E}
+.ob-s6{color:#B08D57}
+.ob-s7{color:#5F7A66}
+.ob-s8{color:#8A8175}
+.ob-s9{color:#9C5F52}
+.ob-sP{color:#4F6B52}
+.ob-sF{color:#9C9488}
 /* 顧客分類バッジ */
 .ob-cls-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.68rem;font-weight:700;letter-spacing:.04em;white-space:nowrap}
-.ob-cls-miKomi{background:#FEF9EC;color:#92400E;border:1px solid #FDE68A}
-.ob-cls-shodan{background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE}
-.ob-cls-keiyaku{background:#ECFDF5;color:#166534;border:1px solid #86EFAC}
-.ob-cls-partner{background:#F5F3FF;color:#5B21B6;border:1px solid #DDD6FE}
-.ob-cls-koji{background:#FFF7ED;color:#9A3412;border:1px solid #FED7AA}
-.ob-cls-hikiwatashi{background:#F0FDFA;color:#0F766E;border:1px solid #99F6E4}
+.ob-cls-miKomi{background:#F7F3EA;color:#8C6F3E;border:1px solid #E3D6B8}
+.ob-cls-shodan{background:#EEF1F0;color:#4B6358;border:1px solid #C9D6CE}
+.ob-cls-keiyaku{background:#EEF2ED;color:#4F6B52;border:1px solid #C7D6C6}
+.ob-cls-partner{background:#F2EEF2;color:#7A5E76;border:1px solid #DBCBD8}
+.ob-cls-koji{background:#F7EFE9;color:#8C5A3E;border:1px solid #E3C7B4}
+.ob-cls-hikiwatashi{background:#EDF1F1;color:#3E6B67;border:1px solid #BFD6D3}
 
 /* インライン編集 */
 .ob-editable{display:inline-block;min-width:18px;cursor:text;border-radius:3px;padding:4px 5px;transition:background .12s;line-height:1.4}
@@ -937,18 +939,18 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .ob-vis-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.12);transform:translateY(-2px)}
 /* ステータスカラーバー（上端） */
 .ob-vis-card-bar{height:4px;flex-shrink:0}
-.ob-vis-card[data-sc="ob-s0"] .ob-vis-card-bar{background:#F5DFA0}
-.ob-vis-card[data-sc="ob-s1"] .ob-vis-card-bar{background:#D4C8F8}
-.ob-vis-card[data-sc="ob-s2"] .ob-vis-card-bar{background:#A7DFBE}
-.ob-vis-card[data-sc="ob-s3"] .ob-vis-card-bar{background:#BFDBFE}
-.ob-vis-card[data-sc="ob-s4"] .ob-vis-card-bar{background:#FEC9C9}
-.ob-vis-card[data-sc="ob-s5"] .ob-vis-card-bar{background:#F9C2DC}
-.ob-vis-card[data-sc="ob-s6"] .ob-vis-card-bar{background:#FDC9A0}
-.ob-vis-card[data-sc="ob-s7"] .ob-vis-card-bar{background:#6EE7B7}
-.ob-vis-card[data-sc="ob-s8"] .ob-vis-card-bar{background:#D1D5DB}
-.ob-vis-card[data-sc="ob-s9"] .ob-vis-card-bar{background:#FECACA}
-.ob-vis-card[data-sc="ob-sP"] .ob-vis-card-bar{background:#86EFAC}
-.ob-vis-card[data-sc="ob-sF"] .ob-vis-card-bar{background:#E5E7EB}
+.ob-vis-card[data-sc="ob-s0"] .ob-vis-card-bar{background:#AD9868}
+.ob-vis-card[data-sc="ob-s1"] .ob-vis-card-bar{background:#9C8465}
+.ob-vis-card[data-sc="ob-s2"] .ob-vis-card-bar{background:#8C8F6E}
+.ob-vis-card[data-sc="ob-s3"] .ob-vis-card-bar{background:#748592}
+.ob-vis-card[data-sc="ob-s4"] .ob-vis-card-bar{background:#A8826B}
+.ob-vis-card[data-sc="ob-s5"] .ob-vis-card-bar{background:#93798E}
+.ob-vis-card[data-sc="ob-s6"] .ob-vis-card-bar{background:#B08D57}
+.ob-vis-card[data-sc="ob-s7"] .ob-vis-card-bar{background:#5F7A66}
+.ob-vis-card[data-sc="ob-s8"] .ob-vis-card-bar{background:#C7C0B4}
+.ob-vis-card[data-sc="ob-s9"] .ob-vis-card-bar{background:#9C5F52}
+.ob-vis-card[data-sc="ob-sP"] .ob-vis-card-bar{background:#4F6B52}
+.ob-vis-card[data-sc="ob-sF"] .ob-vis-card-bar{background:#D6D0C4}
 /* カード内レイアウト */
 .ob-vis-card-hd{display:flex;align-items:center;gap:7px;padding:8px 12px 6px;border-bottom:1px solid #F2EEE9}
 .ob-vis-card-date{font-size:.73rem;color:#888;white-space:nowrap;font-family:monospace}
@@ -1146,9 +1148,9 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .ob-card-staff{font-weight:700;color:#555}
 .ob-card-last{font-size:.72rem;color:#9A8C76;font-weight:600}
 .ob-card-next{font-size:.76rem;font-weight:700;padding:5px 11px;border-radius:7px;white-space:nowrap;line-height:1.5}
-.ob-card-next.ok{background:#F0FDF4;color:#166534;border:1px solid #BBF7D0}
-.ob-card-next.warn{background:#FFF7ED;color:#92500A;border:1px solid #FDE68A}
-.ob-card-next.over{background:#FEF2F2;color:#991B1B;border:1px solid #FECACA}
+.ob-card-next.ok{background:#EEF2ED;color:#4F6B52;border:1px solid #C7D6C6}
+.ob-card-next.warn{background:#F7F1E7;color:#8C6F3E;border:1px solid #E3D6B8}
+.ob-card-next.over{background:#F5EAE8;color:#9C5F52;border:1px solid #E3C2BC}
 .ob-card-next.none{background:#F9FAFB;color:#9CA3AF;border:1px solid #E5E7EB}
 .ob-card-pills{display:flex;flex-wrap:wrap;gap:5px}
 .ob-pill{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid #E8E4DE;background:#F9FAFB;color:#888;cursor:pointer;transition:all .14s;user-select:none}
@@ -1156,18 +1158,18 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .ob-pill.on{background:#2B2B2B;color:#fff;border-color:#2B2B2B}
 .ob-card-p{font-size:.7rem;color:#5E9E5E;font-weight:700;background:#F0FDF4;padding:3px 9px;border-radius:4px;border:1px solid #BBF7D0;display:inline-block}
 /* ステータス別カード左ボーダー */
-.ob-card[data-sc="ob-s0"]{border-left-color:#F5DFA0}
-.ob-card[data-sc="ob-s1"]{border-left-color:#D4C8F8}
-.ob-card[data-sc="ob-s2"]{border-left-color:#A7DFBE}
-.ob-card[data-sc="ob-s3"]{border-left-color:#BFDBFE}
-.ob-card[data-sc="ob-s4"]{border-left-color:#FEC9C9}
-.ob-card[data-sc="ob-s5"]{border-left-color:#F9C2DC}
-.ob-card[data-sc="ob-s6"]{border-left-color:#FDC9A0}
-.ob-card[data-sc="ob-s7"]{border-left-color:#6EE7B7}
-.ob-card[data-sc="ob-s8"]{border-left-color:#D1D5DB}
-.ob-card[data-sc="ob-s9"]{border-left-color:#FECACA}
-.ob-card[data-sc="ob-sP"]{border-left-color:#86EFAC}
-.ob-card[data-sc="ob-sF"]{border-left-color:#E5E7EB;opacity:.7}
+.ob-card[data-sc="ob-s0"]{border-left-color:#AD9868}
+.ob-card[data-sc="ob-s1"]{border-left-color:#9C8465}
+.ob-card[data-sc="ob-s2"]{border-left-color:#8C8F6E}
+.ob-card[data-sc="ob-s3"]{border-left-color:#748592}
+.ob-card[data-sc="ob-s4"]{border-left-color:#A8826B}
+.ob-card[data-sc="ob-s5"]{border-left-color:#93798E}
+.ob-card[data-sc="ob-s6"]{border-left-color:#B08D57}
+.ob-card[data-sc="ob-s7"]{border-left-color:#5F7A66}
+.ob-card[data-sc="ob-s8"]{border-left-color:#C7C0B4}
+.ob-card[data-sc="ob-s9"]{border-left-color:#9C5F52}
+.ob-card[data-sc="ob-sP"]{border-left-color:#4F6B52}
+.ob-card[data-sc="ob-sF"]{border-left-color:#D6D0C4;opacity:.7}
 /* ── 直近案件セクションヘッダー ── */
 .ob-act-section{padding:16px 0 8px}
 .ob-act-section-hd{display:flex;align-items:center;gap:10px;padding:0 20px 10px;border-bottom:1px solid #EDEAE4;margin-bottom:14px}
