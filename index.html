@@ -6393,10 +6393,17 @@ var __obLoading = false;
 var _obLastSaveTs = 0; // obSaveField が呼ばれた最終時刻
 var _obAreaPickerOpen = false; // エリアピッカー表示中フラグ（再描画ブロック用）
 
+// カスタムドロップダウン(ステータス/担当者/エリア選択)が開いている間は
+// バックグラウンド再描画を止める共通判定。これらは<body>直下に浮くdivで
+// INPUT/SELECTではないため、activeElementチェックだけでは検知できない。
+function _obPopupOpen(){
+  return !!(document.getElementById('ob-custom-dd') || document.getElementById('ob-area-picker'));
+}
 function obLoad(silent, force){
   if(__obLoading && silent) return; // サイレント更新は同時実行しない
   // 編集中チェック（どのパスでも再描画前に確認）
   function _isObEditing(){
+    if(_obPopupOpen()) return true;
     var ae=document.activeElement;
     return ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
       (document.getElementById('ob-detail').contains(ae)||document.getElementById('ob-visitors-content').contains(ae)||document.getElementById('ob-active-content').contains(ae)||document.getElementById('ob-hist-pop').contains(ae)||document.getElementById('ob-next-pop').contains(ae));
@@ -6423,7 +6430,7 @@ function obLoad(silent, force){
     var prevLen=obRows.length;
     // ユーザーが入力中の場合は再描画をスキップ
     var ae=document.activeElement;
-    var userEditing = _obAreaPickerOpen || (ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
+    var userEditing = _obAreaPickerOpen || _obPopupOpen() || (ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT') &&
       (document.getElementById('ob-detail').contains(ae) || document.getElementById('ob-visitors-content').contains(ae) || document.getElementById('ob-active-content').contains(ae) || document.getElementById('ob-hist-pop').contains(ae) || document.getElementById('ob-next-pop').contains(ae)));
     // フェッチ中にユーザーが保存した場合、または最近保存した場合は古いGASデータで上書きしない
     // 手動更新でも30秒以内の保存は保護する（更新ボタン連打で消えるバグ対策）
