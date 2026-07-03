@@ -1268,7 +1268,8 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .hub{position:fixed;inset:0;z-index:45;display:none;flex-direction:column;align-items:stretch;justify-content:flex-start;background:#F2F0EC;overflow:hidden}
 .hub.show{display:flex}
 /* ヒーロー写真帯：ヘッダー直下に固定高さで写真をしっかり見せる */
-.hub-hero{position:relative;flex-shrink:0;height:260px;overflow:hidden}
+.hub-hero{position:relative;flex-shrink:0;height:260px;overflow:hidden;transition:height .3s ease}
+.hub-hero.collapsed{height:0}
 .hub-hero .lslides{display:block}
 .hub-hero .lveil{display:block;background:linear-gradient(180deg,rgba(20,16,10,.32) 0%,rgba(20,16,10,.18) 55%,rgba(20,16,10,.55) 100%)}
 .hub-hero .lveil::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 65%,#F2F0EC 100%)}
@@ -3952,6 +3953,7 @@ function showApp(){
     // サイドバーを先に初期化（自動表示はしない）
     wsInit();
     document.getElementById('hub').classList.add('show');
+    hubUpdateHeroVisibility();
     // キャッシュから即時描画、続いてバックグラウンドで最新取得
     var obCached = (function(){ try{var d=localStorage.getItem('ob_v3');return d?JSON.parse(d):[];}catch(e){return[];} })();
     var kjCached = (function(){ try{var d=localStorage.getItem('kj_v1');return d?JSON.parse(d):[];}catch(e){return[];} })();
@@ -4034,6 +4036,7 @@ function enterMtgBoard(){
 function showHub(){
   _hideAllBoards();
   document.getElementById('hub').classList.add('show');
+  hubUpdateHeroVisibility();
   wsSetActiveSection('hub');
   hubUpdateBadges();
   // ハブ戻り時：キャッシュが古い場合のみバックグラウンド取得
@@ -4047,6 +4050,20 @@ function showHub(){
   scheduleEvSyncFromGAS();
   hubNoteRender();
   hubRestoreLayout();
+}
+
+// ヒーロー写真帯：その日最初にハブを開いた時だけ表示し、以降は畳んでカードをすぐ見せる
+function hubUpdateHeroVisibility(){
+  var hero = document.querySelector('.hub-hero'); if(!hero) return;
+  var today = new Date();
+  var todayStr = today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2);
+  var lastSeen = localStorage.getItem('hub_hero_last_date');
+  if(lastSeen === todayStr){
+    hero.classList.add('collapsed');
+  } else {
+    hero.classList.remove('collapsed');
+    localStorage.setItem('hub_hero_last_date', todayStr);
+  }
 }
 
 /* ─── ハブ自由レイアウト ─── */
