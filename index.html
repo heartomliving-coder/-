@@ -6393,11 +6393,13 @@ var __obLoading = false;
 var _obLastSaveTs = 0; // obSaveField が呼ばれた最終時刻
 var _obAreaPickerOpen = false; // エリアピッカー表示中フラグ（再描画ブロック用）
 
-// カスタムドロップダウン(ステータス/担当者/エリア選択)が開いている間は
-// バックグラウンド再描画を止める共通判定。これらは<body>直下に浮くdivで
-// INPUT/SELECTではないため、activeElementチェックだけでは検知できない。
+// カスタムドロップダウン(ステータス/担当者/エリア選択)や表示中モーダルが
+// 開いている間はバックグラウンド再描画を止める共通判定。カスタムdropdownは
+// <body>直下に浮くdivでINPUT/SELECTではないため、activeElementチェックだけ
+// では検知できない。表示中の.modal（新規追加モーダル等）も対象に含める。
 function _obPopupOpen(){
-  return !!(document.getElementById('ob-custom-dd') || document.getElementById('ob-area-picker'));
+  if(document.getElementById('ob-custom-dd') || document.getElementById('ob-area-picker')) return true;
+  return !!document.querySelector('.modal.show');
 }
 function obLoad(silent, force){
   if(__obLoading && silent) return; // サイレント更新は同時実行しない
