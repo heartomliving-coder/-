@@ -1639,8 +1639,8 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .hub-act-date{color:rgba(29,46,61,.35);white-space:nowrap;font-size:.67rem}
 
 /* ── Notionワークスペース サイドバー ─────────────────────── */
-#ws-open-btn{background:none;border:none;color:rgba(255,255,255,.55);cursor:pointer;font-size:1.2rem;width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
-#ws-open-btn:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.9)}
+#ws-open-btn{background:none;border:1px solid rgba(29,46,61,.15);color:#1D2E3D;cursor:pointer;font-size:1.2rem;width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+#ws-open-btn:hover{background:rgba(95,169,143,.12);border-color:rgba(95,169,143,.4)}
 body.ws-open #ws-open-btn{display:none}
 .ws-sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:#191919;color:rgba(255,255,255,.85);display:none;flex-direction:column;z-index:350;overflow:hidden;transition:width .2s ease;user-select:none}
 .ws-sidebar.show{display:flex}
@@ -10358,10 +10358,15 @@ function tochiRenderList(){
         (biko?'<div style="font-size:.76rem;color:#777;margin:2px 0;line-height:1.5;white-space:pre-line">📝 '+esc(biko)+'</div>':'')+
         (parking?'<div class="tochi-card-park">🅿 '+esc(parking)+'</div>':'')+
         (function(){var kjMatch=findRelatedKj(customerName);return kjMatch?'<div style="margin:4px 0"><button onclick="tochiJumpToKj(\''+esc(kjMatch._id)+'\')" style="background:#FDF8F3;color:#92400E;border:1px solid #FDE68A;border-radius:5px;padding:5px 10px;font-size:.76rem;font-weight:700;cursor:pointer;width:100%">🏗 着工管理を見る → '+esc(kjMatch['物件名']||customerName)+'</button></div>':'';})() +
+        (function(){var oid=r.obId||'';if(!oid)return '';var found=(obRows||[]).some(function(o){return String(o.id)===String(oid);});return found?'<div style="margin:4px 0"><button onclick="tochiJumpToOb(\''+esc(oid)+'\')" style="background:#EEF3F1;color:#24425C;border:1px solid #C9D6CE;border-radius:5px;padding:5px 10px;font-size:.76rem;font-weight:700;cursor:pointer;width:100%">👤 オープンボードで開く → '+esc(customerName)+'</button></div>':'';})() +
         '<div class="tochi-card-actions">'+
           (openUrl?'<a href="'+esc(openUrl)+'" target="_blank" class="tochi-link-btn">🗺 地図を開く</a>':'')+
           (allTabs.length?'<button class="tochi-pdf-btn" data-pname="'+esc(customerName)+'" data-purls="'+esc(JSON.stringify(allTabs))+'" onclick="tochiOpenPdfBtn(this)">📄 資料プレビュー</button>':'')+
-          (!hasKoji&&loc?'<button onclick="tochiGenerateOne(\''+esc(notionId)+'\',\''+esc(customerName)+'\')" style="display:inline-flex;align-items:center;gap:4px;background:#EDF7EF;color:#166534;border:1px solid #BBF7D0;border-radius:5px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">🔨 案内図生成</button>':'')+
+          (r.mapStatus==='pending'
+            ?'<span style="display:inline-flex;align-items:center;gap:4px;background:#F7F1E7;color:#7A5A1E;border:1px solid #E3D6B8;border-radius:5px;padding:5px 10px;font-size:.72rem;font-weight:700">⏳ 案内図を生成中…</span>'
+            :(String(r.mapStatus||'').indexOf('error')===0
+              ?'<button onclick="tochiGenerateOne(\''+esc(notionId)+'\',\''+esc(customerName)+'\')" title="'+esc(r.mapStatus)+'" style="display:inline-flex;align-items:center;gap:4px;background:#F5EAE8;color:#9C3D2E;border:1px solid #E3C2BC;border-radius:5px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">⚠ 生成失敗・再試行</button>'
+              :(!hasKoji&&loc?'<button onclick="tochiGenerateOne(\''+esc(notionId)+'\',\''+esc(customerName)+'\')" style="display:inline-flex;align-items:center;gap:4px;background:#EDF7EF;color:#166534;border:1px solid #BBF7D0;border-radius:5px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">🔨 案内図生成</button>':'')))+
         '</div>'+
         '<div class="tochi-card-tags">'+
           '<span class="tochi-tag '+(hasKoji?'on':'off')+'">工事案内図 '+(hasKoji?'✓':'未')+'</span>'+
@@ -10519,18 +10524,21 @@ function tochiSaveAddress(rowIdx){
   if(chiban) r['地番']=chiban;
   if(biko!==undefined) r['備考']=biko;
   tochiSetCache(tochiRows);
-  // GASに保存（Notionを更新）
+  // GASに保存（所在地の設定/変更でGAS側が案内図生成を自動キューする）
   toast('土地情報を保存中…');
-  post({action:'tochiSaveField',notionId:notionId,field:'所在地',value:address});
+  post({action:'tochiSaveField',notionId:notionId,field:'所在地',value:address},function(d){
+    if(d&&d.error){ toast('⚠️ 保存エラー: '+d.error); return; }
+    if(d&&d.mapQueued){
+      toast('✅ 保存しました。案内図を自動生成中…（数分かかります）');
+      tochiStartMapWatch();
+    } else {
+      toast('✅ 土地情報を保存しました');
+    }
+    tochiLoad(true,true);
+  });
   if(zip) post({action:'tochiSaveField',notionId:notionId,field:'郵便番号',value:zip});
   if(chiban) post({action:'tochiSaveField',notionId:notionId,field:'地番',value:chiban});
   if(biko!==undefined) post({action:'tochiSaveField',notionId:notionId,field:'備考',value:biko});
-  // 保存後に案内図生成を自動トリガー
-  setTimeout(function(){
-    toast('✅ 土地情報を保存しました。地図・工事案内図を生成中…（数分かかります）');
-    post({action:'tochiGenerateAllMaps'});
-    setTimeout(function(){ tochiLoad(true); },90000);
-  },1200);
   // UI更新
   var disp=document.getElementById('tochi-loc-disp-'+rowIdx);
   var edit=document.getElementById('tochi-loc-edit-'+rowIdx);
@@ -10570,20 +10578,46 @@ function tochiSaveNew(){
   tochiSetCache(tochiRows);
   tochiRenderList();
   toast('✅ 「'+name+'」を土地DBに追加中…');
-  // GASに保存
-  post({action:'tochiAddEntry',name:name,address:addr,zip:zip,chiban:chiban,biko:biko});
-  setTimeout(function(){
-    tochiLoad(true);
-    if(addr) setTimeout(function(){ post({action:'tochiGenerateAllMaps'}); },2000);
-  },3000);
+  // GASに保存（住所ありならGAS側が案内図生成を自動キュー）
+  post({action:'tochiAddEntry',name:name,address:addr,zip:zip,chiban:chiban,biko:biko},function(d){
+    if(d&&d.error){ toast('⚠️ 追加エラー: '+d.error); return; }
+    if(addr){ toast('✅ 追加しました。案内図を自動生成中…（数分かかります）'); tochiStartMapWatch(); }
+    tochiLoad(true,true);
+  });
 }
 
 // 個別案内図生成（所在地が登録済みの1件のみ）
 function tochiGenerateOne(notionId, customerName){
-  if(!notionId){ toast('Notion IDが未設定です'); return; }
-  toast('「'+customerName+'」の地図・案内図を生成中…（数分かかります）');
-  post({action:'tochiGenerateAllMaps'}); // GASはis_emptyフィルタで自動的に対象を限定
-  setTimeout(function(){ toast('✅ 生成完了（確認中…）'); tochiLoad(true); },90000);
+  if(!notionId){ toast('IDが未設定です'); return; }
+  toast('「'+customerName+'」の案内図を生成キューに追加しました（数分かかります）');
+  post({action:'tochiGenerateAllMaps',id:notionId},function(d){
+    if(d&&d.error){ toast('⚠️ '+d.error); return; }
+    tochiLoad(true,true); // pending表示を即反映
+  });
+  // 完成をポーリングで検知（30秒ごと・最大10分）
+  tochiStartMapWatch();
+}
+var _tochiMapWatchTimer=null;
+function tochiStartMapWatch(){
+  if(_tochiMapWatchTimer) return;
+  var tries=0;
+  _tochiMapWatchTimer=setInterval(function(){
+    tries++;
+    tochiLoad(true,true);
+    var stillPending=(tochiRows||[]).some(function(r){return r.mapStatus==='pending';});
+    if(!stillPending||tries>=20){
+      clearInterval(_tochiMapWatchTimer); _tochiMapWatchTimer=null;
+      if(!stillPending) toast('✅ 案内図の生成が完了しました');
+    }
+  },30000);
+}
+// 土地DB→オープンボード詳細へジャンプ（obIdで紐付け）
+function tochiJumpToOb(obId){
+  var idx=-1;
+  for(var i=0;i<(obRows||[]).length;i++){ if(String(obRows[i].id)===String(obId)){ idx=obRows[i]._row!==undefined?obRows[i]._row:i; break; } }
+  if(idx<0){ toast('オープンボードに該当顧客が見つかりません'); return; }
+  enterOpenBoard();
+  setTimeout(function(){ obOpenDetail(idx); },600);
 }
 
 // 起動処理（OAuth2ポップアップコールバックの場合はスキップ）
