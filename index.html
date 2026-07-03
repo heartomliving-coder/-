@@ -529,11 +529,11 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 /* ─────────── モード選択ハブ ─────────── */
 .hub{position:fixed;inset:0;z-index:45;display:none;flex-direction:column;align-items:stretch;justify-content:flex-start;overflow:hidden}
 .hub.show{display:flex}
-.hub .lslides{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.hub .lslide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;will-change:opacity,transform;animation:lKen 54s linear infinite}
-.hub .lslide:nth-child(2){animation-delay:9s}.hub .lslide:nth-child(3){animation-delay:18s}.hub .lslide:nth-child(4){animation-delay:27s}.hub .lslide:nth-child(5){animation-delay:36s}.hub .lslide:nth-child(6){animation-delay:45s}
-.hub .lveil{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(5,5,8,.60) 0%,rgba(5,5,8,.38) 48%,rgba(5,5,8,.64) 100%)}
-.hub .lveil::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 46%,rgba(154,140,118,.08),transparent 65%)}
+.hub-hero .lslides{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.hub-hero .lslide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;will-change:opacity,transform;animation:lKen 54s linear infinite}
+.hub-hero .lslide:nth-child(2){animation-delay:9s}.hub-hero .lslide:nth-child(3){animation-delay:18s}.hub-hero .lslide:nth-child(4){animation-delay:27s}.hub-hero .lslide:nth-child(5){animation-delay:36s}.hub-hero .lslide:nth-child(6){animation-delay:45s}
+.hub-hero .lveil{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(5,5,8,.60) 0%,rgba(5,5,8,.38) 48%,rgba(5,5,8,.64) 100%)}
+.hub-hero .lveil::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 46%,rgba(154,140,118,.08),transparent 65%)}
 .hub-wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:30px;width:100%;max-width:800px}
 .hub-logo{height:38px;margin-bottom:12px;filter:brightness(0) invert(1) opacity(.9)}
 .hub-eyebrow{font-family:"Playfair Display",serif;font-size:.68rem;letter-spacing:.52em;color:rgba(255,255,255,.48);margin-bottom:44px}
@@ -1267,14 +1267,19 @@ tr:hover .ob-hist-add-btn{opacity:1}
 ═══════════════════════════════════════════════ */
 .hub{position:fixed;inset:0;z-index:45;display:none;flex-direction:column;align-items:stretch;justify-content:flex-start;background:#F2F0EC;overflow:hidden}
 .hub.show{display:flex}
-/* 背景スライドショー（heartom.co.jpの家写真）は残し、オーバーレイを薄くして写真を活かす */
-.hub .lslides{display:block}
-.hub .lveil{display:block;background:linear-gradient(180deg,rgba(242,240,236,.72) 0%,rgba(242,240,236,.42) 45%,rgba(242,240,236,.76) 100%)}
-.hub .lveil::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 100% 65% at 50% 55%,rgba(95,169,143,.06),transparent 68%)}
+/* ヒーロー写真帯：ヘッダー直下に固定高さで写真をしっかり見せる */
+.hub-hero{position:relative;flex-shrink:0;height:260px;overflow:hidden}
+.hub-hero .lslides{display:block}
+.hub-hero .lveil{display:block;background:linear-gradient(180deg,rgba(20,16,10,.32) 0%,rgba(20,16,10,.18) 55%,rgba(20,16,10,.55) 100%)}
+.hub-hero .lveil::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 65%,#F2F0EC 100%)}
+.hub-hero-content{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
+.hub-hero-eyebrow{font-family:"Playfair Display",serif;font-size:.66rem;letter-spacing:.5em;color:rgba(255,255,255,.82);margin-bottom:14px;text-transform:uppercase}
+.hub-hero-msg{font-family:var(--serif);font-size:1.28rem;font-weight:600;color:#fff;letter-spacing:.1em;text-shadow:0 2px 12px rgba(0,0,0,.25)}
+@media(max-width:640px){.hub-hero{height:170px}.hub-hero-msg{font-size:1rem}}
 
 /* ─── ヘッダーバー（白基調） ─── */
 .hub-header{flex-shrink:0;width:100%;background:rgba(255,255,255,.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(29,46,61,.1);display:flex;align-items:center;gap:18px;padding:12px 32px;box-sizing:border-box;position:relative;z-index:2}
-.hub-header .hh-logo{height:28px;opacity:.92}
+.hub-header .hh-logo{height:28px;opacity:.92;filter:brightness(0)}
 .hub-header .hh-title{font-family:var(--serif);font-size:.96rem;letter-spacing:.18em;color:rgba(29,46,61,.85);font-weight:600}
 .hub-header .hh-sub{font-family:"Playfair Display",serif;font-size:.55rem;letter-spacing:.36em;color:rgba(29,46,61,.4);font-weight:400;display:block;margin-top:2px}
 .hub-header .hh-grow{flex:1}
@@ -1318,24 +1323,32 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .hub-ev-badge.ev-b-on{background:rgba(31,74,50,.15);color:#1F4A32}
 .hub-ev-badge.ev-b-soon{background:rgba(122,90,30,.15);color:#7A5A1E}
 
-/* ─── メインエリア ─── */
-.hub-main{overflow-y:auto;padding:20px 26px;display:flex;flex-direction:column;gap:16px}
-/* ── ハブカード：コンシェルジュ台帳スタイル（白パネル・横一列の番号付きリスト） ── */
-.hub-cards-grid{display:flex;flex-direction:column;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(29,46,61,.1);border-radius:14px;overflow:hidden}
-.hub-card{display:flex;align-items:center;gap:20px;padding:16px 26px;cursor:pointer;transition:background .22s ease,padding-left .22s ease;position:relative;border-bottom:1px solid rgba(29,46,61,.08);text-align:left;min-width:0}
-.hub-card:last-child{border-bottom:none}
-.hub-card:hover{background:rgba(95,169,143,.08);padding-left:32px}
-.hub-card:active{background:rgba(95,169,143,.14)}
-.hub-card.soon{opacity:.32;cursor:not-allowed}
-.hub-card.soon:hover{background:none;padding-left:26px}
+/* ─── メインエリア（横に並べてリズムを出す：スケジュールと直近来客を2カラム化） ─── */
+.hub-main{overflow-y:auto;padding:20px 26px;display:flex;flex-flow:row wrap;align-content:flex-start;gap:16px}
+.hub-main>*{width:100%}
+.hub-main .hub-sec[data-sec="gcal"],.hub-main .hub-sec[data-sec="recent"]{width:calc(50% - 8px);display:flex;flex-direction:column}
+.hub-main .hub-sec[data-sec="gcal"] .hub-gcal,.hub-main .hub-sec[data-sec="recent"] .hub-recent{height:100%}
+@media(max-width:900px){.hub-main .hub-sec[data-sec="gcal"],.hub-main .hub-sec[data-sec="recent"]{width:100%}}
+/* ── ハブカード：2x2グリッド・色アクセント帯でリズムを演出 ── */
+.hub-cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.hub-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;background:#fff;border:1px solid rgba(29,46,61,.08);border-top:3px solid rgba(29,46,61,.2);border-radius:12px;box-shadow:0 1px 3px rgba(29,46,61,.05);padding:20px 22px;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease;position:relative;text-align:left;min-width:0}
+.hub-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(29,46,61,.12)}
+.hub-card:active{transform:translateY(-1px)}
+.hub-card.soon{opacity:.4;cursor:not-allowed}
+.hub-card.soon:hover{transform:none;box-shadow:0 1px 3px rgba(29,46,61,.05)}
+.hub-card.hc-accent-a{border-top-color:#375670}
+.hub-card.hc-accent-b{border-top-color:#2F5C56}
+.hub-card.hc-accent-c{border-top-color:#7A5A1E}
+.hub-card.hc-accent-d{border-top-color:#1F4A32}
 .hub-card .hc-icon{display:none}
-.hub-card .hc-num{display:block;font-family:"Playfair Display",serif;font-size:1.5rem;font-weight:400;color:rgba(29,46,61,.32);flex-shrink:0;width:40px;line-height:1;font-style:italic}
-.hub-card .hc-body{flex:1;min-width:0}
-.hub-card .hc-title{font-family:var(--serif);font-size:1.08rem;font-weight:700;color:#1D2E3D;letter-spacing:.06em;margin-bottom:3px}
-.hub-card .hc-desc{font-size:.72rem;color:rgba(29,46,61,.55);letter-spacing:.02em;line-height:1.55}
-.hub-card .hc-arrow{flex-shrink:0;font-size:1.1rem;color:rgba(95,169,143,.7);transition:transform .22s ease;font-family:"Playfair Display",serif}
+.hub-card .hc-num{display:block;font-family:"Playfair Display",serif;font-size:1.7rem;font-weight:400;color:rgba(29,46,61,.24);line-height:1;font-style:italic}
+.hub-card .hc-body{width:100%}
+.hub-card .hc-title{font-family:var(--serif);font-size:1.1rem;font-weight:700;color:#1D2E3D;letter-spacing:.06em;margin-bottom:4px}
+.hub-card .hc-desc{font-size:.72rem;color:rgba(29,46,61,.55);letter-spacing:.02em;line-height:1.6}
+.hub-card .hc-arrow{position:absolute;right:20px;bottom:18px;font-size:1.1rem;color:rgba(95,169,143,.7);transition:transform .22s ease;font-family:"Playfair Display",serif}
 .hub-card:hover .hc-arrow{transform:translateX(5px);color:#2F5C4E}
-.hub-card .hc-badge{flex-shrink:0;background:rgba(95,169,143,.14);border:1px solid rgba(95,169,143,.4);color:#2F5C4E;font-size:.64rem;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:20px;position:static}
+.hub-card .hc-badge{position:absolute;top:16px;right:18px;background:rgba(95,169,143,.14);border:1px solid rgba(95,169,143,.4);color:#2F5C4E;font-size:.64rem;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:20px}
+@media(max-width:640px){.hub-cards-grid{grid-template-columns:1fr}}
 
 /* ─── 直近受付プレビュー ─── */
 .hub-recent{background:rgba(255,255,255,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(29,46,61,.1);border-radius:14px;overflow:hidden;flex:1;min-height:0;display:flex;flex-direction:column}
@@ -1368,7 +1381,7 @@ tr:hover .ob-hist-add-btn{opacity:1}
 @media(max-width:480px){
   /* スマホ：1列カード＋コンパクト表示 */
   .hub-cards-grid{grid-template-columns:1fr!important;gap:10px}
-  .hub-card{padding:18px 20px}
+  .hub-card{padding:18px 20px 40px}
   .hub-card .hc-icon{font-size:1.5rem;margin-bottom:8px}
   .hub-card .hc-title{font-size:.9rem}
   .hub-header{padding:10px 14px;gap:8px}
@@ -1437,7 +1450,7 @@ tr:hover .ob-hist-add-btn{opacity:1}
   #hubUserInfo{display:none!important}
   .hub-header-btnrow .hub-acct-btn{display:none}
   .hub-cards-grid{grid-template-columns:1fr}
-  .hub-card{padding:18px 20px}
+  .hub-card{padding:18px 20px 40px}
   .hub-main{padding:14px}
   /* バー */
   .bar{padding:12px 14px;gap:8px}
@@ -1546,17 +1559,18 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .gsearch-item-sub{font-size:.75rem;color:#999;white-space:nowrap}
 .gsearch-empty{text-align:center;color:#CCC;padding:30px;font-size:.85rem}
 /* ダッシュボードKPI */
-.hub-kpi-ext{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
-.hub-kpi-ext-card{background:rgba(255,255,255,.93);border:1px solid rgba(29,46,61,.08);border-radius:8px;padding:10px 12px;text-align:center}
-.hub-kpi-ext-val{font-size:1.4rem;font-weight:700;color:#1D2E3D}
-.hub-kpi-ext-lbl{font-size:.65rem;color:rgba(29,46,61,.55);margin-top:2px}
-.hub-kpi-ext-hi{background:rgba(36,66,92,.08);border-color:rgba(36,66,92,.25)}
+.hub-kpi-ext{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:8px}
+.hub-kpi-ext-card{background:#fff;border:1px solid rgba(29,46,61,.08);border-top:3px solid rgba(29,46,61,.18);border-radius:8px;box-shadow:0 1px 3px rgba(29,46,61,.04);padding:12px 12px;text-align:center;transition:box-shadow .2s ease,transform .2s ease}
+.hub-kpi-ext-card:hover{box-shadow:0 6px 16px rgba(29,46,61,.1);transform:translateY(-2px)}
+.hub-kpi-ext-val{font-family:"Playfair Display",serif;font-size:1.6rem;font-weight:700;color:#1D2E3D}
+.hub-kpi-ext-lbl{font-size:.65rem;color:rgba(29,46,61,.55);margin-top:3px}
+.hub-kpi-ext-hi{border-top-color:#24425C}
 .hub-kpi-ext-hi .hub-kpi-ext-val{color:#24425C}
-.hub-kpi-ext-green{background:rgba(31,74,50,.08);border-color:rgba(31,74,50,.25)}
+.hub-kpi-ext-green{border-top-color:#1F4A32}
 .hub-kpi-ext-green .hub-kpi-ext-val{color:#1F4A32}
-.hub-kpi-ext-teal{background:rgba(31,92,82,.08);border-color:rgba(31,92,82,.25)}
+.hub-kpi-ext-teal{border-top-color:#1F5C52}
 .hub-kpi-ext-teal .hub-kpi-ext-val{color:#1F5C52}
-.hub-kpi-ext-warn{background:rgba(122,90,30,.08);border-color:rgba(122,90,30,.28)}
+.hub-kpi-ext-warn{border-top-color:#7A5A1E}
 .hub-kpi-ext-warn .hub-kpi-ext-val{color:#7A5A1E}
 @media(max-width:640px){
   .hub-kpi-ext{grid-template-columns:repeat(3,1fr)!important;gap:6px}
@@ -2046,16 +2060,6 @@ body.ws-open #ws-backdrop{display:block}
 
 <!-- ─── モード選択ハブ（ダッシュボード） ─── -->
 <div id="hub" class="hub">
-  <!-- 背景スライドショー -->
-  <div class="lslides">
-    <div class="lslide" style="background-image:url('https://heartom-customer.vercel.app/ext1.jpg')"></div>
-    <div class="lslide" style="background-image:url('https://heartom-customer.vercel.app/ext3.jpg')"></div>
-    <div class="lslide" style="background-image:url('https://heartom-customer.vercel.app/int1.jpg')"></div>
-    <div class="lslide" style="background-image:url('https://heartom-customer.vercel.app/ext5.jpg')"></div>
-    <div class="lslide" style="background-image:url('https://heartom-customer.vercel.app/int3.jpg')"></div>
-    <div class="lslide" style="background-image:url('https://heartom-customer.vercel.app/ext7.jpg')"></div>
-  </div>
-  <div class="lveil"></div>
   <!-- ヘッダー -->
   <div class="hub-header">
     <button id="ws-open-btn" onclick="wsShow()" title="メニューを開く">☰</button>
@@ -2083,6 +2087,22 @@ body.ws-open #ws-backdrop{display:block}
     </div>
     <div class="hub-header-btnrow" style="display:flex;align-items:center;gap:8px">
       <button onclick="logout()" style="background:rgba(255,80,80,.15);border:1px solid rgba(255,80,80,.3);color:rgba(255,180,180,.9);padding:7px 14px;border-radius:6px;font-size:.74rem;cursor:pointer;letter-spacing:.04em;white-space:nowrap;font-family:inherit;transition:all .2s" onmouseover="this.style.background='rgba(255,80,80,.28)'" onmouseout="this.style.background='rgba(255,80,80,.15)'">ログアウト</button>
+    </div>
+  </div>
+  <!-- ヒーロー写真帯 -->
+  <div class="hub-hero">
+    <div class="lslides">
+      <div class="lslide" style="background-image:url('https://heartom-customer.vercel.app/ext1.jpg')"></div>
+      <div class="lslide" style="background-image:url('https://heartom-customer.vercel.app/ext3.jpg')"></div>
+      <div class="lslide" style="background-image:url('https://heartom-customer.vercel.app/int1.jpg')"></div>
+      <div class="lslide" style="background-image:url('https://heartom-customer.vercel.app/ext5.jpg')"></div>
+      <div class="lslide" style="background-image:url('https://heartom-customer.vercel.app/int3.jpg')"></div>
+      <div class="lslide" style="background-image:url('https://heartom-customer.vercel.app/ext7.jpg')"></div>
+    </div>
+    <div class="lveil"></div>
+    <div class="hub-hero-content">
+      <div class="hub-hero-eyebrow">HEARTOM LIVING MANAGEMENT CONSOLE</div>
+      <div class="hub-hero-msg">本日も一日、よろしくお願いいたします。</div>
     </div>
   </div>
   <!-- ボディ -->
@@ -2126,7 +2146,7 @@ body.ws-open #ws-backdrop{display:block}
       <div class="hub-sec" data-sec="cards" draggable="false">
         <div class="hub-sec-handle">⠿ ドラッグして並び替え</div>
         <div class="hub-cards-grid">
-          <div class="hub-card" onclick="if(!_hubLayoutEditing)enterReception()">
+          <div class="hub-card hc-accent-a" onclick="if(!_hubLayoutEditing)enterReception()">
             <div class="hc-num">01</div>
             <div class="hc-body">
               <div class="hc-title">受付管理</div>
@@ -2134,7 +2154,7 @@ body.ws-open #ws-backdrop{display:block}
             </div>
             <div class="hc-arrow">→</div>
           </div>
-          <div class="hub-card" onclick="if(!_hubLayoutEditing)enterOpenBoard()">
+          <div class="hub-card hc-accent-b" onclick="if(!_hubLayoutEditing)enterOpenBoard()">
             <div class="hc-num">02</div>
             <div class="hc-body">
               <div class="hc-title">オープンボード</div>
@@ -2143,7 +2163,7 @@ body.ws-open #ws-backdrop{display:block}
             <span class="hc-badge" id="hubObCount">—</span>
             <div class="hc-arrow">→</div>
           </div>
-          <div class="hub-card" onclick="if(!_hubLayoutEditing)enterKojiBoard()">
+          <div class="hub-card hc-accent-c" onclick="if(!_hubLayoutEditing)enterKojiBoard()">
             <div class="hc-num">03</div>
             <div class="hc-body">
               <div class="hc-title">着工管理</div>
@@ -2152,7 +2172,7 @@ body.ws-open #ws-backdrop{display:block}
             <span class="hc-badge" id="hubKjCount">—</span>
             <div class="hc-arrow">→</div>
           </div>
-          <div class="hub-card" onclick="if(!_hubLayoutEditing)enterTochiBoard()">
+          <div class="hub-card hc-accent-d" onclick="if(!_hubLayoutEditing)enterTochiBoard()">
             <div class="hc-num">04</div>
             <div class="hc-body">
               <div class="hc-title">土地DB</div>
@@ -2213,10 +2233,10 @@ body.ws-open #ws-backdrop{display:block}
       <!-- カスタムノート（Notionブロック） -->
       <div class="hub-sec" data-sec="note" draggable="false">
         <div class="hub-sec-handle">⠿ ドラッグして並び替え</div>
-        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px 18px">
+        <div style="background:#fff;border:1px solid rgba(29,46,61,.08);border-top:3px solid rgba(122,90,30,.5);border-radius:10px;box-shadow:0 1px 3px rgba(29,46,61,.04);padding:14px 18px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <span style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.1em">📌 ハブノート</span>
-            <button onclick="hubNoteAddBlock()" style="background:none;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);border-radius:5px;padding:2px 10px;font-size:.72rem;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='rgba(192,160,112,.6)';this.style.color='#C0A070'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='rgba(255,255,255,.4)'">＋ 追加</button>
+            <span style="font-size:.72rem;font-weight:700;color:rgba(29,46,61,.6);letter-spacing:.1em">📌 ハブノート</span>
+            <button onclick="hubNoteAddBlock()" style="background:none;border:1px solid rgba(29,46,61,.15);color:rgba(29,46,61,.5);border-radius:5px;padding:2px 10px;font-size:.72rem;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='rgba(95,169,143,.6)';this.style.color='#2F5C4E'" onmouseout="this.style.borderColor='rgba(29,46,61,.15)';this.style.color='rgba(29,46,61,.5)'">＋ 追加</button>
           </div>
           <div id="hub-note-blocks" style="display:flex;flex-direction:column;gap:2px;min-height:28px"></div>
         </div>
@@ -4243,15 +4263,15 @@ function hubNoteBlockHTML(b,olNum){
   var ti=wsBlockTypeInfo(b.type||'p');
   var bid=b.id;
   var styles={
-    p:'color:rgba(255,255,255,.75);font-size:.84rem',
-    h1:'color:#fff;font-size:1.15rem;font-weight:700',
-    h2:'color:#fff;font-size:.96rem;font-weight:700',
-    h3:'color:rgba(255,255,255,.9);font-size:.86rem;font-weight:700',
-    quote:'color:rgba(255,255,255,.5);font-style:italic;border-left:3px solid rgba(192,160,112,.5);padding-left:10px',
-    code:'color:#F9A8D4;font-family:monospace;background:rgba(255,255,255,.06);border-radius:4px;padding:2px 6px;font-size:.8rem',
-    ul:'color:rgba(255,255,255,.75);font-size:.84rem',
-    ol:'color:rgba(255,255,255,.75);font-size:.84rem',
-    todo:'color:rgba(255,255,255,.75);font-size:.84rem',
+    p:'color:rgba(29,46,61,.82);font-size:.84rem',
+    h1:'color:#1D2E3D;font-size:1.15rem;font-weight:700',
+    h2:'color:#1D2E3D;font-size:.96rem;font-weight:700',
+    h3:'color:rgba(29,46,61,.92);font-size:.86rem;font-weight:700',
+    quote:'color:rgba(29,46,61,.55);font-style:italic;border-left:3px solid rgba(95,169,143,.5);padding-left:10px',
+    code:'color:#9C3D6B;font-family:monospace;background:rgba(29,46,61,.05);border-radius:4px;padding:2px 6px;font-size:.8rem',
+    ul:'color:rgba(29,46,61,.82);font-size:.84rem',
+    ol:'color:rgba(29,46,61,.82);font-size:.84rem',
+    todo:'color:rgba(29,46,61,.82);font-size:.84rem',
   };
   var st=styles[b.type||'p']||styles.p;
   var taBase='rows="1" data-bid="'+bid+'" '
@@ -4259,24 +4279,24 @@ function hubNoteBlockHTML(b,olNum){
     +'oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\';hubNoteSaveAll()" '
     +'onblur="hubNoteSaveAll()" '
     +'style="'+st+';width:100%;border:none;outline:none;resize:none;background:transparent;font-family:inherit;overflow:hidden;min-height:1.6em"';
-  var del='<button onclick="hubNoteDeleteBlock(\''+bid+'\')" style="opacity:0;background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.7rem;padding:2px 5px;flex-shrink:0;transition:opacity .15s" class="hub-note-del-btn" title="削除">✕</button>';
+  var del='<button onclick="hubNoteDeleteBlock(\''+bid+'\')" style="opacity:0;background:none;border:none;color:rgba(29,46,61,.35);cursor:pointer;font-size:.7rem;padding:2px 5px;flex-shrink:0;transition:opacity .15s" class="hub-note-del-btn" title="削除">✕</button>';
   var wrap='display:flex;align-items:flex-start;gap:4px;padding:1px 0';
   if(b.type==='hr'){
     return '<div style="'+wrap+'" data-bid="'+bid+'">'
-      +'<hr style="border:none;border-top:1px solid rgba(255,255,255,.12);flex:1;margin:8px 0">'+del+'</div>';
+      +'<hr style="border:none;border-top:1px solid rgba(29,46,61,.12);flex:1;margin:8px 0">'+del+'</div>';
   } else if(b.type==='ul'){
     return '<div style="'+wrap+'" data-bid="'+bid+'" class="hub-note-block">'
-      +'<span style="color:rgba(255,255,255,.4);padding-top:3px;flex-shrink:0">•</span>'
+      +'<span style="color:rgba(29,46,61,.45);padding-top:3px;flex-shrink:0">•</span>'
       +'<textarea class="hub-note-ta" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea>'+del+'</div>';
   } else if(b.type==='ol'){
     return '<div style="'+wrap+'" data-bid="'+bid+'" class="hub-note-block">'
-      +'<span style="color:rgba(255,255,255,.4);padding-top:3px;flex-shrink:0;min-width:18px">'+(olNum||1)+'.</span>'
+      +'<span style="color:rgba(29,46,61,.45);padding-top:3px;flex-shrink:0;min-width:18px">'+(olNum||1)+'.</span>'
       +'<textarea class="hub-note-ta" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea>'+del+'</div>';
   } else if(b.type==='todo'){
     var checked=b.checked?'checked':'';
     return '<div style="'+wrap+'" data-bid="'+bid+'" class="hub-note-block">'
-      +'<input type="checkbox" '+checked+' data-bid="'+bid+'" onchange="hubNoteCheckboxChange(this)" style="margin-top:4px;flex-shrink:0;accent-color:#C0A070">'
-      +'<textarea class="hub-note-ta" placeholder="'+ti.ph+'" '+taBase+(b.checked?' text-decoration:line-through;color:rgba(255,255,255,.3)':'')+'>'+wsSafeHtml(b.content||'')+'</textarea>'+del+'</div>';
+      +'<input type="checkbox" '+checked+' data-bid="'+bid+'" onchange="hubNoteCheckboxChange(this)" style="margin-top:4px;flex-shrink:0;accent-color:#2F5C4E">'
+      +'<textarea class="hub-note-ta" placeholder="'+ti.ph+'" '+taBase+(b.checked?' text-decoration:line-through;color:rgba(29,46,61,.35)':'')+'>'+wsSafeHtml(b.content||'')+'</textarea>'+del+'</div>';
   } else {
     return '<div style="'+wrap+'" data-bid="'+bid+'" class="hub-note-block">'
       +'<textarea class="hub-note-ta" placeholder="'+ti.ph+'" '+taBase+'>'+wsSafeHtml(b.content||'')+'</textarea>'+del+'</div>';
