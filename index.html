@@ -2072,14 +2072,14 @@ body.ws-open #ws-backdrop{display:block}
       <div class="hh-date" id="hubClockDate"></div>
     </div>
     <!-- ログインユーザー表示 -->
-    <div id="hubUserInfo" data-keep-visible style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:all .2s" onclick="showSettings()" title="設定を開く" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
+    <div id="hubUserInfo" data-keep-visible style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(29,46,61,.05);border:1px solid rgba(29,46,61,.12);cursor:pointer;transition:all .2s" onclick="showSettings()" title="設定を開く" onmouseover="this.style.background='rgba(95,169,143,.12)'" onmouseout="this.style.background='rgba(29,46,61,.05)'">
       <span style="font-size:1rem">👤</span>
       <div style="line-height:1.25">
         <div style="display:flex;align-items:center;gap:6px">
-          <div id="hubUserName" style="font-size:.8rem;color:rgba(255,255,255,.92);font-weight:700;letter-spacing:.02em;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis"></div>
+          <div id="hubUserName" style="font-size:.8rem;color:#1D2E3D;font-weight:700;letter-spacing:.02em;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis"></div>
           <span id="hubRoleBadge" style="font-size:.58rem;padding:1px 7px;border-radius:99px;color:#fff;white-space:nowrap;background:#6B7280"></span>
         </div>
-        <div id="hubUserEmail" style="font-size:.6rem;color:rgba(255,255,255,.38);letter-spacing:.01em;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+        <div id="hubUserEmail" style="font-size:.6rem;color:rgba(29,46,61,.5);letter-spacing:.01em;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
       </div>
     </div>
     <div class="hub-header-btnrow" style="display:flex;align-items:center;gap:8px">
@@ -3619,7 +3619,7 @@ function isFullAccess(){ return getUserRole()==='owner'||getUserRole()==='full';
 function applyRoleUI(){
   var role = getUserRole();
   var roleLbl = role==='owner'?'オーナー':role==='full'?'フルアクセス':'一般';
-  var roleColor = role==='owner'?'#9A8C76':role==='full'?'#2563EB':'#6B7280';
+  var roleColor = role==='owner'?'#24425C':role==='full'?'#2563EB':'#6B7280';
   // ロールバッジをユーザー情報エリアに表示
   var badge = document.getElementById('hubRoleBadge');
   if(badge){ badge.textContent=roleLbl; badge.style.background=roleColor; }
@@ -4881,17 +4881,17 @@ function hubLoadGcal(force){
 }
 function hubGcalDiagnose(){
   var el=document.getElementById('hubGcalList'); if(!el) return;
-  el.innerHTML='<div class="hub-gcal-empty" style="color:rgba(255,255,100,.5)">🔍 診断中…</div>';
+  el.innerHTML='<div class="hub-gcal-empty" style="color:#7A5A1E">🔍 診断中…</div>';
   gasGet('gcalDiagnose',function(d){
-    if(!d){ el.innerHTML='<div class="hub-gcal-empty" style="color:red">タイムアウト — GAS URLを確認してください</div>'; return; }
+    if(!d){ el.innerHTML='<div class="hub-gcal-empty" style="color:#9C3D2E">タイムアウト — GAS URLを確認してください</div>'; return; }
     var sumEl=document.getElementById('hubGcalList');
     if(!sumEl) return;
-    var color = d.ok?'rgba(100,255,150,.7)':'rgba(255,120,80,.8)';
+    var color = d.ok?'#1F4A32':'#9C3D2E';
     sumEl.innerHTML='<div class="hub-gcal-empty" style="color:'+color+';text-align:left;font-size:.72rem;line-height:1.8">'+
       '<b>📋 診断結果</b><br>'+esc(d.summary||'—')+'<br>'+
-      '<span style="color:rgba(255,255,255,.4)">実行: '+esc(d.executedAt||'')+'</span>'+
+      '<span style="color:rgba(29,46,61,.5)">実行: '+esc(d.executedAt||'')+'</span>'+
       (d.calendarNames?'<br>カレンダー: '+esc(d.calendarNames.join(' / ')):'')+'<br>'+
-      '<button onclick="hubLoadGcal(true)" style="background:rgba(255,255,255,.1);border:none;color:#aaa;cursor:pointer;padding:3px 8px;border-radius:4px;margin-top:4px;font-size:.7rem">🔄 カレンダー読み込み</button>'+
+      '<button onclick="hubLoadGcal(true)" style="background:rgba(29,46,61,.06);border:1px solid rgba(29,46,61,.15);color:#1D2E3D;cursor:pointer;padding:3px 8px;border-radius:4px;margin-top:4px;font-size:.7rem">🔄 カレンダー読み込み</button>'+
     '</div>';
   }, 25000);
 }
@@ -4900,11 +4900,11 @@ function hubRenderGcal(d){
   if(!d||d.error){
     var errMsg = d&&d.error ? d.error : '通信タイムアウト（GAS URLを確認してください）';
     var isAuth = errMsg.indexOf('権限')>=0 || errMsg.indexOf('authorize')>=0 || errMsg.indexOf('scope')>=0 || errMsg.indexOf('Calendar')>=0;
-    el.innerHTML='<div class="hub-gcal-empty" style="color:rgba(255,100,100,.6);font-size:.72rem;line-height:1.9">'+
+    el.innerHTML='<div class="hub-gcal-empty" style="color:#9C3D2E;font-size:.72rem;line-height:1.9;text-align:left">'+
       (isAuth?'📵 <b>Calendar権限未承認</b>':'⚠️ カレンダー取得エラー')+
       '<br>'+esc(errMsg.substring(0,80))+
-      '<br><button onclick="hubLoadGcal(true)" style="background:rgba(255,255,255,.1);border:none;color:#aaa;cursor:pointer;padding:3px 8px;border-radius:4px;margin-top:2px;font-size:.7rem">🔄 再試行</button>'+
-      ' <button onclick="hubGcalDiagnose()" style="background:rgba(255,200,0,.15);border:none;color:#FFD700;cursor:pointer;padding:3px 8px;border-radius:4px;margin-top:2px;font-size:.7rem">🔍 診断</button>'+
+      '<br><button onclick="hubLoadGcal(true)" style="background:rgba(29,46,61,.06);border:1px solid rgba(29,46,61,.15);color:#1D2E3D;cursor:pointer;padding:3px 8px;border-radius:4px;margin-top:4px;font-size:.7rem">🔄 再試行</button>'+
+      ' <button onclick="hubGcalDiagnose()" style="background:rgba(122,90,30,.1);border:1px solid rgba(122,90,30,.3);color:#7A5A1E;cursor:pointer;padding:3px 8px;border-radius:4px;margin-top:4px;font-size:.7rem">🔍 診断</button>'+
     '</div>';
     return;
   }
