@@ -1265,7 +1265,7 @@ tr:hover .ob-hist-add-btn{opacity:1}
 /* ═══════════════════════════════════════════════
    Hub Dashboard — heartom.co.jp スタイル全画面
 ═══════════════════════════════════════════════ */
-.hub{position:fixed;inset:0;z-index:45;display:none;flex-direction:column;align-items:stretch;justify-content:flex-start;background:#F2F0EC;overflow:hidden}
+.hub{position:fixed;inset:0;z-index:45;display:none;flex-direction:column;align-items:stretch;justify-content:flex-start;background:#DDE3E6;overflow:hidden}
 .hub.show{display:flex}
 /* ヒーロー写真帯：ヘッダー直下に固定高さで写真をしっかり見せる */
 .hub-hero{position:relative;flex-shrink:0;height:260px;overflow:hidden}
@@ -1330,25 +1330,25 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .hub-main .hub-sec[data-sec="gcal"],.hub-main .hub-sec[data-sec="recent"]{width:calc(50% - 8px);display:flex;flex-direction:column}
 .hub-main .hub-sec[data-sec="gcal"] .hub-gcal,.hub-main .hub-sec[data-sec="recent"] .hub-recent{height:100%}
 @media(max-width:900px){.hub-main .hub-sec[data-sec="gcal"],.hub-main .hub-sec[data-sec="recent"]{width:100%}}
-/* ── ハブカード：2x2グリッド・色アクセント帯でリズムを演出 ── */
+/* ── ハブカード：2x2グリッド・濃色塗りつぶし(OBバッジと統一) ── */
 .hub-cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.hub-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;background:#fff;border:1px solid rgba(29,46,61,.08);border-top:3px solid rgba(29,46,61,.2);border-radius:12px;box-shadow:0 1px 3px rgba(29,46,61,.05);padding:20px 22px;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease;position:relative;text-align:left;min-width:0}
-.hub-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(29,46,61,.12)}
+.hub-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;background:#1D2E3D;border:none;border-radius:12px;box-shadow:0 1px 3px rgba(29,46,61,.15);padding:20px 22px;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease;position:relative;text-align:left;min-width:0}
+.hub-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(29,46,61,.28)}
 .hub-card:active{transform:translateY(-1px)}
 .hub-card.soon{opacity:.4;cursor:not-allowed}
-.hub-card.soon:hover{transform:none;box-shadow:0 1px 3px rgba(29,46,61,.05)}
-.hub-card.hc-accent-a{border-top-color:#375670}
-.hub-card.hc-accent-b{border-top-color:#2F5C56}
-.hub-card.hc-accent-c{border-top-color:#7A5A1E}
-.hub-card.hc-accent-d{border-top-color:#1F4A32}
+.hub-card.soon:hover{transform:none;box-shadow:0 1px 3px rgba(29,46,61,.15)}
+.hub-card.hc-accent-a{background:#375670}
+.hub-card.hc-accent-b{background:#2F5C56}
+.hub-card.hc-accent-c{background:#7A5A1E}
+.hub-card.hc-accent-d{background:#1F4A32}
 .hub-card .hc-icon{display:none}
-.hub-card .hc-num{display:block;font-family:"Playfair Display",serif;font-size:1.7rem;font-weight:400;color:rgba(29,46,61,.24);line-height:1;font-style:italic}
+.hub-card .hc-num{display:block;font-family:"Playfair Display",serif;font-size:1.7rem;font-weight:400;color:rgba(255,255,255,.4);line-height:1;font-style:italic}
 .hub-card .hc-body{width:100%}
-.hub-card .hc-title{font-family:var(--serif);font-size:1.1rem;font-weight:700;color:#1D2E3D;letter-spacing:.06em;margin-bottom:4px}
-.hub-card .hc-desc{font-size:.72rem;color:rgba(29,46,61,.55);letter-spacing:.02em;line-height:1.6}
-.hub-card .hc-arrow{position:absolute;right:20px;bottom:18px;font-size:1.1rem;color:rgba(95,169,143,.7);transition:transform .22s ease;font-family:"Playfair Display",serif}
-.hub-card:hover .hc-arrow{transform:translateX(5px);color:#2F5C4E}
-.hub-card .hc-badge{position:absolute;top:16px;right:18px;background:rgba(95,169,143,.14);border:1px solid rgba(95,169,143,.4);color:#2F5C4E;font-size:.64rem;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:20px}
+.hub-card .hc-title{font-family:var(--serif);font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:.06em;margin-bottom:4px}
+.hub-card .hc-desc{font-size:.72rem;color:rgba(255,255,255,.68);letter-spacing:.02em;line-height:1.6}
+.hub-card .hc-arrow{position:absolute;right:20px;bottom:18px;font-size:1.1rem;color:rgba(255,255,255,.55);transition:transform .22s ease;font-family:"Playfair Display",serif}
+.hub-card:hover .hc-arrow{transform:translateX(5px);color:#fff}
+.hub-card .hc-badge{position:absolute;top:16px;right:18px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32);color:#fff;font-size:.64rem;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:20px}
 @media(max-width:640px){.hub-cards-grid{grid-template-columns:1fr}}
 
 /* ─── 直近受付プレビュー ─── */
@@ -1559,20 +1559,16 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .gsearch-item-name{font-size:.85rem;color:#1A2A4A;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gsearch-item-sub{font-size:.75rem;color:#999;white-space:nowrap}
 .gsearch-empty{text-align:center;color:#CCC;padding:30px;font-size:.85rem}
-/* ダッシュボードKPI */
+/* ダッシュボードKPI（濃色塗りつぶし・OBバッジと統一） */
 .hub-kpi-ext{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:8px}
-.hub-kpi-ext-card{background:#fff;border:1px solid rgba(29,46,61,.08);border-top:3px solid rgba(29,46,61,.18);border-radius:8px;box-shadow:0 1px 3px rgba(29,46,61,.04);padding:12px 12px;text-align:center;transition:box-shadow .2s ease,transform .2s ease}
-.hub-kpi-ext-card:hover{box-shadow:0 6px 16px rgba(29,46,61,.1);transform:translateY(-2px)}
-.hub-kpi-ext-val{font-family:"Playfair Display",serif;font-size:1.6rem;font-weight:700;color:#1D2E3D}
-.hub-kpi-ext-lbl{font-size:.65rem;color:rgba(29,46,61,.55);margin-top:3px}
-.hub-kpi-ext-hi{border-top-color:#24425C}
-.hub-kpi-ext-hi .hub-kpi-ext-val{color:#24425C}
-.hub-kpi-ext-green{border-top-color:#1F4A32}
-.hub-kpi-ext-green .hub-kpi-ext-val{color:#1F4A32}
-.hub-kpi-ext-teal{border-top-color:#1F5C52}
-.hub-kpi-ext-teal .hub-kpi-ext-val{color:#1F5C52}
-.hub-kpi-ext-warn{border-top-color:#7A5A1E}
-.hub-kpi-ext-warn .hub-kpi-ext-val{color:#7A5A1E}
+.hub-kpi-ext-card{background:#1D2E3D;border:none;border-radius:8px;box-shadow:0 1px 3px rgba(29,46,61,.15);padding:12px 12px;text-align:center;transition:box-shadow .2s ease,transform .2s ease}
+.hub-kpi-ext-card:hover{box-shadow:0 6px 16px rgba(29,46,61,.25);transform:translateY(-2px)}
+.hub-kpi-ext-val{font-family:"Playfair Display",serif;font-size:1.6rem;font-weight:700;color:#fff}
+.hub-kpi-ext-lbl{font-size:.65rem;color:rgba(255,255,255,.68);margin-top:3px}
+.hub-kpi-ext-hi{background:#24425C}
+.hub-kpi-ext-green{background:#1F4A32}
+.hub-kpi-ext-teal{background:#1F5C52}
+.hub-kpi-ext-warn{background:#7A5A1E}
 @media(max-width:640px){
   .hub-kpi-ext{grid-template-columns:repeat(3,1fr)!important;gap:6px}
   .hub-kpi-ext-val{font-size:1.1rem}
