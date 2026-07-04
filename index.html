@@ -1904,6 +1904,87 @@ body.ws-open #ws-backdrop{display:block}
 /* ═══ 点滅防止：リスト再描画時のフラッシュ抑制 ═══ */
 #ob-visitors-content,#ob-active-content,#kj-list-content,#tochi-content{contain:style}
 .ws-sb-item{will-change:background}
+
+/* ═══════════════════════════════════════════════
+   品質向上パス：操作性・エフェクト・視認性の統一
+═══════════════════════════════════════════════ */
+/* ── カスタムスクロールバー（OB/ハブ/詳細/着工/土地）── */
+.ob-scroll::-webkit-scrollbar,.ob-det-body::-webkit-scrollbar,.hub-main::-webkit-scrollbar,
+.hub-side::-webkit-scrollbar,.kj-scroll::-webkit-scrollbar,#tochi-list-content::-webkit-scrollbar,
+.hub-recent-list::-webkit-scrollbar,.hub-gcal-list::-webkit-scrollbar{width:9px;height:9px}
+.ob-scroll::-webkit-scrollbar-thumb,.ob-det-body::-webkit-scrollbar-thumb,.hub-main::-webkit-scrollbar-thumb,
+.hub-side::-webkit-scrollbar-thumb,.kj-scroll::-webkit-scrollbar-thumb,#tochi-list-content::-webkit-scrollbar-thumb,
+.hub-recent-list::-webkit-scrollbar-thumb,.hub-gcal-list::-webkit-scrollbar-thumb{background:rgba(29,46,61,.22);border-radius:8px;border:2px solid transparent;background-clip:content-box}
+.ob-scroll::-webkit-scrollbar-thumb:hover,.ob-det-body::-webkit-scrollbar-thumb:hover,.hub-main::-webkit-scrollbar-thumb:hover{background:rgba(29,46,61,.38);background-clip:content-box;border:2px solid transparent}
+.ob-scroll::-webkit-scrollbar-track,.ob-det-body::-webkit-scrollbar-track,.hub-main::-webkit-scrollbar-track{background:transparent}
+
+/* ── キーボードフォーカスリング（全ボタン/入力の統一）── */
+#openboard button:focus-visible,#hub button:focus-visible,#openboard input:focus-visible,
+#openboard select:focus-visible,#hub input:focus-visible,.ob-detail button:focus-visible{
+  outline:2px solid #5FA98F;outline-offset:2px;border-radius:6px}
+
+/* ── ボタン共通：押下感と滑らかなトランジション ── */
+#openboard button,#hub button,.ob-detail button{transition:background .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease,transform .1s ease}
+#openboard button:active:not(:disabled),#hub button:active:not(:disabled),.ob-detail button:active:not(:disabled){transform:scale(.97)}
+
+/* ── OBタブ：アンダーラインのスライドとホバー ── */
+.ob-tab{position:relative;transition:color .18s ease}
+.ob-tab::after{content:'';position:absolute;left:16px;right:16px;bottom:-1px;height:3px;background:#5FA98F;border-radius:2px 2px 0 0;transform:scaleX(0);transition:transform .22s ease}
+.ob-tab.on{border-bottom-color:transparent}
+.ob-tab.on::after{transform:scaleX(1)}
+.ob-tab:hover:not(.on){background:rgba(255,255,255,.06);border-radius:6px 6px 0 0}
+
+/* ── カード/リスト切替：セグメントコントロール化 ── */
+.ob-vis-view-btn{border-radius:6px!important;transition:all .18s ease;font-weight:700}
+.ob-vis-view-btn:not(.on):hover{background:rgba(29,46,61,.07)}
+.ob-vis-view-btn.on{box-shadow:0 1px 4px rgba(29,46,61,.25)}
+
+/* ── トースト刷新（成功/警告を左ボーダーで区別・スライドイン）── */
+#toast{background:#1D2E3D;border-radius:10px;border-left:4px solid #5FA98F;padding:14px 24px;font-size:.92rem;box-shadow:0 12px 36px rgba(15,25,35,.35);letter-spacing:.02em;line-height:1.6;white-space:pre-line}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── スケルトンローディング ── */
+@keyframes skelShimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.skel{position:relative;overflow:hidden;border-radius:6px;background:#E8E5DF;background-image:linear-gradient(90deg,#E8E5DF 0px,#F5F2EC 40px,#E8E5DF 80px);background-size:800px 100%;animation:skelShimmer 1.4s linear infinite}
+.skel-row{height:15px;margin:11px 16px}
+.skel-row.w60{width:60%}.skel-row.w80{width:80%}.skel-row.w40{width:40%}
+
+/* ── 画面切替のフェードイン ── */
+@keyframes paneIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.ob-pane.show{animation:paneIn .22s ease}
+#hub.show .hub-main{animation:paneIn .25s ease}
+
+/* ── 詳細パネル：情報カードのホバーとセクション見出し ── */
+.ob-info-card{transition:box-shadow .18s ease,border-color .18s ease}
+.ob-info-card:hover{border-color:rgba(95,169,143,.45)}
+.ob-sec-title{color:#3D5568;border-bottom:2px solid rgba(95,169,143,.3);padding-bottom:5px}
+.ob-det-tab{position:relative;transition:color .18s ease}
+.ob-det-tab::after{content:'';position:absolute;left:12px;right:12px;bottom:-1px;height:3px;background:#5FA98F;border-radius:2px 2px 0 0;transform:scaleX(0);transition:transform .22s ease}
+.ob-det-tab.on{border-bottom-color:transparent}
+.ob-det-tab.on::after{transform:scaleX(1)}
+
+/* ── フィルター/検索：入力の統一感 ── */
+.ob-filter select,.ob-filter input[type=text]{border-radius:8px}
+.ob-filter input[type=text]::placeholder{color:#A89F92}
+
+/* ── OBヘッダーボタン（新規追加/更新/戻る）の視認性 ── */
+.ob-hd-tools .hbtn{border-radius:8px;font-weight:700;letter-spacing:.03em}
+.ob-hd-tools .hbtn.primary{background:#5FA98F;border-color:#5FA98F;color:#fff}
+.ob-hd-tools .hbtn.primary:hover{background:#4C927B;border-color:#4C927B;background:#4C927B}
+
+/* ── ハブ：クイックボタンのアイコン浮き＋直近来客ホバー ── */
+.hub-quick-btn{font-weight:700;box-shadow:0 1px 3px rgba(29,46,61,.06)}
+.hub-quick-btn:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(29,46,61,.12)}
+.hub-rec-row{border-left:3px solid transparent;transition:background .15s ease,border-color .15s ease}
+.hub-rec-row:hover{border-left-color:#5FA98F}
+
+/* ── モーダル：登場アニメーション ── */
+@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.modal.show .modal-box{animation:modalIn .22s ease}
+
+/* ── 空状態の視認性 ── */
+.ob-empty-state{color:#8A8175;font-size:.92rem}
+.kj-empty{color:#8A8175}
 </style>
 </head>
 <body>
@@ -2208,7 +2289,7 @@ body.ws-open #ws-backdrop{display:block}
             </div>
           </div>
           <div class="hub-gcal-list" id="hubGcalList">
-            <div class="hub-gcal-empty">読み込み中...</div>
+            <div class="skel skel-row w60"></div><div class="skel skel-row w80"></div><div class="skel skel-row w40"></div>
           </div>
         </div>
       </div>
@@ -2222,7 +2303,7 @@ body.ws-open #ws-backdrop{display:block}
             <button class="hub-recent-more" onclick="if(!_hubLayoutEditing)enterOpenBoard()">すべて見る →</button>
           </div>
           <div class="hub-recent-list" id="hubRecentList">
-            <div class="hub-empty-mini">読み込み中...</div>
+            <div class="skel skel-row w80"></div><div class="skel skel-row w60"></div><div class="skel skel-row w80"></div>
           </div>
         </div>
       </div>
@@ -2314,7 +2395,7 @@ body.ws-open #ws-backdrop{display:block}
     </div>
     <div class="ob-scroll" id="ob-vis-scroll">
       <div id="ob-new-inquiry-banner" style="display:none"></div>
-      <div id="ob-visitors-content" style="padding:14px 16px"><div class="ob-empty-state">読み込み中...</div></div>
+      <div id="ob-visitors-content" style="padding:14px 16px"><div class="skel skel-row w40"></div><div class="skel skel-row w80"></div><div class="skel skel-row"></div><div class="skel skel-row w60"></div><div class="skel skel-row w80"></div></div>
     </div>
   </div>
 
@@ -3655,7 +3736,14 @@ function showSettings(tab){ openSettings(tab||'account'); }
 var __all=[];
 
 function esc(s){return(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show')},2600)}
+function toast(m){
+  var t=document.getElementById('toast');t.textContent=m;
+  // ⚠/❌はエラー系として赤ボーダー、それ以外は緑（成功系）
+  var isErr=/⚠|❌|エラー|失敗/.test(m);
+  t.style.borderLeftColor=isErr?'#C25B4A':'#5FA98F';
+  t.classList.add('show');clearTimeout(t._t);
+  t._t=setTimeout(function(){t.classList.remove('show')},isErr?4200:2600);
+}
 
 var isBoardView = new URLSearchParams(window.location.search).get('view') === 'board';
 if(isBoardView) document.body.classList.add('board-mode');
@@ -6469,7 +6557,7 @@ function obLoad(silent, force){
   if(cached.length){ obRows=cached; obRows.forEach(function(r,i){r._row=i;}); obPopulateFilters(); if(!_isObEditing()) obRenderAll(); }
   // キャッシュがない初回ロード時はローディングアニメーション表示
   if(!cached.length){
-    document.getElementById('ob-visitors-content').innerHTML='<div class="ob-empty-state" style="color:#888"><div style="font-size:2rem;margin-bottom:16px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div><br>データ読み込み中...</div>';
+    document.getElementById('ob-visitors-content').innerHTML='<div class="skel skel-row w40"></div><div class="skel skel-row w80"></div><div class="skel skel-row"></div><div class="skel skel-row w60"></div><div class="skel skel-row w80"></div><div class="skel skel-row w60"></div>';
   }
   // Supabase直接読み込み優先（高速: ~300ms）、未設定ならGAS経由
   function _applyObRows(newRows) {
@@ -9531,7 +9619,7 @@ function kjLoad(silent, force){
     if(!_kjEditing){ kjRenderList(); }
   }
   if(!cached.length){
-    document.getElementById('kj-list-content').innerHTML='<div class="kj-empty" style="color:#888"><div style="font-size:2rem;margin-bottom:12px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div><br>データ読み込み中...</div>';
+    document.getElementById('kj-list-content').innerHTML='<div style="padding:14px 16px"><div class="skel skel-row w40"></div><div class="skel skel-row w80"></div><div class="skel skel-row"></div><div class="skel skel-row w60"></div></div>';
   }
   function _applyKjRows(newRows) {
     __kjLoading = false;
