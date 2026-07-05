@@ -2856,6 +2856,20 @@ body.ws-open #ws-backdrop{display:block}
   </div>
 </div>
 
+<div class="modal" id="obMergeModal">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-hd">
+      <div class="mt">重複顧客を統合</div>
+      <button class="x" onclick="obCloseMergeModal()">&times;</button>
+    </div>
+    <div class="modal-bd">
+      <div style="font-size:.85rem;color:#666;margin-bottom:10px">「<b id="obMergeSrcName"></b>」と同一人物の行を選んで統合します。電話番号・メール・住所・履歴などの空欄が補完され、選ばなかった側の行は削除されます（元に戻せません）。</div>
+      <input id="obMergeSearch" placeholder="顧客名で検索…" oninput="obMergeRenderCandidates()" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #DDD;border-radius:8px">
+      <div id="obMergeCandidates" style="max-height:280px;overflow:auto"></div>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="obNewModal">
   <div class="modal-box" style="max-width:520px">
     <div class="modal-hd">
@@ -7064,6 +7078,7 @@ function obRenderVisitors(){
             '</div>'+
             '<div class="ob-vis-card-acts">'+
               '<button class="ob-vis-card-act" onclick="obHistPopOpen(event,'+r._row+');event.stopPropagation()">履歴</button>'+
+              '<button class="ob-vis-card-act" onclick="obOpenMergeModal('+r._row+');event.stopPropagation()" title="別行と同一人物としてまとめる">🔗統合</button>'+
               '<button class="ob-vis-card-act del" onclick="obConfirmDel('+r._row+');event.stopPropagation()">削除</button>'+
             '</div>'+
           '</div>';
@@ -7204,7 +7219,8 @@ function obRenderVisitors(){
               '<span style="color:#CCC;font-size:.76rem">次回日を設定...</span>')+
           '</div>'+
         '</td>'+
-        '<td style="padding:4px 6px;text-align:center" onclick="event.stopPropagation()">'+
+        '<td style="padding:4px 6px;text-align:center;white-space:nowrap" onclick="event.stopPropagation()">'+
+          '<button class="ob-del" onclick="obOpenMergeModal('+r._row+');event.stopPropagation()" title="別行と同一人物としてまとめる" style="margin-right:4px">🔗</button>'+
           '<button class="ob-del" onclick="obConfirmDel('+r._row+');event.stopPropagation()" title="削除">✕</button>'+
         '</td>'+
       '</tr>';
@@ -8312,6 +8328,68 @@ function obConfirmDel(rowIdx){
   post({action:'obDeleteCustomer',id:rid,row:rowIdx}, function(d){
     if(d&&d.error){ toast('❌ 削除エラー: '+d.error); obLoad(false,true); }
     else { setTimeout(function(){ _obLastSaveTs=0; obLoad(false,true); },3000); }
+  });
+}
+
+// ── 重複統合（LINE経由/Gmail経由などで同一人物が別行になった場合にまとめる） ──
+var _obMergeSrcRow=-1;
+function obOpenMergeModal(rowIdx){
+  var r=obRows[rowIdx]; if(!r) return;
+  _obMergeSrcRow=rowIdx;
+  document.getElementById('obMergeSrcName').textContent=r['顧客名']||'';
+  document.getElementById('obMergeSearch').value='';
+  obMergeRenderCandidates();
+  document.getElementById('obMergeModal').classList.add('show');
+}
+function obCloseMergeModal(){
+  var m=document.getElementById('obMergeModal'); if(m) m.classList.remove('show');
+  _obMergeSrcRow=-1;
+}
+function obMergeRenderCandidates(){
+  var box=document.getElementById('obMergeCandidates'); if(!box) return;
+  var q=(document.getElementById('obMergeSearch').value||'').trim().toLowerCase();
+  var list=obRows.map(function(r,i){return {r:r,i:i};}).filter(function(o){
+    if(o.i===_obMergeSrcRow) return false;
+    if(!q) return true;
+    return (o.r['顧客名']||'').toLowerCase().indexOf(q)>=0;
+  }).slice(0,50);
+  if(!list.length){ box.innerHTML='<div style="color:#AAA;padding:10px;font-size:.85rem">候補がありません（顧客名で検索してください）</div>'; return; }
+  box.innerHTML=list.map(function(o){
+    var r=o.r, k=r.karte||{};
+    var tel=k['電話番号']||r['電話番号']||'';
+    return '<div onclick="obMergeExecute('+o.i+')" style="padding:10px 12px;border:1px solid #EEE;border-radius:8px;margin-bottom:6px;cursor:pointer" '
+      +'onmouseover="this.style.background=\'#F7F7F5\'" onmouseout="this.style.background=\'\'">'
+      +'<b>'+esc(r['顧客名']||'—')+'</b>'+(tel?' <span style="color:#999;font-size:.78rem">📞'+esc(tel)+'</span>':'')
+      +'<div style="font-size:.72rem;color:#AAA">'+esc(r['反響元']||'不明')+' ・ '+esc(r['問い合わせ日']||r['来場日']||'')+'</div></div>';
+  }).join('');
+}
+function obMergeExecute(targetIdx){
+  if(_obMergeSrcRow<0) return;
+  var src=obRows[_obMergeSrcRow], tgt=obRows[targetIdx];
+  if(!src||!tgt) return;
+  if(!confirm('「'+(src['顧客名']||'')+'」を「'+(tgt['顧客名']||'')+'」に統合します。\n「'+(src['顧客名']||'')+'」側の行は削除されます。\nよろしいですか？')) return;
+  ['反響元','エリア','担当者','サブ担当','次回予定','次回内容','商談ステータス'].forEach(function(f){
+    if(!obSanitizeVal(tgt[f])&&obSanitizeVal(src[f])) tgt[f]=src[f];
+  });
+  tgt.karte=tgt.karte||{}; src.karte=src.karte||{};
+  ['電話番号','フリガナ','メールアドレス','住所','郵便番号'].forEach(function(f){
+    if(!obSanitizeVal(tgt.karte[f])&&obSanitizeVal(src.karte[f])) tgt.karte[f]=src.karte[f];
+  });
+  var hist=(tgt.history||[]).concat(src.history||[]);
+  hist.sort(function(a,b){return (a.date||'')>(b.date||'')?1:(a.date||'')<(b.date||'')?-1:0;});
+  tgt.history=hist;
+  var keepId=tgt.id, removeId=src.id, removedIdx=_obMergeSrcRow;
+  obRows.splice(removedIdx,1);
+  obRows.forEach(function(r,i){r._row=i;});
+  _obLastSaveTs=Date.now();
+  obSetCache(obRows);
+  obCloseMergeModal();
+  if(obDetailRow===removedIdx){ obCloseDetail(); } else if(obDetailRow>removedIdx){ obDetailRow--; }
+  obRenderAll();
+  toast('✅ 統合しました');
+  post({action:'obMergeRows',keepId:keepId,removeId:removeId},function(d){
+    if(d&&d.error){ toast('❌ 統合エラー: '+d.error); }
+    setTimeout(function(){ _obLastSaveTs=0; obLoad(false,true); },2000);
   });
 }
 
