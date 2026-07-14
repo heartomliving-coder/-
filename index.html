@@ -5726,22 +5726,25 @@ function renderList(){
 
 function post(payload, cb){
   payload=payload||{}; payload.key=adminKey();
-  // コールバックなしでも必ずcorsで結果を確認し、保存失敗を検知してユーザーに通知する
-  // （旧no-cors投げっぱなしは失敗しても分からず「データが消えた」原因になっていた）
-  var handler = (typeof cb === 'function') ? cb : function(res){
+  // コールバックの有無に関わらず必ずcorsで結果を確認し、保存失敗を検知してユーザーに通知する。
+  // （以前はカスタムコールバックを渡すとこのチェックが完全にバイパスされ、保存が実際には
+  // 　失敗していても呼び出し元が独自に「保存しました」トーストを出してしまい、
+  // 　「フォーム入力が反映されないことがある」という報告の原因になっていた）
+  function genericErrorCheck(res){
     if(!res || res.error){
       var act = payload.action || '';
       // 保存系アクションの失敗のみ通知（表示系は静かに）
-      if(/^(obSave|obUpdate|obAdd|obConfirm|obDelete|kjSave|kjUpdate|kjDelete|mtgSave|mtgUpdate|mtgDelete|tochiSave|tochiUpdate|tochiDelete)/.test(act)){
+      if(/^(obSave|obUpdate|obAdd|obConfirm|obDelete|obMerge|obSetHistory|kjSave|kjUpdate|kjDelete|mtgSave|mtgUpdate|mtgDelete|tochiSave|tochiUpdate|tochiDelete)/.test(act)){
         toast('⚠️ 保存エラー['+act+']: '+(res&&res.error?res.error:'通信失敗')+'\n画面を更新して保存されたか確認してください');
       } else {
         console.warn('[post] '+act+' failed:', res&&res.error);
       }
     }
-  };
+  }
   return fetch(sendUrl(),{method:'POST',mode:'cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-    .then(function(res){return res.json();}).then(handler)
-    .catch(function(e){console.warn('[post] error',e);handler(null);});
+    .then(function(res){return res.json();})
+    .then(function(res){ genericErrorCheck(res); if(typeof cb==='function') cb(res); })
+    .catch(function(e){ console.warn('[post] error',e); genericErrorCheck(null); if(typeof cb==='function') cb(null); });
 }
 
 // ★ 送信時に担当者＋サブ担当者を文字列結合する関数
@@ -6649,6 +6652,14 @@ function obRenderAll(){ obRenderPipeline(); obRenderVisitors(); obRenderActive()
 
 // 受付/顧客DBの新規問い合わせのうち、オープンボード未登録のものを検出してバナー表示
 function _obNameKey(s){ return String(s||'').replace(/[\s　]/g,'').trim(); }
+// フォーム動作確認等のテスト送信判定（GAS側isTestOrInvalidName_と同一ロジック）
+function _obIsTestName(name){
+  var n=String(name||'').trim();
+  if(!n) return true;
+  if(n.length>20) return true;
+  if(/テスト/.test(n)&&/(です|ます|ください|下さい|ので|お願い|及びません|不要)/.test(n)) return true;
+  return false;
+}
 function _obTelKey(s){ return String(s||'').replace(/[^0-9]/g,''); }
 
 // Gmail直接取得 - localStorageキャッシュ15分、セッション初回は必ず再取得
@@ -6709,6 +6720,9 @@ function obCheckNewInquiries(){
     });
     var dismissed=JSON.parse(localStorage.getItem('ob_inquiry_dismissed')||'[]');
     pending=pending.filter(function(c){ return dismissed.indexOf((c.id||c.name))<0; });
+    // フォーム動作確認等のテスト送信を候補から除外（GAS側と同じ判定。
+    // 過去に顧客情報DBへ登録済みのテストデータが再提案され続けるのを防ぐ）
+    pending=pending.filter(function(c){ return !_obIsTestName(c.name); });
     window._obPendingInquiries=pending;
     if(!pending.length){ banner.style.display='none'; banner.innerHTML=''; return; }
     var gCnt=pending.filter(function(p){return p._src==='gmail';}).length;
@@ -6759,8 +6773,13 @@ function obImportNewInquiries(){
       karte:{ 電話番号:c.tel||'', フリガナ:c.furigana||'', メールアドレス:c.email||'', 住所:c.address||'', 郵便番号:c.zip||'' },
       history:[{date:inquiryDate,type:'問い合わせ',content:'',staff:''}] });
     obRows.push(newRec);
-    // Gmail由来の場合はGAS側で受付管理・顧客情報シートにも書き込む
-    post(Object.assign({action:'obSaveCustomer'},data,{karte:{電話番号:c.tel||'',フリガナ:c.furigana||'',メールアドレス:c.email||'',住所:c.address||'',郵便番号:c.zip||''}}));
+    // Gmail由来の場合はGAS側で受付管理・顧客情報シートにも書き込む。
+    // GASは仮ID（tmp_...）を使わず本物のIDを新規発行するため、応答が届き次第
+    // ローカルの仮IDを本物のIDに置き換える（そうしないと、この直後に履歴追加や
+    // カルテ編集を行った際「該当行が見つからない」エラーで保存が失敗する）。
+    post(Object.assign({action:'obSaveCustomer'},data,{karte:{電話番号:c.tel||'',フリガナ:c.furigana||'',メールアドレス:c.email||'',住所:c.address||'',郵便番号:c.zip||''}}), function(d){
+      if(d&&d.id){ newRec.id=d.id; obSetCache(obRows); }
+    });
   });
   // Gmailキャッシュをクリア（追加済みが再表示されないように）
   _obGmailLeads=null; try{ localStorage.removeItem(_GMAIL_LEADS_KEY); }catch(e){}
@@ -8443,7 +8462,12 @@ function obSaveNew(){
   obSetCache(obRows);
   obRenderAll();
   toast('✅ 「'+name+'」を追加しました（GASに保存中…）');
-  post(Object.assign({action:'obSaveCustomer'},data));
+  // GASは仮ID（tmp_...）を使わず本物のIDを新規発行するため、応答が届き次第
+  // ローカルの仮IDを本物のIDに置き換える（そうしないと、この直後に履歴追加や
+  // カルテ編集を行った際「該当行が見つからない」エラーで保存が失敗する）。
+  post(Object.assign({action:'obSaveCustomer'},data), function(d){
+    if(d&&d.id){ newRec.id=d.id; obSetCache(obRows); }
+  });
   setTimeout(function(){ obLoad(true); },3500);
 }
 
