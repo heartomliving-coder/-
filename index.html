@@ -7475,7 +7475,9 @@ function obTogglePill(el,field,rowIdx){
   r[field]=newVal;
   obSetCache(obRows);
   el.classList.toggle('on',newVal==='1');
-  post({action:'obUpdateField',id:r.id,row:rowIdx,field:field,value:newVal});
+  post({action:'obUpdateField',id:r.id,row:rowIdx,field:field,value:newVal},function(res){
+    if(res&&res.v!==undefined){ r['_v']=res.v; obSetCache(obRows); }
+  });
 }
 
 // ── 月間カレンダー（直近案件タブ） ──
@@ -7915,6 +7917,9 @@ function obSaveField(row,field,value){
   obSetCache(obRows);
   post({action:'obUpdateField',id:(obRows[row]?obRows[row].id:''),row:row,field:field,value:value},function(res){
     if(!res||res.error){ toast('⚠️ 保存エラー: '+(res&&res.error||'通信失敗')+'（再入力してください）'); }
+    // サーバ側の_vを同期しておかないと、カルテ全体保存フォーム等の競合検知が
+    // この1項目更新を見逃し、後から古いフォームで上書き消失させてしまう。
+    else if(res.v!==undefined && obRows[row]){ obRows[row]['_v']=res.v; obSetCache(obRows); }
   });
   if(field==='商談ステータス' && value==='パートナー契約済'){
     kjAutoAddFromOB(obRows[row]);
@@ -8644,7 +8649,9 @@ function obMendanSave(){
   obSetCache(obRows);
   obRenderMendanHistory(r);
   obMendanClear();
-  post({action:'obUpdateField',id:r.id,row:obDetailRow,field:'mendan',value:JSON.stringify(r.mendan)});
+  post({action:'obUpdateField',id:r.id,row:obDetailRow,field:'mendan',value:JSON.stringify(r.mendan)},function(res){
+    if(res&&res.v!==undefined){ r['_v']=res.v; obSetCache(obRows); }
+  });
   var msg=document.getElementById('ob-mendan-save-msg');
   if(msg){ msg.style.color='#22C55E'; msg.textContent='✅ 保存しました'; setTimeout(function(){msg.textContent='';},3000); }
   toast('面談報告を保存しました');
@@ -8668,7 +8675,9 @@ function obMendanDelete(idx){
   _obLastSaveTs=Date.now();
   obSetCache(obRows);
   obRenderMendanHistory(r);
-  post({action:'obUpdateField',id:r.id,row:obDetailRow,field:'mendan',value:JSON.stringify(r.mendan)});
+  post({action:'obUpdateField',id:r.id,row:obDetailRow,field:'mendan',value:JSON.stringify(r.mendan)},function(res){
+    if(res&&res.v!==undefined){ r['_v']=res.v; obSetCache(obRows); }
+  });
   toast('面談報告を削除しました');
 }
 
@@ -8915,7 +8924,9 @@ function obToggleDet(el,field,rowIdx){
   var nv=cur?'0':'1';
   r[field]=nv; obSetCache(obRows);
   el.classList.toggle('done',nv==='1');
-  post({action:'obUpdateField',id:(r?r.id:''),row:rowIdx,field:field,value:nv});
+  post({action:'obUpdateField',id:(r?r.id:''),row:rowIdx,field:field,value:nv},function(res){
+    if(res&&res.v!==undefined){ r['_v']=res.v; obSetCache(obRows); }
+  });
 }
 
 // 履歴タイムライン
