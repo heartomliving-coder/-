@@ -4231,7 +4231,12 @@ function lineRender(){
         (ev.body?'<pre id="'+bodyIdSafe+'" style="display:none;white-space:pre-wrap;font-size:.7rem;color:#555;background:#F8F6F2;border-radius:6px;padding:8px;margin:4px 0 0;max-height:220px;overflow:auto">'+esc(ev.body)+'</pre>':'')+
       '</div>';
     }).join('');
-    return '<div class="ob-card" data-sc="'+cat.cls+'">'+
+    var keyAttr=esc(p.key||'');
+    return '<div class="ob-card" data-sc="'+cat.cls+'" style="position:relative">'+
+      '<div class="ob-vis-card-acts">'+
+        '<button class="ob-vis-card-act" onclick="lineMergeStart(\''+keyAttr+'\');event.stopPropagation()" title="別の人と統合（同一人物の重複をまとめる）">🔗 統合</button>'+
+        '<button class="ob-vis-card-act del" onclick="lineHidePerson(\''+keyAttr+'\',\''+esc(p.name||'')+'\');event.stopPropagation()" title="顧客ではない・不要な項目を非表示にする">✕ 非表示</button>'+
+      '</div>'+
       '<div class="ob-card-body">'+
         '<div class="ob-card-top">'+
           '<span class="ob-card-name">'+esc(p.name||'（氏名不明）')+'</span>'+
@@ -4244,6 +4249,36 @@ function lineRender(){
       '</div>'+
     '</div>';
   }).join('')+'</div>';
+}
+
+function lineHidePerson(key, name){
+  if(!confirm((name||'この項目')+'を非表示にしますか？\n顧客ではない通知（社内共有・キャンペーン応募等）を除外する時に使います。\nOBに実際に登録済みの顧客を非表示にしても、OBのデータ自体は消えません。')) return;
+  gasGet('lineExcludePerson&pkey='+encodeURIComponent(key), function(d){
+    if(!d || d.error){ toast('⚠️ 非表示に失敗しました: '+((d&&d.error)||'通信エラー')); return; }
+    lineRows = d.people || [];
+    try{ localStorage.setItem('line_v1_cache', JSON.stringify(lineRows)); localStorage.setItem('line_v1_ts', String(Date.now())); }catch(e){}
+    lineRender(); lineUpdateLastUpdatedLabel();
+    toast('✕ 非表示にしました');
+  });
+}
+var _lineMergeFromKey=null;
+function lineMergeStart(fromKey){
+  _lineMergeFromKey=fromKey;
+  var from=lineRows.find(function(p){return p.key===fromKey;});
+  var candidates=lineRows.filter(function(p){return p.key!==fromKey;});
+  var listStr=candidates.map(function(p,i){return (i+1)+'. '+(p.name||'（氏名不明）')+(p.tel?'　'+p.tel:'');}).join('\n');
+  var input=prompt('「'+(from&&from.name||'この項目')+'」をどの項目に統合しますか？\n番号を入力してください（同一人物のLINE表示名／本名の重複をまとめます）。\n\n'+listStr);
+  if(!input) return;
+  var idx=parseInt(input,10)-1;
+  if(isNaN(idx)||idx<0||idx>=candidates.length){ toast('⚠️ 番号が正しくありません'); return; }
+  var toKey=candidates[idx].key;
+  gasGet('lineMergePerson&fromKey='+encodeURIComponent(fromKey)+'&toKey='+encodeURIComponent(toKey), function(d){
+    if(!d || d.error){ toast('⚠️ 統合に失敗しました: '+((d&&d.error)||'通信エラー')); return; }
+    lineRows = d.people || [];
+    try{ localStorage.setItem('line_v1_cache', JSON.stringify(lineRows)); localStorage.setItem('line_v1_ts', String(Date.now())); }catch(e){}
+    lineRender(); lineUpdateLastUpdatedLabel();
+    toast('🔗 統合しました');
+  });
 }
 
 function enterMtgBoard(){
@@ -8482,10 +8517,20 @@ function obConfirmDel(rowIdx){
   obRenderVisitors(); obRenderActive();
   toast('削除しました');
   // IDで確実に削除（Supabase順序変動による誤削除防止）
-  post({action:'obDeleteCustomer',id:rid,row:rowIdx}, function(d){
-    if(d&&d.error){ toast('❌ 削除エラー: '+d.error); obLoad(false,true); }
-    else { setTimeout(function(){ _obLastSaveTs=0; obLoad(false,true); },3000); }
-  });
+  // バックグラウンドの自動処理（トリガー）が同時にOBを更新中だと、まれにロック待ちが
+  // タイムアウトすることがあるため、ロック関連のエラーだけは1回だけ自動で再試行する。
+  function _obSendDelete(retried){
+    post({action:'obDeleteCustomer',id:rid,row:rowIdx}, function(d){
+      if(d&&d.error){
+        if(!retried && /ロック/.test(d.error)){
+          setTimeout(function(){ _obSendDelete(true); }, 3000);
+          return;
+        }
+        toast('❌ 削除エラー: '+d.error); obLoad(false,true);
+      } else { setTimeout(function(){ _obLastSaveTs=0; obLoad(false,true); },3000); }
+    });
+  }
+  _obSendDelete(false);
 }
 
 // ── 重複統合（LINE経由/Gmail経由などで同一人物が別行になった場合にまとめる） ──
