@@ -1341,6 +1341,7 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .hub-card.hc-accent-b{background:#2F5C56}
 .hub-card.hc-accent-c{background:#7A5A1E}
 .hub-card.hc-accent-d{background:#1F4A32}
+.hub-card.hc-accent-e{background:#265A57}
 .hub-card .hc-icon{display:none}
 .hub-card .hc-num{display:block;font-family:"Playfair Display",serif;font-size:1.7rem;font-weight:400;color:rgba(255,255,255,.4);line-height:1;font-style:italic}
 .hub-card .hc-body{width:100%}
@@ -2259,6 +2260,15 @@ body.ws-open #ws-backdrop{display:block}
             <span class="hc-badge" id="hubTcCount">—</span>
             <div class="hc-arrow">→</div>
           </div>
+          <div class="hub-card hc-accent-e" onclick="if(!_hubLayoutEditing)enterLineBoard()">
+            <div class="hc-num">05</div>
+            <div class="hc-body">
+              <div class="hc-title">LINE問い合わせ状況</div>
+              <div class="hc-desc">Gmail連携・友達追加/資料請求/予約の状況をリアルタイム表示</div>
+            </div>
+            <span class="hc-badge" id="hubLineCount">—</span>
+            <div class="hc-arrow">→</div>
+          </div>
         </div>
       </div>
 
@@ -2434,6 +2444,45 @@ body.ws-open #ws-backdrop{display:block}
   </div>
 
 
+</div>
+
+<!-- ─── LINE問い合わせ状況（Gmail連携・自動反映） ─── -->
+<div id="lineboard" class="ob">
+  <div class="ob-hd">
+    <div class="ob-brand">
+      <img src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM" onerror="this.style.display='none'">
+      <div class="ob-hd-ti">LINE問い合わせ状況<small>LINE INQUIRY STATUS</small></div>
+    </div>
+    <div class="ob-hd-tools">
+      <span id="line-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
+      <button class="hbtn ghost" onclick="lineLoad(false,true)" title="Gmailから最新状況を取得">🔄 更新</button>
+      <button class="hbtn" onclick="showHub()">‹ 戻る</button>
+    </div>
+  </div>
+  <div class="ob-pane show">
+    <div class="ob-filter" style="flex-wrap:wrap;gap:6px 10px">
+      <input type="text" id="line-q" placeholder="🔍 顧客名 / 電話..." style="min-width:180px;flex:1" oninput="lineRender()">
+      <label style="font-size:.7rem;color:#888;font-weight:700;letter-spacing:.06em">状態</label>
+      <select id="line-filter-status" onchange="lineRender()" style="width:140px">
+        <option value="">すべて</option>
+        <option value="FriendAdded">友達追加のみ</option>
+        <option value="DocumentRequest">資料請求</option>
+        <option value="Reservation">予約</option>
+        <option value="Task">スタッフタスク</option>
+        <option value="Other">その他</option>
+      </select>
+      <label style="font-size:.7rem;color:#888;font-weight:700;letter-spacing:.06em">OB登録</label>
+      <select id="line-filter-ob" onchange="lineRender()" style="width:110px">
+        <option value="">すべて</option>
+        <option value="unregistered">未登録のみ</option>
+        <option value="registered">登録済みのみ</option>
+      </select>
+      <span class="ob-filter-count" id="line-count" style="font-size:.78rem"></span>
+    </div>
+    <div class="ob-scroll">
+      <div id="line-content" style="padding:14px 16px"><div class="skel skel-row w40"></div><div class="skel skel-row w80"></div><div class="skel skel-row"></div></div>
+    </div>
+  </div>
 </div>
 
 <!-- ─── 着工管理ボード ─── -->
@@ -4095,7 +4144,7 @@ function enterReception(){
 }
 
 function _hideAllBoards(){
-  ['hub','openboard','kojiboard','tochiboard','mtgboard','custboard','app'].forEach(function(id){
+  ['hub','openboard','kojiboard','tochiboard','mtgboard','custboard','app','lineboard'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.classList.remove('show');
   });
   var cdb=document.getElementById('customdbboard'); if(cdb) cdb.classList.remove('show');
@@ -4111,6 +4160,79 @@ function enterOpenBoard(){
   if(!window.__obPollTimer) window.__obPollTimer=setInterval(function(){ obLoad(true,true); },5*60*1000); // 5分ごとに新着チェック
   obStartAutoSync();
   wsSetActiveSection('ob');
+}
+
+// ── LINE問い合わせ状況（Gmail連携） ──────────────────────────
+var lineRows=[];
+function enterLineBoard(){
+  _hideAllBoards();
+  document.getElementById('lineboard').classList.add('show');
+  lineLoad();
+  if(!window.__linePollTimer) window.__linePollTimer=setInterval(function(){ lineLoad(true,true); }, 5*60*1000); // 5分ごとにGmailから再取得
+  wsSetActiveSection('line');
+}
+function lineUpdateLastUpdatedLabel(){
+  var el=document.getElementById('line-last-updated'); if(!el) return;
+  var ts=parseInt(localStorage.getItem('line_v1_ts')||'0');
+  el.textContent = ts ? '最終更新 '+obFmtDateTime(new Date(ts).toISOString()) : '';
+}
+function lineLoad(silent, force){
+  var cached=null; try{ cached=JSON.parse(localStorage.getItem('line_v1_cache')||'null'); }catch(e){}
+  if(cached && !force && isCacheFresh('line_v1_ts')){
+    lineRows=cached; lineRender(); lineUpdateLastUpdatedLabel(); return;
+  }
+  if(!cached){ document.getElementById('line-content').innerHTML='<div class="skel skel-row w40"></div><div class="skel skel-row w80"></div><div class="skel skel-row"></div>'; }
+  gasGet('lineGetStatus', function(d){
+    if(!d || d.error){ if(!silent) toast('⚠️ LINE状況の取得に失敗しました: '+((d&&d.error)||'通信エラー')); return; }
+    lineRows = d.people || [];
+    try{ localStorage.setItem('line_v1_cache', JSON.stringify(lineRows)); localStorage.setItem('line_v1_ts', String(Date.now())); }catch(e){}
+    lineRender();
+    lineUpdateLastUpdatedLabel();
+    if(silent) toast('🔔 LINE問い合わせ状況を更新しました');
+  });
+}
+var LINE_CATEGORY_LABEL={FriendAdded:{label:'👋 友達追加のみ',cls:'ob-s0'},DocumentRequest:{label:'📄 資料請求',cls:'ob-s2'},Reservation:{label:'📅 予約',cls:'ob-sP'},Task:{label:'🛠 スタッフタスク',cls:'ob-s4'},Other:{label:'❔ その他',cls:'ob-s9'}};
+function lineRender(){
+  var q=(document.getElementById('line-q').value||'').trim();
+  var fStatus=document.getElementById('line-filter-status').value;
+  var fOb=document.getElementById('line-filter-ob').value;
+  var rows=lineRows.filter(function(p){
+    if(q){
+      var hay=(p.name||'')+(p.tel||'');
+      if(hay.indexOf(q)<0) return false;
+    }
+    if(fStatus && p.lastEvent.category!==fStatus) return false;
+    if(fOb==='registered' && !p.obMatched) return false;
+    if(fOb==='unregistered' && p.obMatched) return false;
+    return true;
+  });
+  document.getElementById('line-count').textContent = rows.length+'件';
+  if(!rows.length){ document.getElementById('line-content').innerHTML='<div class="ob-empty-state">該当するLINE問い合わせはありません</div>'; return; }
+  document.getElementById('line-content').innerHTML='<div class="ob-card-grid">'+rows.map(function(p){
+    var cat=LINE_CATEGORY_LABEL[p.lastEvent.category]||LINE_CATEGORY_LABEL.Other;
+    var obChip = p.obMatched
+      ? '<span class="ob-badge" style="background:#1F4A32;color:#fff">✅ OB登録済み'+(p.obName?'：'+esc(p.obName):'')+'</span>'
+      : '<span class="ob-badge" style="background:#7A5A1E;color:#fff">⚠️ OB未登録</span>';
+    var histHtml=p.events.slice(-5).reverse().map(function(ev){
+      var c=LINE_CATEGORY_LABEL[ev.category]||LINE_CATEGORY_LABEL.Other;
+      return '<div style="display:flex;gap:8px;font-size:.72rem;color:#888;padding:2px 0">'+
+        '<span style="white-space:nowrap;color:#AAA">'+esc(ev.date)+'</span>'+
+        '<span>'+esc(c.label)+(ev.taskDesc?'（'+esc(ev.taskDesc)+'）':'')+'</span>'+
+      '</div>';
+    }).join('');
+    return '<div class="ob-card" data-sc="'+cat.cls+'">'+
+      '<div class="ob-card-body">'+
+        '<div class="ob-card-top">'+
+          '<span class="ob-card-name">'+esc(p.name||'（氏名不明）')+'</span>'+
+        '</div>'+
+        (p.tel?'<div style="font-size:.8rem;color:#666">📞 '+esc(p.tel)+'</div>':'')+
+        '<div><span class="ob-badge '+cat.cls+'">'+cat.label+'</span></div>'+
+        '<div style="font-size:.7rem;color:#AAA">初回検知: '+esc(p.firstSeen)+' ／ 最終更新: '+esc(p.lastEvent.date)+'</div>'+
+        '<div>'+obChip+'</div>'+
+        '<details style="margin-top:4px"><summary style="font-size:.72rem;color:#9A8C76;cursor:pointer">履歴（'+p.events.length+'件）</summary>'+histHtml+'</details>'+
+      '</div>'+
+    '</div>';
+  }).join('')+'</div>';
 }
 
 function enterMtgBoard(){
