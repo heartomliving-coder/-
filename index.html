@@ -4168,7 +4168,9 @@ function enterLineBoard(){
   _hideAllBoards();
   document.getElementById('lineboard').classList.add('show');
   lineLoad();
-  if(!window.__linePollTimer) window.__linePollTimer=setInterval(function(){ lineLoad(true,true); }, 5*60*1000); // 5分ごとにGmailから再取得
+  // GAS側が5分ごとのトリガーでキャッシュを最新化しているので、こちらは1分ごとに
+  // キャッシュを読みに行くだけで十分リアルタイムに近い表示になる（Gmail検索は行わない＝軽量）。
+  if(!window.__linePollTimer) window.__linePollTimer=setInterval(function(){ lineLoad(true,false); }, 60*1000);
   wsSetActiveSection('line');
 }
 function lineUpdateLastUpdatedLabel(){
@@ -4176,19 +4178,22 @@ function lineUpdateLastUpdatedLabel(){
   var ts=parseInt(localStorage.getItem('line_v1_ts')||'0');
   el.textContent = ts ? '最終更新 '+obFmtDateTime(new Date(ts).toISOString()) : '';
 }
+// force=true: 手動更新ボタン用。GASにその場でGmailを検索させ直す（少し時間がかかる）。
+// force=false: 通常ロード・自動ポーリング用。GAS側が5分おきに更新しているキャッシュを読むだけ（高速）。
 function lineLoad(silent, force){
   var cached=null; try{ cached=JSON.parse(localStorage.getItem('line_v1_cache')||'null'); }catch(e){}
-  if(cached && !force && isCacheFresh('line_v1_ts')){
-    lineRows=cached; lineRender(); lineUpdateLastUpdatedLabel(); return;
+  if(cached && !force){
+    lineRows=cached; lineRender(); lineUpdateLastUpdatedLabel();
+  } else if(!cached){
+    document.getElementById('line-content').innerHTML='<div class="skel skel-row w40"></div><div class="skel skel-row w80"></div><div class="skel skel-row"></div>';
   }
-  if(!cached){ document.getElementById('line-content').innerHTML='<div class="skel skel-row w40"></div><div class="skel skel-row w80"></div><div class="skel skel-row"></div>'; }
-  gasGet('lineGetStatus', function(d){
+  gasGet(force?'lineGetStatus':'lineGetStatusCached', function(d){
     if(!d || d.error){ if(!silent) toast('⚠️ LINE状況の取得に失敗しました: '+((d&&d.error)||'通信エラー')); return; }
     lineRows = d.people || [];
     try{ localStorage.setItem('line_v1_cache', JSON.stringify(lineRows)); localStorage.setItem('line_v1_ts', String(Date.now())); }catch(e){}
     lineRender();
     lineUpdateLastUpdatedLabel();
-    if(silent) toast('🔔 LINE問い合わせ状況を更新しました');
+    if(force) toast('🔔 Gmailから最新状況を取得しました');
   });
 }
 var LINE_CATEGORY_LABEL={FriendAdded:{label:'👋 友達追加のみ',cls:'ob-s0'},DocumentRequest:{label:'📄 資料請求',cls:'ob-s2'},Reservation:{label:'📅 予約',cls:'ob-sP'},Task:{label:'🛠 スタッフタスク',cls:'ob-s4'},Other:{label:'❔ その他',cls:'ob-s9'}};
@@ -4213,11 +4218,17 @@ function lineRender(){
     var obChip = p.obMatched
       ? '<span class="ob-badge" style="background:#1F4A32;color:#fff">✅ OB登録済み'+(p.obName?'：'+esc(p.obName):'')+'</span>'
       : '<span class="ob-badge" style="background:#7A5A1E;color:#fff">⚠️ OB未登録</span>';
-    var histHtml=p.events.slice(-5).reverse().map(function(ev){
+    var histHtml=p.events.slice(-8).reverse().map(function(ev,i){
       var c=LINE_CATEGORY_LABEL[ev.category]||LINE_CATEGORY_LABEL.Other;
-      return '<div style="display:flex;gap:8px;font-size:.72rem;color:#888;padding:2px 0">'+
-        '<span style="white-space:nowrap;color:#AAA">'+esc(ev.date)+'</span>'+
-        '<span>'+esc(c.label)+(ev.taskDesc?'（'+esc(ev.taskDesc)+'）':'')+'</span>'+
+      var bodyId='line-body-'+p.tel+'-'+p.email+'-'+i;
+      var bodyIdSafe=bodyId.replace(/[^a-zA-Z0-9_-]/g,'_');
+      return '<div style="padding:3px 0;border-bottom:1px dashed #EEE">'+
+        '<div style="display:flex;gap:8px;font-size:.72rem;color:#888;align-items:center">'+
+          '<span style="white-space:nowrap;color:#AAA">'+esc(ev.date)+'</span>'+
+          '<span>'+esc(c.label)+(ev.taskDesc?'（'+esc(ev.taskDesc)+'）':'')+'</span>'+
+          (ev.body?'<span style="cursor:pointer;color:#2F5C56;text-decoration:underline;margin-left:auto" onclick="var e=document.getElementById(\''+bodyIdSafe+'\');e.style.display=e.style.display===\'none\'?\'block\':\'none\'">本文</span>':'')+
+        '</div>'+
+        (ev.body?'<pre id="'+bodyIdSafe+'" style="display:none;white-space:pre-wrap;font-size:.7rem;color:#555;background:#F8F6F2;border-radius:6px;padding:8px;margin:4px 0 0;max-height:220px;overflow:auto">'+esc(ev.body)+'</pre>':'')+
       '</div>';
     }).join('');
     return '<div class="ob-card" data-sc="'+cat.cls+'">'+
