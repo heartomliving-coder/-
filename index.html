@@ -424,23 +424,25 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .fp-hint{font-size:.72rem;color:#9A9286;line-height:1.6;background:rgba(255,255,255,.05);border:1px solid #333333;border-radius:6px;padding:10px 12px}
 .fp-danger{border-color:#6e4a44;color:#E0917F}
 .fp-danger:hover{background:#B4524A;border-color:#B4524A;color:#fff}
-/* ドリンク注文バナー */
-.drink-order-banner{display:none;position:absolute;top:0;left:0;right:310px;z-index:20;background:linear-gradient(135deg,#1a3a1a,#0e260e);border-bottom:2px solid #4a8a4a;padding:18px 24px;animation:dob-in .3s ease}
+/* ドリンク注文の通知
+   来客中の画面に大きく出ると来場されたお客様の目に留まりやすいため、
+   全幅の派手なバナーではなく、右上に寄せた控えめな小型カードにしている。
+   点滅・拡大アニメーションも用いず、業務用の落ち着いた配色に統一する。 */
+.drink-order-banner{display:none;position:absolute;top:10px;right:322px;z-index:20;width:270px;max-width:calc(100% - 340px);background:rgba(29,46,61,.97);border:1px solid rgba(255,255,255,.14);border-left:3px solid #5FA98F;border-radius:8px;padding:10px 12px;box-shadow:0 6px 20px rgba(0,0,0,.28)}
 .drink-order-banner.show{display:block}
-@keyframes dob-in{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
-.dob-hd{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.dob-icon{font-size:1.8rem;animation:dob-pulse 1s ease infinite alternate}
-@keyframes dob-pulse{from{transform:scale(1)}to{transform:scale(1.2)}}
-.dob-title{color:#7ec87e;font-size:1.1rem;font-weight:800;letter-spacing:.06em;flex:1}
-.dob-time{color:rgba(255,255,255,.35);font-size:.72rem}
-.dob-items{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-.dob-chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:6px 14px;color:#E8E3DA;font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:6px}
-.dob-chip .dob-qty{color:#E6B840;font-weight:800}
-.dob-chip .dob-temp{font-size:.68rem;padding:2px 6px;border-radius:3px;font-weight:700}
-.dob-chip .dob-temp.hot{background:rgba(220,60,40,.3);color:#ff8070}
-.dob-chip .dob-temp.ice{background:rgba(40,120,220,.3);color:#70b0ff}
-.dob-done-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);border-radius:4px;padding:8px 18px;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .15s}
-.dob-done-btn:hover{background:#4a8a4a;border-color:#4a8a4a;color:#fff}
+.dob-hd{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.dob-icon{font-size:.95rem;opacity:.85}
+.dob-title{color:#CFE6DC;font-size:.78rem;font-weight:700;letter-spacing:.02em;flex:1}
+.dob-time{color:rgba(255,255,255,.32);font-size:.66rem}
+.dob-items{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.dob-chip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:3px 9px;color:#E8E3DA;font-size:.74rem;font-weight:600;display:flex;align-items:center;gap:5px}
+.dob-chip .dob-qty{color:#9ED6BE;font-weight:800}
+.dob-chip .dob-temp{font-size:.62rem;padding:1px 5px;border-radius:3px;font-weight:700}
+.dob-chip .dob-temp.hot{background:rgba(190,90,70,.28);color:#E5A192}
+.dob-chip .dob-temp.ice{background:rgba(70,120,190,.28);color:#9DC2E8}
+.dob-done-btn{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.62);border-radius:4px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s}
+.dob-done-btn:hover{background:#2F5C56;border-color:#2F5C56;color:#fff}
+@media(max-width:900px){.drink-order-banner{right:10px;max-width:calc(100% - 20px)}}
 /* お客様入力プレビュー（iframe） */
 .preview-frame{width:100%;height:100%;border:0;background:#fff;display:block}
 .preview-frame.hide{display:none}
@@ -3276,11 +3278,11 @@ body.ws-open #ws-backdrop{display:block}
     <div class="drink-order-banner" id="drinkOrderBanner">
       <div class="dob-hd">
         <span class="dob-icon">🍵</span>
-        <span class="dob-title">ドリンク注文が届きました！</span>
+        <span class="dob-title">ご注文</span>
         <span class="dob-time" id="dobTime"></span>
       </div>
       <div class="dob-items" id="dobItems"></div>
-      <button class="dob-done-btn" onclick="clearDrinkOrderBanner()">✓ 対応済み（バナーを閉じる）</button>
+      <button class="dob-done-btn" onclick="clearDrinkOrderBanner()">✓ 対応済み</button>
     </div>
     <div class="pdf-wrap" id="pdfWrap">
       <iframe id="previewFrame" class="preview-frame" title="お客様入力プレビュー"></iframe>
@@ -5892,20 +5894,32 @@ function renderList(){
     '</tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
+// サーバー側で書き込みを一切行わない読み取り専用アクションだけを列挙する。
+// ここに載っていないアクションは全て「失敗したらトーストで通知」される。
+var POST_SILENT_ACTIONS = ['listDriveFiles'];
+
 function post(payload, cb){
   payload=payload||{}; payload.key=adminKey();
   // コールバックの有無に関わらず必ずcorsで結果を確認し、保存失敗を検知してユーザーに通知する。
+  // ※ POST_SILENT_ACTIONS に入れてよいのは「サーバー側で一切書き込まない読み取り専用」だけ。
+  //   書き込む可能性が少しでもあるものは絶対に足さないこと（失敗が黙殺され、
+  //   ユーザーが保存されたと誤認する事故に直結するため）。
   // （以前はカスタムコールバックを渡すとこのチェックが完全にバイパスされ、保存が実際には
   // 　失敗していても呼び出し元が独自に「保存しました」トーストを出してしまい、
   // 　「フォーム入力が反映されないことがある」という報告の原因になっていた）
   function genericErrorCheck(res){
     if(!res || res.error){
       var act = payload.action || '';
-      // 保存系アクションの失敗のみ通知（表示系は静かに）
-      if(/^(obSave|obUpdate|obAdd|obConfirm|obDelete|obMerge|obSetHistory|kjSave|kjUpdate|kjDelete|mtgSave|mtgUpdate|mtgDelete|tochiSave|tochiUpdate|tochiDelete)/.test(act)){
-        toast('⚠️ 保存エラー['+act+']: '+(res&&res.error?res.error:'通信失敗')+'\n画面を更新して保存されたか確認してください');
-      } else {
+      // 「保存系だけ通知」を保存アクション名の羅列で判定していた時は、新しい保存機能を
+      // 追加するたびに追記漏れが起き、実際に saveHubEvents / tochiAddEntry /
+      // uploadDriveFile / pushSession などの失敗が画面に何も出ないまま消えていた。
+      // そのため判定を逆転し、「読み取り専用・ポーリングだけ静かにして、
+      // 書き込む可能性のあるものは全て通知する」方式にした。
+      // これにより今後追加される保存処理も自動的に通知対象になる。
+      if(POST_SILENT_ACTIONS.indexOf(act) >= 0){
         console.warn('[post] '+act+' failed:', res&&res.error);
+      } else {
+        toast('⚠️ 保存エラー['+act+']: '+(res&&res.error?res.error:'通信失敗')+'\n画面を更新して保存されたか確認してください');
       }
     }
   }
