@@ -149,8 +149,9 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,1
 .bar .newbtn{background:var(--charcoal);color:#fff;border:none;border-radius:2px;padding:15px 24px;font-size:1rem;font-weight:700;letter-spacing:.06em;cursor:pointer;flex-shrink:0;transition:background .18s}
 .bar .newbtn:hover{background:#000}
 .bar .newbtn:active{opacity:.85}
-.bar .drink-newbtn{background:#1a3520;color:#7ec87e;border:1.5px solid #3a6a3a;border-radius:2px;padding:14px 20px;font-size:.9rem;font-weight:700;letter-spacing:.04em;cursor:pointer;flex-shrink:0;transition:all .18s}
-.bar .drink-newbtn:hover{background:#22441e;border-color:#4a8a4a}
+/* ドリンクオーダーは社内限定の機能のため、主要ボタンと同列で目立たせず控えめな表示にする */
+.bar .drink-newbtn{background:transparent;color:#999;border:1px solid #DDD;border-radius:2px;padding:6px 10px;font-size:.7rem;font-weight:500;letter-spacing:.02em;cursor:pointer;flex-shrink:0;transition:all .18s;margin-left:auto}
+.bar .drink-newbtn:hover{background:#F5F5F5;color:#666}
 .bar .drink-newbtn:active{opacity:.85}
 .bar input{flex:1;min-width:200px;padding:14px 16px;border:1px solid var(--bd2);border-radius:2px;font-size:1rem;background:#fff;color:var(--tx);outline:none}
 .bar input:focus{border-color:var(--charcoal)}
@@ -180,8 +181,9 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,1
 .ct-btn{border:none;border-radius:3px;padding:6px 10px;font-size:.74rem;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:all .15s;white-space:nowrap}
 .ct-btn-send{background:var(--charcoal);color:#fff}
 .ct-btn-send:hover{background:#000}
-.ct-btn-drink{background:#1a2e1a;color:#7ec87e;border:1px solid #3a6a3a}
-.ct-btn-drink:hover{background:#3a6a3a;color:#fff}
+/* 社内限定機能のため主要ボタンより控えめに */
+.ct-btn-drink{background:transparent;color:#AAA;border:1px solid #E5E5E5}
+.ct-btn-drink:hover{background:#F5F5F5;color:#888}
 .ct-btn-url{background:#fff;color:var(--charcoal);border:1px solid var(--charcoal)}
 .ct-btn-url:hover{background:var(--charcoal);color:#fff}
 /* 後方互換（モバイル用）*/
@@ -3098,13 +3100,13 @@ body.ws-open #ws-backdrop{display:block}
     <section class="ws-right">
       <div class="bar">
         <button class="newbtn" onclick="sendNew()">＋ 新規のお客様を送信</button>
-        <button class="drink-newbtn" onclick="sendNewDrink()">🍵 新規ドリンクオーダー</button>
         <span class="target">送信先
           <select id="target" onchange="saveTarget()"></select>
         </span>
         <input id="q" placeholder="名前・電話・メールで絞り込み" oninput="renderList()">
         <button class="rl" onclick="loadList()">再読込</button>
         <span class="listcount" id="listCount"></span>
+        <button class="drink-newbtn" onclick="sendNewDrink()" title="ドリンクのみ先に案内する場合">🍵</button>
       </div>
       <div class="list" id="list"><div class="state">読み込み中...</div></div>
     </section>
@@ -3353,7 +3355,7 @@ body.ws-open #ws-backdrop{display:block}
       <button class="fp-btn" onclick="sendCommand(__fsScreenId,'drinkPrompt',{})">🔔 お飲み物はいかがですか</button>
 
       <div class="fp-sec">ドリンク注文</div>
-      <button class="fp-btn" onclick="sendDrinkMenu()" style="background:#1a2e1a;border-color:#2d5a2d;color:#7ec87e">🍵 ドリンクメニューを送信</button>
+      <button class="fp-btn" onclick="sendDrinkMenu()">🍵 ドリンクメニューを送信</button>
       <div id="drinkOrderPanel" style="display:none;margin-top:8px;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:10px;font-size:.8rem"></div>
 
       <div id="cmdFeedback" class="cmd-feedback" style="display:none"></div>
@@ -4362,6 +4364,16 @@ function mailRender(){
     var statChip = m.unanswered
       ? '<span class="ob-badge" style="background:#B5432A;color:#fff">📮 未対応（'+m.waitingDays+'日経過）</span>'
       : '<span class="ob-badge" style="background:#4B7A5A;color:#fff">✅ 対応済み</span>';
+    // 同一顧客の複数スレッド（資料請求→予約 等）を1枚のカードにまとめて表示
+    var threads=m.threads||[];
+    var threadsHtml=threads.map(function(t){
+      return '<div style="padding:4px 0;border-top:1px dashed #EEE;display:flex;gap:8px;align-items:center;font-size:.72rem">'+
+        '<span style="white-space:nowrap;color:'+(t.unanswered?'#B5432A':'#7A9A82')+'">'+(t.unanswered?'📮未対応':'✅対応済み')+'</span>'+
+        '<span style="color:#AAA;white-space:nowrap">'+esc(t.lastDate)+'</span>'+
+        '<span style="color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">'+esc(t.subject||'')+'</span>'+
+        '<a href="'+esc(t.threadUrl)+'" target="_blank" rel="noopener" style="color:#2F5C56;white-space:nowrap" onclick="event.stopPropagation()">開く→</a>'+
+      '</div>';
+    }).join('');
     return '<div class="ob-card" data-sc="'+(m.unanswered?'ob-sF':'ob-s0')+'">'+
       '<div class="ob-card-body">'+
         '<div class="ob-card-top">'+
@@ -4369,10 +4381,9 @@ function mailRender(){
         '</div>'+
         (m.tel?'<div style="font-size:.8rem;color:#666">📞 '+esc(m.tel)+'</div>':'')+
         (m.email?'<div style="font-size:.75rem;color:#5B7FA6">✉ '+esc(m.email)+'</div>':'')+
-        '<div style="font-size:.75rem;color:#888;margin-top:4px">'+esc(m.subject||'')+'</div>'+
         '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">'+statChip+obChip+'</div>'+
-        '<div style="font-size:.7rem;color:#AAA;margin-top:4px">最終更新: '+esc(m.lastDate)+'（'+m.msgCount+'件のやり取り）</div>'+
-        '<a href="'+esc(m.threadUrl)+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:.75rem;color:#2F5C56;text-decoration:underline" onclick="event.stopPropagation()">Gmailで開く →</a>'+
+        '<div style="font-size:.7rem;color:#AAA;margin-top:4px">最終更新: '+esc(m.lastDate)+'</div>'+
+        '<details style="margin-top:6px" '+(threads.length>1?'open':'')+'><summary style="font-size:.72rem;color:#9A8C76;cursor:pointer">やり取り（'+threads.length+'件）</summary>'+threadsHtml+'</details>'+
       '</div>'+
     '</div>';
   }).join('')+'</div>';
@@ -6020,7 +6031,7 @@ function renderList(){
       '<td class="ct-email" title="'+esc(c.email||'')+'">'+esc(c.email||'—')+'</td>'+
       '<td><div class="ct-ops">'+
         '<button class="ct-btn ct-btn-send" onclick="sendCustomer('+idx+')">▶ 送信</button>'+
-        '<button class="ct-btn ct-btn-drink" onclick="sendCustomerDrink('+idx+')" title="先にドリンクオーダー">🍵 ドリンク</button>'+
+        '<button class="ct-btn ct-btn-drink" onclick="sendCustomerDrink('+idx+')" title="先にドリンクオーダー">🍵</button>'+
         '<button class="ct-btn ct-btn-url" onclick="issueOnlineUrl('+idx+')" title="URL発行">🔗</button>'+
       '</div></td>'+
     '</tr>';
