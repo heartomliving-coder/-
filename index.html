@@ -486,6 +486,24 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .dbl-toggle input:checked+.dbl-slider{background:#C0392B}
 .dbl-toggle input:checked+.dbl-slider::before{transform:translateX(20px)}
 /* DBロック拒否モーダル */
+.help-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:flex-start;justify-content:center;padding:5vh 16px;overflow:auto}
+.help-modal.show{display:flex}
+.help-box{background:#fff;border-radius:10px;max-width:720px;width:100%;box-shadow:0 16px 60px rgba(0,0,0,.3);max-height:90vh;display:flex;flex-direction:column}
+.help-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #EEE;flex-shrink:0}
+.help-hd-title{font-size:1.1rem;font-weight:700;color:#1D2E3D;letter-spacing:.02em}
+.help-close{background:none;border:none;font-size:1.4rem;color:#999;cursor:pointer;line-height:1;padding:4px 8px}
+.help-close:hover{color:#333}
+.help-body{padding:8px 24px 24px;overflow-y:auto}
+.help-sec{margin-top:18px}
+.help-sec:first-child{margin-top:18px}
+.help-sec-title{font-size:.85rem;font-weight:700;color:#2F5C56;letter-spacing:.04em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.help-sec-body{font-size:.85rem;color:#444;line-height:1.7}
+.help-sec-body ul{margin:4px 0;padding-left:1.3em}
+.help-sec-body li{margin:3px 0}
+.help-sec-body b{color:#1D2E3D}
+.help-card-tbl{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:6px}
+.help-card-tbl td{padding:5px 8px;border-bottom:1px solid #F0EDE8;vertical-align:top}
+.help-card-tbl td:first-child{white-space:nowrap;font-weight:700;color:#1D2E3D}
 .lock-denied-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:center;justify-content:center}
 .lock-denied-modal.show{display:flex}
 .lock-denied-box{background:#fff;border-radius:8px;padding:32px 36px;max-width:340px;text-align:center;box-shadow:0 16px 60px rgba(0,0,0,.3)}
@@ -1387,7 +1405,9 @@ tr:hover .ob-hist-add-btn{opacity:1}
 @media(max-width:860px){
   .hub-body{grid-template-columns:1fr}
   .hub-side{display:none}
-  .hub-cards-grid{grid-template-columns:repeat(2,1fr)!important}
+  /* !importantを外す: 640px以下のスマホ用1列ルール（後方の@media）が
+     ここに埋もれて効かなくなっていたため（instrumentedで確認済みのバグ） */
+  .hub-cards-grid{grid-template-columns:repeat(2,1fr)}
   .hub-header{padding:12px 16px}
   .hub-main{padding:16px}
 }
@@ -2176,6 +2196,7 @@ body.ws-open #ws-backdrop{display:block}
       </div>
     </div>
     <div class="hub-header-btnrow" style="display:flex;align-items:center;gap:8px">
+      <button onclick="openHelpGuide()" title="使い方ガイド" style="background:rgba(29,46,61,.06);border:1px solid rgba(29,46,61,.15);color:#1D2E3D;padding:7px 14px;border-radius:6px;font-size:.74rem;cursor:pointer;letter-spacing:.04em;white-space:nowrap;font-family:inherit;transition:all .2s" onmouseover="this.style.background='rgba(95,169,143,.15)'" onmouseout="this.style.background='rgba(29,46,61,.06)'">❓ ヘルプ</button>
       <button onclick="logout()" style="background:rgba(255,80,80,.15);border:1px solid rgba(255,80,80,.3);color:rgba(255,180,180,.9);padding:7px 14px;border-radius:6px;font-size:.74rem;cursor:pointer;letter-spacing:.04em;white-space:nowrap;font-family:inherit;transition:all .2s" onmouseover="this.style.background='rgba(255,80,80,.28)'" onmouseout="this.style.background='rgba(255,80,80,.15)'">ログアウト</button>
     </div>
   </div>
@@ -13678,6 +13699,16 @@ function closeLockDenied(){
   if(m) m.classList.remove('show');
 }
 
+function openHelpGuide(){
+  var m = document.getElementById('helpModal');
+  if(m) m.classList.add('show');
+}
+function closeHelpGuide(e){
+  if(e && e.target !== e.currentTarget) return; // 中身クリックでは閉じない（onclickのstopPropagationと二重ガード）
+  var m = document.getElementById('helpModal');
+  if(m) m.classList.remove('show');
+}
+
 function renderDbLockSettings(){
   var el = document.getElementById('dbLockBody');
   if(!el) return;
@@ -13701,6 +13732,65 @@ function toggleDbLock(boardId, locked){
 }
 
 </script>
+
+<!-- 使い方ガイド（ヘルプ）モーダル -->
+<div class="help-modal" id="helpModal" onclick="closeHelpGuide(event)">
+  <div class="help-box" onclick="event.stopPropagation()">
+    <div class="help-hd">
+      <div class="help-hd-title">❓ 使い方ガイド</div>
+      <button class="help-close" onclick="closeHelpGuide()">✕</button>
+    </div>
+    <div class="help-body">
+      <div class="help-sec">
+        <div class="help-sec-title">🏠 ハブ画面の6つのカード</div>
+        <div class="help-sec-body">
+          <table class="help-card-tbl">
+            <tr><td>01 受付管理</td><td>タブレットにお客様の入力画面を送信する。ドリンク注文もここから送れる（🍵アイコン）。</td></tr>
+            <tr><td>02 オープンボード</td><td>全顧客の追客状況・商談進捗を管理する中心画面。「熱量」バッジは今すぐ動くべき顧客の目安。</td></tr>
+            <tr><td>03 着工管理</td><td>契約後〜引渡しまでの工程を管理。</td></tr>
+            <tr><td>04 土地DB</td><td>確定土地・見学会案内図・工事案内図の管理。</td></tr>
+            <tr><td>05 LINE問い合わせ状況</td><td>LINE経由の友達追加・資料請求・予約をGmail連携で自動表示。</td></tr>
+            <tr><td>06 メール対応状況</td><td>問い合わせメールで返信していないもの（未対応）を自動検出して一覧表示。</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="help-sec">
+        <div class="help-sec-title">🔥 熱量スコアの見方</div>
+        <div class="help-sec-body">
+          商談ステージの進み具合・直近の接触の新しさ・来場回数・次回アポの有無から自動計算される、営業目線の「今の温度感」です。<br>
+          <ul>
+            <li><b>🔥 熱い</b> — 今すぐフォローすべき顧客</li>
+            <li><b>🌤 中間</b> — 動きはあるが決め手が必要</li>
+            <li><b>❄ 低調</b> — しばらく動きが無い顧客</li>
+            <li><b>❌ 失注 / 🎉 成約済み</b> — 商談ステータスで自動判定</li>
+          </ul>
+          バッジにカーソルを合わせる（スマホでは長押し）と、点数の根拠が表示されます。
+        </div>
+      </div>
+      <div class="help-sec">
+        <div class="help-sec-title">📋 オープンボードの基本操作</div>
+        <div class="help-sec-body">
+          <ul>
+            <li>顧客名をタップすると詳細画面が開き、カルテ・履歴・ドライブ・面談報告を編集できる</li>
+            <li>ステータスや担当者はその場でタップして変更できる（保存は自動）</li>
+            <li>「🔗統合」で同じ人が重複登録された場合に1件へまとめられる</li>
+            <li>カード表示⇔リスト表示は右上のボタンで切り替え可能</li>
+          </ul>
+        </div>
+      </div>
+      <div class="help-sec">
+        <div class="help-sec-title">⚠️ よくあるトラブル</div>
+        <div class="help-sec-body">
+          <ul>
+            <li><b>保存に失敗した通知が出る</b> — 他のスタッフが同時に同じ顧客を編集している可能性があります。画面を更新してもう一度お試しください。</li>
+            <li><b>「オーナーのみアクセスできます」と出る</b> — その項目はオーナーがロックしています。オーナーに解除を依頼してください。</li>
+            <li><b>顧客が重複して表示される</b> — オープンボードの「🔗統合」機能で1件にまとめられます。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- DBロック拒否モーダル -->
 <div class="lock-denied-modal" id="lockDeniedModal" onclick="closeLockDenied()">
