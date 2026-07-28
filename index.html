@@ -4205,7 +4205,7 @@ function lineRender(){
   var fOb=document.getElementById('line-filter-ob').value;
   var rows=lineRows.filter(function(p){
     if(q){
-      var hay=(p.name||'')+(p.tel||'');
+      var hay=(p.name||'')+(p.tel||'')+(p.obName||'')+((p.aliases||[]).join(''));
       if(hay.indexOf(q)<0) return false;
     }
     if(fStatus && p.lastEvent.category!==fStatus) return false;
@@ -4222,7 +4222,8 @@ function lineRender(){
       : '<span class="ob-badge" style="background:#7A5A1E;color:#fff">⚠️ OB未登録</span>';
     var histHtml=p.events.slice(-8).reverse().map(function(ev,i){
       var c=LINE_CATEGORY_LABEL[ev.category]||LINE_CATEGORY_LABEL.Other;
-      var bodyId='line-body-'+p.tel+'-'+p.email+'-'+i;
+      // keyは人ごとに一意（電話/メールが無い友達追加のみの人でも衝突しない）
+      var bodyId='line-body-'+(p.key||p.tel||p.email||'x')+'-'+i;
       var bodyIdSafe=bodyId.replace(/[^a-zA-Z0-9_-]/g,'_');
       return '<div style="padding:3px 0;border-bottom:1px dashed #EEE">'+
         '<div style="display:flex;gap:8px;font-size:.72rem;color:#888;align-items:center">'+
@@ -4243,6 +4244,8 @@ function lineRender(){
         '<div class="ob-card-top">'+
           '<span class="ob-card-name">'+esc(p.name||'（氏名不明）')+'</span>'+
         '</div>'+
+        // 漢字／ローマ字など表記違いで別々に届いていた表示名を統合した場合の別名表示
+        ((p.aliases&&p.aliases.length)?'<div style="font-size:.7rem;color:#9A8C76">別表記: '+esc(p.aliases.join(' / '))+'</div>':'')+
         (p.tel?'<div style="font-size:.8rem;color:#666">📞 '+esc(p.tel)+'</div>':'')+
         '<div><span class="ob-badge '+cat.cls+'">'+cat.label+'</span></div>'+
         '<div style="font-size:.7rem;color:#AAA">初回検知: '+esc(p.firstSeen)+' ／ 最終更新: '+esc(p.lastEvent.date)+'</div>'+
