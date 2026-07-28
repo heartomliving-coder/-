@@ -956,6 +956,12 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .ob-vis-card-date{font-size:.73rem;color:#888;white-space:nowrap;font-family:monospace}
 .ob-vis-card-type{font-size:.71rem;font-weight:700;background:#F0EDE8;color:#6B5E50;padding:2px 8px;border-radius:20px;white-space:nowrap}
 .ob-vis-card-badge{margin-left:auto}
+.ob-heat-badge{font-size:.71rem;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;cursor:default}
+.ob-heat-hot{background:#FDECE7;color:#B5432A}
+.ob-heat-warm{background:#FDF4E3;color:#9A7623}
+.ob-heat-cold{background:#EEF1F4;color:#6B7684}
+.ob-heat-lost{background:#F2F0EE;color:#9A8C76}
+.ob-heat-won{background:#EAF3EC;color:#2F6B45}
 .ob-vis-card-body{padding:9px 12px 6px}
 .ob-vis-card-name{font-size:1.02rem;font-weight:700;color:#1A1A1A;letter-spacing:.02em;line-height:1.3;margin-bottom:1px}
 .ob-vis-card-kana{font-size:.72rem;color:#999;margin-bottom:3px}
@@ -1344,6 +1350,7 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .hub-card.hc-accent-c{background:#7A5A1E}
 .hub-card.hc-accent-d{background:#1F4A32}
 .hub-card.hc-accent-e{background:#265A57}
+.hub-card.hc-accent-f{background:#6B4A3A}
 .hub-card .hc-icon{display:none}
 .hub-card .hc-num{display:block;font-family:"Playfair Display",serif;font-size:1.7rem;font-weight:400;color:rgba(255,255,255,.4);line-height:1;font-style:italic}
 .hub-card .hc-body{width:100%}
@@ -2271,6 +2278,15 @@ body.ws-open #ws-backdrop{display:block}
             <span class="hc-badge" id="hubLineCount">—</span>
             <div class="hc-arrow">→</div>
           </div>
+          <div class="hub-card hc-accent-f" onclick="if(!_hubLayoutEditing)enterMailBoard()">
+            <div class="hc-num">06</div>
+            <div class="hc-body">
+              <div class="hc-title">メール対応状況</div>
+              <div class="hc-desc">問い合わせメールの未対応・対応済みを一覧化（Gmail連携）</div>
+            </div>
+            <span class="hc-badge" id="hubMailCount">—</span>
+            <div class="hc-arrow">→</div>
+          </div>
         </div>
       </div>
 
@@ -2397,6 +2413,12 @@ body.ws-open #ws-backdrop{display:block}
         <option value="desc" selected>新しい順</option>
         <option value="asc">古い順</option>
       </select>
+      <select id="ob-vis-heat" onchange="obRenderVisitors()" style="width:110px" title="熱量で絞り込み">
+        <option value="">熱量：すべて</option>
+        <option value="hot">🔥 熱いのみ</option>
+        <option value="warm">🌤 中間のみ</option>
+        <option value="cold">❄ 低調のみ</option>
+      </select>
       <button class="hbtn ghost" onclick="obJumpToLatestMonth()" title="最新月の先頭にスクロール" style="font-size:.7rem;padding:5px 9px;white-space:nowrap">最新月↓</button>
       <span class="ob-filter-count" id="ob-vis-count" style="font-size:.78rem"></span>
       <!-- 表示切り替え -->
@@ -2483,6 +2505,36 @@ body.ws-open #ws-backdrop{display:block}
     </div>
     <div class="ob-scroll">
       <div id="line-content" style="padding:14px 16px"><div class="skel skel-row w40"></div><div class="skel skel-row w80"></div><div class="skel skel-row"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── メール対応状況（Gmail連携・自動反映） ─── -->
+<div id="mailboard" class="ob">
+  <div class="ob-hd">
+    <div class="ob-brand">
+      <img src="https://www.heartom.co.jp/wp-content/themes/heartom2023/images/loading-logo.svg" alt="HEARTOM" onerror="this.style.display='none'">
+      <div class="ob-hd-ti">メール対応状況<small>MAIL RESPONSE STATUS</small></div>
+    </div>
+    <div class="ob-hd-tools">
+      <span id="mail-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
+      <button class="hbtn ghost" onclick="mailLoad(false,true)" title="Gmailから最新状況を取得">🔄 更新</button>
+      <button class="hbtn" onclick="showHub()">‹ 戻る</button>
+    </div>
+  </div>
+  <div class="ob-pane show">
+    <div class="ob-filter" style="flex-wrap:wrap;gap:6px 10px">
+      <input type="text" id="mail-q" placeholder="🔍 顧客名 / 電話..." style="min-width:180px;flex:1" oninput="mailRender()">
+      <label style="font-size:.7rem;color:#888;font-weight:700;letter-spacing:.06em">状態</label>
+      <select id="mail-filter-status" onchange="mailRender()" style="width:120px">
+        <option value="">すべて</option>
+        <option value="unanswered">未対応のみ</option>
+        <option value="answered">対応済みのみ</option>
+      </select>
+      <span class="ob-filter-count" id="mail-count" style="font-size:.78rem"></span>
+    </div>
+    <div class="ob-scroll">
+      <div id="mail-content" style="padding:14px 16px"><div class="skel skel-row w40"></div><div class="skel skel-row w80"></div><div class="skel skel-row"></div></div>
     </div>
   </div>
 </div>
@@ -2669,6 +2721,7 @@ body.ws-open #ws-backdrop{display:block}
         <div id="ob-det-name" class="ob-det-name" title="クリックして名前を編集" onclick="obEditDetName()" style="cursor:pointer">—</div>
         <div id="ob-det-sub" class="ob-det-sub"></div>
       </div>
+      <span id="ob-det-heat" class="ob-heat-badge" style="font-size:.78rem;padding:5px 14px;margin-right:8px"></span>
       <span id="ob-det-badge" class="ob-badge" style="font-size:.78rem;padding:5px 14px;cursor:default"></span>
     </div>
     <div class="ob-det-tabs">
@@ -4146,7 +4199,7 @@ function enterReception(){
 }
 
 function _hideAllBoards(){
-  ['hub','openboard','kojiboard','tochiboard','mtgboard','custboard','app','lineboard'].forEach(function(id){
+  ['hub','openboard','kojiboard','tochiboard','mtgboard','custboard','app','lineboard','mailboard'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.classList.remove('show');
   });
   var cdb=document.getElementById('customdbboard'); if(cdb) cdb.classList.remove('show');
@@ -4256,6 +4309,75 @@ function lineRender(){
   }).join('')+'</div>';
 }
 
+// ── メール対応状況（Gmail連携） ──────────────────────────
+var mailItems=[];
+function enterMailBoard(){
+  _hideAllBoards();
+  document.getElementById('mailboard').classList.add('show');
+  mailLoad();
+  // GAS側が10分ごとのトリガーでキャッシュを最新化しているので、こちらは1分ごとに
+  // キャッシュを読みに行くだけで十分リアルタイムに近い表示になる（Gmail検索は行わない＝軽量）。
+  if(!window.__mailPollTimer) window.__mailPollTimer=setInterval(function(){ mailLoad(true,false); }, 60*1000);
+  wsSetActiveSection('mail');
+}
+function mailUpdateLastUpdatedLabel(){
+  var el=document.getElementById('mail-last-updated'); if(!el) return;
+  var ts=parseInt(localStorage.getItem('mail_v1_ts')||'0');
+  el.textContent = ts ? '最終更新 '+obFmtDateTime(new Date(ts).toISOString()) : '';
+}
+function mailLoad(silent, force){
+  var cached=null; try{ cached=JSON.parse(localStorage.getItem('mail_v1_cache')||'null'); }catch(e){}
+  if(cached && !force){
+    mailItems=cached; mailRender(); mailUpdateLastUpdatedLabel();
+  } else if(!cached){
+    document.getElementById('mail-content').innerHTML='<div class="skel skel-row w40"></div><div class="skel skel-row w80"></div><div class="skel skel-row"></div>';
+  }
+  gasGet(force?'mailGetStatus':'mailGetStatusCached', function(d){
+    if(!d || d.error){ if(!silent) toast('⚠️ メール対応状況の取得に失敗しました: '+((d&&d.error)||'通信エラー')); return; }
+    mailItems = d.items || [];
+    try{ localStorage.setItem('mail_v1_cache', JSON.stringify(mailItems)); localStorage.setItem('mail_v1_ts', String(Date.now())); }catch(e){}
+    mailRender();
+    mailUpdateLastUpdatedLabel();
+    var hc=document.getElementById('hubMailCount'); if(hc) hc.textContent=(d.unansweredCount||0)+'件未対応';
+  });
+}
+function mailRender(){
+  var q=(document.getElementById('mail-q').value||'').trim();
+  var fStatus=document.getElementById('mail-filter-status').value;
+  var rows=mailItems.filter(function(m){
+    if(q){
+      var hay=(m.name||'')+(m.tel||'')+(m.obName||'');
+      if(hay.indexOf(q)<0) return false;
+    }
+    if(fStatus==='unanswered' && !m.unanswered) return false;
+    if(fStatus==='answered' && m.unanswered) return false;
+    return true;
+  });
+  document.getElementById('mail-count').textContent = rows.length+'件（未対応 '+rows.filter(function(m){return m.unanswered;}).length+'件）';
+  if(!rows.length){ document.getElementById('mail-content').innerHTML='<div class="ob-empty-state">該当する問い合わせメールはありません</div>'; return; }
+  document.getElementById('mail-content').innerHTML='<div class="ob-card-grid">'+rows.map(function(m){
+    var obChip = m.obMatched
+      ? '<span class="ob-badge" style="background:#1F4A32;color:#fff">✅ OB登録済み'+(m.obName?'：'+esc(m.obName):'')+'</span>'
+      : '<span class="ob-badge" style="background:#7A5A1E;color:#fff">⚠️ OB未登録</span>';
+    var statChip = m.unanswered
+      ? '<span class="ob-badge" style="background:#B5432A;color:#fff">📮 未対応（'+m.waitingDays+'日経過）</span>'
+      : '<span class="ob-badge" style="background:#4B7A5A;color:#fff">✅ 対応済み</span>';
+    return '<div class="ob-card" data-sc="'+(m.unanswered?'ob-sF':'ob-s0')+'">'+
+      '<div class="ob-card-body">'+
+        '<div class="ob-card-top">'+
+          '<span class="ob-card-name">'+esc(m.name||'（氏名不明）')+'</span>'+
+        '</div>'+
+        (m.tel?'<div style="font-size:.8rem;color:#666">📞 '+esc(m.tel)+'</div>':'')+
+        (m.email?'<div style="font-size:.75rem;color:#5B7FA6">✉ '+esc(m.email)+'</div>':'')+
+        '<div style="font-size:.75rem;color:#888;margin-top:4px">'+esc(m.subject||'')+'</div>'+
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">'+statChip+obChip+'</div>'+
+        '<div style="font-size:.7rem;color:#AAA;margin-top:4px">最終更新: '+esc(m.lastDate)+'（'+m.msgCount+'件のやり取り）</div>'+
+        '<a href="'+esc(m.threadUrl)+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:.75rem;color:#2F5C56;text-decoration:underline" onclick="event.stopPropagation()">Gmailで開く →</a>'+
+      '</div>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+
 function lineHidePerson(key, name){
   if(!confirm((name||'この項目')+'を非表示にしますか？\n顧客ではない通知（社内共有・キャンペーン応募等）を除外する時に使います。\nOBに実際に登録済みの顧客を非表示にしても、OBのデータ自体は消えません。')) return;
   gasGet('lineExcludePerson&pkey='+encodeURIComponent(key), function(d){
@@ -4313,6 +4435,7 @@ function showHub(){
   // ハブ戻り時：キャッシュが古い場合のみバックグラウンド取得
   obLoad(true);
   kjLoad(true);
+  hubLoadMailCount();
   setTimeout(function(){ hubLoadTodayKpi(); }, 800);
   setTimeout(function(){ hubLoadGcal(); }, 1500);
   hubBuildActivityFeed();
@@ -4671,6 +4794,16 @@ document.addEventListener('mouseout',function(e){
   var block=e.target.closest && e.target.closest('.hub-note-block');
   if(block){ var btn=block.querySelector('.hub-note-del-btn'); if(btn) btn.style.opacity='0'; }
 });
+
+// ハブ画面表示時に、メール未対応件数をキャッシュから軽量取得してバッジに反映する
+// （Gmail検索は行わずDriveキャッシュを読むだけなので、ハブ表示のたびに呼んでも負荷は無視できる）
+function hubLoadMailCount(){
+  gasGet('mailGetStatusCached', function(d){
+    if(!d || d.error) return;
+    var el=document.getElementById('hubMailCount');
+    if(el) el.textContent=(d.unansweredCount||0)+'件未対応';
+  });
+}
 
 function hubUpdateBadges(){
   var obActive=obRows.filter(function(r){var s=r['商談ステータス']||''; return ['失注','引渡済'].indexOf(s)<0;}).length;
@@ -6622,6 +6755,15 @@ function obClsBadge(cls){
   return '<span class="ob-cls-badge '+c+'">'+esc(cls)+'</span>';
 }
 
+// 顧客の熱量バッジ（GAS側 obComputeHeat_ の結果をそのまま表示。追加API課金なしの営業スコア）
+var OB_HEAT_CLASS_ = {hot:'ob-heat-hot', warm:'ob-heat-warm', cold:'ob-heat-cold', lost:'ob-heat-lost', won:'ob-heat-won'};
+function obHeatBadge(heat){
+  if(!heat || !heat.label) return '';
+  var cls=OB_HEAT_CLASS_[heat.level]||'ob-heat-cold';
+  var title=(heat.reasons||[]).join(' / ')+(heat.score!==undefined?'（スコア'+heat.score+'）':'');
+  return '<span class="ob-heat-badge '+cls+'" title="'+esc(title)+'">'+esc(heat.label)+'</span>';
+}
+
 // ステータス表示正規化（初回接触→問い合わせ）
 function obNormStatus(s){
   if(!s) return '問い合わせ';
@@ -7118,6 +7260,7 @@ function obRenderVisitors(){
   var fStaff=((document.getElementById('ob-vis-staff')||{}).value||'');
   var fQ=((document.getElementById('ob-vis-q')||{}).value||'').toLowerCase().trim();
   var sortAsc=((document.getElementById('ob-vis-sort')||{}).value||'desc')==='asc';
+  var fHeat=((document.getElementById('ob-vis-heat')||{}).value||'');
 
   var rows=obRows.filter(function(r){
     var d=obNormDate(r['問い合わせ日']||r['来場日']||'');
@@ -7130,6 +7273,7 @@ function obRenderVisitors(){
       if(hay.indexOf(fQ)<0) return false;
     }
     if(obStatusFilter && (r['商談ステータス']||'問い合わせ')!==obStatusFilter) return false;
+    if(fHeat && (!r._heat || r._heat.level!==fHeat)) return false;
     return true;
   });
   var cntEl=document.getElementById('ob-vis-count'); if(cntEl) cntEl.textContent=rows.length+'件';
@@ -7265,6 +7409,7 @@ function obRenderVisitors(){
             '<div class="ob-vis-card-hd">'+
               '<span class="ob-vis-card-date">'+dateLbl+'</span>'+
               (tipo?'<span class="ob-vis-card-type">'+esc(tipo)+'</span>':'')+
+              obHeatBadge(r._heat)+
               '<span class="ob-vis-card-badge"><span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+');event.stopPropagation()" style="cursor:pointer">'+esc(dispStatus)+'</span></span>'+
             '</div>'+
             '<div class="ob-vis-card-body">'+
@@ -7315,6 +7460,7 @@ function obRenderVisitors(){
     '<th style="min-width:120px">顧客名</th>'+
     '<th style="min-width:140px">フリガナ / 電話 / メール</th>'+
     '<th style="min-width:90px">ステータス</th>'+
+    '<th style="min-width:64px">熱量</th>'+
     '<th style="min-width:64px">担当</th>'+
     '<th style="min-width:64px">サブ担当</th>'+
     '<th style="min-width:62px">エリア</th>'+
@@ -7408,6 +7554,7 @@ function obRenderVisitors(){
         '<td style="white-space:nowrap;cursor:pointer" onclick="obFloatEdit(event,'+r._row+',\'商談ステータス\',\'select\');event.stopPropagation()">'+
           obListCellHtml(r,'商談ステータス')+
         '</td>'+
+        '<td style="white-space:nowrap" onclick="event.stopPropagation()">'+obHeatBadge(r._heat)+'</td>'+
         '<td style="white-space:nowrap;cursor:pointer" onclick="obFloatEdit(event,'+r._row+',\'担当者\',\'staff\');event.stopPropagation()">'+
           obListCellHtml(r,'担当者')+
         '</td>'+
@@ -8690,6 +8837,15 @@ function obOpenDetail(rowIdx){
   var sc=OB_STATUS_CLASS[r['商談ステータス']]||'ob-s0';
   var badge=document.getElementById('ob-det-badge');
   badge.textContent=r['商談ステータス']||'—'; badge.className='ob-badge '+sc;
+  var heatEl=document.getElementById('ob-det-heat');
+  if(heatEl){
+    if(r._heat && r._heat.label){
+      heatEl.style.display='';
+      heatEl.textContent=r._heat.label;
+      heatEl.className='ob-heat-badge '+(OB_HEAT_CLASS_[r._heat.level]||'ob-heat-cold');
+      heatEl.title=(r._heat.reasons||[]).join(' / ')+(r._heat.score!==undefined?'（スコア'+r._heat.score+'）':'');
+    } else { heatEl.style.display='none'; }
+  }
   obDetTab('info');
   obRenderDetInfo();
   obRenderDetHistory();
