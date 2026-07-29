@@ -9069,12 +9069,19 @@ function obMendanSave(){
   obSetCache(obRows);
   obRenderMendanHistory(r);
   obMendanClear();
-  post({action:'obUpdateField',id:r.id,row:obDetailRow,field:'mendan',value:JSON.stringify(r.mendan)},function(res){
-    if(res&&res.v!==undefined){ r['_v']=res.v; obSetCache(obRows); }
-  });
   var msg=document.getElementById('ob-mendan-save-msg');
-  if(msg){ msg.style.color='#22C55E'; msg.textContent='✅ 保存しました'; setTimeout(function(){msg.textContent='';},3000); }
-  toast('面談報告を保存しました');
+  post({action:'obUpdateField',id:r.id,row:obDetailRow,field:'mendan',value:JSON.stringify(r.mendan)},function(res){
+    if(!res||res.error){
+      // 保存に失敗した面談報告を残したままにしない＝追加分を取り消す
+      var idx=r.mendan.indexOf(report); if(idx>=0) r.mendan.splice(idx,1);
+      obSetCache(obRows); obRenderMendanHistory(r);
+      if(msg){ msg.style.color='#DC2626'; msg.textContent='⚠️ 保存に失敗しました。入力し直してください'; setTimeout(function(){msg.textContent='';},4000); }
+      return;
+    }
+    if(res.v!==undefined){ r['_v']=res.v; obSetCache(obRows); }
+    if(msg){ msg.style.color='#22C55E'; msg.textContent='✅ 保存しました'; setTimeout(function(){msg.textContent='';},3000); }
+    toast('面談報告を保存しました');
+  });
 }
 
 function obMendanClear(){
@@ -9196,6 +9203,7 @@ function obSaveDetBirthday(){
   obSetCache(obRows);
   post({action:'obSaveKarte',id:r.id,row:obDetailRow,karte:r.karte,_v:r['_v']||0}, function(d){
     if(d&&d.conflict){ obHandleConflict_(); return; }
+    if(!d||d.error){ return; } // エラーはpost()側の汎用トーストで通知済み。ここでは成功を偽装しない
     toast('誕生日を保存しました');
     obRenderDetBirthday();
   });
@@ -9675,6 +9683,7 @@ function obRenderDetKarte(){
 function obSaveKarteForm(){
   var r=obRows[obDetailRow]; if(!r) return;
   if(!r.karte) r.karte={};
+  var oldKarte=r.karte;
   var karte={};
   OB_KARTE_FIELDS.forEach(function(f){
     var el=document.getElementById('kf-'+f.key);
@@ -9683,6 +9692,11 @@ function obSaveKarteForm(){
   r.karte=karte; obSetCache(obRows);
   post({action:'obSaveKarte',id:r.id,row:obDetailRow,karte:karte,_v:r['_v']||0}, function(d){
     if(d&&d.conflict){ obHandleConflict_(); return; }
+    if(!d||d.error){
+      // 保存できていないのに新しい入力内容が残ったままにしない＝元のカルテへ戻す
+      r.karte=oldKarte; obSetCache(obRows); obRenderDetKarte();
+      return;
+    }
     toast('カルテを保存しました');
   });
 }
@@ -10582,15 +10596,21 @@ function kjStartEdit(el){
   var r=kjRows.find(function(x){return x._id===id;}); if(!r) return;
   var curVal=r[field]!=null?String(r[field]):'';
 
-  function saveVal(v){
-    r[field]=v; kjSetCache(kjRows);
-    var ph=KJ_PHASES.find(function(p){return p.fields.some(function(f){return f.k===field;});});
+  function _kjRerender(ph){
     if(ph) kjRenderDetPane(ph);
     kjRenderList();
-    // update header badge
     var phase=kjPhaseOf(r); var pc=KJ_PHASE_CLASS[phase]||'p0';
     var b=document.getElementById('kj-det-badge'); if(b){b.textContent=phase;b.className='kj-phase-badge '+pc;}
-    post({action:'kjUpdateField',id:id,field:field,value:v});
+  }
+  function saveVal(v){
+    var oldV=r[field];
+    var ph=KJ_PHASES.find(function(p){return p.fields.some(function(f){return f.k===field;});});
+    r[field]=v; kjSetCache(kjRows);
+    _kjRerender(ph);
+    post({action:'kjUpdateField',id:id,field:field,value:v},function(res){
+      // 保存に失敗した項目を古い値のまま見せ続けない＝必ず元に戻す
+      if(!res||res.error){ r[field]=oldV; kjSetCache(kjRows); _kjRerender(ph); }
+    });
   }
 
   if(type==='sel'){
@@ -10751,16 +10771,20 @@ function kjAddProject(){
   var name=prompt('物件名を入力してください（例：田中 一郎様）');
   if(!name||!name.trim()) return;
   toast('追加中…');
-  post({action:'kjSaveProject',record:{'物件名':name.trim(),'ステータス':'契約前'}});
-  setTimeout(function(){ toast('✅ 追加しました'); kjLoad(); },1500);
+  post({action:'kjSaveProject',record:{'物件名':name.trim(),'ステータス':'契約前'}},function(d){
+    if(!d||d.error) return; // エラーはpost()側の汎用トーストで通知済み
+    toast('✅ 追加しました'); kjLoad();
+  });
 }
 
 function kjConfirmDel(id){
   var r=kjRows.find(function(x){return x._id===id;}); if(!r) return;
   if(!confirm('「'+r['物件名']+'」を削除しますか？\nこの操作は元に戻せません。')) return;
   toast('削除中…');
-  post({action:'kjDeleteProject',id:id});
-  setTimeout(function(){ toast('削除しました'); kjLoad(); },1500);
+  post({action:'kjDeleteProject',id:id},function(d){
+    if(!d||d.error){ kjLoad(); return; } // 失敗時も最新状態を再取得して画面とサーバのズレを防ぐ
+    toast('削除しました'); kjLoad();
+  });
 }
 
 function kjImportExcel(){
@@ -10798,8 +10822,10 @@ function kjAutoAddFromOB(obRow){
     'ステータス': '契約前'
   };
   toast('着工管理に「'+rec['物件名']+'」を追加中…');
-  post({action:'kjSaveProject',record:rec});
-  setTimeout(function(){ toast('✅ 着工管理に追加しました: '+rec['物件名']); kjLoad(true); },1500);
+  post({action:'kjSaveProject',record:rec},function(d){
+    if(!d||d.error) return; // エラーはpost()側の汎用トーストで通知済み
+    toast('✅ 着工管理に追加しました: '+rec['物件名']); kjLoad(true);
+  });
 }
 
 // OBステータスがパートナー契約済になったら土地DBにも自動追加
@@ -11139,6 +11165,8 @@ function tochiSaveAddress(rowIdx){
   var zip=zipInp?zipInp.value.trim():'';
   var chiban=chibanInp?chibanInp.value.trim():'';
   var biko=bikoInp?bikoInp.value.trim():'';
+  // ロールバック用に保存前の値を控えておく
+  var oldVals={'所在地':r['所在地'],'郵便番号':r['郵便番号'],'地番':r['地番'],'備考':r['備考']};
   // ローカルキャッシュ更新
   r['所在地']=address;
   if(zip) r['郵便番号']=zip;
@@ -11148,7 +11176,12 @@ function tochiSaveAddress(rowIdx){
   // GASに保存（所在地の設定/変更でGAS側が案内図生成を自動キューする）
   toast('土地情報を保存中…');
   post({action:'tochiSaveField',notionId:notionId,field:'所在地',value:address},function(d){
-    if(d&&d.error){ toast('⚠️ 保存エラー: '+d.error); return; }
+    if(d&&d.error){
+      toast('⚠️ 保存エラー: '+d.error+'（元の内容に戻しました）');
+      // 保存に失敗したのに新しい値が残ったまま「保存できたつもり」になるのを防ぐ
+      r['所在地']=oldVals['所在地']; tochiSetCache(tochiRows); tochiRenderList();
+      return;
+    }
     if(d&&d.mapQueued){
       toast('✅ 保存しました。案内図を自動生成中…（数分かかります）');
       tochiStartMapWatch();
@@ -11157,9 +11190,9 @@ function tochiSaveAddress(rowIdx){
     }
     tochiLoad(true,true);
   });
-  if(zip) post({action:'tochiSaveField',notionId:notionId,field:'郵便番号',value:zip});
-  if(chiban) post({action:'tochiSaveField',notionId:notionId,field:'地番',value:chiban});
-  if(biko!==undefined) post({action:'tochiSaveField',notionId:notionId,field:'備考',value:biko});
+  if(zip) post({action:'tochiSaveField',notionId:notionId,field:'郵便番号',value:zip},function(d){ if(d&&d.error){ r['郵便番号']=oldVals['郵便番号']; tochiSetCache(tochiRows); tochiRenderList(); } });
+  if(chiban) post({action:'tochiSaveField',notionId:notionId,field:'地番',value:chiban},function(d){ if(d&&d.error){ r['地番']=oldVals['地番']; tochiSetCache(tochiRows); tochiRenderList(); } });
+  if(biko!==undefined) post({action:'tochiSaveField',notionId:notionId,field:'備考',value:biko},function(d){ if(d&&d.error){ r['備考']=oldVals['備考']; tochiSetCache(tochiRows); tochiRenderList(); } });
   // UI更新
   var disp=document.getElementById('tochi-loc-disp-'+rowIdx);
   var edit=document.getElementById('tochi-loc-edit-'+rowIdx);
@@ -11860,17 +11893,28 @@ function mtgSaveDetail(){
     var field = el.getAttribute('data-field');
     var value = el.value;
     if(r[field] !== value){
+      updates.push({field:field, value:value, oldValue:r[field]});
       r[field] = value;
-      updates.push({field:field, value:value});
     }
   });
   if(!updates.length){ toast('変更なし'); return; }
   mtgSetCache(mtgRows);
   mtgRenderList();
+  // 全項目の保存が完了してから成否をまとめて表示する（実際には失敗しているのに
+  // 「保存しました」と表示され、あとから消えているように見える事故を防ぐ）
+  var remaining = updates.length; var failed = [];
   updates.forEach(function(u){
-    post({action:'mtgUpdateField', id:__mtgDetailId, field:u.field, value:u.value});
+    post({action:'mtgUpdateField', id:__mtgDetailId, field:u.field, value:u.value},function(res){
+      remaining--;
+      if(!res||res.error){
+        failed.push(u.field);
+        r[u.field]=u.oldValue; mtgSetCache(mtgRows); mtgRenderList();
+      }
+      if(remaining===0){
+        toast(failed.length ? ('⚠️ 一部の項目の保存に失敗しました（元に戻しました）: '+failed.join('、')) : '✅ 保存しました');
+      }
+    });
   });
-  toast('✅ 保存しました');
   // 顧客名変更時はヘッダーも更新
   var nameEl = document.getElementById('mtg-det-name');
   if(nameEl) nameEl.textContent = r['顧客名']||'—';
@@ -11960,8 +12004,17 @@ function mtgAddNew(){
       mtgSetCache(mtgRows);
       mtgRenderList();
       mtgCloseDetail();
-      post({action:'mtgSaveEntry', record:rec});
-      toast('✅ MTGを保存しました');
+      post({action:'mtgSaveEntry', record:rec},function(d){
+        if(!d||d.error){
+          // サーバに保存できていない新規レコードを画面に残さない＝取り消す
+          var ri = mtgRows.findIndex(function(r){ return r._id===rec._id; });
+          if(ri>=0) mtgRows.splice(ri,1);
+          mtgRows.forEach(function(r,i){r._idx=i;});
+          mtgSetCache(mtgRows); mtgRenderList();
+          return;
+        }
+        toast('✅ MTGを保存しました');
+      });
       // 保存ボタンを元に戻す
       if(saveBtn){ saveBtn.textContent='💾 保存'; saveBtn.onclick=mtgSaveDetail; }
     };
