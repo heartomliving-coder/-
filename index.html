@@ -770,6 +770,17 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ob-editable.empty{color:#CCC;font-style:italic}
 .ob-cell-input{border:none;border-bottom:2px solid #5FA98F;background:rgba(234,240,238,.6);font-size:.82rem;font-family:inherit;color:var(--tx);padding:2px 4px;outline:none;min-width:60px;max-width:200px;border-radius:2px}
 .ob-cell-select{border:1px solid #5FA98F;background:#fff;font-size:.82rem;font-family:inherit;color:var(--tx);outline:none;cursor:pointer;padding:2px 4px;border-radius:2px}
+.ob-cell-textarea{border:none;border-bottom:2px solid #5FA98F;background:rgba(234,240,238,.6);font-size:.82rem;font-family:inherit;color:var(--tx);padding:4px;outline:none;width:100%;min-width:120px;min-height:52px;border-radius:2px;resize:vertical;line-height:1.5}
+/* 保存状態フィードバック（Notion風：保存中→OK/エラーを必ず可視化する） */
+.ob-editable{position:relative}
+.ob-save-dot{position:absolute;top:1px;right:1px;width:7px;height:7px;border-radius:50%;pointer-events:none;opacity:0;transition:opacity .15s}
+.ob-save-dot.saving{opacity:1;background:#B8AFA0;animation:obPulse 1s ease-in-out infinite}
+.ob-save-dot.ok{opacity:1;background:#5FA98F;animation:obFadeOut 1.1s ease forwards}
+.ob-save-dot.err{opacity:1;background:#DC2626;animation:none}
+@keyframes obPulse{0%,100%{transform:scale(.85);opacity:.5}50%{transform:scale(1.15);opacity:1}}
+@keyframes obFadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+.ob-editable.ob-save-err-flash{animation:obErrFlash 1.4s ease}
+@keyframes obErrFlash{0%,100%{background:transparent}15%,45%{background:rgba(220,38,38,.16)}}
 /* 新規問い合わせバナー */
 .ob-newinq{display:flex;align-items:center;gap:10px;margin:12px 16px 0;padding:10px 14px;background:#EAF0EE;border:1px solid #BFD6CD;border-radius:8px}
 .ob-newinq-ic{font-size:1.1rem;flex-shrink:0}
@@ -1065,7 +1076,7 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .ob-info-card{background:#fff;border:1px solid #E8E4DE;border-radius:8px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.04);transition:box-shadow .15s}
 .ob-info-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .ob-info-label{font-size:.73rem;font-weight:700;letter-spacing:.1em;color:#7A7166;margin-bottom:6px;text-transform:uppercase}
-.ob-info-val{font-size:.94rem;color:#2B2B2B;font-weight:600;min-height:22px}
+.ob-info-val{font-size:.94rem;color:#2B2B2B;font-weight:600;min-height:22px;white-space:pre-wrap;word-break:break-word}
 .ob-info-val .ob-editable{font-size:.94rem;font-weight:600;min-width:80px;display:block}
 .ob-info-full{grid-column:1/-1}
 .ob-info-actions{display:flex;gap:10px;margin-top:4px}
@@ -7996,7 +8007,7 @@ function obFmtDateTime(s){
 }
 
 function _obMoveToNextCell(currentEl, dir){
-  var cells = Array.from(document.querySelectorAll('#ob-visitors-content .ob-editable, #ob-active-content .ob-editable'));
+  var cells = Array.from(document.querySelectorAll('#ob-visitors-content .ob-editable, #ob-active-content .ob-editable, #ob-detail .ob-editable'));
   var idx = cells.indexOf(currentEl);
   if(idx < 0) return;
   var next = cells[idx + dir];
@@ -8022,7 +8033,10 @@ function obStartEdit(el){
       var colorStyle=(f==='アポ確定日')?'color:#2563EB;font-weight:600':(f==='次回予定'?'color:#166534;font-weight:600':'');
       return colorStyle?'<span style="'+colorStyle+'">'+obFmtDate(v)+'</span>':obFmtDate(v);
     }
-    function saveDate(v){ if(done)return; done=true; el.innerHTML=_obDateDisplay(v,field); obSaveField(row,field,v); }
+    function saveDate(v){
+      if(done)return; done=true; el.innerHTML=_obDateDisplay(v,field);
+      obSaveField(row,field,v,{el:el,oldValue:val,onError:function(oldV){ el.innerHTML=_obDateDisplay(obNormDate(oldV),field); }});
+    }
     inp.addEventListener('change',function(){ saveDate(inp.value); });
     inp.addEventListener('blur',function(){ setTimeout(function(){ if(!done){ done=true; el.innerHTML=_obDateDisplay(obNormDate(val),field); } },300); });
     inp.addEventListener('keydown',function(e){
@@ -8054,8 +8068,16 @@ function obStartEdit(el){
     function saveSel(v){
       if(done2)return; done2=true;
       if(v===undefined){ el.innerHTML=val?esc(val):'<span style="color:#CCC;font-size:.72rem;font-style:italic">—</span>'; return; }
-      el.innerHTML=v?esc(v):'<span style="color:#CCC;font-size:.72rem;font-style:italic">—</span>';
-      obSaveField(row,field,v);
+      var _display=function(vv){ return vv?esc(vv):'<span style="color:#CCC;font-size:.72rem;font-style:italic">—</span>'; };
+      el.innerHTML=_display(v);
+      obSaveField(row,field,v,{el:el,oldValue:val,onError:function(oldV){
+        el.innerHTML=_display(oldV);
+        if(field==='商談ステータス'){
+          var nc0=OB_STATUS_CLASS[oldV]||'ob-s0';
+          var tr0=el.closest('tr'); if(tr0){var b0=tr0.querySelector('.ob-badge'); if(b0){b0.textContent=oldV;b0.className='ob-badge '+nc0;}}
+          if(row===obDetailRow){var db0=document.getElementById('ob-det-badge'); if(db0){db0.textContent=oldV;db0.className='ob-badge '+nc0;}}
+        }
+      }});
       if(field==='商談ステータス'){
         var nc=OB_STATUS_CLASS[v]||'ob-s0';
         var tr=el.closest('tr'); if(tr){var b=tr.querySelector('.ob-badge'); if(b){b.textContent=v;b.className='ob-badge '+nc;}}
@@ -8075,13 +8097,34 @@ function obStartEdit(el){
     return;
   }
   if(type==='area-multi'){
+    var _areaDisplay=function(v){ return v?v.split(',').filter(Boolean).map(function(m){return '<span class="ob-area-tag">'+esc(m.trim())+'</span>';}).join(' '):'<span style="color:#CCC;font-size:.72rem;font-style:italic">—</span>'; };
     obAreaPickerOpen(el,val,function(newVal){
-      var areaHtml=newVal?newVal.split(',').filter(Boolean).map(function(m){return '<span class="ob-area-tag">'+esc(m.trim())+'</span>';}).join(' '):'<span style="color:#CCC;font-size:.72rem;font-style:italic">—</span>';
+      var areaHtml=_areaDisplay(newVal);
       el.innerHTML=areaHtml;
-      obSaveField(row,field,newVal);
+      obSaveField(row,field,newVal,{el:el,oldValue:val,onError:function(oldV){
+        var revertHtml=_areaDisplay(oldV);
+        el.innerHTML=revertHtml;
+        var liveR=document.querySelector('.ob-editable[data-row="'+row+'"][data-field="エリア"]');
+        if(liveR&&liveR!==el) liveR.innerHTML=revertHtml;
+      }});
       // バックグラウンド更新でelが差し替えられた場合もライブセルを更新
       var live=document.querySelector('.ob-editable[data-row="'+row+'"][data-field="エリア"]');
       if(live&&live!==el) live.innerHTML=areaHtml;
+    });
+    return;
+  }
+  if(type==='textarea'){
+    var ta=document.createElement('textarea'); ta.value=val; ta.className='ob-cell-textarea'; ta.rows=3;
+    el.innerHTML=''; el.appendChild(ta); ta.focus();
+    ta.selectionStart=ta.selectionEnd=ta.value.length;
+    var doneTa=false;
+    function saveTa(){ if(doneTa)return; doneTa=true; var v=ta.value; el.textContent=v||''; obSaveField(row,field,v,{el:el,oldValue:val,onError:function(oldV){ el.textContent=oldV||''; }}); }
+    ta.addEventListener('blur',saveTa);
+    ta.addEventListener('keydown',function(e){
+      if(e.key==='Escape'){ doneTa=true; el.textContent=val||''; }
+      else if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){ e.preventDefault(); ta.blur(); }
+      // 通常のEnterは改行として使えるようにし、Tabで次項目へ進めないため
+      // メモ欄内で自由に複数行入力できるようにする（Notionのテキストブロックに寄せる）
     });
     return;
   }
@@ -8089,7 +8132,7 @@ function obStartEdit(el){
   inp2.style.minWidth=Math.max(60,el.offsetWidth)+'px';
   el.innerHTML=''; el.appendChild(inp2); inp2.focus(); inp2.select();
   var done3=false;
-  function saveTxt(){ if(done3)return; done3=true; var v=inp2.value; el.textContent=v||''; obSaveField(row,field,v); }
+  function saveTxt(){ if(done3)return; done3=true; var v=inp2.value; el.textContent=v||''; obSaveField(row,field,v,{el:el,oldValue:val,onError:function(oldV){ el.textContent=oldV||''; }}); }
   inp2.addEventListener('blur',saveTxt);
   inp2.addEventListener('keydown',function(e){
     if(e.key==='Enter'||e.key==='Tab'){
@@ -8131,8 +8174,9 @@ function obFloatEdit(e,rowIdx,field,kind){
   var r=obRows[rowIdx]; if(!r) return;
   var td=(e&&e.currentTarget)?e.currentTarget:null;
   if(kind==='area'){
-    obAreaPickerOpen(td||document.body,obSanitizeVal(r['エリア']||''),function(nv){
-      obSaveField(rowIdx,'エリア',nv);
+    var oldArea=obSanitizeVal(r['エリア']||'');
+    obAreaPickerOpen(td||document.body,oldArea,function(nv){
+      obSaveField(rowIdx,'エリア',nv,{el:td,oldValue:oldArea,onError:function(){ if(td) td.innerHTML=obListCellHtml(obRows[rowIdx],'エリア'); }});
       if(td) td.innerHTML=obListCellHtml(obRows[rowIdx],'エリア');
     });
     return;
@@ -8158,7 +8202,12 @@ function obFloatEdit(e,rowIdx,field,kind){
     function pickVal(val){
       dd.remove();
       document.removeEventListener('mousedown',outsideDd,true);
-      obSaveField(rowIdx,field,val);
+      obSaveField(rowIdx,field,val,{el:td,oldValue:cur,onError:function(){
+        if(td){
+          td.innerHTML=obListCellHtml(obRows[rowIdx],field);
+          if(field==='商談ステータス'){ var trE=td.closest('tr'); if(trE) trE.setAttribute('data-sc',obStatusClassFor(obRows[rowIdx])); }
+        }
+      }});
       if(td) td.innerHTML=obListCellHtml(obRows[rowIdx],field);
       if(field==='商談ステータス'&&td){
         var tr=td.closest('tr'); if(tr) tr.setAttribute('data-sc',obStatusClassFor(obRows[rowIdx]));
@@ -8184,14 +8233,14 @@ function obFloatEdit(e,rowIdx,field,kind){
     box.style.top=top2+'px';
   }
   box.classList.add('show');
-  _obFloatCtx={rowIdx:rowIdx,field:field,td:td,ctrl:ctrl,done:false};
+  _obFloatCtx={rowIdx:rowIdx,field:field,td:td,ctrl:ctrl,done:false,oldVal:cur2};
   ctrl.focus(); if(ctrl.select) ctrl.select();
   function commit(save){
     var ctx=_obFloatCtx; if(!ctx||ctx.done) return; ctx.done=true; _obFloatCtx=null;
     document.removeEventListener('mousedown',outside,true);
     if(save){
       var v=ctx.ctrl.value;
-      obSaveField(ctx.rowIdx,ctx.field,v);
+      obSaveField(ctx.rowIdx,ctx.field,v,{el:ctx.td,oldValue:ctx.oldVal,onError:function(){ if(ctx.td) ctx.td.innerHTML=obListCellHtml(obRows[ctx.rowIdx],ctx.field); }});
       if(ctx.td) ctx.td.innerHTML=obListCellHtml(obRows[ctx.rowIdx],ctx.field);
     }
     box.classList.remove('show'); box.innerHTML='';
@@ -8245,18 +8294,42 @@ function obAreaPickerOpen(anchor, currentVal, onSave){
   renderPicker();
 }
 
-function obSaveField(row,field,value){
+// 保存中/保存済/失敗を可視化する小さなインジケーター（Notion風：エラーが起きても絶対に気づける）
+function obFieldDot(el,state){
+  if(!el) return;
+  var dot=el.querySelector(':scope > .ob-save-dot');
+  if(!dot){ dot=document.createElement('span'); dot.className='ob-save-dot'; el.appendChild(dot); }
+  dot.className='ob-save-dot '+state;
+}
+// row/field単位の保存を行う。opts={el, oldValue, onError} を渡すと、
+// 失敗時に自動でoldValueへロールバックし、視覚的にも保存失敗を明示する。
+function obSaveField(row,field,value,opts){
+  opts=opts||{};
+  var el=opts.el; var hadOld=('oldValue' in opts);
   _obLastSaveTs = Date.now(); // フェッチ中の上書き防止用タイムスタンプ
   if(obRows[row]){
     if(field.indexOf('karte.')===0){ if(!obRows[row].karte) obRows[row].karte={}; obRows[row].karte[field.slice(6)]=value; }
     else obRows[row][field]=value;
   }
   obSetCache(obRows);
+  if(el) obFieldDot(el,'saving');
   post({action:'obUpdateField',id:(obRows[row]?obRows[row].id:''),row:row,field:field,value:value},function(res){
-    if(!res||res.error){ toast('⚠️ 保存エラー: '+(res&&res.error||'通信失敗')+'（再入力してください）'); }
-    // サーバ側の_vを同期しておかないと、カルテ全体保存フォーム等の競合検知が
-    // この1項目更新を見逃し、後から古いフォームで上書き消失させてしまう。
-    else if(res.v!==undefined && obRows[row]){ obRows[row]['_v']=res.v; obSetCache(obRows); }
+    if(!res||res.error){
+      toast('⚠️ 保存に失敗しました。この項目は元の値に戻しました: '+(res&&res.error||'通信失敗'));
+      // 失敗時はサーバに反映されていない値を画面に残さない＝必ずロールバックする
+      if(obRows[row] && hadOld){
+        if(field.indexOf('karte.')===0){ if(obRows[row].karte) obRows[row].karte[field.slice(6)]=opts.oldValue; }
+        else obRows[row][field]=opts.oldValue;
+        obSetCache(obRows);
+      }
+      if(el){ obFieldDot(el,'err'); el.classList.remove('ob-save-err-flash'); void el.offsetWidth; el.classList.add('ob-save-err-flash'); }
+      if(typeof opts.onError==='function') opts.onError(opts.oldValue);
+    } else {
+      if(el) obFieldDot(el,'ok');
+      // サーバ側の_vを同期しておかないと、カルテ全体保存フォーム等の競合検知が
+      // この1項目更新を見逃し、後から古いフォームで上書き消失させてしまう。
+      if(res.v!==undefined && obRows[row]){ obRows[row]['_v']=res.v; obSetCache(obRows); }
+    }
   });
   if(field==='商談ステータス' && value==='パートナー契約済'){
     kjAutoAddFromOB(obRows[row]);
@@ -9154,10 +9227,10 @@ function obRenderDetInfo(){
     {key:'商談ステータス',label:'商談ステータス',type:'sel',opts:OB_STATUS_LIST},
     {key:'顧客分類',label:'顧客分類',type:'sel',opts:['見込み','商談中','契約済','パートナー','着工中','引渡し済']},
     {key:'次回予定',label:'次回予定日',type:'date'},
-    {key:'次回内容',label:'次回内容',type:'text',full:true},
+    {key:'次回内容',label:'次回内容',type:'textarea',full:true},
     {key:'アポ確定日',label:'アポ確定日',type:'date'},
     {key:'P申込目標日',label:'P申込目標日',type:'date'},
-    {key:'メモ',label:'メモ',type:'text',full:true}
+    {key:'メモ',label:'メモ',type:'textarea',full:true}
   ];
   g.innerHTML=fields.map(function(f){
     if(f.sec){ return '<div class="ob-info-full" style="margin:6px 0 -4px;font-size:.7rem;font-weight:700;letter-spacing:.12em;color:#9A8C76;border-bottom:1px solid #EEE;padding-bottom:4px">'+esc(f.sec)+'</div>'; }
