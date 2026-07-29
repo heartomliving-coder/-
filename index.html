@@ -4151,6 +4151,11 @@ function onAuthFail(){
 }
 
 function showApp(){
+  // ボードのアクセス制限判定より前にDBロック設定を取得しておく
+  // （空のキャッシュのまま判定するとロック中でも一瞬アクセスできてしまうため）
+  loadDbLocks(function(){ showAppAfterLocks_(); });
+}
+function showAppAfterLocks_(){
   document.getElementById('login').classList.add('hide');
   // ログインユーザー名・メール表示
   var nameEl = document.getElementById('hubUserName');
@@ -13778,7 +13783,10 @@ function isOwnerRole(){
 // ════════════════════════════════════════════════════════
 
 /* ── DBアクセスロック ─────────────────────────────── */
-var DB_LOCK_KEY = 'db_lock_settings';
+// 以前はlocalStorageのみで保存しており、ロックしても他のスタッフの端末や
+// 別ブラウザには一切反映されなかった。GAS(Script Properties)に保存し、
+// 全端末で共有されるようにした。ページロード時にloadDbLocks()でキャッシュし、
+// checkBoardAccess()は同期チェックのままそのキャッシュを参照する。
 var DB_LOCK_BOARDS = [
   {id:'ob',   label:'OBボード',   sub:'来場履歴・顧客管理・オープンボード'},
   {id:'kj',   label:'着工管理',   sub:'着工スケジュール・工程管理'},
@@ -13786,9 +13794,13 @@ var DB_LOCK_BOARDS = [
   {id:'tochi',label:'土地DB',     sub:'土地情報・不動産台帳'},
   {id:'mtg',  label:'営業MTG',    sub:'面談記録・商談管理'}
 ];
-
-function getDbLocks(){
-  try{ return JSON.parse(localStorage.getItem(DB_LOCK_KEY)||'{}'); }catch(e){ return {}; }
+var __dbLocksCache = {};
+function getDbLocks(){ return __dbLocksCache; }
+function loadDbLocks(cb){
+  gasGet('getDbLockSettings', function(d){
+    if(d && d.ok) __dbLocksCache = d.locks || {};
+    if(typeof cb === 'function') cb();
+  });
 }
 
 function checkBoardAccess(boardId){
@@ -13826,20 +13838,27 @@ function renderDbLockSettings(){
   var el = document.getElementById('dbLockBody');
   if(!el) return;
   if(!isOwner()){ el.innerHTML='<div style="font-size:.82rem;color:#999;padding:12px 0">オーナーのみ設定できます</div>'; return; }
-  var locks = getDbLocks();
-  el.innerHTML = DB_LOCK_BOARDS.map(function(b){
-    var checked = locks[b.id] ? 'checked' : '';
-    return '<div class="dbl-item">'+
-      '<div><div class="dbl-label">'+b.label+'</div><div class="dbl-sub">'+b.sub+'</div></div>'+
-      '<label class="dbl-toggle"><input type="checkbox" '+checked+' onchange="toggleDbLock(\''+b.id+'\',this.checked)"><span class="dbl-slider"></span></label>'+
-      '</div>';
-  }).join('');
+  function draw(){
+    var locks = getDbLocks();
+    el.innerHTML = DB_LOCK_BOARDS.map(function(b){
+      var checked = locks[b.id] ? 'checked' : '';
+      return '<div class="dbl-item">'+
+        '<div><div class="dbl-label">'+b.label+'</div><div class="dbl-sub">'+b.sub+'</div></div>'+
+        '<label class="dbl-toggle"><input type="checkbox" '+checked+' onchange="toggleDbLock(\''+b.id+'\',this.checked)"><span class="dbl-slider"></span></label>'+
+        '</div>';
+    }).join('');
+  }
+  draw();
+  // 設定画面を開くたびに他端末での変更を反映する
+  loadDbLocks(draw);
 }
 
 function toggleDbLock(boardId, locked){
   var locks = getDbLocks();
   if(locked) locks[boardId]=true; else delete locks[boardId];
-  localStorage.setItem(DB_LOCK_KEY, JSON.stringify(locks));
+  post({action:'saveDbLockSettings', locks:locks}, function(d){
+    if(!d||d.error){ toast('⚠️ ロック設定の保存に失敗しました: '+((d&&d.error)||'通信エラー')); loadDbLocks(renderDbLockSettings); return; }
+  });
   var msg = (locked?'🔒 ':'🔓 ') + ({ob:'OBボード',kj:'着工管理',cust:'顧客DB',tochi:'土地DB',mtg:'営業MTG'}[boardId]||boardId) + (locked?' をオーナー限定にしました':' のロックを解除しました');
   toast(msg);
 }
