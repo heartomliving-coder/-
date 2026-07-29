@@ -3337,7 +3337,7 @@ body.ws-open #ws-backdrop{display:block}
   <div class="mtg-det-body" id="mtg-det-body"></div>
   <div class="mtg-det-actions">
     <button class="hbtn primary" onclick="mtgSaveDetail()">💾 保存</button>
-    <button class="hbtn ghost" style="color:#DC2626;border-color:#DC2626" onclick="mtgDeleteEntry()">🗑 削除</button>
+    <button class="hbtn ghost mtg-del-btn" style="color:#DC2626;border-color:#DC2626" onclick="mtgDeleteEntry()">🗑 削除</button>
   </div>
 </div>
 <div id="mtg-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2999" onclick="mtgCloseDetail()"></div>
@@ -3848,7 +3848,7 @@ function applyRoleUI(){
   var connectionTab = document.getElementById('stab-connection');
   if(connectionTab) connectionTab.style.display = isFullAccess() ? '' : 'none';
   // 削除ボタン（フルアクセス以上のみ）
-  document.querySelectorAll('.ob-del,.ob-vis-card-act.del,.kj-del-btn').forEach(function(el){
+  document.querySelectorAll('.ob-del,.ob-vis-card-act.del,.kj-del-btn,.mtg-del-btn').forEach(function(el){
     el.style.display = isFullAccess() ? '' : 'none';
   });
 }
