@@ -2631,7 +2631,7 @@ body.ws-open #ws-backdrop{display:block}
       <span id="tc-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
       <button class="hbtn primary" onclick="tochiOpenAddModal()">＋ 新規追加</button>
       <button class="hbtn ghost" onclick="tochiGenerateAll()">🗺 地図PDF生成（未処理）</button>
-      <button class="hbtn ghost" onclick="tochiLoad(false,true)">🔄 Notion同期</button>
+      <button class="hbtn ghost" onclick="tochiLoad(false,true)">🔄 再読み込み</button>
       <button class="hbtn ghost" onclick="showHub()">‹ 戻る</button>
     </div>
   </div>
@@ -3180,7 +3180,7 @@ body.ws-open #ws-backdrop{display:block}
     </div>
     <div class="kj-actions">
       <span id="cust-last-updated" style="font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;margin-right:4px"></span>
-      <button class="hbtn ghost" onclick="custLoad()">🔄 Notion同期</button>
+      <button class="hbtn ghost" onclick="custLoad()">🔄 再読み込み</button>
       <button class="hbtn ghost" onclick="enterOpenBoard()">‹ OBへ戻る</button>
     </div>
   </div>
@@ -3523,7 +3523,7 @@ body.ws-open #ws-backdrop{display:block}
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
             <button class="hbtn" onclick="dtSyncOB()" style="padding:10px;text-align:left">
               <div style="font-size:.88rem;font-weight:700">📊 OB同期</div>
-              <div style="font-size:.72rem;color:#888;margin-top:2px">Notionから最新データを取込</div>
+              <div style="font-size:.72rem;color:#888;margin-top:2px">Driveから最新データを取込</div>
             </button>
             <button class="hbtn" onclick="dtSyncKJ()" style="padding:10px;text-align:left">
               <div style="font-size:.88rem;font-weight:700">🏗 着工管理同期</div>
@@ -3531,15 +3531,11 @@ body.ws-open #ws-backdrop{display:block}
             </button>
             <button class="hbtn" onclick="dtSyncTochi()" style="padding:10px;text-align:left">
               <div style="font-size:.88rem;font-weight:700">🏠 土地DB同期</div>
-              <div style="font-size:.72rem;color:#888;margin-top:2px">Notionから再取得</div>
+              <div style="font-size:.72rem;color:#888;margin-top:2px">Driveから最新データを再取得</div>
             </button>
             <button class="hbtn" onclick="dtSyncBdays()" style="padding:10px;text-align:left">
               <div style="font-size:.88rem;font-weight:700">🎂 誕生日同期</div>
-              <div style="font-size:.72rem;color:#888;margin-top:2px">Notionから誕生日を再取込</div>
-            </button>
-            <button class="hbtn" onclick="obImportFromNotion()" style="padding:10px;text-align:left">
-              <div style="font-size:.88rem;font-weight:700">📥 Notion完全同期</div>
-              <div style="font-size:.72rem;color:#888;margin-top:2px">OBデータをNotionから一括更新</div>
+              <div style="font-size:.72rem;color:#888;margin-top:2px">OBカルテから誕生日を再集計</div>
             </button>
             <button class="hbtn" onclick="obCleanData()" style="padding:10px;text-align:left">
               <div style="font-size:.88rem;font-weight:700">🧹 データ修正</div>
@@ -5984,7 +5980,7 @@ function openBoard(){
 function gasGet(action,cb,timeout){
   var url=sendUrl()+'?action='+action+'&key='+encodeURIComponent(adminKey())+'&_='+Date.now();
   var ms = timeout ||
-    (/^(obGetData|obImportFromNotion|obSyncBirthdays|kjImportFromExcel|tochiGetData|mtgGetData|mtgSyncChatwork|kjGetCwMessages|mtgListCwRooms|listInfoCustomers)/.test(action) ? 90000 :
+    (/^(obGetData|obSyncBirthdays|kjImportFromExcel|tochiGetData|mtgGetData|mtgSyncChatwork|kjGetCwMessages|mtgListCwRooms|listInfoCustomers)/.test(action) ? 90000 :
      /^(listSessions|listMonitors|listActivityLog)/.test(action) ? 8000 : 45000);
   var controller = window.AbortController ? new AbortController() : null;
   var tid = setTimeout(function(){ if(controller) controller.abort(); }, ms);
@@ -10018,7 +10014,7 @@ function obOpenDriveInNewTab(){
   window.open(r['driveUrl'],'_blank');
 }
 
-// 誕生日同期（NotionバースデーDB → OBドライブJSON）
+// 誕生日同期（OBカルテのBD_フィールド → 誕生日一覧を再集計）
 function obSyncBirthdaysBtn(){
   toast('誕生日同期中…');
   gasGet('obSyncBirthdays',function(d){
@@ -10029,27 +10025,15 @@ function obSyncBirthdaysBtn(){
   });
 }
 
-// Notion同期（手動）
-function obImportFromNotion(){
-  if(!confirm('Notionの顧客マスタDB・見学会カルテDB・MTG DBから完全同期します。\n新規追加＋既存ステータス更新＋来場履歴を取得します。\n30〜60秒かかります。続けますか？')) return;
-  toast('Notion同期中… しばらくお待ちください');
-  gasGet('obImportFromNotion',function(d){
-    if(!d||d.error){ toast('⚠️ 同期エラー: '+(d?d.error:'不明')); return; }
-    var bdMsg=(d.birthdays&&d.birthdays.ok)?(' / 誕生日'+d.birthdays.synced+'件'):''
-    toast('✅ 同期完了：新規'+d.imported+'件追加、既存'+d.updated+'件更新（計'+d.total+'件）'+bdMsg);
-    obLoad();
-  });
-}
-
-// Notion自動サイレント同期（5分ごと）新規問い合わせを自動反映
+// Gmail自動サイレント同期（5分ごと）新規問い合わせを自動反映
 var __obAutoSyncTimer = null;
 function obStartAutoSync(){
   if(__obAutoSyncTimer) return;
   // 初回は30秒後に実行（画面ロード直後の負荷を避ける）
-  setTimeout(function(){ obSilentNotionSync(); }, 30000);
-  __obAutoSyncTimer = setInterval(function(){ obSilentNotionSync(); }, 5 * 60 * 1000);
+  setTimeout(function(){ obSilentInquirySync(); }, 30000);
+  __obAutoSyncTimer = setInterval(function(){ obSilentInquirySync(); }, 5 * 60 * 1000);
 }
-function obSilentNotionSync(){
+function obSilentInquirySync(){
   gasGet('processNewInquiries',function(d){
     if(!d||!d.ok) return;
     if(d.imported > 0){
@@ -10903,7 +10887,7 @@ function enterTochiBoard(){
   var cached=tochiGetCache();
   if(cached.length){ tochiRows=cached; tochiRenderList(); }
   tochiLoad(false); // キャッシュ新鮮なら即返る、古ければ取得
-  // 5分ごとに自動更新（Notion APIはレート制限があるため長め）
+  // 5分ごとに自動更新
   if(!window.__tcPollTimer) window.__tcPollTimer = setInterval(function(){ tochiLoad(true,true); }, CACHE_TTL_MS);
 }
 
@@ -10920,9 +10904,9 @@ function tochiLoad(silent, force){
     tochiRows=cached; tochiRenderList(); tcUpdateLastUpdatedLabel();
     return;
   }
-  if(!silent){ toast('Notionから読み込み中…'); }
+  if(!silent){ toast('読み込み中…'); }
   var el=document.getElementById('tochi-list-content');
-  if(!tochiRows.length && el){ el.innerHTML='<div class="kj-empty">⏳ Notionから読み込み中...</div>'; }
+  if(!tochiRows.length && el){ el.innerHTML='<div class="kj-empty">⏳ 読み込み中...</div>'; }
   gasGet('tochiGetData',function(d){
     if(!d||d.error){
       var errMsg=(d&&d.error)?d.error:'通信エラー';
@@ -11496,13 +11480,11 @@ function custRenderInfo(){
   var pane=document.getElementById('cust-pane-info'); if(!pane) return;
   function row(lbl,val){ return val?'<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #F0EDE8"><span style="min-width:100px;color:#888;font-size:.78rem">'+esc(lbl)+'</span><span style="flex:1;font-size:.84rem">'+esc(val)+'</span></div>':''; }
   var statusColor={'パートナー契約済':'#22C55E','商談中':'#3B82F6','見込み':'#F59E0B'}[r.status]||'#9CA3AF';
-  var notionUrl='https://notion.so/'+r.id.replace(/-/g,'');
   pane.innerHTML='<div style="display:flex;flex-direction:column;gap:0">'+
     row('氏名',r.name)+ row('フリガナ',r.furigana)+ row('電話番号',r.tel)+
     row('メール',r.email)+ row('住所',r.address)+ row('登録日',r.registeredAt?r.registeredAt.substring(0,10):'')+
     (r.status?'<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #F0EDE8"><span style="min-width:100px;color:#888;font-size:.78rem">ステータス</span><span style="color:'+statusColor+';font-weight:700;font-size:.84rem">'+esc(r.status)+'</span></div>':'')+
-    '</div>'+
-    '<a href="'+esc(notionUrl)+'" target="_blank" style="display:inline-block;margin-top:16px;padding:8px 16px;background:#1A1A1A;color:#fff;text-decoration:none;border-radius:5px;font-size:.78rem">🔗 Notionで開く</a>';
+    '</div>';
 }
 
 function custRenderOb(){
