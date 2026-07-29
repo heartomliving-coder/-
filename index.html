@@ -9393,7 +9393,8 @@ function obAddHistoryItem(){
   // 内容が空でも種別があれば登録可（手動入力を簡単に）
   if(!content && !type){ toast('種別または内容を入力してください'); return; }
   if(!r.history) r.history=[];
-  r.history.push({date:date,type:type,content:content,staff:staff});
+  var newItem={date:date,type:type,content:content,staff:staff};
+  r.history.push(newItem);
   r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
   _obLastSaveTs=Date.now();
   obSetCache(obRows);
@@ -9401,8 +9402,15 @@ function obAddHistoryItem(){
   obRenderVisitors();
   document.getElementById('tl-content').value='';
   var _drid=obRows[obDetailRow]?obRows[obDetailRow].id:'';
-  post({action:'obAddHistory',id:_drid,row:obDetailRow,date:date,type:type,content:content,staff:staff});
-  toast('履歴を追加しました');
+  post({action:'obAddHistory',id:_drid,row:obDetailRow,date:date,type:type,content:content,staff:staff},function(res){
+    if(!res||res.error){
+      // 保存できていない履歴を残さない＝追加分を取り消す
+      var idx=r.history.indexOf(newItem); if(idx>=0) r.history.splice(idx,1);
+      obSetCache(obRows); obRenderDetHistory(); obRenderVisitors();
+      return;
+    }
+    toast('履歴を追加しました');
+  });
 }
 
 // ── 来場履歴インラインポップオーバー ──────────────────────────
@@ -9479,6 +9487,17 @@ function obHistPopSave(){
   var staff = (document.getElementById('ob-hist-pop-staff')||{}).value || '';
   if(!date){ var t=new Date(); date=t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2); }
   if(!r.history) r.history = [];
+  var _oldHistory = r.history.slice();
+  function _obHistPopRerenderCells(){
+    obHistPopRenderList(r);
+    var tds = document.querySelectorAll('tr[data-row="'+rowIdx+'"] td');
+    tds.forEach(function(td){ if(td.querySelector('.ob-hist-chips')){
+      td.innerHTML='<div class="ob-hist-chips">'+obMiniTl(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+rowIdx+');event.stopPropagation()">＋</button></div>';
+    }});
+  }
+  function _obHistPopRollback(){
+    r.history=_oldHistory; obSetCache(obRows); _obHistPopRerenderCells();
+  }
   if(_obHistPopEditKey){
     // 編集モード：古いアイテムを削除して新しいアイテムで置換
     var kparts=_obHistPopEditKey.split('|'); var kdate=kparts[0]; var ktype=kparts.slice(1).join('|');
@@ -9500,24 +9519,24 @@ function obHistPopSave(){
     _obHistPopEditKey=null;
     var st=document.getElementById('ob-hist-pop-section-title'); if(st) st.textContent='＋ 履歴を追加';
     var sb=document.getElementById('ob-hist-pop-save'); if(sb) sb.textContent='追加';
-    toast('履歴を更新しました');
     r.history.push({date:date,type:type,content:content,staff:staff});
     r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
     // 編集＝削除+追加を一括置換1回で送信（並列送信による誤削除・重複を防止）
-    post({action:'obSetHistory',id:r.id,row:rowIdx,history:JSON.stringify(r.history)});
+    post({action:'obSetHistory',id:r.id,row:rowIdx,history:JSON.stringify(r.history)},function(res){
+      if(!res||res.error){ _obHistPopRollback(); return; }
+      toast('履歴を更新しました');
+    });
   } else {
-    toast('履歴を追加しました');
     r.history.push({date:date,type:type,content:content,staff:staff});
     r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
-    post({action:'obAddHistory',id:r.id,row:rowIdx,date:date,type:type,content:content,staff:staff});
+    post({action:'obAddHistory',id:r.id,row:rowIdx,date:date,type:type,content:content,staff:staff},function(res){
+      if(!res||res.error){ _obHistPopRollback(); return; }
+      toast('履歴を追加しました');
+    });
   }
   _obLastSaveTs=Date.now();
   obSetCache(obRows);
-  obHistPopRenderList(r);
-  var tds = document.querySelectorAll('tr[data-row="'+rowIdx+'"] td');
-  tds.forEach(function(td){ if(td.querySelector('.ob-hist-chips')){
-    td.innerHTML='<div class="ob-hist-chips">'+obMiniTl(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+rowIdx+');event.stopPropagation()">＋</button></div>';
-  }});
+  _obHistPopRerenderCells();
   document.getElementById('ob-hist-pop-content').value='';
 }
 
@@ -9619,45 +9638,67 @@ function obHistPopDel(key){
   var rowIdx = _obHistPopRow; if(rowIdx < 0) return;
   var r = obRows[rowIdx]; if(!r||!r.history) return;
   if(!confirm('この履歴を削除しますか？')) return;
+  var _oldHistory=r.history.slice();
   r.history=r.history.filter(function(h){
     return (obNormDate(h.date||'')+'|'+(h.type||''))!==key;
   });
-  // 一括置換で送信（並列削除によるインデックス競合＝誤削除を防止）
-  post({action:'obSetHistory',id:(r?r.id:''),row:rowIdx,history:JSON.stringify(r.history)});
   obSetCache(obRows);
   obHistPopRenderList(r);
   var tds2 = document.querySelectorAll('tr[data-row="'+rowIdx+'"] td');
-  tds2.forEach(function(td){ if(td.querySelector('.ob-hist-chips')){
-    td.innerHTML='<div class="ob-hist-chips">'+obMiniTl(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+rowIdx+');event.stopPropagation()">＋</button></div>';
-  }});
-  toast('削除しました');
+  function _rerenderChips(){
+    tds2.forEach(function(td){ if(td.querySelector('.ob-hist-chips')){
+      td.innerHTML='<div class="ob-hist-chips">'+obMiniTl(r)+'<button class="ob-hist-add-btn" onclick="obHistPopOpen(event,'+rowIdx+');event.stopPropagation()">＋</button></div>';
+    }});
+  }
+  _rerenderChips();
+  // 一括置換で送信（並列削除によるインデックス競合＝誤削除を防止）
+  post({action:'obSetHistory',id:(r?r.id:''),row:rowIdx,history:JSON.stringify(r.history)},function(res){
+    if(!res||res.error){
+      // 削除できていないのに消えたままにしない＝元に戻す
+      r.history=_oldHistory; obSetCache(obRows); obHistPopRenderList(r); _rerenderChips();
+      return;
+    }
+    toast('削除しました');
+  });
 }
 
 function obDelHistory(histIdx){
   var r=obRows[obDetailRow]; if(!r||!r.history) return;
   if(!confirm('この履歴を削除しますか？')) return;
+  var _oldHistory=r.history.slice();
   r.history.splice(histIdx,1);
   obSetCache(obRows);
   obRenderDetHistory();
   obRenderVisitors();
   // 一括置換で送信（サーバー側と並び順がズレていても誤削除しない）
-  post({action:'obSetHistory',id:(r.id||''),row:obDetailRow,history:JSON.stringify(r.history)});
-  toast('削除しました');
+  post({action:'obSetHistory',id:(r.id||''),row:obDetailRow,history:JSON.stringify(r.history)},function(res){
+    if(!res||res.error){
+      r.history=_oldHistory; obSetCache(obRows); obRenderDetHistory(); obRenderVisitors();
+      return;
+    }
+    toast('削除しました');
+  });
 }
 
 // 重複除去後のタイムラインから削除：同一キー（正規化日付＋種別）の元エントリを全て削除
 function obDelHistoryByKey(key){
   var r=obRows[obDetailRow]; if(!r||!r.history) return;
   if(!confirm('この履歴を削除しますか？')) return;
+  var _oldHistory=r.history.slice();
   r.history=r.history.filter(function(h){
     return (obNormDate(h.date||'')+'|'+(h.type||''))!==key;
   });
-  // 一括置換で送信（並列削除によるインデックス競合＝誤削除を防止）
-  post({action:'obSetHistory',id:(r.id||''),row:obDetailRow,history:JSON.stringify(r.history)});
   obSetCache(obRows);
   obRenderDetHistory();
   obRenderVisitors();
-  toast('削除しました');
+  // 一括置換で送信（並列削除によるインデックス競合＝誤削除を防止）
+  post({action:'obSetHistory',id:(r.id||''),row:obDetailRow,history:JSON.stringify(r.history)},function(res){
+    if(!res||res.error){
+      r.history=_oldHistory; obSetCache(obRows); obRenderDetHistory(); obRenderVisitors();
+      return;
+    }
+    toast('削除しました');
+  });
 }
 
 // カルテ
