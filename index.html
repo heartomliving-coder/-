@@ -976,12 +976,6 @@ tr:hover .ob-hist-add-btn{opacity:1}
 .ob-vis-card-date{font-size:.73rem;color:#888;white-space:nowrap;font-family:monospace}
 .ob-vis-card-type{font-size:.71rem;font-weight:700;background:#F0EDE8;color:#6B5E50;padding:2px 8px;border-radius:20px;white-space:nowrap}
 .ob-vis-card-badge{margin-left:auto}
-.ob-heat-badge{font-size:.71rem;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;cursor:default}
-.ob-heat-hot{background:#FDECE7;color:#B5432A}
-.ob-heat-warm{background:#FDF4E3;color:#9A7623}
-.ob-heat-cold{background:#EEF1F4;color:#6B7684}
-.ob-heat-lost{background:#F2F0EE;color:#9A8C76}
-.ob-heat-won{background:#EAF3EC;color:#2F6B45}
 .ob-vis-card-body{padding:9px 12px 6px}
 .ob-vis-card-name{font-size:1.02rem;font-weight:700;color:#1A1A1A;letter-spacing:.02em;line-height:1.3;margin-bottom:1px}
 .ob-vis-card-kana{font-size:.72rem;color:#999;margin-bottom:3px}
@@ -2436,12 +2430,6 @@ body.ws-open #ws-backdrop{display:block}
         <option value="desc" selected>新しい順</option>
         <option value="asc">古い順</option>
       </select>
-      <select id="ob-vis-heat" onchange="obRenderVisitors()" style="width:110px" title="熱量で絞り込み">
-        <option value="">熱量：すべて</option>
-        <option value="hot">🔥 熱いのみ</option>
-        <option value="warm">🌤 中間のみ</option>
-        <option value="cold">❄ 低調のみ</option>
-      </select>
       <button class="hbtn ghost" onclick="obJumpToLatestMonth()" title="最新月の先頭にスクロール" style="font-size:.7rem;padding:5px 9px;white-space:nowrap">最新月↓</button>
       <span class="ob-filter-count" id="ob-vis-count" style="font-size:.78rem"></span>
       <!-- 表示切り替え -->
@@ -2744,7 +2732,6 @@ body.ws-open #ws-backdrop{display:block}
         <div id="ob-det-name" class="ob-det-name" title="クリックして名前を編集" onclick="obEditDetName()" style="cursor:pointer">—</div>
         <div id="ob-det-sub" class="ob-det-sub"></div>
       </div>
-      <span id="ob-det-heat" class="ob-heat-badge" style="font-size:.78rem;padding:5px 14px;margin-right:8px"></span>
       <span id="ob-det-badge" class="ob-badge" style="font-size:.78rem;padding:5px 14px;cursor:default"></span>
     </div>
     <div class="ob-det-tabs">
@@ -4314,7 +4301,7 @@ function lineRender(){
     return '<div class="ob-card" data-sc="'+cat.cls+'" style="position:relative">'+
       '<div class="ob-vis-card-acts">'+
         '<button class="ob-vis-card-act" onclick="lineMergeStart(\''+keyAttr+'\');event.stopPropagation()" title="別の人と統合（同一人物の重複をまとめる）">🔗 統合</button>'+
-        '<button class="ob-vis-card-act del" onclick="lineHidePerson(\''+keyAttr+'\',\''+esc(p.name||'')+'\');event.stopPropagation()" title="顧客ではない・不要な項目を非表示にする">✕ 非表示</button>'+
+        '<button class="ob-vis-card-act del" onclick="lineHidePerson(\''+keyAttr+'\',\''+esc(p.name||'')+'\');event.stopPropagation()" title="顧客ではない・不要な項目を一覧から削除する">🗑 削除</button>'+
       '</div>'+
       '<div class="ob-card-body">'+
         '<div class="ob-card-top">'+
@@ -4411,13 +4398,13 @@ function mailRender(){
 }
 
 function lineHidePerson(key, name){
-  if(!confirm((name||'この項目')+'を非表示にしますか？\n顧客ではない通知（社内共有・キャンペーン応募等）を除外する時に使います。\nOBに実際に登録済みの顧客を非表示にしても、OBのデータ自体は消えません。')) return;
+  if(!confirm((name||'この項目')+'をLINE問い合わせ状況の一覧から削除しますか？\n顧客ではない通知（社内共有・キャンペーン応募等）を除外する時に使います。\n次回以降のGmail再取得でも復活しません。\n※OBに実際に登録済みの顧客の場合、OB側のデータ自体は消えません（このLINE一覧からのみ削除されます）。')) return;
   gasGet('lineExcludePerson&pkey='+encodeURIComponent(key), function(d){
-    if(!d || d.error){ toast('⚠️ 非表示に失敗しました: '+((d&&d.error)||'通信エラー')); return; }
+    if(!d || d.error){ toast('⚠️ 削除に失敗しました: '+((d&&d.error)||'通信エラー')); return; }
     lineRows = d.people || [];
     try{ localStorage.setItem('line_v1_cache', JSON.stringify(lineRows)); localStorage.setItem('line_v1_ts', String(Date.now())); }catch(e){}
     lineRender(); lineUpdateLastUpdatedLabel();
-    toast('✕ 非表示にしました');
+    toast('🗑 削除しました');
   });
 }
 var _lineMergeFromKey=null;
@@ -6787,15 +6774,6 @@ function obClsBadge(cls){
   return '<span class="ob-cls-badge '+c+'">'+esc(cls)+'</span>';
 }
 
-// 顧客の熱量バッジ（GAS側 obComputeHeat_ の結果をそのまま表示。追加API課金なしの営業スコア）
-var OB_HEAT_CLASS_ = {hot:'ob-heat-hot', warm:'ob-heat-warm', cold:'ob-heat-cold', lost:'ob-heat-lost', won:'ob-heat-won'};
-function obHeatBadge(heat){
-  if(!heat || !heat.label) return '';
-  var cls=OB_HEAT_CLASS_[heat.level]||'ob-heat-cold';
-  var title=(heat.reasons||[]).join(' / ')+(heat.score!==undefined?'（スコア'+heat.score+'）':'');
-  return '<span class="ob-heat-badge '+cls+'" title="'+esc(title)+'">'+esc(heat.label)+'</span>';
-}
-
 // ステータス表示正規化（初回接触→問い合わせ）
 function obNormStatus(s){
   if(!s) return '問い合わせ';
@@ -7292,7 +7270,6 @@ function obRenderVisitors(){
   var fStaff=((document.getElementById('ob-vis-staff')||{}).value||'');
   var fQ=((document.getElementById('ob-vis-q')||{}).value||'').toLowerCase().trim();
   var sortAsc=((document.getElementById('ob-vis-sort')||{}).value||'desc')==='asc';
-  var fHeat=((document.getElementById('ob-vis-heat')||{}).value||'');
 
   var rows=obRows.filter(function(r){
     var d=obNormDate(r['問い合わせ日']||r['来場日']||'');
@@ -7305,7 +7282,6 @@ function obRenderVisitors(){
       if(hay.indexOf(fQ)<0) return false;
     }
     if(obStatusFilter && (r['商談ステータス']||'問い合わせ')!==obStatusFilter) return false;
-    if(fHeat && (!r._heat || r._heat.level!==fHeat)) return false;
     return true;
   });
   var cntEl=document.getElementById('ob-vis-count'); if(cntEl) cntEl.textContent=rows.length+'件';
@@ -7441,7 +7417,6 @@ function obRenderVisitors(){
             '<div class="ob-vis-card-hd">'+
               '<span class="ob-vis-card-date">'+dateLbl+'</span>'+
               (tipo?'<span class="ob-vis-card-type">'+esc(tipo)+'</span>':'')+
-              obHeatBadge(r._heat)+
               '<span class="ob-vis-card-badge"><span class="ob-badge '+sc+'" onclick="obEditStatusInline(this,'+r._row+');event.stopPropagation()" style="cursor:pointer">'+esc(dispStatus)+'</span></span>'+
             '</div>'+
             '<div class="ob-vis-card-body">'+
@@ -7492,7 +7467,6 @@ function obRenderVisitors(){
     '<th style="min-width:120px">顧客名</th>'+
     '<th style="min-width:140px">フリガナ / 電話 / メール</th>'+
     '<th style="min-width:90px">ステータス</th>'+
-    '<th style="min-width:64px">熱量</th>'+
     '<th style="min-width:64px">担当</th>'+
     '<th style="min-width:64px">サブ担当</th>'+
     '<th style="min-width:62px">エリア</th>'+
@@ -7586,7 +7560,6 @@ function obRenderVisitors(){
         '<td style="white-space:nowrap;cursor:pointer" onclick="obFloatEdit(event,'+r._row+',\'商談ステータス\',\'select\');event.stopPropagation()">'+
           obListCellHtml(r,'商談ステータス')+
         '</td>'+
-        '<td style="white-space:nowrap" onclick="event.stopPropagation()">'+obHeatBadge(r._heat)+'</td>'+
         '<td style="white-space:nowrap;cursor:pointer" onclick="obFloatEdit(event,'+r._row+',\'担当者\',\'staff\');event.stopPropagation()">'+
           obListCellHtml(r,'担当者')+
         '</td>'+
@@ -8869,15 +8842,6 @@ function obOpenDetail(rowIdx){
   var sc=OB_STATUS_CLASS[r['商談ステータス']]||'ob-s0';
   var badge=document.getElementById('ob-det-badge');
   badge.textContent=r['商談ステータス']||'—'; badge.className='ob-badge '+sc;
-  var heatEl=document.getElementById('ob-det-heat');
-  if(heatEl){
-    if(r._heat && r._heat.label){
-      heatEl.style.display='';
-      heatEl.textContent=r._heat.label;
-      heatEl.className='ob-heat-badge '+(OB_HEAT_CLASS_[r._heat.level]||'ob-heat-cold');
-      heatEl.title=(r._heat.reasons||[]).join(' / ')+(r._heat.score!==undefined?'（スコア'+r._heat.score+'）':'');
-    } else { heatEl.style.display='none'; }
-  }
   obDetTab('info');
   obRenderDetInfo();
   obRenderDetHistory();
@@ -13746,25 +13710,12 @@ function toggleDbLock(boardId, locked){
         <div class="help-sec-body">
           <table class="help-card-tbl">
             <tr><td>01 受付管理</td><td>タブレットにお客様の入力画面を送信する。ドリンク注文もここから送れる（🍵アイコン）。</td></tr>
-            <tr><td>02 オープンボード</td><td>全顧客の追客状況・商談進捗を管理する中心画面。「熱量」バッジは今すぐ動くべき顧客の目安。</td></tr>
+            <tr><td>02 オープンボード</td><td>全顧客の追客状況・商談進捗を管理する中心画面。</td></tr>
             <tr><td>03 着工管理</td><td>契約後〜引渡しまでの工程を管理。</td></tr>
             <tr><td>04 土地DB</td><td>確定土地・見学会案内図・工事案内図の管理。</td></tr>
             <tr><td>05 LINE問い合わせ状況</td><td>LINE経由の友達追加・資料請求・予約をGmail連携で自動表示。</td></tr>
             <tr><td>06 メール対応状況</td><td>問い合わせメールで返信していないもの（未対応）を自動検出して一覧表示。</td></tr>
           </table>
-        </div>
-      </div>
-      <div class="help-sec">
-        <div class="help-sec-title">🔥 熱量スコアの見方</div>
-        <div class="help-sec-body">
-          商談ステージの進み具合・直近の接触の新しさ・来場回数・次回アポの有無から自動計算される、営業目線の「今の温度感」です。<br>
-          <ul>
-            <li><b>🔥 熱い</b> — 今すぐフォローすべき顧客</li>
-            <li><b>🌤 中間</b> — 動きはあるが決め手が必要</li>
-            <li><b>❄ 低調</b> — しばらく動きが無い顧客</li>
-            <li><b>❌ 失注 / 🎉 成約済み</b> — 商談ステータスで自動判定</li>
-          </ul>
-          バッジにカーソルを合わせる（スマホでは長押し）と、点数の根拠が表示されます。
         </div>
       </div>
       <div class="help-sec">
