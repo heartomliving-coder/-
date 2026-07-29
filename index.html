@@ -9501,21 +9501,23 @@ function obHistPopSave(){
   }
   if(_obHistPopEditKey){
     // 編集モード：古いアイテムを削除して新しいアイテムで置換
+    // 一覧（obDedupHistory）は同一日付+種別の重複行を1件にマージして表示するため、
+    // 生データ側に重複行が複数残っていると先頭1件だけ消しても残りが表示に残ってしまい、
+    // 編集内容が反映されないように見える。そのため一致する行は全て削除する。
     var kparts=_obHistPopEditKey.split('|'); var kdate=kparts[0]; var ktype=kparts.slice(1).join('|');
-    var editIdx=-1;
-    for(var i=0;i<r.history.length;i++){
-      if(obNormDate(r.history[i].date||'')===kdate&&(r.history[i].type||'')===ktype){editIdx=i;break;}
-    }
-    if(editIdx<0){
-      // フォールバック：日付のみで検索（種別が一致しない場合）
-      for(var i=0;i<r.history.length;i++){
-        if(obNormDate(r.history[i].date||'')===kdate){editIdx=i;break;}
-      }
-    }
     var isEdit=false;
-    if(editIdx>=0){
-      r.history.splice(editIdx,1);
-      isEdit=true;
+    r.history = r.history.filter(function(h){
+      var isMatch = obNormDate(h.date||'')===kdate && (h.type||'')===ktype;
+      if(isMatch) isEdit=true;
+      return !isMatch;
+    });
+    if(!isEdit){
+      // フォールバック：日付のみで一致する行を削除（種別が一致しない場合）
+      r.history = r.history.filter(function(h){
+        var isMatch = obNormDate(h.date||'')===kdate;
+        if(isMatch) isEdit=true;
+        return !isMatch;
+      });
     }
     _obHistPopEditKey=null;
     var st=document.getElementById('ob-hist-pop-section-title'); if(st) st.textContent='＋ 履歴を追加';
@@ -9545,10 +9547,14 @@ function obHistPopEdit(key){
   var rowIdx=_obHistPopRow; if(rowIdx<0) return;
   var r=obRows[rowIdx]; if(!r||!r.history) return;
   var kparts=key.split('|'); var kdate=kparts[0]; var ktype=kparts.slice(1).join('|');
+  // 一覧表示（obDedupHistory）と同じマージ結果を編集フォームに反映する。
+  // 生のr.historyには同一日付+種別の重複行が残っている場合があり、
+  // 先頭の生データだけを見ると一覧に表示されている内容（マージ後）と食い違い、
+  // 空欄で編集を開始してしまう（＝保存しても変化がないように見える）ため。
   var item=null;
-  for(var i=0;i<r.history.length;i++){
-    var h=r.history[i];
-    if(obNormDate(h.date||'')===kdate&&(h.type||'')===ktype){item=h;break;}
+  var deduped=obDedupHistory(r.history);
+  for(var i=0;i<deduped.length;i++){
+    if(deduped[i].date===kdate&&(deduped[i].type||'')===ktype){item=deduped[i];break;}
   }
   if(!item) return;
   _obHistPopEditKey=key;
