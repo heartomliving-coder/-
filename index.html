@@ -6122,10 +6122,36 @@ function post(payload, cb){
       }
     }
   }
-  return fetch(sendUrl(),{method:'POST',mode:'cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+  // 保存にはタイムアウトを必ず設ける。
+  // 以前は post() だけ AbortController が無く、通信がハングすると
+  // ・コールバックが永久に呼ばれない → ロールバックも走らない
+  // ・エラー表示も出ない
+  // ため「画面上は保存できたように見えるのに実際は未保存」という最悪の状態になっていた。
+  var __body = JSON.stringify(payload);
+  var __ctrl = window.AbortController ? new AbortController() : null;
+  var __timedOut = false;
+  var __ms = 90000;
+  var __tid = setTimeout(function(){ __timedOut = true; if(__ctrl) __ctrl.abort(); }, __ms);
+  return fetch(sendUrl(),{
+      method:'POST', mode:'cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:__body,
+      signal: __ctrl ? __ctrl.signal : undefined
+    })
     .then(function(res){return res.json();})
-    .then(function(res){ genericErrorCheck(res); if(typeof cb==='function') cb(res); })
-    .catch(function(e){ console.warn('[post] error',e); genericErrorCheck(null); if(typeof cb==='function') cb(null); });
+    .then(function(res){ clearTimeout(__tid); genericErrorCheck(res); if(typeof cb==='function') cb(res); })
+    .catch(function(e){
+      clearTimeout(__tid);
+      console.warn('[post] error', e);
+      if(__timedOut){
+        var act0 = payload.action || '';
+        toast('⏱ 保存がタイムアウトしました['+act0+']\n通信状況を確認し、画面を更新して保存されたかご確認ください');
+      } else {
+        genericErrorCheck(null);
+      }
+      // タイムアウト時も必ずコールバックを呼び、呼び出し元のロールバックを走らせる
+      if(typeof cb==='function') cb(null);
+    });
 }
 
 // ★ 送信時に担当者＋サブ担当者を文字列結合する関数
