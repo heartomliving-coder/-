@@ -4545,31 +4545,37 @@ function hubInitDrag(){
   });
 }
 
+// 拡張KPI欄（#hubExtKpi）は並び替え対象の.hub-secではないため、セクションだけを並び替えると
+// KPI欄との前後関係が操作のたびに変わってしまう（表示順が読み込みごとに変わる不具合の原因）。
+// どんな並び順でも「カードの直後にKPI」という位置に必ず固定して、表示を決定的にする。
+function hubSnapKpi_(){
+  var main = document.getElementById('hub-main');
+  var kpi = document.getElementById('hubExtKpi');
+  var cards = main ? main.querySelector('.hub-sec[data-sec="cards"]') : null;
+  if(main && kpi && cards) cards.after(kpi);
+}
+
 function hubSaveLayout(){
   var secs = document.querySelectorAll('#hub-main .hub-sec');
   var order = Array.from(secs).map(function(s){ return s.dataset.sec; });
   try{ localStorage.setItem(HUB_LAYOUT_KEY, JSON.stringify(order)); }catch(e){}
+  hubSnapKpi_();
 }
 
-// 「拡張KPI」欄（#hubExtKpi）は並び替え対象outsideのため、appendChildで無条件に末尾へ
-// 動かすと常にKPI欄より後ろへ押し出されてしまっていた（表示順が読み込みごとに変わる不具合の原因）。
-// KPI欄より前に元々あったセクション（cards）はKPI欄の直前へ、後ろにあったセクションは
-// KPI欄より後ろ（末尾）へ、と元の位置関係を保ったまま並び替える。
 function hubRestoreLayout(){
   try{
     var order = JSON.parse(localStorage.getItem(HUB_LAYOUT_KEY) || 'null');
-    if(!order || !order.length) return;
-    var main = document.getElementById('hub-main');
-    var kpi = document.getElementById('hubExtKpi');
-    if(!main) return;
-    var BEFORE_KPI = ['cards'];
-    order.forEach(function(sec){
-      var el = main.querySelector('[data-sec="'+sec+'"]');
-      if(!el) return;
-      if(kpi && BEFORE_KPI.indexOf(sec) >= 0) main.insertBefore(el, kpi);
-      else main.appendChild(el);
-    });
+    if(order && order.length){
+      var main = document.getElementById('hub-main');
+      if(main){
+        order.forEach(function(sec){
+          var el = main.querySelector('.hub-sec[data-sec="'+sec+'"]');
+          if(el) main.appendChild(el);
+        });
+      }
+    }
   }catch(e){}
+  hubSnapKpi_();
 }
 
 /* ─── OB基本情報セクション並び替え ─── */
@@ -9520,12 +9526,11 @@ function obHistPopSave(){
       return !isMatch;
     });
     if(!isEdit){
-      // フォールバック：日付のみで一致する行を削除（種別が一致しない場合）
-      r.history = r.history.filter(function(h){
-        var isMatch = obNormDate(h.date||'')===kdate;
-        if(isMatch) isEdit=true;
-        return !isMatch;
-      });
+      // フォールバック：日付のみで一致する最初の1行だけ削除（種別が一致しない場合）。
+      // 全件削除にすると同日の別種別（面談・電話など）まで巻き添えで消えるため1件に限定する。
+      for(var fi=0; fi<r.history.length; fi++){
+        if(obNormDate(r.history[fi].date||'')===kdate){ r.history.splice(fi,1); isEdit=true; break; }
+      }
     }
     _obHistPopEditKey=null;
     var st=document.getElementById('ob-hist-pop-section-title'); if(st) st.textContent='＋ 履歴を追加';
