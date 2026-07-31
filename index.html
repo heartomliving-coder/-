@@ -12375,8 +12375,8 @@ function buildCustomerTimeline(obRow){
   var name = (obRow['顧客名']||'').replace(/様$/,'').trim();
   var events = [];
 
-  // OB来場履歴
-  var hist = obRow.history || [];
+  // OB来場履歴（同一日付+種別の重複行はマージして1件に）
+  var hist = obDedupHistory(obRow.history || []);
   hist.forEach(function(h){
     events.push({date:h.date||'',type:'ob',label:'来場',sub:h.visitType||h.type||'',icon:'🏠'});
   });
@@ -12469,14 +12469,15 @@ function hubRenderExtKpi(){
   var obPartner=(obRows||[]).filter(function(r){ return (r['商談ステータス']||'').indexOf('パートナー')>=0; }).length;
   var obShodan=(obRows||[]).filter(function(r){ var s=r['商談ステータス']||''; return ['FP前','LPS前','ヒアリング前','プレゼン前'].indexOf(s)>=0; }).length;
   // 今月来場数（履歴の種別「来場」が今月のもの）
+  // 重複行が残っている顧客がいると生データのままでは水増しされるため、集計前にマージする
   var visitsThisMonth=(obRows||[]).reduce(function(acc,r){
-    return acc + (r.history||[]).filter(function(h){ return (h.type||'').indexOf('来場')>=0 && (h.date||'').indexOf(ym)===0; }).length;
+    return acc + obDedupHistory(r.history||[]).filter(function(h){ return (h.type||'').indexOf('来場')>=0 && (h.date||'').indexOf(ym)===0; }).length;
   },0);
   // 未対応（30日以上連絡なし・失注・中長期以外）
   var uncontacted=(obRows||[]).filter(function(r){
     var st=r['商談ステータス']||'';
     if(['失注','中長期フォロー','パートナー検討中','パートナー契約済'].indexOf(st)>=0) return false;
-    var hist=r.history||[];
+    var hist=obDedupHistory(r.history||[]);
     if(!hist.length) return true;
     var last=hist[hist.length-1];
     var lastDate=new Date(obNormDate(last.date||'')||todayStr);
