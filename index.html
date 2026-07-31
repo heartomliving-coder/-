@@ -4993,6 +4993,17 @@ function _renderPresence(rows, myEmail, myDetailId){
   }
 }
 // 同時編集コンフリクト処理
+// 履歴の競合は「他スタッフが来場記録を追加・編集した」ケースがほとんど。
+// ここで強制上書きを許すと相手が入力した来場記録ごと消えてしまうため、
+// 上書きの選択肢は出さず、必ず自分の変更を取り消して最新を読み直す。
+function obHistConflict_(rollback){
+  try{ if(typeof rollback==='function') rollback(); }catch(e){}
+  try{ localStorage.removeItem('ob_v3_ts'); }catch(e){}
+  _obLastSaveTs = 0;
+  obLoad(false, true);
+  toast('⚠️ 他のスタッフが同時にこの顧客を更新したため、保存を取り消しました。最新の内容に更新したので、もう一度お試しください');
+}
+
 function obHandleConflict_(){
   var confirmed=confirm('⚠️ 他のユーザーがこのレコードを保存しました。\n\n最新データを読み込みますか？\n（OK = 最新を読み込む / キャンセル = 強制上書き保存）');
   if(confirmed){
@@ -9503,6 +9514,9 @@ function obHistPopSave(){
   if(!date){ var t=new Date(); date=t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2); }
   if(!r.history) r.history = [];
   var _oldHistory = r.history.slice();
+  // 画面に反映する前のバージョンを控える。これをサーバーに送ることで
+  // 「読み込んでから送信するまでの間に他スタッフが更新していないか」を判定できる
+  var _baseV = r['_v'];
   function _obHistPopRerenderCells(){
     obHistPopRenderList(r);
     var tds = document.querySelectorAll('tr[data-row="'+rowIdx+'"] td');
@@ -9538,8 +9552,10 @@ function obHistPopSave(){
     r.history.push({date:date,type:type,content:content,staff:staff});
     r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
     // 編集＝削除+追加を一括置換1回で送信（並列送信による誤削除・重複を防止）
-    post({action:'obSetHistory',id:r.id,row:rowIdx,history:JSON.stringify(r.history)},function(res){
+    post({action:'obSetHistory',id:r.id,row:rowIdx,baseV:_baseV,history:JSON.stringify(r.history)},function(res){
+      if(res&&res.conflict){ obHistConflict_(_obHistPopRollback); return; }
       if(!res||res.error){ _obHistPopRollback(); return; }
+      if(res.v!==undefined) r['_v']=res.v;
       toast('履歴を更新しました');
     });
   } else {
@@ -9547,6 +9563,7 @@ function obHistPopSave(){
     r.history.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
     post({action:'obAddHistory',id:r.id,row:rowIdx,date:date,type:type,content:content,staff:staff},function(res){
       if(!res||res.error){ _obHistPopRollback(); return; }
+      if(res.v!==undefined) r['_v']=res.v;
       toast('履歴を追加しました');
     });
   }
@@ -9659,6 +9676,7 @@ function obHistPopDel(key){
   var r = obRows[rowIdx]; if(!r||!r.history) return;
   if(!confirm('この履歴を削除しますか？')) return;
   var _oldHistory=r.history.slice();
+  var _baseV=r['_v'];
   r.history=r.history.filter(function(h){
     return (obNormDate(h.date||'')+'|'+(h.type||''))!==key;
   });
@@ -9671,13 +9689,16 @@ function obHistPopDel(key){
     }});
   }
   _rerenderChips();
+  function _rollback(){ r.history=_oldHistory; obSetCache(obRows); obHistPopRenderList(r); _rerenderChips(); }
   // 一括置換で送信（並列削除によるインデックス競合＝誤削除を防止）
-  post({action:'obSetHistory',id:(r?r.id:''),row:rowIdx,history:JSON.stringify(r.history)},function(res){
+  post({action:'obSetHistory',id:(r?r.id:''),row:rowIdx,baseV:_baseV,history:JSON.stringify(r.history)},function(res){
+    if(res&&res.conflict){ obHistConflict_(_rollback); return; }
     if(!res||res.error){
       // 削除できていないのに消えたままにしない＝元に戻す
-      r.history=_oldHistory; obSetCache(obRows); obHistPopRenderList(r); _rerenderChips();
+      _rollback();
       return;
     }
+    if(res.v!==undefined) r['_v']=res.v;
     toast('削除しました');
   });
 }
@@ -9686,16 +9707,20 @@ function obDelHistory(histIdx){
   var r=obRows[obDetailRow]; if(!r||!r.history) return;
   if(!confirm('この履歴を削除しますか？')) return;
   var _oldHistory=r.history.slice();
+  var _baseV=r['_v'];
   r.history.splice(histIdx,1);
   obSetCache(obRows);
   obRenderDetHistory();
   obRenderVisitors();
+  function _rollback(){ r.history=_oldHistory; obSetCache(obRows); obRenderDetHistory(); obRenderVisitors(); }
   // 一括置換で送信（サーバー側と並び順がズレていても誤削除しない）
-  post({action:'obSetHistory',id:(r.id||''),row:obDetailRow,history:JSON.stringify(r.history)},function(res){
+  post({action:'obSetHistory',id:(r.id||''),row:obDetailRow,baseV:_baseV,history:JSON.stringify(r.history)},function(res){
+    if(res&&res.conflict){ obHistConflict_(_rollback); return; }
     if(!res||res.error){
-      r.history=_oldHistory; obSetCache(obRows); obRenderDetHistory(); obRenderVisitors();
+      _rollback();
       return;
     }
+    if(res.v!==undefined) r['_v']=res.v;
     toast('削除しました');
   });
 }
@@ -9705,18 +9730,22 @@ function obDelHistoryByKey(key){
   var r=obRows[obDetailRow]; if(!r||!r.history) return;
   if(!confirm('この履歴を削除しますか？')) return;
   var _oldHistory=r.history.slice();
+  var _baseV=r['_v'];
   r.history=r.history.filter(function(h){
     return (obNormDate(h.date||'')+'|'+(h.type||''))!==key;
   });
   obSetCache(obRows);
   obRenderDetHistory();
   obRenderVisitors();
+  function _rollback(){ r.history=_oldHistory; obSetCache(obRows); obRenderDetHistory(); obRenderVisitors(); }
   // 一括置換で送信（並列削除によるインデックス競合＝誤削除を防止）
-  post({action:'obSetHistory',id:(r.id||''),row:obDetailRow,history:JSON.stringify(r.history)},function(res){
+  post({action:'obSetHistory',id:(r.id||''),row:obDetailRow,baseV:_baseV,history:JSON.stringify(r.history)},function(res){
+    if(res&&res.conflict){ obHistConflict_(_rollback); return; }
     if(!res||res.error){
-      r.history=_oldHistory; obSetCache(obRows); obRenderDetHistory(); obRenderVisitors();
+      _rollback();
       return;
     }
+    if(res.v!==undefined) r['_v']=res.v;
     toast('削除しました');
   });
 }
