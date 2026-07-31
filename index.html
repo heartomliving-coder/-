@@ -6023,6 +6023,7 @@ function gasGet(action,cb,timeout){
     .then(function(d){
       clearTimeout(tid);
       if(d&&d.error==='auth'){onAuthFail();cb(null);return;}
+      if(d&&d.locked){ obApplyServerLock_(d.board); cb(null); return; }
       cb(d);
     })
     .catch(function(e){
@@ -6100,6 +6101,12 @@ function post(payload, cb){
   // 　失敗していても呼び出し元が独自に「保存しました」トーストを出してしまい、
   // 　「フォーム入力が反映されないことがある」という報告の原因になっていた）
   function genericErrorCheck(res){
+    // オーナーがロックしたボードへの更新は「保存エラー」ではなくアクセス制限として伝える
+    if(res && res.locked){
+      obApplyServerLock_(res.board);
+      toast('🔒 '+(res.error||'このセクションはオーナーのみアクセスできます'));
+      return;
+    }
     if(!res || res.error){
       var act = payload.action || '';
       // 「保存系だけ通知」を保存アクション名の羅列で判定していた時は、新しい保存機能を
@@ -13850,6 +13857,14 @@ function loadDbLocks(cb){
     if(d && d.ok) __dbLocksCache = d.locks || {};
     if(typeof cb === 'function') cb();
   });
+}
+
+// サーバーから「このボードはロック中」と返された時に、手元のロック状態も合わせる。
+// これによりオーナーが他端末でロックした直後でも、次の通信で確実に画面側に反映される。
+function obApplyServerLock_(boardId){
+  if(!boardId) return;
+  if(__dbLocksCache[boardId]) return;
+  __dbLocksCache[boardId] = true;
 }
 
 function checkBoardAccess(boardId){
