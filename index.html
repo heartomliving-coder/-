@@ -4551,15 +4551,23 @@ function hubSaveLayout(){
   try{ localStorage.setItem(HUB_LAYOUT_KEY, JSON.stringify(order)); }catch(e){}
 }
 
+// 「拡張KPI」欄（#hubExtKpi）は並び替え対象outsideのため、appendChildで無条件に末尾へ
+// 動かすと常にKPI欄より後ろへ押し出されてしまっていた（表示順が読み込みごとに変わる不具合の原因）。
+// KPI欄より前に元々あったセクション（cards）はKPI欄の直前へ、後ろにあったセクションは
+// KPI欄より後ろ（末尾）へ、と元の位置関係を保ったまま並び替える。
 function hubRestoreLayout(){
   try{
     var order = JSON.parse(localStorage.getItem(HUB_LAYOUT_KEY) || 'null');
     if(!order || !order.length) return;
     var main = document.getElementById('hub-main');
+    var kpi = document.getElementById('hubExtKpi');
     if(!main) return;
+    var BEFORE_KPI = ['cards'];
     order.forEach(function(sec){
       var el = main.querySelector('[data-sec="'+sec+'"]');
-      if(el) main.appendChild(el);
+      if(!el) return;
+      if(kpi && BEFORE_KPI.indexOf(sec) >= 0) main.insertBefore(el, kpi);
+      else main.appendChild(el);
     });
   }catch(e){}
 }
