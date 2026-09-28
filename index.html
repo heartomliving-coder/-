@@ -98,6 +98,12 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,1
 .ws{flex:1;display:grid;grid-template-columns:minmax(340px,30%) 1fr;min-height:0;overflow:hidden}
 .ws-left{background:var(--charcoal);overflow:auto;border-right:1px solid rgba(0,0,0,.06);display:flex;flex-direction:column}
 .ws-right{display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+/* タブレット幅（縦向き等）：2カラムのままだと顧客一覧が窮屈になるため縦積みにする */
+@media (max-width:900px){
+  .ws{grid-template-columns:1fr;grid-template-rows:auto 1fr;overflow:auto}
+  .ws-left{max-height:46vh;border-right:none;border-bottom:1px solid rgba(0,0,0,.14)}
+  .ws-right{min-height:54vh}
+}
 
 .seats-wrap{background:transparent;padding:22px 22px 8px}
 .seats-h{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.78);font-size:.72rem;letter-spacing:.18em;font-weight:700;margin-bottom:14px}
@@ -154,8 +160,9 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,1
 .bar .rl{background:#fff;border:1px solid var(--bd2);border-radius:2px;padding:13px 18px;font-size:.85rem;font-weight:600;cursor:pointer;color:var(--tx2);flex-shrink:0}
 .bar .rl:hover{border-color:var(--charcoal)}
 .bar .rl:active{background:var(--sf)}
-.bar .target{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--tx2);font-weight:700;flex-shrink:0;letter-spacing:.04em}
-.bar .target select{padding:13px 11px;border:1px solid var(--bd2);border-radius:2px;font-size:1rem;background:#fff;color:var(--tx);outline:none;font-weight:600}
+/* 送信先（端末選択）は「顧客を選ぶ→端末を選ぶ→送信」の主導線の要なので、単なる検索欄と区別できる強調枠にする */
+.bar .target{display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--charcoal);font-weight:700;flex-shrink:0;letter-spacing:.06em;background:#F4EFE6;border:1px solid var(--gold);border-radius:2px;padding:8px 12px 8px 14px}
+.bar .target select{padding:9px 10px;border:1px solid var(--bd2);border-radius:2px;font-size:1rem;background:#fff;color:var(--tx);outline:none;font-weight:700}
 .bar .listcount{margin-left:auto;font-size:.8rem;color:var(--tx3);font-weight:700;letter-spacing:.04em;flex-shrink:0}
 
 .list{flex:1;width:100%;margin:0;padding:0 0 40px;overflow:auto;min-height:0}
