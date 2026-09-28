@@ -149,10 +149,6 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,1
 .bar .newbtn{background:var(--charcoal);color:#fff;border:none;border-radius:2px;padding:15px 24px;font-size:1rem;font-weight:700;letter-spacing:.06em;cursor:pointer;flex-shrink:0;transition:background .18s}
 .bar .newbtn:hover{background:#000}
 .bar .newbtn:active{opacity:.85}
-/* ドリンクオーダーは社内限定の機能のため、主要ボタンと同列で目立たせず控えめな表示にする */
-.bar .drink-newbtn{background:transparent;color:#999;border:1px solid #DDD;border-radius:2px;padding:6px 10px;font-size:.7rem;font-weight:500;letter-spacing:.02em;cursor:pointer;flex-shrink:0;transition:all .18s;margin-left:auto}
-.bar .drink-newbtn:hover{background:#F5F5F5;color:#666}
-.bar .drink-newbtn:active{opacity:.85}
 .bar input{flex:1;min-width:200px;padding:14px 16px;border:1px solid var(--bd2);border-radius:2px;font-size:1rem;background:#fff;color:var(--tx);outline:none}
 .bar input:focus{border-color:var(--charcoal)}
 .bar .rl{background:#fff;border:1px solid var(--bd2);border-radius:2px;padding:13px 18px;font-size:.85rem;font-weight:600;cursor:pointer;color:var(--tx2);flex-shrink:0}
@@ -181,9 +177,6 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(154,140,1
 .ct-btn{border:none;border-radius:3px;padding:6px 10px;font-size:.74rem;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:all .15s;white-space:nowrap}
 .ct-btn-send{background:var(--charcoal);color:#fff}
 .ct-btn-send:hover{background:#000}
-/* 社内限定機能のため主要ボタンより控えめに */
-.ct-btn-drink{background:transparent;color:#AAA;border:1px solid #E5E5E5}
-.ct-btn-drink:hover{background:#F5F5F5;color:#888}
 .ct-btn-url{background:#fff;color:var(--charcoal);border:1px solid var(--charcoal)}
 .ct-btn-url:hover{background:var(--charcoal);color:#fff}
 /* 後方互換（モバイル用）*/
@@ -426,25 +419,6 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .fp-hint{font-size:.72rem;color:#9A9286;line-height:1.6;background:rgba(255,255,255,.05);border:1px solid #333333;border-radius:6px;padding:10px 12px}
 .fp-danger{border-color:#6e4a44;color:#E0917F}
 .fp-danger:hover{background:#B4524A;border-color:#B4524A;color:#fff}
-/* ドリンク注文の通知
-   来客中の画面に大きく出ると来場されたお客様の目に留まりやすいため、
-   全幅の派手なバナーではなく、右上に寄せた控えめな小型カードにしている。
-   点滅・拡大アニメーションも用いず、業務用の落ち着いた配色に統一する。 */
-.drink-order-banner{display:none;position:absolute;top:10px;right:322px;z-index:20;width:270px;max-width:calc(100% - 340px);background:rgba(29,46,61,.97);border:1px solid rgba(255,255,255,.14);border-left:3px solid #5FA98F;border-radius:8px;padding:10px 12px;box-shadow:0 6px 20px rgba(0,0,0,.28)}
-.drink-order-banner.show{display:block}
-.dob-hd{display:flex;align-items:center;gap:7px;margin-bottom:7px}
-.dob-icon{font-size:.95rem;opacity:.85}
-.dob-title{color:#CFE6DC;font-size:.78rem;font-weight:700;letter-spacing:.02em;flex:1}
-.dob-time{color:rgba(255,255,255,.32);font-size:.66rem}
-.dob-items{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
-.dob-chip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:3px 9px;color:#E8E3DA;font-size:.74rem;font-weight:600;display:flex;align-items:center;gap:5px}
-.dob-chip .dob-qty{color:#9ED6BE;font-weight:800}
-.dob-chip .dob-temp{font-size:.62rem;padding:1px 5px;border-radius:3px;font-weight:700}
-.dob-chip .dob-temp.hot{background:rgba(190,90,70,.28);color:#E5A192}
-.dob-chip .dob-temp.ice{background:rgba(70,120,190,.28);color:#9DC2E8}
-.dob-done-btn{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.62);border-radius:4px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s}
-.dob-done-btn:hover{background:#2F5C56;border-color:#2F5C56;color:#fff}
-@media(max-width:900px){.drink-order-banner{right:10px;max-width:calc(100% - 20px)}}
 /* お客様入力プレビュー（iframe） */
 .preview-frame{width:100%;height:100%;border:0;background:#fff;display:block}
 .preview-frame.hide{display:none}
@@ -528,9 +502,6 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ci .url-btn{flex-shrink:0;background:#fff;border:1.5px solid var(--charcoal);color:var(--charcoal);border-radius:2px;padding:14px 14px;font-size:.82rem;font-weight:700;letter-spacing:.04em;cursor:pointer;line-height:1.3;text-align:center;min-width:100px;transition:all .18s;margin-right:8px}
 .ci .url-btn:hover{background:var(--charcoal);color:#fff}
 .ci .url-btn:active{opacity:.85;transform:scale(.98)}
-.ci .drink-btn{flex-shrink:0;background:#1a2e1a;border:1.5px solid #3a6a3a;color:#7ec87e;border-radius:2px;padding:14px 14px;font-size:.82rem;font-weight:700;letter-spacing:.04em;cursor:pointer;line-height:1.3;text-align:center;min-width:100px;transition:all .18s;margin-right:8px}
-.ci .drink-btn:hover{background:#3a6a3a;color:#fff}
-.ci .drink-btn:active{opacity:.85;transform:scale(.98)}
 .url-display{background:var(--sf);border:1px solid var(--bd2);border-radius:3px;padding:14px 16px;font-size:.82rem;word-break:break-all;color:var(--tx2);margin-bottom:14px;line-height:1.6;font-family:monospace}
 .url-copy-btn{width:100%;padding:14px;border:none;border-radius:2px;background:var(--charcoal);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:.06em;margin-bottom:12px}
 .url-copy-btn:hover{background:#000}
@@ -3125,7 +3096,6 @@ body.ws-open #ws-backdrop{display:block}
         <input id="q" placeholder="名前・電話・メールで絞り込み" oninput="renderList()">
         <button class="rl" onclick="loadList()">再読込</button>
         <span class="listcount" id="listCount"></span>
-        <button class="drink-newbtn" onclick="sendNewDrink()" title="ドリンクのみ先に案内する場合">🍵</button>
       </div>
       <div class="list" id="list"><div class="state">読み込み中...</div></div>
     </section>
@@ -3349,15 +3319,6 @@ body.ws-open #ws-backdrop{display:block}
     <button class="fsm-close" onclick="closeFsMonitor()">✕ 閉じる</button>
   </div>
   <div class="fsm-body" style="position:relative">
-    <div class="drink-order-banner" id="drinkOrderBanner">
-      <div class="dob-hd">
-        <span class="dob-icon">🍵</span>
-        <span class="dob-title">ご注文</span>
-        <span class="dob-time" id="dobTime"></span>
-      </div>
-      <div class="dob-items" id="dobItems"></div>
-      <button class="dob-done-btn" onclick="clearDrinkOrderBanner()">✓ 対応済み</button>
-    </div>
     <div class="pdf-wrap" id="pdfWrap">
       <iframe id="previewFrame" class="preview-frame" title="お客様入力プレビュー"></iframe>
       <div class="preview-idle" id="previewIdle">お客様の入力を待っています…</div>
@@ -3371,11 +3332,6 @@ body.ws-open #ws-backdrop{display:block}
       <div class="fp-sec">お客様へ通知</div>
       <button class="fp-btn" onclick="sendCommand(__fsScreenId,'toast','スタッフがまもなく伺います')">🔔 まもなく伺います</button>
       <button class="fp-btn" onclick="sendCommand(__fsScreenId,'toast','資料をお持ちします')">🔔 資料をお持ちします</button>
-      <button class="fp-btn" onclick="sendCommand(__fsScreenId,'drinkPrompt',{})">🔔 お飲み物はいかがですか</button>
-
-      <div class="fp-sec">ドリンク注文</div>
-      <button class="fp-btn" onclick="sendDrinkMenu()">🍵 ドリンクメニューを送信</button>
-      <div id="drinkOrderPanel" style="display:none;margin-top:8px;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:10px;font-size:.8rem"></div>
 
       <div id="cmdFeedback" class="cmd-feedback" style="display:none"></div>
 
@@ -6077,7 +6033,6 @@ function renderList(){
       '<td class="ct-email" title="'+esc(c.email||'')+'">'+esc(c.email||'—')+'</td>'+
       '<td><div class="ct-ops">'+
         '<button class="ct-btn ct-btn-send" onclick="sendCustomer('+idx+')">▶ 送信</button>'+
-        '<button class="ct-btn ct-btn-drink" onclick="sendCustomerDrink('+idx+')" title="先にドリンクオーダー">🍵</button>'+
         '<button class="ct-btn ct-btn-url" onclick="issueOnlineUrl('+idx+')" title="URL発行">🔗</button>'+
       '</div></td>'+
     '</tr>';
@@ -6176,19 +6131,6 @@ function sendCustomer(idx){
   setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
 }
 
-function sendCustomerDrink(idx){
-  var c=__all[idx]; if(!c)return;
-  var masterId=(c.dbSource==='master')?(c.id||''):'';
-  var tg=getTarget();
-  openFsMonitor(tg, true);
-  var payload={action:'pushSession',isNew:false,screen:tg,drinkFirst:true,staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',
-    customer:{name:c.name||'',furigana:c.furigana||'',tel:c.tel||'',email:c.email||'',postalCode:c.postalCode||'',address:c.address||'',masterId:masterId,threadId:(c.threadId&&c.threadId.indexOf('notion_')!==0)?c.threadId:''}};
-  post(payload, function(){ sendCommand(tg,'drinkFirst',{name:c.name||''}); });
-  startDrinkOrderPoll();
-  toast('🍵 '+( c.name||'お客様')+' 様 のドリンク注文画面を 受付'+screenLabel(tg)+' に送信しました');
-  setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
-}
-
 function sendNew(){
   var tg=getTarget();
 
@@ -6197,15 +6139,6 @@ function sendNew(){
 
   post({action:'pushSession',isNew:true,screen:tg,staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',customer:{}});
   toast('新規のお客様の入力画面を 受付'+screenLabel(tg)+' に送信しました');
-  setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
-}
-
-function sendNewDrink(){
-  var tg=getTarget();
-  openFsMonitor(tg, true);
-  post({action:'pushSession',isNew:true,screen:tg,drinkFirst:true,staff:getCombinedStaff(),eventName:localStorage.getItem('reception_event')||'',customer:{}}, function(){ sendCommand(tg,'drinkFirst',{name:''}); });
-  startDrinkOrderPoll();
-  toast('🍵 新規ドリンク注文画面を 受付'+screenLabel(tg)+' に送信しました');
   setTimeout(function(){ if(isBoardView) pollBoard(); else pollStatus(); },1200);
 }
 
@@ -6235,7 +6168,6 @@ function sendCommand(screen, type, payload) {
   if(type==='setValue') { cmd.field = payload.field; cmd.value = payload.value; }
   if(type==='setChip') { cmd.field = payload.field; cmd.value = payload.value; }
   if(type==='setImg') { cmd.field = payload.field; cmd.value = payload.value; }
-  if(type==='drinkFirst') { cmd.name = (payload&&payload.name)||''; }
 
   // ★ コマンド送信時刻を記録（updateFsMonitorのheartomPreview上書きを10秒間防ぐ）
   __lastCmdSent = Date.now();
@@ -6286,7 +6218,6 @@ function openFsMonitor(n, delayIframe) {
   var u=customerUrl(); var fr=document.getElementById('previewFrame');
   document.getElementById('fsMonitor').classList.remove('hide');
   updateFsMonitor(__lastSessions, __lastMonitors);
-  startDrinkOrderPoll();
   // delayIframe=true: 新規セッション送信直後のため、GASが更新されるまで1.8秒待ってからiframeを読み込む
   // これにより「旧データが一瞬表示される」バグを防ぐ
   if(fr){
@@ -6307,99 +6238,6 @@ function closeFsMonitor() {
   __fsScreenId = null;
   var fr=document.getElementById('previewFrame'); if(fr) fr.src='about:blank';
   document.getElementById('fsMonitor').classList.add('hide');
-  stopDrinkOrderPoll();
-}
-
-/* ── ドリンク注文 ─────────────────── */
-var _drinkPollTimer = null;
-var _drinkOrderSent = {};
-
-function sendDrinkMenu() {
-  if (!__fsScreenId) return;
-  sendCommand(__fsScreenId, 'drinkMenu', {});
-  toast('🍵 ドリンクメニューをタブレットへ送信しました');
-  startDrinkOrderPoll();
-}
-
-function startDrinkOrderPoll() {
-  stopDrinkOrderPoll();
-  _drinkPollTimer = setInterval(function(){ fetchDrinkOrders(); }, 5000);
-  fetchDrinkOrders();
-}
-
-function stopDrinkOrderPoll() {
-  if (_drinkPollTimer) { clearInterval(_drinkPollTimer); _drinkPollTimer = null; }
-}
-
-function fetchDrinkOrders() {
-  gasGet('pollDrinkOrders', function(d) {
-    if (!d || !d.orders) return;
-    renderDrinkOrders(d.orders);
-  });
-}
-
-var _lastDrinkOrderKey = '';
-function renderDrinkOrders(orders) {
-  var panel = document.getElementById('drinkOrderPanel');
-  var banner = document.getElementById('drinkOrderBanner');
-  var relevant = orders.filter(function(o){ return String(o.screen) === String(__fsScreenId); });
-
-  /* サイドパネル（小） */
-  if (panel) {
-    if (relevant.length === 0) { panel.style.display='none'; }
-    else {
-      panel.style.display='block';
-      var ph = '<div style="color:#7ec87e;font-weight:700;margin-bottom:6px;font-size:.75rem;letter-spacing:.08em">📋 受信した注文</div>';
-      relevant.forEach(function(o) {
-        ph += '<div style="margin-bottom:8px">';
-        ph += '<div style="color:#666;font-size:.62rem;margin-bottom:4px">受信: '+(o.submittedAt||'')+'</div>';
-        if(o.order&&o.order.length>0){
-          o.order.forEach(function(item){
-            var tl=item.temp==='hot'?'🔴':item.temp==='ice'?'🔵':'';
-            ph+='<div style="display:flex;align-items:center;gap:5px;padding:3px 0;border-bottom:1px solid #2a2a2a">';
-            ph+='<span style="color:#E8E3DA;flex:1;font-size:.8rem">'+esc(item.ja)+'</span>';
-            ph+=tl+'<span style="color:#E6B840;font-weight:700;font-size:.8rem">×'+item.qty+'</span>';
-            ph+='</div>';
-          });
-        }
-        ph+='<button onclick="clearDrinkOrder(\''+String(o.screen)+'\')" style="margin-top:6px;background:#333;border:1px solid #4a8a4a;color:#7ec87e;border-radius:4px;padding:4px 10px;font-size:.7rem;cursor:pointer;width:100%">✓ 対応済み</button>';
-        ph+='</div>';
-      });
-      panel.innerHTML = ph;
-    }
-  }
-
-  /* 大バナー：新しい注文が届いたとき */
-  if (!banner) return;
-  if (relevant.length === 0) { banner.classList.remove('show'); _lastDrinkOrderKey=''; return; }
-  var o = relevant[0];
-  var key = String(o.screen)+'|'+(o.submittedAt||'');
-  if (key === _lastDrinkOrderKey) return; /* 既に表示済み */
-  _lastDrinkOrderKey = key;
-  var dobItems = document.getElementById('dobItems');
-  var dobTime = document.getElementById('dobTime');
-  if(dobTime) dobTime.textContent = o.submittedAt||'';
-  if(dobItems && o.order && o.order.length>0){
-    dobItems.innerHTML = o.order.map(function(item){
-      var tempCls = item.temp==='hot'?'hot':item.temp==='ice'?'ice':'';
-      var tempLbl = item.temp==='hot'?'HOT':item.temp==='ice'?'ICE':'';
-      return '<div class="dob-chip">'+esc(item.ja)+(tempLbl?'<span class="dob-temp '+tempCls+'">'+tempLbl+'</span>':'')+'<span class="dob-qty">×'+item.qty+'</span></div>';
-    }).join('');
-  }
-  banner.classList.add('show');
-}
-
-function clearDrinkOrderBanner() {
-  var banner = document.getElementById('drinkOrderBanner');
-  if(banner) banner.classList.remove('show');
-  clearDrinkOrder(__fsScreenId);
-  _lastDrinkOrderKey = '';
-}
-
-function clearDrinkOrder(screen) {
-  gasPost({action:'clearDrinkOrder', screen:screen}, function(){
-    fetchDrinkOrders();
-  });
 }
 
 // ★ お客様画面（iframe）からの直接遠隔入力コマンドを受信（プロンプトなし）
@@ -13967,7 +13805,7 @@ function toggleDbLock(boardId, locked){
         <div class="help-sec-title">🏠 ハブ画面の6つのカード</div>
         <div class="help-sec-body">
           <table class="help-card-tbl">
-            <tr><td>01 受付管理</td><td>タブレットにお客様の入力画面を送信する。ドリンク注文もここから送れる（🍵アイコン）。</td></tr>
+            <tr><td>01 受付管理</td><td>タブレットにお客様の入力画面を送信する。</td></tr>
             <tr><td>02 オープンボード</td><td>全顧客の追客状況・商談進捗を管理する中心画面。</td></tr>
             <tr><td>03 着工管理</td><td>契約後〜引渡しまでの工程を管理。</td></tr>
             <tr><td>04 土地DB</td><td>確定土地・見学会案内図・工事案内図の管理。</td></tr>
